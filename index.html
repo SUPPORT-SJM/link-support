@@ -1,74 +1,72 @@
 <!DOCTYPE html>
 <html lang="ja">
-<head><meta name="robots" content="noindex, nofollow">
-<meta name="googlebot" content="noindex, nofollow">
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<meta name="googlebot" content="noindex, nofollow">
 <title>LINK 初期サポートの流れ</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Noto Sans JP',sans-serif;background:#FFFBF7;padding:14px 14px 48px}
+body{font-family:'Noto Sans JP',sans-serif;background:#FFFBF7;padding:16px 14px 48px}
 .wrap{max-width:390px;margin:0 auto}
 
-/* ウェルカム */
 .welcome{background:linear-gradient(135deg,#FFF8E1,#FFF0F0);border-radius:16px;padding:20px 16px;margin-bottom:16px;border:1px solid #FFD6A0;text-align:center}
 .welcome h1{font-size:17px;font-weight:700;color:#E65100;line-height:1.7;margin:8px 0}
 .welcome p{font-size:13px;color:#795548;line-height:1.9}
 
-/* ヒーロー */
 .hero{background:#FFF0F0;border-radius:16px;padding:20px 16px;margin-bottom:20px;border:1px solid #FFD6D6}
 .hero h2{font-size:18px;font-weight:700;color:#C62828;margin-bottom:12px;line-height:1.6;text-align:center}
 .hero-body{font-size:14px;color:#5D4037;line-height:2.1}
 .hero-body p{margin-bottom:4px}
 .hero-em{background:#FFECB3;border-radius:8px;padding:10px 12px;font-size:14px;color:#5D4037;line-height:1.85;margin-top:10px;border-left:3px solid #FFB300}
 
-/* フェーズ見出し */
 .phase{font-size:15px;font-weight:700;color:#2E7D32;margin:24px 0 10px;padding-bottom:6px;border-bottom:2px solid #A5D6A7}
 .phase-b{color:#1B5E20;border-bottom-color:#81C784}
-.emoji-row{font-size:18px;letter-spacing:2px;margin:6px 0 12px}
+.emoji-row{font-size:18px;letter-spacing:2px;margin:4px 0 10px}
+.hint{font-size:15px;font-weight:700;color:#FF7043;text-align:center;margin-bottom:14px;background:#FFF0EB;border:2px solid #FFAB76;border-radius:10px;padding:10px 12px}
 
-/* 概要カード（緑） */
-.card-g{background:#fff;border:1px solid #C8E6C9;border-radius:12px;margin-bottom:10px;overflow:hidden}
-.card-g-head{display:flex;align-items:stretch}
-.card-g-num{background:#43A047;color:#fff;font-size:16px;font-weight:700;padding:8px 14px;display:flex;align-items:center;justify-content:center;min-width:44px}
-.card-g-ttl{background:#E8F5E9;color:#1B5E20;font-size:14px;font-weight:700;padding:8px 12px;flex:1;display:flex;align-items:center;line-height:1.5}
-.card-g-body{font-size:14px;color:#5D4037;line-height:1.9;padding:12px 14px}
+.card{background:#fff;border:1px solid #C8E6C9;border-radius:12px;margin-bottom:10px;overflow:hidden}
+.card-head{display:flex;align-items:stretch;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
+.card-num{background:#43A047;color:#fff;font-size:16px;font-weight:700;padding:8px 14px;display:flex;align-items:center;justify-content:center;min-width:44px;flex-shrink:0}
+.card-ttl{background:#E8F5E9;color:#1B5E20;font-size:14px;font-weight:700;padding:8px 12px;flex:1;display:flex;align-items:center;line-height:1.5}
+.card-arrow{background:#E8F5E9;color:#43A047;font-size:18px;padding:8px 12px;display:flex;align-items:center;transition:transform 0.3s;flex-shrink:0}
+.card-arrow.open{transform:rotate(180deg)}
+.card-body{max-height:0;overflow:hidden;transition:max-height 0.4s ease}
+.card-body.open{max-height:2000px}
+.card-inner{padding:14px;font-size:14px;color:#5D4037;line-height:1.9}
+.card-inner p{margin-bottom:6px}
+.card-inner p:last-child{margin-bottom:0}
 
-/* 詳細カード（オレンジ） */
-.card-o{margin-bottom:20px}
-.card-o-head{display:flex;align-items:stretch;border-radius:12px;overflow:hidden;margin-bottom:12px;border:1px solid #FFD0B0}
-.card-o-num{background:#FF7043;color:#fff;font-size:16px;font-weight:700;padding:8px 14px;display:flex;align-items:center;justify-content:center;min-width:44px}
-.card-o-ttl{background:#FFF0EB;color:#BF360C;font-size:14px;font-weight:700;padding:8px 12px;flex:1;display:flex;align-items:center;line-height:1.5}
-
-/* テキスト・共通 */
-.body-text{font-size:14px;color:#5D4037;line-height:2;margin-bottom:8px}
-.body-text p{margin-bottom:6px}
+.step-list{display:flex;flex-direction:column;gap:7px;margin-bottom:8px}
+.step-row{display:flex;align-items:flex-start;gap:8px;font-size:14px;color:#4E342E;line-height:1.7}
+.stag{background:#E3F2FD;color:#0D47A1;border-radius:5px;padding:2px 8px;font-size:12px;font-weight:700;white-space:nowrap;flex-shrink:0;margin-top:2px}
 .note{background:#FFF8E1;border-radius:8px;padding:10px 12px;font-size:13px;color:#5D4037;line-height:1.85;border-left:3px solid #FFD54F;margin-top:8px}
 .italic{font-size:13px;color:#8D6E63;line-height:1.85;margin-top:8px;font-style:italic}
 .bullet{display:flex;align-items:flex-start;gap:8px;font-size:14px;color:#4E342E;line-height:1.8;margin-bottom:6px}
-.bullet-dot{width:20px;height:20px;border-radius:50%;border:2px solid #A5D6A7;flex-shrink:0;margin-top:2px}
-.step-list{display:flex;flex-direction:column;gap:7px}
-.step-row{display:flex;align-items:flex-start;gap:8px;font-size:14px;color:#4E342E;line-height:1.7}
-.step-tag{background:#E3F2FD;color:#0D47A1;border-radius:5px;padding:2px 8px;font-size:12px;font-weight:700;white-space:nowrap;flex-shrink:0;margin-top:2px}
+.bullet:last-child{margin-bottom:0}
+.dot{width:20px;height:20px;border-radius:50%;border:2px solid #A5D6A7;flex-shrink:0;margin-top:2px}
 .em-line{font-size:20px;letter-spacing:3px;margin:6px 0;text-align:center}
 .arrow{text-align:center;font-size:20px;margin:8px 0;color:#FF7043}
 .divider{border:none;border-top:2px dashed #F0E0D0;margin:24px 0}
+.img-wrap{border-radius:12px;overflow:hidden;border:1px solid #F0E0D0;margin:12px 0}
+.img-wrap img{width:100%;display:block}
 
-/* ボタン類 */
-.btn-anim{display:block;margin:12px 0;padding:16px;border-radius:12px;font-size:14px;font-weight:700;text-align:center;text-decoration:none;color:#fff;border:none;cursor:pointer;transition:opacity 0.2s}
-.btn-anim:hover{opacity:0.85}
-.btn-blue{background:linear-gradient(90deg,#60B0F4,#22D3EE);border:2px solid #3B82F6}
-.btn-green{background:linear-gradient(90deg,#34D399,#10B981);border:2px solid #22C55E}
-.btn-orange{background:linear-gradient(90deg,#FB923C,#F97316);border:2px solid #F97316}
-.btn-yellow{background:linear-gradient(90deg,#FCD34D,#F59E0B);border:2px solid #EAB308;color:#78350F}
-.btn-rose{background:linear-gradient(90deg,#FB7185,#F43F5E);border:2px solid #F43F5E}
-.btn-purple{background:linear-gradient(90deg,#A78BFA,#8B5CF6);border:2px solid #7C3AED}
-.btn-red{background:linear-gradient(90deg,#F87171,#EF4444);border:2px solid #EF4444}
-.btn-amber{background:linear-gradient(90deg,#FCD34D,#F59E0B);border:2px solid #D97706;color:#78350F}
-.btn-teal{background:linear-gradient(90deg,#2DD4BF,#14B8A6);border:2px solid #0D9488}
-.btn-label{font-size:12px;font-weight:700;text-align:center;margin-bottom:6px}
-.btn-box{padding:16px;border-radius:12px;margin:12px 0}
+.lnk{display:block;margin-top:10px;padding:12px;color:#fff;border-radius:10px;text-align:center;font-weight:700;text-decoration:none;font-size:14px}
+.lnk-or{background:#FF7043}
+.lnk-g{background:#43A047}
+.lnk-b{background:linear-gradient(90deg,#60B0F4,#22D3EE);border:2px solid #3B82F6}
+.lnk-green{background:linear-gradient(90deg,#34D399,#10B981);border:2px solid #22C55E}
+.lnk-amber{background:linear-gradient(90deg,#FB923C,#F97316);border:2px solid #F97316}
+.lnk-yellow{background:linear-gradient(90deg,#FCD34D,#F59E0B);border:2px solid #EAB308;color:#78350F}
+.lnk-rose{background:linear-gradient(90deg,#FB7185,#F43F5E);border:2px solid #F43F5E}
+.lnk-purple{background:linear-gradient(90deg,#A78BFA,#8B5CF6);border:2px solid #7C3AED}
+.lnk-red{background:linear-gradient(90deg,#F87171,#EF4444);border:2px solid #EF4444}
+.lnk-gold{background:linear-gradient(90deg,#FCD34D,#F59E0B);border:2px solid #D97706;color:#78350F}
+.lnk-teal{background:linear-gradient(90deg,#2DD4BF,#14B8A6);border:2px solid #0D9488}
+
+.btn-box{padding:14px;border-radius:12px;margin:10px 0}
 .btn-box-blue{background:linear-gradient(90deg,#DBEAFE,#CFFAFE);border:2px solid #3B82F6}
 .btn-box-green{background:linear-gradient(90deg,#D1FAE5,#ECFDF5);border:2px solid #22C55E}
 .btn-box-orange{background:linear-gradient(90deg,#FEF3C7,#FFF7ED);border:2px solid #F97316}
@@ -76,6 +74,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:#FFFBF7;padding:14px 14px 
 .btn-box-rose{background:linear-gradient(90deg,#FFE4E6,#FDF2F8);border:2px solid #F43F5E}
 .btn-box-purple{background:linear-gradient(90deg,#F3E8FF,#FDF4FF);border:2px solid #7C3AED}
 .btn-box-teal{background:linear-gradient(90deg,#CCFBF1,#F0FDFA);border:2px solid #0D9488}
+.btn-label{font-size:12px;font-weight:700;text-align:center;margin-bottom:8px}
 .btn-box-blue .btn-label{color:#1D4ED8}
 .btn-box-green .btn-label{color:#15803D}
 .btn-box-orange .btn-label{color:#C2410C}
@@ -84,11 +83,6 @@ body{font-family:'Noto Sans JP',sans-serif;background:#FFFBF7;padding:14px 14px 
 .btn-box-purple .btn-label{color:#6D28D9}
 .btn-box-teal .btn-label{color:#0F766E}
 
-/* 画像 */
-.img-wrap{border-radius:12px;overflow:hidden;border:1px solid #F0E0D0;margin:12px 0}
-.img-wrap img{width:100%;display:block}
-
-/* コピーツール */
 .gen-box{background:#FFF8F5;border:1px solid #FFD0B0;border-radius:12px;padding:14px;margin-top:10px}
 .gen-label{font-size:12px;font-weight:700;color:#FF7043;margin-bottom:6px;display:block}
 .gen-input{width:100%;border:1px solid #FFCCBC;border-radius:8px;padding:10px 12px;font-size:14px;font-family:'Noto Sans JP',sans-serif;color:#4E342E;background:#fff;margin-bottom:12px;outline:none}
@@ -99,24 +93,22 @@ body{font-family:'Noto Sans JP',sans-serif;background:#FFFBF7;padding:14px 14px 
 #copyBtn{display:block !important;width:100% !important;padding:16px !important;border-radius:12px !important;background:#FF7043 !important;background-color:#FF7043 !important;border:none !important;cursor:pointer !important;font-family:'Noto Sans JP',sans-serif !important;font-size:18px !important;font-weight:700 !important;color:#ffffff !important;-webkit-text-fill-color:#ffffff !important;text-align:center !important;letter-spacing:0.05em !important}
 .copy-hint{font-size:12px;color:#A1887F;text-align:center;margin-top:8px}
 
-/* フッター */
-.footer{background:#FFF0F0;border-radius:16px;padding:18px 16px;margin-top:8px;border:1px solid #FFD6D6}
+.footer{background:#FFF0F0;border-radius:16px;padding:18px 16px;margin-top:20px;border:1px solid #FFD6D6}
 .footer h3{font-size:15px;font-weight:700;color:#C62828;margin-bottom:10px;line-height:1.6;text-align:center}
 .footer-body{font-size:14px;color:#5D4037;line-height:2}
 .footer-body p{margin-bottom:6px}
+.footer-body p:last-child{margin-bottom:0}
 </style>
 </head>
 <body>
 <div class="wrap">
 
-<!-- ウェルカム -->
 <div class="welcome">
   <div style="font-size:32px;margin-bottom:8px">🎉</div>
   <h1>LINKへようこそ！<br>これからLINKを最大限活用する<br>準備を始めましょう✨️</h1>
   <p>あなたの"やりたい"が加速していきます💡<br>まずはこの流れに沿って進めてみてください！</p>
 </div>
 
-<!-- ヒーロー -->
 <div class="hero">
   <h2>🌸 初期サポートの流れ 🌸</h2>
   <div class="hero-body">
@@ -128,201 +120,210 @@ body{font-family:'Noto Sans JP',sans-serif;background:#FFFBF7;padding:14px 14px 
   <div class="hero-em">『 入ったけど、LINKを使えてない😢』<br>を無くすためです✨</div>
 </div>
 
-<!-- 本日 -->
+<p class="hint">👇 各項目をタップすると詳細が開きます</p>
+
 <div class="phase">本日</div>
 <div class="emoji-row">⚡</div>
-<div class="card-g">
-  <div class="card-g-head"><div class="card-g-num">1</div><div class="card-g-ttl">ホーム画面に LINKポータル（全サイト総合案内）を置く</div></div>
-</div>
-<div class="card-g">
-  <div class="card-g-head"><div class="card-g-num">2</div><div class="card-g-ttl">LINK information（公式ライン）に入る</div></div>
+
+<div class="card">
+  <div class="card-head" onclick="toggle(this)">
+    <div class="card-num">1</div>
+    <div class="card-ttl">ホーム画面に LINKポータル（全サイト総合案内）を置く</div>
+    <div class="card-arrow">▼</div>
+  </div>
+  <div class="card-body">
+    <div class="card-inner">
+      <p>LINKポータルをアプリみたく<br>スマホのホーム画面上に保存する</p>
+      <p>✅ LINKツールの総合案内サイトです💁‍♀️</p>
+      <p>✅ 下記の手順でスマホのホーム画面上に<br>置いておくと便利です😊</p>
+      <div class="img-wrap">
+        <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/001-aCk05zA9KtrIo32BfqDCRjqNqmWjhz.jpg" alt="LINKポータルをアプリみたいに使う手順">
+      </div>
+      <div class="btn-box btn-box-blue">
+        <p class="btn-label">👇 タップしてポータルを開く 👇</p>
+        <a href="https://app.link-event-x.com" target="_blank" class="lnk lnk-b">🔗 LINKポータルを開く</a>
+      </div>
+    </div>
+  </div>
 </div>
 
-<!-- 2週間以内 -->
+<div class="card">
+  <div class="card-head" onclick="toggle(this)">
+    <div class="card-num">2</div>
+    <div class="card-ttl">LINK information（公式ライン）に入る</div>
+    <div class="card-arrow">▼</div>
+  </div>
+  <div class="card-body">
+    <div class="card-inner">
+      <p>ここ👉からお入りください</p>
+      <div class="em-line">💛💛💛💛💛💛💛</div>
+      <div class="btn-box btn-box-green">
+        <p class="btn-label">👇 タップしてLINE登録 👇</p>
+        <a href="https://s.lmes.jp/landing-qr/2008524921-7QZ2vX3X?uLand=iRyJ9G" target="_blank" class="lnk lnk-green">📲 LINK information に登録する</a>
+      </div>
+      <div class="em-line">💛💛💛💛💛💛</div>
+      <p>✅ LINK内の全ての情報検索が出来る<br>LINK公式ラインです！</p>
+      <p>Q&amp;Aやニーズ別診断、様々な情報を探したり、スタンプラリーがあったり、ワクワクします😲</p>
+      <p>✅ 大切なリッチメニューは、<br>ある程度まで進めたら開放される仕組みです！そこまですぐに進めてくださいね✨</p>
+      <p>必ず出てくる動画は全て</p>
+      <div class="em-line">👆👆👆👆👆👆</div>
+      <p>しっかり見るようにしてください</p>
+      <div class="em-line">👆👆👆👆👆👆👆👆👆</div>
+      <p>こちら下記は、<br>リッチメニュー解放の中に出てくる<br>step3・4掲載に関しての補足事項です💡</p>
+      <div class="btn-box btn-box-orange">
+        <p class="btn-label">👇 タップして詳細をチェック 👇</p>
+        <a href="https://share.evernote.com/note/ccfb2b54-94b8-df59-2066-1dc8172aff21" target="_blank" class="lnk lnk-amber">📄 step3・4 補足事項を見る</a>
+      </div>
+      <div class="note">
+        <div class="bullet"><div class="dot"></div><div>リッチメニューが開放されない</div></div>
+        <div class="bullet"><div class="dot"></div><div>途中わからない問題がある</div></div>
+        <p style="margin-top:6px">などは、初期サポートライングループでご質問ください❤️</p>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="phase phase-b">2週間以内に</div>
 <div class="emoji-row">⚡⚡⚡</div>
-<div class="card-g">
-  <div class="card-g-head"><div class="card-g-num">★</div><div class="card-g-ttl">LINK information（公式ライン）のリッチメニュー解放させる事</div></div>
-  <div class="card-g-body">
-    <div class="step-list">
-      <div class="step-row"><div class="step-tag">step❶</div>ルール動画</div>
-      <div class="step-row"><div class="step-tag">step❷</div>動き方動画</div>
-      <div class="step-row"><div class="step-tag">step❸</div>sasaeaiマッチング動画▶︎制作</div>
-      <div class="step-row"><div class="step-tag">step❹</div>LINKベース▶︎制作</div>
-      <div class="step-row"><div class="step-tag">step❺</div>LINK information使い方動画視聴</div>
+
+<div class="card">
+  <div class="card-head" onclick="toggle(this)">
+    <div class="card-num">★</div>
+    <div class="card-ttl">LINK informationのリッチメニューを解放する</div>
+    <div class="card-arrow">▼</div>
+  </div>
+  <div class="card-body">
+    <div class="card-inner">
+      <div class="img-wrap">
+        <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/002-LQDBlJxycWBg3cvPUmUZQQvawvqQgg.jpg" alt="リッチメニュー解放イメージ">
+      </div>
+      <div class="step-list">
+        <div class="step-row"><div class="stag">step❶</div>ルール動画</div>
+        <div class="step-row"><div class="stag">step❷</div>動き方動画</div>
+        <div class="step-row"><div class="stag">step❸</div>sasaeaiマッチング動画▶︎制作</div>
+        <div class="step-row"><div class="stag">step❹</div>LINKベース▶︎制作</div>
+        <div class="step-row"><div class="stag">step❺</div>LINK information使い方動画視聴</div>
+      </div>
+      <div class="note">📝 step❸❹で制作したものは、<strong>初期サポートライングループ</strong>にURLを必ず貼ってください</div>
+      <p class="italic">を進めていただきながら、</p>
     </div>
-    <div class="note">📝 step❸❹で制作したものは、<strong>初期サポートライングループ</strong>にURLを必ず貼ってください</div>
-    <p class="italic">を進めていただきながら、</p>
   </div>
 </div>
 
-<!-- 1ヶ月以内 -->
 <div class="phase">1ヶ月間以内で</div>
 <div class="emoji-row">⚡⚡⚡⚡</div>
-<div class="card-g">
-  <div class="card-g-head"><div class="card-g-num">3</div><div class="card-g-ttl">LINKセミナー・LINKセレモニー</div></div>
-  <div class="card-g-body">
-    <div class="bullet"><div class="bullet-dot"></div><div>5種類のLINKセミナー（LINKの宝の地図🗺️）を視聴する事</div></div>
-    <div class="note">📝 どうしても出れない場合、『最低でも2つ』✨<br>残りのものは『登録3ヶ月以内』で視聴してください⚡</div>
-    <div class="bullet" style="margin-top:10px"><div class="bullet-dot"></div><div>🆓 直近のLINKセレモニーの予約</div></div>
+
+<div class="card">
+  <div class="card-head" onclick="toggle(this)">
+    <div class="card-num">3</div>
+    <div class="card-ttl">LINKセミナー・LINKセレモニー</div>
+    <div class="card-arrow">▼</div>
   </div>
-</div>
-<div class="card-g">
-  <div class="card-g-head"><div class="card-g-num">4</div><div class="card-g-ttl">LINKスケジュールサイトの使い方を覚える</div></div>
-  <div class="card-g-body">
-    <div class="bullet"><div class="bullet-dot"></div><div>LINKスケジュールサイトの使い方を覚えて、その他のイベントや講座、トレーニングを受けてみよう！！</div></div>
-  </div>
-</div>
-<div class="card-g">
-  <div class="card-g-head"><div class="card-g-num">5</div><div class="card-g-ttl">オープンチャットに入る</div></div>
-  <div class="card-g-body">
-    <div class="bullet"><div class="bullet-dot"></div><div>LINK情報伝達チャット/公認イベント情報のオプチャに入る</div></div>
-    <div class="bullet"><div class="bullet-dot"></div><div>自分に合うLINKサークル/地域コミュニティのオープンチャットに入り、自己紹介をする</div></div>
+  <div class="card-body">
+    <div class="card-inner">
+      <p>リッチメニューの解放を進めながら、LINKの全貌を知っていきましょう✨</p>
+      <p>それに、必須になってくるのが、</p>
+      <p>📚 LINKセミナー<br>🎖️ LINKセレモニー</p>
+      <p>です✨</p>
+      <p>【聞く】LINKセミナーで<br>知識を整え、魅力やルートがわかり、</p>
+      <div class="arrow">↓</div>
+      <p>【見て体感する】LINKセレモニーで<br>規模感、繋がり、ブランディングがわかります😲</p>
+      <p>📝 セレモニーは申し込みも先着なので、<br>早めに申し込まれた方が有利です⚡</p>
+      <p>またセレモニーは2000人が<br>日本中や世界から集まる結集ポイントです。</p>
+      <p>ベストな繋がりも増えたり飲み放題／ブュッフェもあり、最高峰のパーティーです🎉</p>
+      <p>この二つは、本当に明確になるので<br>忙しい方でも皆さん<br>必ず優先的に出られます✨</p>
+      <div class="btn-box btn-box-yellow">
+        <p class="btn-label">👇 タップして詳細をチェック 👇</p>
+        <a href="https://share.evernote.com/note/b0a365d3-34d3-da5d-a196-1f9e984f0d33" target="_blank" class="lnk lnk-yellow">⭐️ 必須！LINKセミナーに関する記載</a>
+      </div>
+      <div class="btn-box btn-box-rose">
+        <p class="btn-label">👇 タップして詳細をチェック 👇</p>
+        <a href="https://link-event-x.com/node/1181" target="_blank" class="lnk lnk-rose">⭐️ LINK No.1 LINKセレモニーに関する記載</a>
+      </div>
+      <div class="note">📝 申し込みは最下部の「申し込みはこちらから」、Googleフォームに記入ください</div>
+      <div class="bullet" style="margin-top:12px"><div class="dot"></div><div>5種類のLINKセミナー（LINKの宝の地図🗺️）を視聴する事</div></div>
+      <div class="note">📝 どうしても出れない場合、『最低でも2つ』✨<br>残りのものは『登録3ヶ月以内』で視聴してください⚡</div>
+      <div class="bullet" style="margin-top:10px"><div class="dot"></div><div>🆓 直近のLINKセレモニーの予約</div></div>
+    </div>
   </div>
 </div>
 
-<div class="divider"></div>
-
-<!-- 詳細①：画像→テキスト -->
-<div class="img-wrap">
-  <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/001-aCk05zA9KtrIo32BfqDCRjqNqmWjhz.jpg" alt="LINKポータルをアプリみたいに使う手順">
-</div>
-
-<div class="card-o">
-  <div class="card-o-head"><div class="card-o-num">1</div><div class="card-o-ttl">LINKポータルをアプリみたくスマホのホーム画面上に保存する</div></div>
-  <div class="body-text">
-    <p>✅ LINKツールの総合案内サイトです💁‍♀️</p>
-    <p>✅ 下記の手順でスマホのホーム画面上に<br>置いておくと便利です😊</p>
+<div class="card">
+  <div class="card-head" onclick="toggle(this)">
+    <div class="card-num">4</div>
+    <div class="card-ttl">LINKスケジュールサイトの使い方を覚える</div>
+    <div class="card-arrow">▼</div>
   </div>
-  <div class="btn-box btn-box-blue">
-    <p class="btn-label">👇 タップしてポータルを開く 👇</p>
-    <a href="https://app.link-event-x.com" target="_blank" class="btn-anim btn-blue">🔗 LINKポータルを開く</a>
-  </div>
-</div>
-
-<!-- 詳細②：画像→テキスト -->
-<div class="img-wrap">
-  <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/002-LQDBlJxycWBg3cvPUmUZQQvawvqQgg.jpg" alt="リッチメニュー解放イメージ">
-</div>
-
-<div class="card-o">
-  <div class="card-o-head"><div class="card-o-num">2</div><div class="card-o-ttl">公式ライン LINK informationに登録してリッチメニュー解放を行なう</div></div>
-  <div class="body-text"><p>ここ👉からお入りください</p></div>
-  <div class="em-line">💛💛💛💛💛💛💛</div>
-  <div class="btn-box btn-box-green">
-    <p class="btn-label">👇 タップしてLINE登録 👇</p>
-    <a href="https://s.lmes.jp/landing-qr/2008524921-7QZ2vX3X?uLand=iRyJ9G" target="_blank" class="btn-anim btn-green">📲 LINK information に登録する</a>
-  </div>
-  <div class="em-line">💛💛💛💛💛💛</div>
-  <div class="body-text">
-    <p>✅ LINK内の全ての情報検索が出来る<br>LINK公式ラインです！</p>
-    <p>Q&amp;Aやニーズ別診断、様々な情報を探したり、スタンプラリーがあったり、ワクワクします😲</p>
-    <p>✅ 大切なリッチメニューは、<br>ある程度まで進めたら開放される仕組みです！そこまですぐに進めてくださいね✨</p>
-    <p>必ず出てくる動画は全て</p>
-  </div>
-  <div class="em-line">👆👆👆👆👆👆</div>
-  <div class="body-text"><p>しっかり見るようにしてください</p></div>
-  <div class="em-line">👆👆👆👆👆👆👆👆👆</div>
-  <div class="body-text">
-    <p>こちら下記は、<br>リッチメニュー解放の中に出てくる<br>step3・4掲載に関しての補足事項です💡</p>
-  </div>
-  <div class="btn-box btn-box-orange">
-    <p class="btn-label">👇 タップして詳細をチェック 👇</p>
-    <a href="https://share.evernote.com/note/ccfb2b54-94b8-df59-2066-1dc8172aff21" target="_blank" class="btn-anim btn-orange">📄 step3・4 補足事項を見る</a>
-  </div>
-  <div class="note">
-    <div class="bullet"><div class="bullet-dot"></div><div>リッチメニューが開放されない</div></div>
-    <div class="bullet"><div class="bullet-dot"></div><div>途中わからない問題がある</div></div>
-    <p style="margin-top:6px">などは、初期サポートライングループでご質問ください❤️</p>
+  <div class="card-body">
+    <div class="card-inner">
+      <p>上記の最も大切なLINKセミナー／LINKセレモニーを中心に、それ以外にも様々な環境に触れてみよう✨</p>
+      <p>その為に、大切なサイトの使い方をお伝えしておきます！</p>
+      <p>✅ LINKを知る事から始まり、<br>関係構築や事業の集客ポイント探し<br>学びや成長にまで使える最重要サイトです😲</p>
+      <p>✅ こちらは①LINKポータルや②LINK informationからも飛ぶ事が出来ます。</p>
+      <div class="btn-box btn-box-purple">
+        <p class="btn-label">📖 順番に見ていってください</p>
+        <a href="https://link-event-x.com" target="_blank" class="lnk lnk-purple">🌐 LINK公式公認スケジュールサイト</a>
+        <a href="https://www.youtube.com/watch?v=GqEtcSaU05c" target="_blank" class="lnk lnk-red" style="margin-top:8px">▶️ スケジュールサイト使い方動画</a>
+        <a href="https://share.evernote.com/note/1d91331a-4c0c-9630-130f-f06e9710fa11" target="_blank" class="lnk lnk-gold" style="margin-top:8px">💡 スケジュールサイト豆知識はこちら</a>
+      </div>
+    </div>
   </div>
 </div>
 
-<div class="card-o">
-  <div class="card-o-head"><div class="card-o-num">3</div><div class="card-o-ttl">LINK informationのリッチメニュー解放をしながらLINKの全貌を知りましょう✨</div></div>
-  <div class="body-text">
-    <p>それに、必須になってくるのが、</p>
-    <p>📚 LINKセミナー<br>🎖️ LINKセレモニー</p>
-    <p>です✨</p>
-    <p>【聞く】LINKセミナーで<br>知識を整え、魅力やルートがわかり、</p>
+<div class="card">
+  <div class="card-head" onclick="toggle(this)">
+    <div class="card-num">5</div>
+    <div class="card-ttl">オープンチャットに入る</div>
+    <div class="card-arrow">▼</div>
   </div>
-  <div class="arrow">↓</div>
-  <div class="body-text">
-    <p>【見て体感する】LINKセレモニーで<br>規模感、繋がり、ブランディングがわかります😲</p>
-    <p>📝 セレモニーは申し込みも先着なので、<br>早めに申し込まれた方が有利です⚡</p>
-    <p>またセレモニーは2000人が<br>日本中や世界から集まる結集ポイントです。</p>
-    <p>ベストな繋がりも増えたり飲み放題／ブュッフェもあり、最高峰のパーティーです🎉</p>
-    <p>この二つは、本当に明確になるので<br>忙しい方でも皆さん<br>必ず優先的に出られます✨</p>
-  </div>
-  <div class="btn-box btn-box-yellow">
-    <p class="btn-label">👇 タップして詳細をチェック 👇</p>
-    <a href="https://share.evernote.com/note/b0a365d3-34d3-da5d-a196-1f9e984f0d33" target="_blank" class="btn-anim btn-yellow">⭐️ 必須！LINKセミナーに関する記載</a>
-  </div>
-  <div class="btn-box btn-box-rose">
-    <p class="btn-label">👇 タップして詳細をチェック 👇</p>
-    <a href="https://link-event-x.com/node/1181" target="_blank" class="btn-anim btn-rose">⭐️ LINK No.1 LINKセレモニーに関する記載</a>
-  </div>
-  <div class="note">📝 申し込みは最下部の「申し込みはこちらから」、Googleフォームに記入ください</div>
-</div>
-
-<div class="card-o">
-  <div class="card-o-head"><div class="card-o-num">4</div><div class="card-o-ttl">上記の最も大切なLINKセミナー／LINKセレモニーを中心に、それ以外にも様々な環境に触れてみよう✨</div></div>
-  <div class="body-text">
-    <p>その為に、大切なサイトの使い方をお伝えしておきます！</p>
-    <p>✅ LINKを知る事から始まり、<br>関係構築や事業の集客ポイント探し<br>学びや成長にまで使える最重要サイトです😲</p>
-    <p>✅ こちらは①LINKポータルや②LINK informationからも飛ぶ事が出来ます。</p>
-  </div>
-  <div class="btn-box btn-box-purple">
-    <p class="btn-label">📖 順番に見ていってください</p>
-    <a href="https://link-event-x.com" target="_blank" class="btn-anim btn-purple">🌐 LINK公式公認スケジュールサイト</a>
-    <a href="https://www.youtube.com/watch?v=GqEtcSaU05c" target="_blank" class="btn-anim btn-red">▶️ スケジュールサイト使い方</a>
-    <a href="https://share.evernote.com/note/1d91331a-4c0c-9630-130f-f06e9710fa11" target="_blank" class="btn-anim btn-amber">💡 スケジュールサイト豆知識はこちら</a>
+  <div class="card-body">
+    <div class="card-inner">
+      <p>いよいよ初期サポートも最後です😲</p>
+      <p>下記のLINEオープンチャットにお入りください⚡</p>
+      <div class="arrow">↓</div>
+      <div class="btn-box btn-box-teal">
+        <p class="btn-label">👇 タップしてチェック 👇</p>
+        <a href="https://share.evernote.com/note/4e349623-51d0-2cf7-5251-62efa32a9552" target="_blank" class="lnk lnk-teal">📋 入るべきオープンチャット集</a>
+      </div>
+    </div>
   </div>
 </div>
 
-<div class="card-o">
-  <div class="card-o-head"><div class="card-o-num">5</div><div class="card-o-ttl">いよいよ初期サポートも最後です😲</div></div>
-  <div class="body-text">
-    <p>下記のLINEオープンチャットにお入りください⚡</p>
-    <p>✅</p>
-    <p>最初のルール動画でもありましたが、<br>LINK内の全てのオプチャに入る時は、</p>
-    <p>参加する名前の後に、<br><strong>【自分の所属するチーム名/系列名】</strong>を入れましょう✨️</p>
-    <p>例）🌈高山翔子/Skyarc/🚀SkyExceed</p>
-    <p>意味「名前/チーム名/系列名」</p>
-  </div>
-  <div class="gen-box">
-    <label class="gen-label">👤 あなたの名前を入力</label>
-    <input class="gen-input" id="nameInput" type="text" placeholder="例：高山翔子">
-    <label class="gen-label">🏷️ チーム名/系列を選ぶ</label>
-    <select class="gen-select" id="seriesSelect">
-      <option value="">-- 系列を選んでください --</option>
-      <option value="🚀SkyExceed">🚀SkyExceed</option>
-      <option value="🦅Zenith1">🦅Zenith1</option>
-      <option value="🏰Utop">🏰Utop</option>
-      <option value="🌬️ザ・クラウドブルー(蒼雲）">🌬️ザ・クラウドブルー(蒼雲）</option>
-      <option value="📚FairyTail">📚FairyTail</option>
-      <option value="✨アフロディーテ">✨アフロディーテ</option>
-      <option value="🌟グローハピネス🌟">🌟グローハピネス🌟</option>
-      <option value="🥷HOT STUFF ⚜️">🥷HOT STUFF ⚜️</option>
-      <option value="TELLUS.">TELLUS.</option>
-      <option value="♾️ZERO♾️">♾️ZERO♾️</option>
-      <option value="✈️JET RISE">✈️JET RISE</option>
-      <option value="⭐️ルミナス">⭐️ルミナス</option>
-      <option value="エネルギー🔥">エネルギー🔥</option>
-      <option value="FEAT">FEAT</option>
-      <option value="ミラメリ🪄">ミラメリ🪄</option>
-      <option value="🪽HERO">🪽HERO</option>
-      <option value="💎プリズム">💎プリズム</option>
-    </select>
-    <div class="result-label">✅ あなたのオプチャ用ニックネーム</div>
-    <div class="result-box" id="resultBox">👆 名前と系列を入力してください</div>
-    <button id="copyBtn" onclick="copyResult()">📋 タップしてコピー！</button>
-    <div class="copy-hint" id="copyHint">↑ コピーしてオープンチャットのニックネームに貼り付けてください</div>
-  </div>
-  <div class="arrow">↓</div>
-  <div class="btn-box btn-box-teal">
-    <p class="btn-label">👇 タップしてチェック 👇</p>
-    <a href="https://share.evernote.com/note/4e349623-51d0-2cf7-5251-62efa32a9552" target="_blank" class="btn-anim btn-teal">📋 入るべきオープンチャット集</a>
-  </div>
+<div class="note" style="margin-bottom:12px">
+  <p>✅ LINK informationにある最初のルール動画でもありましたが、<br>LINK内の全てのオプチャに入る時は、</p>
+  <p style="margin-top:6px">参加する名前の後に、<br><strong>【自分の所属するチーム名/系列名】</strong>を入れましょう✨️</p>
+  <p style="margin-top:6px">例）🌈高山翔子/Skyarc/🚀SkyExceed</p>
+  <p>意味「名前/チーム名/系列名」</p>
+</div>
+
+<div class="gen-box" style="margin-bottom:20px">
+  <label class="gen-label">👤 あなたの名前を入力</label>
+  <input class="gen-input" id="nameInput" type="text" placeholder="例：高山翔子">
+  <label class="gen-label">🏷️ チーム名/系列を選ぶ</label>
+  <select class="gen-select" id="seriesSelect">
+    <option value="">-- 系列を選んでください --</option>
+    <option value="🚀SkyExceed">🚀SkyExceed</option>
+    <option value="🦅Zenith1">🦅Zenith1</option>
+    <option value="🏰Utop">🏰Utop</option>
+    <option value="🌬️ザ・クラウドブルー(蒼雲）">🌬️ザ・クラウドブルー(蒼雲）</option>
+    <option value="📚FairyTail">📚FairyTail</option>
+    <option value="✨アフロディーテ">✨アフロディーテ</option>
+    <option value="🌟グローハピネス🌟">🌟グローハピネス🌟</option>
+    <option value="🥷HOT STUFF ⚜️">🥷HOT STUFF ⚜️</option>
+    <option value="TELLUS.">TELLUS.</option>
+    <option value="♾️ZERO♾️">♾️ZERO♾️</option>
+    <option value="✈️JET RISE">✈️JET RISE</option>
+    <option value="⭐️ルミナス">⭐️ルミナス</option>
+    <option value="エネルギー🔥">エネルギー🔥</option>
+    <option value="FEAT">FEAT</option>
+    <option value="ミラメリ🪄">ミラメリ🪄</option>
+    <option value="🪽HERO">🪽HERO</option>
+    <option value="💎プリズム">💎プリズム</option>
+  </select>
+  <div class="result-label">✅ あなたのオプチャ用ニックネーム</div>
+  <div class="result-box" id="resultBox">👆 名前と系列を入力してください</div>
+  <button id="copyBtn" onclick="copyResult()">📋 タップしてコピー！</button>
+  <div class="copy-hint" id="copyHint">↑ コピーしてオープンチャットのニックネームに貼り付けてください</div>
 </div>
 
 <div class="footer">
@@ -337,8 +338,13 @@ body{font-family:'Noto Sans JP',sans-serif;background:#FFFBF7;padding:14px 14px 
 </div>
 
 </div>
-
 <script>
+function toggle(head){
+  const arrow=head.querySelector('.card-arrow');
+  const body=head.nextElementSibling;
+  arrow.classList.toggle('open');
+  body.classList.toggle('open');
+}
 const nameInput=document.getElementById('nameInput');
 const seriesSelect=document.getElementById('seriesSelect');
 const resultBox=document.getElementById('resultBox');
