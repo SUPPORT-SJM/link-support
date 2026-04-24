@@ -27,17 +27,29 @@ body{font-family:'Noto Sans JP',sans-serif;background:#FFFBF7;padding:16px 14px 
 .emoji-row{font-size:18px;letter-spacing:2px;margin:4px 0 10px}
 .hint{font-size:15px;font-weight:700;color:#FF7043;text-align:center;margin-bottom:14px;background:#FFF0EB;border:2px solid #FFAB76;border-radius:10px;padding:10px 12px}
 
-.card{background:#fff;border:1px solid #C8E6C9;border-radius:12px;margin-bottom:10px;overflow:hidden}
+.card{background:#fff;border:1px solid #C8E6C9;border-radius:12px;margin-bottom:10px;overflow:hidden;transition:border-color 0.3s}
+.card.done{border-color:#FFAB76}
 .card-head{display:flex;align-items:stretch;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
-.card-num{background:#43A047;color:#fff;font-size:16px;font-weight:700;padding:8px 14px;display:flex;align-items:center;justify-content:center;min-width:44px;flex-shrink:0}
-.card-ttl{background:#E8F5E9;color:#1B5E20;font-size:14px;font-weight:700;padding:8px 12px;flex:1;display:flex;align-items:center;line-height:1.5}
-.card-arrow{background:#E8F5E9;color:#43A047;font-size:18px;padding:8px 12px;display:flex;align-items:center;transition:transform 0.3s;flex-shrink:0}
+.card-num{background:#43A047;color:#fff;font-size:16px;font-weight:700;padding:8px 14px;display:flex;align-items:center;justify-content:center;min-width:44px;flex-shrink:0;transition:background 0.3s}
+.card.done .card-num{background:#FF7043}
+.card-ttl{background:#E8F5E9;color:#1B5E20;font-size:14px;font-weight:700;padding:8px 12px;flex:1;display:flex;align-items:center;line-height:1.5;transition:background 0.3s,color 0.3s;gap:6px}
+.card.done .card-ttl{background:#FFF0EB;color:#BF360C}
+.card-arrow{background:#E8F5E9;color:#43A047;font-size:18px;padding:8px 12px;display:flex;align-items:center;transition:transform 0.3s,background 0.3s;flex-shrink:0}
+.card.done .card-arrow{background:#FFF0EB;color:#FF7043}
 .card-arrow.open{transform:rotate(180deg)}
 .card-body{max-height:0;overflow:hidden;transition:max-height 0.4s ease}
-.card-body.open{max-height:2000px}
+.card-body.open{max-height:3000px}
 .card-inner{padding:14px;font-size:14px;color:#5D4037;line-height:1.9}
 .card-inner p{margin-bottom:6px}
 .card-inner p:last-child{margin-bottom:0}
+
+.badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 7px;border-radius:20px;flex-shrink:0}
+.badge-yet{background:#E8F5E9;color:#2E7D32}
+.badge-done{background:#FF7043;color:#fff}
+
+.done-btn{display:block;width:100%;margin-top:12px;padding:12px;border-radius:10px;font-size:15px;font-weight:700;text-align:center;cursor:pointer;border:none;font-family:'Noto Sans JP',sans-serif;transition:background 0.3s}
+.done-btn-pending{background:#E8F5E9;color:#2E7D32;border:2px solid #A5D6A7}
+.done-btn-done{background:#FF7043;color:#fff;border:2px solid #E64A19}
 
 .step-list{display:flex;flex-direction:column;gap:7px;margin-bottom:8px}
 .step-row{display:flex;align-items:flex-start;gap:8px;font-size:14px;color:#4E342E;line-height:1.7}
@@ -54,8 +66,6 @@ body{font-family:'Noto Sans JP',sans-serif;background:#FFFBF7;padding:16px 14px 
 .img-wrap img{width:100%;display:block}
 
 .lnk{display:block;margin-top:10px;padding:12px;color:#fff;border-radius:10px;text-align:center;font-weight:700;text-decoration:none;font-size:14px}
-.lnk-or{background:#FF7043}
-.lnk-g{background:#43A047}
 .lnk-b{background:linear-gradient(90deg,#60B0F4,#22D3EE);border:2px solid #3B82F6}
 .lnk-green{background:linear-gradient(90deg,#34D399,#10B981);border:2px solid #22C55E}
 .lnk-amber{background:linear-gradient(90deg,#FB923C,#F97316);border:2px solid #F97316}
@@ -83,7 +93,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:#FFFBF7;padding:16px 14px 
 .btn-box-purple .btn-label{color:#6D28D9}
 .btn-box-teal .btn-label{color:#0F766E}
 
-.gen-box{background:#FFF8F5;border:1px solid #FFD0B0;border-radius:12px;padding:14px;margin-top:10px}
+.gen-box{background:#FFF8F5;border:1px solid #FFD0B0;border-radius:12px;padding:14px;margin-bottom:20px}
 .gen-label{font-size:12px;font-weight:700;color:#FF7043;margin-bottom:6px;display:block}
 .gen-input{width:100%;border:1px solid #FFCCBC;border-radius:8px;padding:10px 12px;font-size:14px;font-family:'Noto Sans JP',sans-serif;color:#4E342E;background:#fff;margin-bottom:12px;outline:none}
 .gen-input:focus{border-color:#FF7043}
@@ -93,7 +103,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:#FFFBF7;padding:16px 14px 
 #copyBtn{display:block !important;width:100% !important;padding:16px !important;border-radius:12px !important;background:#FF7043 !important;background-color:#FF7043 !important;border:none !important;cursor:pointer !important;font-family:'Noto Sans JP',sans-serif !important;font-size:18px !important;font-weight:700 !important;color:#ffffff !important;-webkit-text-fill-color:#ffffff !important;text-align:center !important;letter-spacing:0.05em !important}
 .copy-hint{font-size:12px;color:#A1887F;text-align:center;margin-top:8px}
 
-.footer{background:#FFF0F0;border-radius:16px;padding:18px 16px;margin-top:20px;border:1px solid #FFD6D6}
+.footer{background:#FFF0F0;border-radius:16px;padding:18px 16px;margin-top:8px;border:1px solid #FFD6D6}
 .footer h3{font-size:15px;font-weight:700;color:#C62828;margin-bottom:10px;line-height:1.6;text-align:center}
 .footer-body{font-size:14px;color:#5D4037;line-height:2}
 .footer-body p{margin-bottom:6px}
@@ -120,15 +130,15 @@ body{font-family:'Noto Sans JP',sans-serif;background:#FFFBF7;padding:16px 14px 
   <div class="hero-em">『 入ったけど、LINKを使えてない😢』<br>を無くすためです✨</div>
 </div>
 
-<p class="hint">👇 各項目をタップすると詳細が開きます</p>
+<p class="hint">👇 各項目をタップすると詳細が開きます👇<br>1️⃣ 2️⃣ 3️⃣ 4️⃣ 5️⃣</p>
 
 <div class="phase">本日</div>
 <div class="emoji-row">⚡</div>
 
-<div class="card">
+<div class="card" id="card-1">
   <div class="card-head" onclick="toggle(this)">
     <div class="card-num">1</div>
-    <div class="card-ttl">ホーム画面に LINKポータル（全サイト総合案内）を置く</div>
+    <div class="card-ttl">ホーム画面に LINKポータル（全サイト総合案内）を置く<span class="badge badge-yet" id="badge-1">未</span></div>
     <div class="card-arrow">▼</div>
   </div>
   <div class="card-body">
@@ -143,14 +153,15 @@ body{font-family:'Noto Sans JP',sans-serif;background:#FFFBF7;padding:16px 14px 
         <p class="btn-label">👇 タップしてポータルを開く 👇</p>
         <a href="https://app.link-event-x.com" target="_blank" class="lnk lnk-b">🔗 LINKポータルを開く</a>
       </div>
+      <button class="done-btn done-btn-pending" id="btn-1" onclick="markDone('1')">☑️ 完了したらここを押してね！</button>
     </div>
   </div>
 </div>
 
-<div class="card">
+<div class="card" id="card-2">
   <div class="card-head" onclick="toggle(this)">
     <div class="card-num">2</div>
-    <div class="card-ttl">LINK information（公式ライン）に入る</div>
+    <div class="card-ttl">LINK information（公式ライン）に入る<span class="badge badge-yet" id="badge-2">未</span></div>
     <div class="card-arrow">▼</div>
   </div>
   <div class="card-body">
@@ -179,6 +190,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:#FFFBF7;padding:16px 14px 
         <div class="bullet"><div class="dot"></div><div>途中わからない問題がある</div></div>
         <p style="margin-top:6px">などは、初期サポートライングループでご質問ください❤️</p>
       </div>
+      <button class="done-btn done-btn-pending" id="btn-2" onclick="markDone('2')">☑️ 完了したらここを押してね！</button>
     </div>
   </div>
 </div>
@@ -186,10 +198,10 @@ body{font-family:'Noto Sans JP',sans-serif;background:#FFFBF7;padding:16px 14px 
 <div class="phase phase-b">2週間以内に</div>
 <div class="emoji-row">⚡⚡⚡</div>
 
-<div class="card">
+<div class="card" id="card-s">
   <div class="card-head" onclick="toggle(this)">
     <div class="card-num">★</div>
-    <div class="card-ttl">LINK informationのリッチメニューを解放する</div>
+    <div class="card-ttl">LINK informationのリッチメニューを解放する<span class="badge badge-yet" id="badge-s">未</span></div>
     <div class="card-arrow">▼</div>
   </div>
   <div class="card-body">
@@ -206,6 +218,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:#FFFBF7;padding:16px 14px 
       </div>
       <div class="note">📝 step❸❹で制作したものは、<strong>初期サポートライングループ</strong>にURLを必ず貼ってください</div>
       <p class="italic">を進めていただきながら、</p>
+      <button class="done-btn done-btn-pending" id="btn-s" onclick="markDone('s')">☑️ 完了したらここを押してね！</button>
     </div>
   </div>
 </div>
@@ -213,10 +226,10 @@ body{font-family:'Noto Sans JP',sans-serif;background:#FFFBF7;padding:16px 14px 
 <div class="phase">1ヶ月間以内で</div>
 <div class="emoji-row">⚡⚡⚡⚡</div>
 
-<div class="card">
+<div class="card" id="card-3">
   <div class="card-head" onclick="toggle(this)">
     <div class="card-num">3</div>
-    <div class="card-ttl">LINKセミナー・LINKセレモニー</div>
+    <div class="card-ttl">LINKセミナー・LINKセレモニー<span class="badge badge-yet" id="badge-3">未</span></div>
     <div class="card-arrow">▼</div>
   </div>
   <div class="card-body">
@@ -244,14 +257,15 @@ body{font-family:'Noto Sans JP',sans-serif;background:#FFFBF7;padding:16px 14px 
       <div class="bullet" style="margin-top:12px"><div class="dot"></div><div>5種類のLINKセミナー（LINKの宝の地図🗺️）を視聴する事</div></div>
       <div class="note">📝 どうしても出れない場合、『最低でも2つ』✨<br>残りのものは『登録3ヶ月以内』で視聴してください⚡</div>
       <div class="bullet" style="margin-top:10px"><div class="dot"></div><div>🆓 直近のLINKセレモニーの予約</div></div>
+      <button class="done-btn done-btn-pending" id="btn-3" onclick="markDone('3')">☑️ 完了したらここを押してね！</button>
     </div>
   </div>
 </div>
 
-<div class="card">
+<div class="card" id="card-4">
   <div class="card-head" onclick="toggle(this)">
     <div class="card-num">4</div>
-    <div class="card-ttl">LINKスケジュールサイトの使い方を覚える</div>
+    <div class="card-ttl">LINKスケジュールサイトの使い方を覚える<span class="badge badge-yet" id="badge-4">未</span></div>
     <div class="card-arrow">▼</div>
   </div>
   <div class="card-body">
@@ -266,14 +280,15 @@ body{font-family:'Noto Sans JP',sans-serif;background:#FFFBF7;padding:16px 14px 
         <a href="https://www.youtube.com/watch?v=GqEtcSaU05c" target="_blank" class="lnk lnk-red" style="margin-top:8px">▶️ スケジュールサイト使い方動画</a>
         <a href="https://share.evernote.com/note/1d91331a-4c0c-9630-130f-f06e9710fa11" target="_blank" class="lnk lnk-gold" style="margin-top:8px">💡 スケジュールサイト豆知識はこちら</a>
       </div>
+      <button class="done-btn done-btn-pending" id="btn-4" onclick="markDone('4')">☑️ 完了したらここを押してね！</button>
     </div>
   </div>
 </div>
 
-<div class="card">
+<div class="card" id="card-5">
   <div class="card-head" onclick="toggle(this)">
     <div class="card-num">5</div>
-    <div class="card-ttl">オープンチャットに入る</div>
+    <div class="card-ttl">オープンチャットに入る<span class="badge badge-yet" id="badge-5">未</span></div>
     <div class="card-arrow">▼</div>
   </div>
   <div class="card-body">
@@ -285,9 +300,12 @@ body{font-family:'Noto Sans JP',sans-serif;background:#FFFBF7;padding:16px 14px 
         <p class="btn-label">👇 タップしてチェック 👇</p>
         <a href="https://share.evernote.com/note/4e349623-51d0-2cf7-5251-62efa32a9552" target="_blank" class="lnk lnk-teal">📋 入るべきオープンチャット集</a>
       </div>
+      <button class="done-btn done-btn-pending" id="btn-5" onclick="markDone('5')">☑️ 完了したらここを押してね！</button>
     </div>
   </div>
 </div>
+
+<p class="hint" style="margin-top:16px">👆 各項目をタップすると詳細が開きます👆<br>1️⃣ 2️⃣ 3️⃣ 4️⃣ 5️⃣</p>
 
 <div class="note" style="margin-bottom:12px">
   <p>✅ LINK informationにある最初のルール動画でもありましたが、<br>LINK内の全てのオプチャに入る時は、</p>
@@ -296,7 +314,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:#FFFBF7;padding:16px 14px 
   <p>意味「名前/チーム名/系列名」</p>
 </div>
 
-<div class="gen-box" style="margin-bottom:20px">
+<div class="gen-box">
   <label class="gen-label">👤 あなたの名前を入力</label>
   <input class="gen-input" id="nameInput" type="text" placeholder="例：高山翔子">
   <label class="gen-label">🏷️ チーム名/系列を選ぶ</label>
@@ -339,17 +357,55 @@ body{font-family:'Noto Sans JP',sans-serif;background:#FFFBF7;padding:16px 14px 
 
 </div>
 <script>
+const KEYS=['1','2','s','3','4','5'];
+
 function toggle(head){
   const arrow=head.querySelector('.card-arrow');
   const body=head.nextElementSibling;
   arrow.classList.toggle('open');
   body.classList.toggle('open');
 }
+
+function markDone(id){
+  const done=localStorage.getItem('link_done_'+id)==='1';
+  if(done){
+    localStorage.removeItem('link_done_'+id);
+    applyState(id,false);
+  } else {
+    localStorage.setItem('link_done_'+id,'1');
+    applyState(id,true);
+  }
+}
+
+function applyState(id,done){
+  const card=document.getElementById('card-'+id);
+  const btn=document.getElementById('btn-'+id);
+  const badge=document.getElementById('badge-'+id);
+  if(done){
+    card.classList.add('done');
+    btn.textContent='✅ 完了！（もう一度押すと戻せます）';
+    btn.className='done-btn done-btn-done';
+    badge.textContent='完了✓';
+    badge.className='badge badge-done';
+  } else {
+    card.classList.remove('done');
+    btn.textContent='☑️ 完了したらここを押してね！';
+    btn.className='done-btn done-btn-pending';
+    badge.textContent='未';
+    badge.className='badge badge-yet';
+  }
+}
+
+KEYS.forEach(id=>{
+  if(localStorage.getItem('link_done_'+id)==='1') applyState(id,true);
+});
+
 const nameInput=document.getElementById('nameInput');
 const seriesSelect=document.getElementById('seriesSelect');
 const resultBox=document.getElementById('resultBox');
 const copyBtn=document.getElementById('copyBtn');
 const copyHint=document.getElementById('copyHint');
+
 function update(){
   const name=nameInput.value.trim();
   const series=seriesSelect.value;
@@ -358,6 +414,7 @@ function update(){
   if(!series){resultBox.textContent='👆 系列を選んでください';return;}
   resultBox.textContent='🌈'+name+'/Skyarc/'+series;
 }
+
 function copyResult(){
   const name=nameInput.value.trim();
   const series=seriesSelect.value;
@@ -379,6 +436,7 @@ function copyResult(){
     },3000);
   });
 }
+
 nameInput.addEventListener('input',update);
 seriesSelect.addEventListener('change',update);
 </script>
