@@ -11,20 +11,26 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Noto Sans JP',sans-serif;background:#FFFBF7;padding:16px 14px 48px}
 .wrap{max-width:390px;margin:0 auto}
-
 .back-btn{display:flex;align-items:center;gap:6px;color:#FF7043;font-size:13px;font-weight:700;text-decoration:none;margin-bottom:16px}
-
 .hero{background:linear-gradient(135deg,#E8F5E9,#C8E6C9);border-radius:16px;padding:20px 16px;margin-bottom:20px;border:1px solid #A5D6A7;text-align:center}
 .hero h1{font-size:16px;font-weight:700;color:#2E7D32;line-height:1.6;margin-bottom:8px}
 .hero p{font-size:13px;color:#388E3C;line-height:1.8}
-
-.coming{background:#fff;border:2px dashed #A5D6A7;border-radius:16px;padding:40px 20px;text-align:center;margin-bottom:16px}
-.coming-icon{font-size:40px;margin-bottom:12px}
-.coming h2{font-size:15px;font-weight:700;color:#2E7D32;margin-bottom:8px}
-.coming p{font-size:13px;color:#5D4037;line-height:1.8}
-
-.note{background:#FFF8E1;border-radius:8px;padding:10px 12px;font-size:13px;color:#5D4037;line-height:1.85;border-left:3px solid #FFD54F;margin-top:8px}
-
+.section{margin-bottom:20px}
+.section-ttl{font-size:15px;font-weight:700;color:#2E7D32;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #A5D6A7}
+.card{background:#fff;border:1px solid #F0E0D0;border-radius:12px;padding:14px;margin-bottom:10px}
+.card p{font-size:14px;color:#5D4037;line-height:1.9;margin-bottom:8px}
+.card p:last-child{margin-bottom:0}
+.card strong{color:#4E342E}
+.note{background:#FFF8E1;border-radius:8px;padding:10px 12px;font-size:13px;color:#5D4037;line-height:1.85;border-left:3px solid #FFD54F;margin:10px 0}
+.warn{background:#FFF3E0;border-radius:8px;padding:10px 12px;font-size:13px;color:#5D4037;line-height:1.85;border-left:3px solid #FFAB76;margin:10px 0}
+.step-card{background:#fff;border:1px solid #C8E6C9;border-radius:12px;padding:14px;margin-bottom:12px;border-left:4px solid #2E7D32}
+.step-num{font-size:12px;font-weight:700;color:#2E7D32;margin-bottom:6px}
+.step-ttl{font-size:15px;font-weight:700;color:#1B5E20;margin-bottom:8px}
+.step-body{font-size:14px;color:#5D4037;line-height:1.9}
+.step-body p{margin-bottom:6px}
+.step-body p:last-child{margin-bottom:0}
+.lbtn{display:flex;align-items:center;gap:8px;padding:12px 14px;border-radius:10px;font-size:13px;font-weight:500;text-decoration:none;margin:8px 0}
+.lbtn-g{border:1px solid #C8E6C9;background:#F5FFF5;color:#2E7D32}
 .back-btn2{display:block;padding:14px;border-radius:12px;background:#FF7043;color:#fff;text-align:center;font-size:15px;font-weight:700;text-decoration:none;margin-top:20px}
 </style>
 </head>
@@ -34,18 +40,72 @@ body{font-family:'Noto Sans JP',sans-serif;background:#FFFBF7;padding:16px 14px 
   <a href="index.html" class="back-btn">← 初期サポートトップに戻る</a>
 
   <div class="hero">
-    <h1>step❹ LINK-BASE<br>掲載ガイド</h1>
-    <p>リッチメニュー解放の中で出てくる<br>step❹の詳しい手順はこちら</p>
-  </div>
-
-  <div class="coming">
-    <div class="coming-icon">🚧</div>
-    <h2>コンテンツ準備中です</h2>
-    <p>詳しい手順を順次追加していきます。<br>もうしばらくお待ちください！</p>
+    <h1>🏰 チュートリアル step❹<br>LINK-BASE 掲載設定</h1>
+    <p>リッチメニュー解放チュートリアルの<br>step❹の詳しい内容はこちら</p>
   </div>
 
   <div class="note">
-    📝 わからない点は<strong>初期サポートライングループ</strong>でご質問ください❤️
+    📖 チュートリアルに出てくるLINK informationの文章はしっかりと読んだ上で、わからない時はこちらのページを参照してください。
+  </div>
+
+  <div class="section">
+    <div class="section-ttl">📋 step❹ でやること</div>
+
+    <div class="step-card">
+      <div class="step-num">やること① まずログイン</div>
+      <div class="step-ttl">LINK-BASEにログインする</div>
+      <div class="step-body">
+        <p>下のリンクからLINK-BASEにアクセスし、<strong>ビジネス会員番号</strong>と入会時に設定したパスワードでログインしてください。</p>
+        <p>※パスワードを変更した場合は、変更後のパスワードでログインしてください。</p>
+      </div>
+    </div>
+
+    <a href="https://link-base.jp/" target="_blank" class="lbtn lbtn-g">🏰 LINK-BASEサイトを開く</a>
+
+    <div class="step-card" style="margin-top:12px">
+      <div class="step-num">やること②</div>
+      <div class="step-ttl">事業・サービスを掲載する</div>
+      <div class="step-body">
+        <p>LINK-BASEに自分の事業やサービスを掲載してください。</p>
+        <p>掲載には<strong>最低限、画像（案件の画像）1枚が必要</strong>になります。</p>
+        <p>しっかり作り込むほど目を惹きやすくなりますが、まずは1枚でもOKです👍</p>
+      </div>
+    </div>
+
+    <a href="https://drive.google.com/file/d/1ByAjlARZ8bEH_0zSsSxAO4YFGRqZEbT2/view?usp=sharing" target="_blank" class="lbtn lbtn-g">📄 掲載方法はこちらを参照</a>
+
+    <div class="step-card">
+      <div class="step-num">やること③ スタンプを取得する</div>
+      <div class="step-ttl">マイページからスタンプ取得まで</div>
+      <div class="step-body">
+        <p>① ログイン後、LINK-BASEのマイページを開く<br><span style="font-size:12px;color:#888">（お知らせ・会員情報・ID設定・会員情報編集・お問合わせ・ログアウトなどが並んでいます）</span></p>
+        <p>② メニューの下の方にある<strong>「完全攻略スタンプラリー条件一覧」</strong>をタップ</p>
+        <p>③ <strong>「サービス掲載書 入門準備編」</strong>という項目の<strong>「スタンプ取得」</strong>をタップ</p>
+        <p>④ QRコードなどが出てきたら手順に従って取得する</p>
+      </div>
+    </div>
+
+    <div class="warn">
+      <p>⚠️ <strong>事業を掲載する方</strong>：掲載した上でスタンプを取得してください。</p>
+      <p style="margin-top:8px">⚠️ <strong>掲載する事業・サービスが現時点でない方</strong>：スタンプラリー条件一覧の中にある<strong>「LINKベースサービスの掲載の予定がない方はこちら」</strong>をタップして、取得条件を確認してスタンプを取得してください。</p>
+    </div>
+
+    <div class="note">
+      💡 LINK-BASEの詳しい掲載方法や活用法は、サポート講座で詳しく学べます！まずはスタンプ取得を目指しましょう😊
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-ttl">📚 もっと詳しく学びたい方へ</div>
+    <div class="card">
+      <p>掲載方法や活用法は無料のサポート講座で詳しく学べます！</p>
+    </div>
+    <a href="https://link-event-x.com/node/6816" target="_blank" class="lbtn lbtn-g">🔰 LINK BASEサイト掲載のコツ</a>
+    <a href="https://link-event-x.com/node/5727" target="_blank" class="lbtn lbtn-g">🔰 脳科学に基づいたコンセプトの作り方＆書き方サポート講座</a>
+  </div>
+
+  <div class="note">
+    📝 わからない点は<strong>初期サポートグループライン</strong>でご質問ください❤️
   </div>
 
   <a href="index.html" class="back-btn2">← 初期サポートトップに戻る</a>
