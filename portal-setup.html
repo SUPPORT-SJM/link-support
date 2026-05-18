@@ -4,15 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<title>LINKポータルをホーム画面に追加 | LINK 初期サポート</title>
+<title>便利ボタン集 | LINK 初期サポート</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Noto Sans JP',sans-serif;background:#FFFBF7;padding:24px 16px 48px}
 .wrap{max-width:390px;margin:0 auto}
 .hero{background:linear-gradient(135deg,#FFF8E1,#FFF0F0);border-radius:16px;padding:20px 16px;margin-bottom:20px;border:1px solid #FFD6A0;text-align:center}
-.hero h1{font-size:16px;font-weight:700;color:#E65100;line-height:1.7;margin-bottom:6px}
+.hero h1{font-size:17px;font-weight:700;color:#E65100;line-height:1.7;margin-bottom:6px}
 .hero p{font-size:13px;color:#795548;line-height:1.8}
+.section-ttl{font-size:15px;font-weight:700;color:#E65100;margin:20px 0 10px;padding-bottom:6px;border-bottom:2px solid #FFD6A0}
 .note{background:#FFF8E1;border-radius:8px;padding:10px 12px;font-size:13px;color:#5D4037;line-height:1.85;border-left:3px solid #FFD54F;margin-bottom:16px}
 .btn{display:block;width:100%;padding:16px;border-radius:12px;font-size:15px;font-weight:700;text-decoration:none;margin-bottom:10px;text-align:left}
 .btn-android{background:#10B981;color:#fff}
@@ -28,6 +29,15 @@ body{font-family:'Noto Sans JP',sans-serif;background:#FFFBF7;padding:24px 16px 
 .step-body{font-size:13px;color:#5D4037;line-height:1.9}
 .step-body p{margin-bottom:4px}
 .step-body p:last-child{margin-bottom:0}
+.gen-box{background:#FFF8F5;border:1px solid #FFD0B0;border-radius:12px;padding:14px;margin-top:4px}
+.gen-label{font-size:12px;font-weight:700;color:#FF7043;margin-bottom:6px;display:block}
+.gen-input{width:100%;border:1px solid #FFCCBC;border-radius:8px;padding:10px 12px;font-size:14px;font-family:'Noto Sans JP',sans-serif;color:#4E342E;background:#fff;margin-bottom:12px;outline:none}
+.gen-input:focus{border-color:#FF7043}
+.gen-select{width:100%;border:1px solid #FFCCBC;border-radius:8px;padding:10px 12px;font-size:14px;font-family:'Noto Sans JP',sans-serif;color:#4E342E;background:#fff;margin-bottom:12px;outline:none}
+.result-label{font-size:12px;font-weight:700;color:#888;margin-bottom:6px}
+.result-box{background:#FFF0EB;border:2px solid #FF7043;border-radius:10px;padding:12px 14px;font-size:16px;font-weight:700;color:#BF360C;line-height:1.6;min-height:48px;margin-bottom:14px;word-break:break-all;text-align:center}
+#copyBtn{display:block !important;width:100% !important;padding:16px !important;border-radius:12px !important;background:#FF7043 !important;background-color:#FF7043 !important;border:none !important;cursor:pointer !important;font-family:'Noto Sans JP',sans-serif !important;font-size:18px !important;font-weight:700 !important;color:#ffffff !important;-webkit-text-fill-color:#ffffff !important;text-align:center !important;letter-spacing:0.05em !important}
+.copy-hint{font-size:12px;color:#A1887F;text-align:center;margin-top:8px}
 .back-btn{display:block;text-align:center;font-size:12px;color:#A1887F;text-decoration:none;margin-top:20px;padding:8px}
 </style>
 </head>
@@ -35,9 +45,11 @@ body{font-family:'Noto Sans JP',sans-serif;background:#FFFBF7;padding:24px 16px 
 <div class="wrap">
 
   <div class="hero">
-    <h1>📱 LINKポータルを<br>ホーム画面に追加しよう！</h1>
-    <p>アプリのように使えるようになります✨</p>
+    <h1>🧰 便利ボタン集</h1>
+    <p>よく使うボタンをまとめました✨</p>
   </div>
+
+  <div class="section-ttl">📱 LINKポータルをホーム画面に追加</div>
 
   <div class="note">
     📱 <strong>LINEからこのページを開いている方へ</strong><br>
@@ -76,8 +88,79 @@ body{font-family:'Noto Sans JP',sans-serif;background:#FFFBF7;padding:24px 16px 
     <a href="https://app.link-event-x.com" target="_blank" class="btn btn-other" style="margin-bottom:0">🔗 LINKポータルを開く</a>
   </div>
 
+  <div class="section-ttl">🏷️ オプチャ用ニックネームコピー</div>
+
+  <div class="gen-box">
+    <label class="gen-label">👤 あなたの名前を入力</label>
+    <input class="gen-input" id="nameInput" type="text" placeholder="例：高山翔子">
+    <label class="gen-label">🏷️ チーム名/系列を選ぶ</label>
+    <select class="gen-select" id="seriesSelect">
+      <option value="">-- 系列を選んでください --</option>
+      <option value="🚀SkyExceed">🚀SkyExceed</option>
+      <option value="🦅Zenith1">🦅Zenith1</option>
+      <option value="🏰Utop">🏰Utop</option>
+      <option value="🌬️ザ・クラウドブルー(蒼雲）">🌬️ザ・クラウドブルー(蒼雲）</option>
+      <option value="📚FairyTail">📚FairyTail</option>
+      <option value="✨アフロディーテ">✨アフロディーテ</option>
+      <option value="🌟グローハピネス🌟">🌟グローハピネス🌟</option>
+      <option value="🥷HOT STUFF ⚜️">🥷HOT STUFF ⚜️</option>
+      <option value="TELLUS.">TELLUS.</option>
+      <option value="♾️ZERO♾️">♾️ZERO♾️</option>
+      <option value="✈️JET RISE">✈️JET RISE</option>
+      <option value="⭐️ルミナス">⭐️ルミナス</option>
+      <option value="エネルギー🔥">エネルギー🔥</option>
+      <option value="FEAT">FEAT</option>
+      <option value="ミラメリ🪄">ミラメリ🪄</option>
+      <option value="🪽HERO">🪽HERO</option>
+      <option value="💎プリズム">💎プリズム</option>
+    </select>
+    <div class="result-label">✅ あなたのオプチャ用ニックネーム</div>
+    <div class="result-box" id="resultBox">👆 名前と系列を入力してください</div>
+    <button id="copyBtn" onclick="copyResult()">📋 タップしてコピー！</button>
+    <div class="copy-hint" id="copyHint">↑ コピーしてオープンチャットのニックネームに貼り付けてください</div>
+  </div>
+
   <a href="index.html" class="back-btn">← 初期サポートトップに戻る</a>
 
 </div>
+
+<script>
+const nameInput=document.getElementById('nameInput');
+const seriesSelect=document.getElementById('seriesSelect');
+const resultBox=document.getElementById('resultBox');
+const copyBtn=document.getElementById('copyBtn');
+const copyHint=document.getElementById('copyHint');
+function update(){
+  const name=nameInput.value.trim();
+  const series=seriesSelect.value;
+  if(!name&&!series){resultBox.textContent='👆 名前と系列を入力してください';return;}
+  if(!name){resultBox.textContent='👆 名前を入力してください';return;}
+  if(!series){resultBox.textContent='👆 系列を選んでください';return;}
+  resultBox.textContent='🌈'+name+'/Skyarc/'+series;
+}
+function copyResult(){
+  const name=nameInput.value.trim();
+  const series=seriesSelect.value;
+  if(!name||!series){copyHint.textContent='⚠️ 先に名前と系列を入力してください';return;}
+  navigator.clipboard.writeText(resultBox.textContent).then(()=>{
+    copyBtn.textContent='✅ コピーしました！';
+    copyBtn.style.setProperty('background','#43A047','important');
+    copyBtn.style.setProperty('background-color','#43A047','important');
+    copyBtn.style.setProperty('color','#ffffff','important');
+    copyBtn.style.setProperty('-webkit-text-fill-color','#ffffff','important');
+    copyHint.textContent='✅ コピーされました！ニックネームに貼り付けてください';
+    setTimeout(()=>{
+      copyBtn.textContent='📋 タップしてコピー！';
+      copyBtn.style.setProperty('background','#FF7043','important');
+      copyBtn.style.setProperty('background-color','#FF7043','important');
+      copyBtn.style.setProperty('color','#ffffff','important');
+      copyBtn.style.setProperty('-webkit-text-fill-color','#ffffff','important');
+      copyHint.textContent='↑ コピーしてオープンチャットのニックネームに貼り付けてください';
+    },3000);
+  });
+}
+nameInput.addEventListener('input',update);
+seriesSelect.addEventListener('change',update);
+</script>
 </body>
 </html>
