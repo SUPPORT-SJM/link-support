@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ぴよぴよ脱出クイズ|クリエイターズ育成プログラム①</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" sizes="64x64" href="./piyo-icon-64.png">
+<link rel="apple-touch-icon" href="./piyo-icon-180.png">
+<meta name="theme-color" content="#6E5FB5">
+<style>
+  :root{
+    --green-deep:#6E5FB5; --green-leaf:#4FB08C; --green-mist:#EDEAF9;
+    --paper:#FBF8FE; --ink:#22322A;
+    --amber:#F5C452; --amber-deep:#D99A0B; --amber-soft:#FDF3DC;
+    --white:#FFFFFF; --radius:18px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:"Zen Kaku Gothic New",sans-serif;background:var(--paper);color:var(--ink);line-height:1.8;font-size:15.5px;}
+  .wrap{max-width:560px;margin:0 auto;padding:0 18px;}
+  button{font-family:inherit;cursor:pointer;border:none;}
+
+  /* ===== login ===== */
+  #loginView{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(150deg,#9A86E0 0%,#6E5FB5 45%,#5E8FD8 100%);padding:20px;}
+  .login-card{background:var(--white);border-radius:24px;padding:30px 24px;width:100%;max-width:400px;box-shadow:0 10px 40px rgba(0,0,0,.25);}
+  .login-card .prog-badges{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
+  .pb{font-size:10.5px;font-weight:700;letter-spacing:.04em;background:var(--green-mist);color:var(--green-deep);border-radius:999px;padding:4px 11px;}
+  .pb.hot{background:var(--amber);color:#5C4200;}
+  .login-card h1{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;color:var(--green-deep);font-size:22px;line-height:1.5;margin-bottom:4px;}
+  .login-card .sub{font-size:12.5px;color:#5A6B60;margin-bottom:20px;}
+  .field{margin-bottom:15px;}
+  .field label{display:block;font-size:13px;font-weight:700;color:var(--green-deep);margin-bottom:6px;}
+  .field input,.field select{width:100%;padding:13px 14px;font-size:16px;border:2px solid var(--green-mist);border-radius:12px;font-family:inherit;background:var(--paper);}
+  .field input:focus,.field select:focus{outline:none;border-color:var(--green-leaf);}
+  .field small{font-size:11px;color:#7A8A80;display:block;margin-top:4px;}
+  .btn-main{width:100%;padding:15px;border-radius:14px;background:var(--green-leaf);color:var(--white);font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:16px;}
+  .btn-main:active{transform:scale(.98);}
+  .login-err{display:none;background:#FDEBEB;color:#B33;border-radius:10px;padding:10px 14px;font-size:13px;margin-bottom:14px;}
+
+  /* ===== hero ===== */
+  #quizView{display:none;}
+  .hero{background:linear-gradient(150deg,#9A86E0 0%,#6E5FB5 45%,#5E8FD8 100%);color:var(--white);padding:30px 0 28px;}
+  .hero .row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+  .hero .prog-badges{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
+  .hero .pb{background:rgba(255,255,255,.14);color:var(--white);}
+  .hero .pb.hot{background:var(--amber);color:#5C4200;}
+  .hero h1{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:clamp(24px,6.6vw,32px);line-height:1.4;margin-bottom:6px;}
+  .hero p{opacity:.92;font-size:13.5px;}
+  .logout{background:rgba(255,255,255,.15);color:var(--white);font-size:11.5px;border-radius:999px;padding:5px 12px;flex-shrink:0;}
+
+  /* ===== program map ===== */
+  .map-sec{background:var(--white);padding:24px 0;}
+  .map-title{font-size:12px;font-weight:700;color:#7A8A80;letter-spacing:.1em;margin-bottom:12px;}
+  .map{display:flex;align-items:center;gap:6px;overflow-x:auto;padding-bottom:6px;}
+  .map .node{flex-shrink:0;text-align:center;background:var(--paper);border-radius:14px;padding:10px 12px;min-width:96px;}
+  .map .node.here{background:var(--amber-soft);border:2px solid var(--amber);}
+  .map .node .em{font-size:22px;display:block;}
+  .map .node b{font-family:"Zen Maru Gothic",sans-serif;font-size:11.5px;color:var(--green-deep);display:block;line-height:1.5;}
+  .map .node small{font-size:10px;color:#7A8A80;}
+  .map .arw{color:var(--green-leaf);font-weight:900;flex-shrink:0;}
+  .map-note{font-size:12px;color:#5A6B60;margin-top:10px;background:var(--paper);border-radius:10px;padding:9px 12px;}
+
+  /* ===== progress ===== */
+  .prog-sec{padding:22px 0 4px;}
+  .prog-card{background:var(--green-deep);color:var(--white);border-radius:20px;padding:18px 20px;}
+  .prog-card .row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;}
+  .prog-card b{font-family:"Zen Maru Gothic",sans-serif;font-size:15px;}
+  .prog-card .cnt{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:20px;}
+  .bar{height:10px;background:rgba(255,255,255,.25);border-radius:99px;overflow:hidden;}
+  .bar i{display:block;height:100%;background:var(--amber);border-radius:99px;width:0%;transition:width .5s ease;}
+  .prog-card .subrow{display:flex;justify-content:space-between;align-items:center;margin-top:10px;gap:8px;flex-wrap:wrap;}
+  .prog-card small{font-size:11px;opacity:.85;}
+  .btn-refresh{background:rgba(255,255,255,.16);color:var(--white);font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:12px;border-radius:999px;padding:8px 14px;}
+
+  /* ===== quiz ===== */
+  section.quiz{padding:24px 0 40px;}
+  .q{background:var(--white);border-radius:var(--radius);box-shadow:0 2px 8px rgba(30,92,70,.07);margin-bottom:14px;overflow:hidden;border:2px solid transparent;}
+  .q.approved{border-color:var(--green-leaf);}
+  .q-head{padding:16px 16px 10px;display:flex;gap:12px;align-items:flex-start;}
+  .q-no{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:13px;background:var(--amber);color:#5C4200;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .q.approved .q-no{background:var(--green-leaf);color:var(--white);}
+  .q-head h3{font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:15.5px;line-height:1.6;flex:1;color:var(--ink);}
+  .t-badge{margin:0 16px 12px 62px;display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;border-radius:999px;padding:5px 13px;background:#F1F1EC;color:#8A8A80;}
+  .q.approved .t-badge{background:var(--green-leaf);color:var(--white);}
+  .q-btns{display:flex;gap:8px;margin:0 16px 14px 62px;flex-wrap:wrap;}
+  .q-toggle{background:var(--green-mist);color:var(--green-deep);font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:13px;border-radius:999px;padding:9px 18px;}
+  .q-toggle.hintbtn{background:var(--amber-soft);color:#8A6D00;}
+  .q-hint{display:none;padding:0 16px 12px 62px;}
+  .q.hint-open .q-hint{display:block;}
+  .h-box{background:var(--amber-soft);border-radius:12px;padding:12px 15px;font-size:13.5px;color:#5C4200;line-height:1.75;}
+  .h-link{display:inline-block;margin:8px 6px 0 0;background:var(--white);border-radius:999px;padding:7px 15px;font-size:12.5px;font-weight:700;color:var(--green-deep);text-decoration:none;}
+  .q-ans{display:none;padding:0 16px 16px 62px;}
+  .q.open .q-ans{display:block;}
+  .a-box{background:var(--paper);border-radius:12px;padding:13px 15px;font-size:14px;}
+  .a-box ol{padding-left:20px;}
+  .a-box li{margin-bottom:3px;}
+  .a-box p{margin-bottom:6px;}
+  .a-box b{color:var(--green-deep);}
+  .slot{margin-top:10px;font-size:12px;color:#8A8A80;background:#F6F6F4;border:1.5px dashed #D8D8D0;border-radius:10px;padding:8px 12px;}
+  .q-actions{display:flex;gap:8px;margin-top:12px;}
+  .btn-self{background:var(--white);border:2px solid var(--green-mist);border-radius:999px;padding:9px 18px;font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:13.5px;color:#7A8A80;}
+  .btn-self.on{background:var(--amber-soft);border-color:var(--amber);color:#8A6D00;}
+
+  /* ===== graduation ===== */
+  #gradCard{display:none;background:linear-gradient(135deg,#1E5C46,#2E7D5B);color:var(--white);border-radius:22px;padding:26px 22px;margin-top:8px;text-align:center;}
+  #gradCard.show{display:block;}
+  #gradCard .big{font-size:44px;}
+  #gradCard h3{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:21px;margin:6px 0 10px;}
+  #gradCard p{font-size:13.5px;opacity:.92;}
+  footer{text-align:center;font-size:11.5px;color:#7A8A80;padding:8px 0 44px;line-height:2;}
+
+  #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(80px);background:var(--ink);color:var(--white);font-size:13px;border-radius:999px;padding:10px 20px;opacity:0;transition:all .3s ease;pointer-events:none;z-index:50;white-space:nowrap;}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+
+<!-- ========== LOGIN ========== -->
+<div id="loginView">
+  <div class="login-card">
+    <div class="prog-badges">
+      <span class="pb">① サポーター育成マニュアル</span>
+      <span class="pb hot">クリエイターズ育成プログラム ①</span>
+    </div>
+    <h1>🐣 ぴよぴよ脱出クイズ</h1>
+    <p class="sub">7問すべてに<b>先生の丸⭕</b>がついたら卒業です。答え合わせは担当コーチと行います。</p>
+    <div class="login-err" id="loginErr"></div>
+    <div class="field">
+      <label>会員番号</label>
+      <input type="text" id="inId" inputmode="numeric" placeholder="例:00012345" autocomplete="username">
+    </div>
+    <div class="field">
+      <label>パスワード(4桁の数字)</label>
+      <input type="password" id="inPin" inputmode="numeric" maxlength="4" placeholder="初回は好きな4桁の数字を決めてください" autocomplete="current-password">
+      <small>※忘れた場合は担当コーチにご確認ください。</small>
+    </div>
+    <div class="field">
+      <label>系列</label>
+      <select id="inKeiretsu"></select>
+      <input type="text" id="inKeiretsuOther" placeholder="系列名を入力してください" style="display:none;margin-top:8px;">
+    </div>
+    <div class="field">
+      <label>お名前(初回のみ)</label>
+      <input type="text" id="inName" placeholder="例:高山翔子">
+    </div>
+    <button class="btn-main" onclick="login()">はじめる ▶</button>
+  </div>
+</div>
+
+<!-- ========== QUIZ ========== -->
+<div id="quizView">
+  <header class="hero">
+    <div class="wrap">
+      <div class="row">
+        <div>
+          <div class="prog-badges">
+            <span class="pb">① サポーター育成マニュアル</span>
+            <span class="pb hot">クリエイターズ育成プログラム ①</span>
+          </div>
+          <h1>🐣 ぴよぴよ脱出クイズ</h1>
+          <p id="helloLine">スカイアークの基本、7問に挑戦!</p>
+        </div>
+        <button class="logout" onclick="logout()">別の番号</button>
+      </div>
+    </div>
+  </header>
+
+  <section class="map-sec">
+    <div class="wrap">
+      <div class="map-title">いまここ ▼ 育成のぜんたい図</div>
+      <div class="map">
+        <div class="node"><span class="em">👤</span><b>メンバー</b><small>入会</small></div>
+        <span class="arw">›</span>
+        <div class="node here"><span class="em">🐣</span><b>① ぴよぴよ<br>脱出クイズ</b><small>いまここ!</small></div>
+        <span class="arw">›</span>
+        <div class="node"><span class="em">🎓</span><b>クリエ昇格</b><small>5人紹介+面談</small></div>
+        <span class="arw">›</span>
+        <div class="node"><span class="em">🔒</span><b>つづきの<br>プログラム</b><small>コーチから案内</small></div>
+      </div>
+      <p class="map-note">💡 ①はメンバーさんの「サポーター育成」とクリエさんの「育成プログラム①」の<b>共通の入口</b>です。</p>
+    </div>
+  </section>
+
+  <div class="wrap prog-sec">
+    <div class="prog-card">
+      <div class="row">
+        <b>⭕ 先生の丸</b>
+        <span class="cnt"><span id="teacherN">0</span> / 7</span>
+      </div>
+      <div class="bar"><i id="progBar"></i></div>
+      <div class="subrow">
+        <small>じぶんチェック:<span id="selfN">0</span>/7 → 答え合わせで先生の丸⭕がもらえます</small>
+        <button class="btn-refresh" onclick="refreshMarks(true)">🔄 先生の丸を確認する</button>
+      </div>
+    </div>
+  </div>
+
+  <section class="quiz">
+    <div class="wrap" id="quizRoot"><!-- JSで生成 --></div>
+    <div class="wrap">
+      <div id="gradCard">
+        <div class="big">🐣→🐔</div>
+        <h3>ぴよぴよ卒業、おめでとう!</h3>
+        <p>先生の丸が7つそろいました!すばらしい🎉<br>つぎのステップは、担当コーチから案内があります。おたのしみに🌱</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    クリエイターズ育成プログラム ①<br>
+    交通整備課|クリエイターズ育成部門|統括:さかいあたる
+  </footer>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ================================================================
+   設定:GASのURL(②マイページと同じもの)を貼り付けてください。
+   空("")のままでも動きます(その場合は自分チェックのみモード)。
+================================================================ */
+const GAS_URL = "";
+
+/* 系列名リスト ※gcon-mypage.html と同じリストに揃えて編集してね */
+const KEIRETSU = [
+  "🚀SkyExceed","🦅Zenith1","🏰Utop","🌟グローハピネス🌟","🥷HOT STUFF⚜️",
+  "TELLUS.","FEAT","🌬️ザ・クラウドブルー(蒼雲)","✈️JET RISE","✨アフロディーテ",
+  "⭐️ルミナス","エネルギー🔥","💎プリズム","📚FairyTail","ミラメリ🪄","🪽HERO","♾️ZERO♾️",
+];
+
+/* ================================================================
+   クイズデータ:あとからコンテンツを足すときはここを編集。
+   hint = {text, links:[{url,label}], slot}/こたえ側は video:{url,label} と slot
+================================================================ */
+const QUIZ = [
+  {id:"q1", q:"1stサポート4つは何でしょう?",
+   hint:{text:"新しいメンバーさんが最初に案内される「4つの場」のこと。ぜんぶ会やイベントの名前だよ。チームLINEの案内を思い出してみて!",
+         slot:"🎥 ヒント動画:制作中"},
+   a:`<ol><li>ユーザーサポート会(動画視聴会)</li><li>グルコン</li><li>LINKセミナー</li><li>チーム交流会</li></ol>`,
+   slot:"🎥 かいせつ動画:制作中"},
+  {id:"q2", q:"ボーナスの種類5つは何でしょう?それぞれ説明もできますか?",
+   hint:{text:"「ス」ではじまるものが2つあるよ。ビジネスマイページの報酬のページをひらいて見てみるのもアリ!",
+         slot:"🔗 参考リンク:あとで追加"},
+   a:`<ol>
+      <li><b>スポンサーボーナス</b>:1人入会→1,500円</li>
+      <li><b>ランクボーナス</b>:チーム全体数とバランスによりボーナスが入る</li>
+      <li><b>スカウトボーナス</b>:直紹介者のランクボーナスの半額</li>
+      <li><b>アドバイザーボーナス</b>:説明会を開いて登録1人につき5,000円ショット</li>
+      <li><b>シェアボーナス</b>:全体から500円プール/全サイト売上からも10%を条件によりランク取得者に分配(コネクターシェア・リンカーシェアの2種類)</li>
+      </ol>`,
+   slot:"🎥 かいせつ動画:新しく撮影予定"},
+  {id:"q3", q:"ビジネスマイページのマップ図で、ランクが影響する箇所はどの項目でしょう?",
+   hint:{text:"じっさいに自分のマップ図をひらいて、ランクの条件になっている数字をさがしてみよう。3つあるよ。",
+         slot:"🖼 画像つきヒント:制作中"},
+   a:`<ol><li>直紹介数(自分を含める)</li><li>当月自己購入メンバー</li><li>当月自己購入メンバー(パーソナル)</li></ol>`,
+   slot:"🖼 マップ図の画像つき解説:制作中"},
+  {id:"q4", q:"ビジネスマイページのマップ図に、数値が反映する日はいつでしょう?",
+   hint:{text:"支払い方法(クレカ/口座振替)によって、日にちがちがうよ。",
+         slot:"🖼 画像つきヒント:制作中"},
+   a:`<p><b>クレカ</b>:13日引き落とし→反映は14日(遅くとも15日ごろ)</p>
+      <p><b>口座振替</b>:21日の朝4時ごろ</p>`,
+   slot:"🖼 マップ図の画像つき解説:制作中"},
+  {id:"q5", q:"概要書面と契約書面の違いは何でしょう?",
+   hint:{text:"わたすタイミングが「登録の前」か「後」か、に注目!",
+         slot:"🎥 ヒント動画:制作中"},
+   a:`<p><b>概要書面</b>:登録<b>前</b>に渡す書類で「概要」が書いてある。本人の意志で電子PDFか書面を選ぶ。</p>
+      <p><b>契約書面</b>:登録<b>後</b>に郵送で届き「契約内容」が書かれている。</p>`,
+   slot:"🎥 かいせつ動画:制作中"},
+  {id:"q6", q:"クーリングオフはいつから何日間でしょう?",
+   hint:{text:"2週間より長いよ。数えはじめる日は「契約書面が届いてから」。"},
+   a:`<p>契約書面が届いてから<b>20日間</b></p>`,
+   slot:"🎥 かいせつ動画:制作中"},
+  {id:"q7", q:"クリエの5スキルは何でしょう?",
+   hint:{text:"「けねん…」「シミュ…」「せん…」+実技で大事な2つ(フォーカス・導員)。",
+         slot:"🎥 ヒント動画:制作中"},
+   a:`<ol><li>懸念解消</li><li>導員</li><li>フォーカス</li><li>シミュレーション</li><li>戦略</li></ol>`,
+   slot:"🎥 かいせつ動画:制作中"},
+];
+
+/* ================================================================ */
+let member = null;
+let selfChecks = {};   // じぶんチェック(この端末)
+let teacher = {};      // 先生の丸(スプレッドシートから)
+const $ = (s)=>document.querySelector(s);
+
+/* 系列セレクト生成 */
+(function(){
+  const sel = $("#inKeiretsu");
+  sel.innerHTML = '<option value="">選択してください</option>'
+    + KEIRETSU.map(k=>`<option value="${k}">${k}</option>`).join("")
+    + '<option value="__other__">その他(自分で入力)</option>';
+  sel.addEventListener("change", ()=>{
+    $("#inKeiretsuOther").style.display = sel.value === "__other__" ? "block" : "none";
+  });
+})();
+
+async function login(){
+  const id = $("#inId").value.trim();
+  const pin = $("#inPin").value.trim();
+  const name = $("#inName").value.trim();
+  let keiretsu = $("#inKeiretsu").value;
+  if(keiretsu === "__other__") keiretsu = $("#inKeiretsuOther").value.trim();
+  const err = $("#loginErr");
+  err.style.display = "none";
+  if(!id || !/^\d{4}$/.test(pin)){
+    err.textContent = "会員番号と、4桁の数字のパスワードを入力してください";
+    err.style.display = "block";
+    return;
+  }
+  member = {id, pin, name, keiretsu};
+  selfChecks = JSON.parse(localStorage.getItem("piyo_self_"+id) || "{}");
+
+  if(GAS_URL){
+    // 登録(初回)+先生の丸を読み込み
+    try{
+      const body = new URLSearchParams({action:"piyoreg", id, pin, name:name||"", keiretsu:keiretsu||""});
+      const res = await fetch(GAS_URL, {method:"POST", body});
+      const j = await res.json();
+      if(j.ok === false && j.error === "pin"){
+        err.textContent = "パスワードが一致しません。忘れた場合は担当コーチにご確認ください。";
+        err.style.display = "block";
+        member = null;
+        return;
+      }
+      if(j.name && !member.name) member.name = j.name;
+    }catch(e){ /* オフラインでもOK */ }
+  }
+  localStorage.setItem("piyo_member", JSON.stringify(member));
+  enterQuiz();
+  refreshMarks(false);
+}
+
+function logout(){
+  localStorage.removeItem("piyo_member");
+  location.reload();
+}
+
+function enterQuiz(){
+  $("#loginView").style.display = "none";
+  $("#quizView").style.display = "block";
+  $("#helloLine").textContent =
+    (member.name ? member.name+"さん、" : "") + "7問に挑戦!(会員番号:" + member.id + ")";
+  render();
+}
+
+async function refreshMarks(showToast){
+  if(!GAS_URL){
+    if(showToast) toast("オンライン同期は準備中です");
+    update();
+    return;
+  }
+  try{
+    const res = await fetch(`${GAS_URL}?action=piyoload&id=${encodeURIComponent(member.id)}&pin=${encodeURIComponent(member.pin)}`);
+    const j = await res.json();
+    if(j.ok && j.marks){
+      teacher = {};
+      j.marks.forEach((m,i)=>{ if(m) teacher["q"+(i+1)] = true; });
+      render();
+      if(showToast) toast("先生の丸を更新しました⭕");
+    }
+  }catch(e){
+    if(showToast) toast("電波のあるところで試してね");
+  }
+}
+
+function render(){
+  const root = $("#quizRoot");
+  root.innerHTML = "";
+  QUIZ.forEach((item, i)=>{
+    const el = document.createElement("div");
+    el.className = "q" + (teacher[item.id] ? " approved" : "");
+    el.id = "card_"+item.id;
+    const h = item.hint || {};
+    const hintInner =
+      (h.text ? `<div>💡 ${h.text}</div>` : "") +
+      (h.links ? h.links.map(l=>`<a class="h-link" href="${l.url}" target="_blank" rel="noopener">${l.label}</a>`).join("") : "") +
+      (h.slot ? `<div class="slot" style="margin-top:8px;">${h.slot}</div>` : "");
+    el.innerHTML = `
+      <div class="q-head">
+        <span class="q-no">${teacher[item.id] ? "⭕" : "Q"+(i+1)}</span>
+        <h3>${item.q}</h3>
+      </div>
+      <span class="t-badge">${teacher[item.id] ? "⭕ 先生の丸、もらった!" : "👨‍🏫 先生の丸:答え合わせでもらえるよ"}</span>
+      <div class="q-btns">
+        <button class="q-toggle hintbtn" id="hbtn_${item.id}" onclick="toggleHint('${item.id}')">💡 ヒントを見る</button>
+        <button class="q-toggle" id="abtn_${item.id}" onclick="toggleAns('${item.id}')">こたえを見る</button>
+      </div>
+      <div class="q-hint"><div class="h-box">${hintInner || "ヒントは準備中です"}</div></div>
+      <div class="q-ans">
+        <div class="a-box">${item.a}</div>
+        ${item.video ? `<a class="q-toggle" style="display:inline-block;text-decoration:none;margin:10px 0 0;" href="${item.video.url}" target="_blank" rel="noopener">${item.video.label}</a>` : ""}
+        ${item.slot ? `<div class="slot">${item.slot}</div>` : ""}
+        <div class="q-actions">
+          <button class="btn-self ${selfChecks[item.id]?'on':''}" onclick="toggleSelf('${item.id}')">${selfChecks[item.id] ? "🐣 じぶんチェック済み" : "おぼえたら押す"}</button>
+        </div>
+      </div>`;
+    root.appendChild(el);
+  });
+  update();
+}
+function toggleHint(id){
+  const card = $("#card_"+id);
+  card.classList.toggle("hint-open");
+  $("#hbtn_"+id).textContent = card.classList.contains("hint-open") ? "💡 ヒントをとじる" : "💡 ヒントを見る";
+}
+function toggleAns(id){
+  const card = $("#card_"+id);
+  card.classList.toggle("open");
+  $("#abtn_"+id).textContent = card.classList.contains("open") ? "こたえをとじる" : "こたえを見る";
+}
+function toggleSelf(id){
+  selfChecks[id] = !selfChecks[id];
+  if(!selfChecks[id]) delete selfChecks[id];
+  else toast("いいね!コーチと答え合わせしよう📞");
+  localStorage.setItem("piyo_self_"+member.id, JSON.stringify(selfChecks));
+  render();
+}
+function update(){
+  const tn = Object.keys(teacher).length;
+  const sn = Object.keys(selfChecks).length;
+  $("#teacherN").textContent = tn;
+  $("#selfN").textContent = sn;
+  $("#progBar").style.width = (tn/QUIZ.length*100) + "%";
+  $("#gradCard").classList.toggle("show", tn === QUIZ.length);
+}
+function toast(msg){
+  const t = $("#toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"), 1800);
+}
+
+/* auto login */
+(function(){
+  const saved = localStorage.getItem("piyo_member");
+  if(saved){
+    member = JSON.parse(saved);
+    selfChecks = JSON.parse(localStorage.getItem("piyo_self_"+member.id) || "{}");
+    enterQuiz();
+    refreshMarks(false);
+  }
+})();
+</script>
+</body>
+</html>

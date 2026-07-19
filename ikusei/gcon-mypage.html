@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>クリエイターズ育成プログラム② グルコンリーダー育成|スカイアーク</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="manifest" href="./gcon-manifest.json">
+<link rel="icon" type="image/png" sizes="64x64" href="./gcon-icon-64.png">
+<link rel="apple-touch-icon" href="./gcon-icon-180.png">
+<meta name="theme-color" content="#6E5FB5">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="クリエ育成">
+<style>
+  :root{
+    --green-deep:#6E5FB5;
+    --green-leaf:#4FB08C;
+    --green-mist:#EDEAF9;
+    --paper:#FBF8FE;
+    --ink:#22322A;
+    --amber:#F5C452;
+    --amber-soft:#FDF3DC;
+    --white:#FFFFFF;
+    --gray:#9AA8A0;
+    --radius:18px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:"Zen Kaku Gothic New",sans-serif;
+    background:var(--paper);color:var(--ink);
+    line-height:1.75;font-size:15.5px;
+  }
+  .wrap{max-width:560px;margin:0 auto;padding:0 16px;}
+  button{font-family:inherit;cursor:pointer;border:none;}
+
+  /* ===== login ===== */
+  #loginView{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(150deg,#9A86E0 0%,#6E5FB5 45%,#5E8FD8 100%);padding:20px;}
+  .login-card{
+    background:var(--white);border-radius:24px;padding:32px 24px;
+    width:100%;max-width:400px;box-shadow:0 10px 40px rgba(0,0,0,.25);
+  }
+  .login-card .prog-tag{
+    display:inline-block;font-size:11px;font-weight:700;letter-spacing:.08em;
+    color:var(--green-deep);background:var(--green-mist);
+    border-radius:999px;padding:4px 12px;margin-bottom:10px;
+  }
+  .login-card h1{
+    font-family:"Zen Maru Gothic",sans-serif;font-weight:900;
+    color:var(--green-deep);font-size:22px;line-height:1.5;margin-bottom:4px;
+  }
+  .login-card .sub{font-size:13px;color:#5A6B60;margin-bottom:22px;}
+  .login-card .sub .step-note{font-size:11.5px;color:#8A9A90;}
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:13px;font-weight:700;color:var(--green-deep);margin-bottom:6px;}
+  .field input,.field select{
+    width:100%;padding:13px 14px;font-size:16px;
+    border:2px solid var(--green-mist);border-radius:12px;
+    font-family:inherit;background:var(--paper);
+  }
+  .field input:focus,.field select:focus{outline:none;border-color:var(--green-leaf);}
+  .field small{font-size:11.5px;color:#7A8A80;display:block;margin-top:4px;}
+  .btn-main{
+    width:100%;padding:15px;border-radius:14px;
+    background:var(--green-leaf);color:var(--white);
+    font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:16px;
+    transition:transform .1s;
+  }
+  .btn-main:active{transform:scale(.98);}
+  .login-err{
+    display:none;background:#FDEBEB;color:#B33;border-radius:10px;
+    padding:10px 14px;font-size:13px;margin-bottom:14px;
+  }
+
+  /* ===== app header ===== */
+  #appView{display:none;}
+  .app-head{background:linear-gradient(150deg,#9A86E0 0%,#6E5FB5 45%,#5E8FD8 100%);color:var(--white);padding:22px 0 26px;}
+  .app-head .row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+  .app-head .hello{font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:18px;}
+  .app-head .mid{font-size:12px;opacity:.85;}
+  .logout{background:rgba(255,255,255,.15);color:var(--white);font-size:11.5px;border-radius:999px;padding:5px 12px;}
+  .overall{margin-top:16px;background:rgba(255,255,255,.12);border-radius:16px;padding:14px 16px;}
+  .overall .nums{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;}
+  .overall .big{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:22px;}
+  .overall .big span{font-size:13px;font-weight:700;opacity:.85;}
+  .bar{height:10px;background:rgba(255,255,255,.25);border-radius:99px;overflow:hidden;}
+  .bar i{display:block;height:100%;background:var(--amber);border-radius:99px;width:0%;transition:width .5s ease;}
+  .sync{font-size:11px;margin-top:8px;opacity:.85;}
+
+  /* ===== week sections ===== */
+  main{padding:20px 0 60px;}
+  .week{margin-bottom:14px;background:var(--white);border-radius:var(--radius);overflow:hidden;box-shadow:0 2px 8px rgba(30,92,70,.07);}
+  .week-head{
+    width:100%;display:flex;align-items:center;gap:12px;
+    padding:16px;background:var(--white);text-align:left;
+  }
+  .week-head .tag{
+    font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:11px;
+    color:var(--white);background:var(--green-leaf);border-radius:999px;
+    padding:3px 10px;flex-shrink:0;letter-spacing:.06em;
+  }
+  .week-head .t{flex:1;}
+  .week-head .t b{font-family:"Zen Maru Gothic",sans-serif;font-size:16px;color:var(--green-deep);display:block;line-height:1.4;}
+  .week-head .t small{font-size:11.5px;color:#7A8A80;}
+  .week-head .mini-bar{width:52px;flex-shrink:0;}
+  .week-head .mini-bar .bar{height:7px;background:var(--green-mist);}
+  .week-head .mini-bar .bar i{background:var(--green-leaf);}
+  .week-head .mini-bar small{font-size:10px;color:#7A8A80;display:block;text-align:right;margin-top:2px;}
+  .week-head .chev{color:var(--gray);transition:transform .25s;flex-shrink:0;}
+  .week.open .chev{transform:rotate(180deg);}
+  .week-body{display:none;padding:4px 14px 16px;}
+  .week.open .week-body{display:block;}
+
+  /* ===== task cards ===== */
+  .task{
+    border:2px solid var(--green-mist);border-radius:16px;
+    padding:14px;margin-top:10px;position:relative;
+    transition:border-color .2s, background .2s;
+  }
+  .task.done{border-color:var(--green-leaf);background:#F2FAF5;}
+  .task.making{background:#F6F6F4;border-color:#E4E4DE;}
+  .task-top{display:flex;gap:10px;align-items:flex-start;}
+  .task-no{
+    font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:11px;
+    color:var(--green-deep);background:var(--green-mist);
+    border-radius:8px;padding:2px 8px;flex-shrink:0;margin-top:3px;
+  }
+  .task.making .task-no{color:#8A8A80;background:#ECECE6;}
+  .task h4{font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:15px;color:var(--ink);line-height:1.5;flex:1;}
+  .task.making h4{color:#8A8A80;}
+  .badge-making{
+    display:inline-block;font-size:10.5px;font-weight:700;
+    color:#8A6D00;background:var(--amber-soft);
+    border-radius:999px;padding:2px 10px;margin-left:6px;vertical-align:middle;
+  }
+  .task .rec{
+    margin-top:10px;font-size:13px;color:#3E5248;
+    background:var(--paper);border-radius:10px;padding:9px 12px;
+  }
+  .task.making .rec{display:none;}
+  .task .rec b{color:var(--green-leaf);font-size:12px;}
+  .task-actions{display:flex;gap:8px;margin-top:12px;align-items:center;flex-wrap:wrap;}
+  .btn-video{
+    display:inline-flex;align-items:center;gap:6px;
+    background:var(--green-deep);color:var(--white);
+    font-size:13px;font-weight:700;border-radius:999px;
+    padding:9px 16px;text-decoration:none;
+  }
+  .btn-video.alt{background:var(--green-leaf);}
+  .btn-video .end{font-weight:400;font-size:11px;opacity:.85;}
+  .chk{
+    margin-left:auto;display:inline-flex;align-items:center;gap:7px;
+    background:var(--white);border:2px solid var(--green-mist);
+    border-radius:999px;padding:8px 16px;
+    font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:13.5px;color:#7A8A80;
+    transition:all .15s;
+  }
+  .task.done .chk{background:var(--green-leaf);border-color:var(--green-leaf);color:var(--white);}
+  .chk:disabled{opacity:.45;cursor:default;}
+  .making-note{margin-top:10px;font-size:12px;color:#8A8A80;}
+
+  /* ===== install banner ===== */
+  #installBanner{
+    display:none;position:fixed;left:12px;right:12px;bottom:12px;z-index:40;
+    background:var(--white);border-radius:18px;padding:14px 16px;
+    box-shadow:0 8px 30px rgba(0,0,0,.22);
+    align-items:center;gap:12px;max-width:536px;margin:0 auto;
+  }
+  #installBanner.show{display:flex;}
+  #installBanner img{width:44px;height:44px;border-radius:12px;flex-shrink:0;}
+  #installBanner .ib-t{flex:1;line-height:1.5;}
+  #installBanner .ib-t b{font-family:"Zen Maru Gothic",sans-serif;font-size:14px;color:var(--green-deep);display:block;}
+  #installBanner .ib-t small{font-size:11.5px;color:#6B7A70;}
+  #installBanner .ib-btn{
+    background:var(--green-leaf);color:var(--white);
+    font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:13px;
+    border-radius:999px;padding:10px 16px;flex-shrink:0;white-space:nowrap;
+  }
+  #installBanner .ib-close{
+    position:absolute;top:-10px;right:-4px;
+    width:26px;height:26px;border-radius:50%;
+    background:var(--ink);color:var(--white);font-size:13px;line-height:1;
+  }
+  #installModal{
+    display:none;position:fixed;inset:0;z-index:60;
+    background:rgba(20,40,30,.6);align-items:flex-end;justify-content:center;
+  }
+  #installModal.show{display:flex;}
+  .im-card{
+    background:var(--white);border-radius:24px 24px 0 0;
+    padding:26px 22px 34px;width:100%;max-width:560px;
+    max-height:80vh;overflow-y:auto;
+  }
+  .im-card h3{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;color:var(--green-deep);font-size:18px;margin-bottom:14px;}
+  .im-step{display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;}
+  .im-step .n{
+    font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:13px;
+    background:var(--green-mist);color:var(--green-deep);
+    width:26px;height:26px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .im-step p{font-size:14px;line-height:1.7;}
+  .im-step .share-ico{
+    display:inline-block;vertical-align:-3px;
+    width:18px;height:18px;
+  }
+  .im-note{
+    background:var(--amber-soft);border-radius:12px;
+    padding:10px 14px;font-size:12.5px;color:#5C4200;margin-bottom:14px;
+  }
+  .im-close{
+    width:100%;padding:13px;border-radius:14px;
+    background:var(--green-mist);color:var(--green-deep);
+    font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:14px;
+  }
+
+  /* ===== toast ===== */
+  #toast{
+    position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(80px);
+    background:var(--ink);color:var(--white);font-size:13px;
+    border-radius:999px;padding:10px 20px;opacity:0;
+    transition:all .3s ease;pointer-events:none;z-index:50;white-space:nowrap;
+  }
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  footer{text-align:center;font-size:11.5px;color:#7A8A80;padding:10px 0 40px;line-height:2;}
+</style>
+</head>
+<body>
+
+<!-- ========== LOGIN ========== -->
+<div id="loginView">
+  <div class="login-card">
+    <span class="prog-tag">クリエイターズ育成プログラム ②</span>
+    <h1>🌱 グルコンリーダー育成<br>マイページ</h1>
+    <p class="sub">スカイアーク|クリエイターズ育成部門<br>
+    <span class="step-note">※ ①<a href="./piyo-quiz.html" style="color:var(--green-leaf);font-weight:700;">「ぴよぴよ脱出クイズ」</a>を終えた方の、次のステップです</span></p>
+    <div class="login-err" id="loginErr"></div>
+    <div class="field">
+      <label>会員番号</label>
+      <input type="text" id="inId" inputmode="numeric" placeholder="例:00012345" autocomplete="username">
+    </div>
+    <div class="field">
+      <label>パスワード(4桁の数字)</label>
+      <input type="password" id="inPin" inputmode="numeric" maxlength="4" placeholder="初回は好きな4桁の数字を決めてください" autocomplete="current-password">
+      <small>※次回から同じ会員番号とパスワードで、どの端末からでも続きができます。忘れた場合は担当コーチへ。</small>
+    </div>
+    <div class="field">
+      <label>系列</label>
+      <select id="inKeiretsu"></select>
+      <input type="text" id="inKeiretsuOther" placeholder="系列名を入力してください" style="display:none;margin-top:8px;">
+    </div>
+    <div class="field">
+      <label>お名前(初回のみ)</label>
+      <input type="text" id="inName" placeholder="例:高山翔子">
+    </div>
+    <button class="btn-main" onclick="login()">はじめる ▶</button>
+  </div>
+</div>
+
+<!-- ========== APP ========== -->
+<div id="appView">
+  <div class="app-head">
+    <div class="wrap">
+      <div class="row">
+        <div>
+          <div class="mid" style="opacity:.75;font-size:11px;letter-spacing:.06em;">クリエイターズ育成プログラム ②</div>
+          <div class="hello" id="helloName">こんにちは!</div>
+          <div class="mid" id="memberIdLabel"></div>
+        </div>
+        <button class="logout" onclick="logout()">別の番号でログイン</button>
+      </div>
+      <div class="overall">
+        <div class="nums">
+          <span class="big"><span>ぜんぶで </span><em id="doneCount" style="font-style:normal;">0</em><span> / <em id="totalCount" style="font-style:normal;">0</em> 完了</span></span>
+          <span style="font-size:20px;" id="cheerEmoji">🌱</span>
+        </div>
+        <div class="bar"><i id="overallBar"></i></div>
+        <div class="sync" id="syncStatus">…</div>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <div class="wrap" id="weeksRoot"><!-- JSで生成 --></div>
+  </main>
+
+  <footer>
+    クリエイターズ育成プログラム<br>
+    ① ぴよぴよ脱出クイズ|② グルコンリーダー育成(このページ)<br>
+    交通整備課|クリエイターズ育成部門|統括:さかいあたる<br>
+    <a href="#" onclick="showInstallHelp();return false;" style="color:var(--green-leaf);font-weight:700;">📲 ホーム画面に追加する方法</a>
+  </footer>
+</div>
+
+<!-- ========== ホーム画面追加バナー ========== -->
+<div id="installBanner">
+  <button class="ib-close" onclick="dismissInstall()">✕</button>
+  <img src="./gcon-icon-192.png" alt="">
+  <div class="ib-t">
+    <b>アプリみたいに使おう!</b>
+    <small>ホーム画面に追加すると、ワンタップで開けます</small>
+  </div>
+  <button class="ib-btn" onclick="installApp()">追加する</button>
+</div>
+
+<!-- ========== 追加方法ガイド(手動手順) ========== -->
+<div id="installModal" onclick="if(event.target===this)closeInstallModal()">
+  <div class="im-card">
+    <h3>📲 ホーム画面に追加のしかた</h3>
+    <div id="imLineNote" class="im-note" style="display:none;">
+      ⚠️ 今LINEの中のブラウザで開いています。先に右下の「…」→<b>「他のアプリで開く」</b>(または「既定のブラウザで開く」)でSafari/Chromeに移動してから、下の手順をやってね。
+    </div>
+    <div id="imIos" style="display:none;">
+      <div class="im-step"><span class="n">1</span><p>画面下(または上)の <b>共有ボタン</b> <svg class="share-ico" viewBox="0 0 24 24" fill="none" stroke="#1E5C46" stroke-width="2"><path d="M12 3v12M8 7l4-4 4 4"/><rect x="4" y="10" width="16" height="11" rx="2"/></svg> をタップ</p></div>
+      <div class="im-step"><span class="n">2</span><p>メニューの中の <b>「ホーム画面に追加」</b> を選ぶ</p></div>
+      <div class="im-step"><span class="n">3</span><p>右上の <b>「追加」</b> を押したら完成!🌱のアイコンがホーム画面に出ます</p></div>
+    </div>
+    <div id="imAndroid" style="display:none;">
+      <div class="im-step"><span class="n">1</span><p>右上の <b>メニュー(⋮)</b> をタップ</p></div>
+      <div class="im-step"><span class="n">2</span><p><b>「ホーム画面に追加」</b>(または「アプリをインストール」)を選ぶ</p></div>
+      <div class="im-step"><span class="n">3</span><p><b>「追加」</b>を押したら完成!🌱のアイコンがホーム画面に出ます</p></div>
+    </div>
+    <button class="im-close" onclick="closeInstallModal()">とじる</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ================================================================
+   設定:GASを設置したらURLをここに貼り付けてください。
+   空("")のままでも動きます(その場合は端末保存のみモード)。
+================================================================ */
+const GAS_URL = "";
+
+/* ================================================================
+   系列名リスト(正式版)。変更があればここを編集してください。
+================================================================ */
+const KEIRETSU = [
+  "🚀SkyExceed",
+  "🦅Zenith1",
+  "🏰Utop",
+  "🌟グローハピネス🌟",
+  "🥷HOT STUFF⚜️",
+  "TELLUS.",
+  "FEAT",
+  "🌬️ザ・クラウドブルー(蒼雲)",
+  "✈️JET RISE",
+  "✨アフロディーテ",
+  "⭐️ルミナス",
+  "エネルギー🔥",
+  "💎プリズム",
+  "📚FairyTail",
+  "ミラメリ🪄",
+  "🪽HERO",
+  "♾️ZERO♾️",
+];
+
+/* 動画ID */
+const V_TRAINING = "Rc2ZCkBIarw";   // ①グルコンリーダートレーニング動画
+const V_DEMO     = "MHVJhdArGl4";   // ②グルコンのビフォア&アフターのコツ(デモ)
+
+const yt = (id,sec)=>`https://youtu.be/${id}?t=${sec}`;
+
+/* ================================================================
+   カリキュラムデータ
+   making:true = 制作中(チェック不可・分母に含めない)
+================================================================ */
+const WEEKS = [
+  {tag:"はじめに", title:"オリエンテーション", sub:"最初にここだけ見てね", tasks:[
+    {id:"t0_1", no:"0-1", title:"「4週間の地図」を読む", rec:"読み終わったら、いちばん気になった週を担当コーチにLINEしてみよう",
+      link:{url:"./gcon-roadmap.html", label:"🗺 地図をひらく", end:""}},
+    {id:"t0_2", no:"0-2", title:"録音のやり方(スマホのボイスメモ)", making:true},
+  ]},
+  {tag:"WEEK 1", title:"🔍 フォーカス週", sub:"夢を聞ける人になる", tasks:[
+    {id:"t1_1", no:"1-1", title:"フォーカスとは?目的は「自分ごとにさせる」", rec:"目的を自分の言葉で30秒、録音してみよう",
+      link:{url:yt(V_TRAINING,545), label:"▶ 動画をみる(9:05から)", end:"〜10:47まで"}},
+    {id:"t1_2", no:"1-2", title:"5つの質問 お手本実演(翔子さん)", rec:"5つの質問を通しで録音してみよう",
+      link:{url:yt(V_DEMO,204), label:"▶ 動画をみる(3:24から)", end:"〜7:43まで", alt:true}},
+    {id:"t1_3", no:"1-3", title:"規模感の深掘り(「世界平和です」への返し方)", rec:"深掘りの質問だけ録音してみよう",
+      link:{url:yt(V_TRAINING,588), label:"▶ 動画をみる(9:48から)", end:"〜11:43まで"}},
+    {id:"t1_4", no:"1-4", title:"逆算の質問(3年後カフェの例)", rec:"逆算の質問を録音してみよう",
+      link:{url:yt(V_TRAINING,787), label:"▶ 動画をみる(13:07から)", end:"〜14:28まで"}},
+    {id:"t1_5", no:"1-5", title:"フォーカスNG例→OK例 くらべてみよう", making:true},
+  ]},
+  {tag:"WEEK 2", title:"🌟 Tアップ週", sub:"30秒で人を輝かせる", tasks:[
+    {id:"t2_1", no:"2-1", title:"Tアップとは?「解説」とのちがい・キューピット役", rec:"ちがいを自分の言葉で30秒、録音してみよう",
+      link:{url:yt(V_TRAINING,868), label:"▶ 動画をみる(14:28から)", end:"〜16:24まで"}},
+    {id:"t2_2", no:"2-2", title:"お手本:経営者さん向けTアップ30秒", making:true},
+    {id:"t2_3", no:"2-3", title:"お手本:MLM経験者さん向け30秒", making:true},
+    {id:"t2_4", no:"2-4", title:"お手本:会社員・主婦さん向け30秒", making:true},
+    {id:"t2_5", no:"2-5", title:"TアップNG例→OK例 くらべてみよう", making:true},
+    {id:"t2_6", no:"2-6", title:"質問だしの促し方+挙手ボタン練習", rec:"促しのセリフを録音してみよう",
+      link:{url:yt(V_DEMO,1345), label:"▶ 動画をみる(22:25から)", end:"〜26:30まで", alt:true}},
+    {id:"t2_7", no:"2-7", title:"【提出】Tアップ ボイスメモ(代表と系列代表/実績と人柄)", rec:"翔子さんと自分の系列代表のTアップを録音して、担当コーチにLINEで送ろう"},
+  ]},
+  {tag:"WEEK 3", title:"🔥 アフター週(いちばん大事!)", sub:"その場でやり切る力", tasks:[
+    {id:"t3_1", no:"3-1", title:"アフター4ステップと「アポ出し最優先」の理由", rec:"理由を自分の言葉で録音してみよう",
+      link:{url:yt(V_DEMO,5415), label:"▶ 動画をみる(1:30:15から)", end:"〜1:33:36まで", alt:true}},
+    {id:"t3_2", no:"3-2", title:"リストアップの進行 お手本(3分タイマー)", rec:"進行のセリフを録音してみよう",
+      link:{url:yt(V_DEMO,5803), label:"▶ 動画をみる(1:36:43から)", end:"〜1:38:02まで", alt:true}},
+    {id:"t3_3", no:"3-3", title:"優先順位3つ+星じるしの案内", rec:"3つの項目の案内を録音してみよう",
+      link:{url:yt(V_DEMO,6026), label:"▶ 動画をみる(1:40:26から)", end:"〜1:42:27まで", alt:true}},
+    {id:"t3_4", no:"3-4", title:"連絡文テンプレ+断り文を分けるワケ", rec:"自分の知り合い1人向けにアレンジして音読録音→コーチにLINEで送ろう",
+      link:{url:yt(V_DEMO,6427), label:"▶ 動画をみる(1:47:07から)", end:"〜1:50:12まで", alt:true}},
+    {id:"t3_5", no:"3-5", title:"「今やる理由」の伝え方", rec:"トークを録音してみよう",
+      link:{url:yt(V_DEMO,6734), label:"▶ 動画をみる(1:52:14から)", end:"〜1:54:37まで", alt:true}},
+    {id:"t3_6", no:"3-6", title:"温度差のある2人アフターの段取り", rec:"段取りを口頭で説明して録音してみよう",
+      link:{url:yt(V_DEMO,5882), label:"▶ 動画をみる(1:38:02から)", end:"〜1:40:26まで", alt:true}},
+    {id:"t3_7", no:"3-7", title:"抵抗がある方へのスモールステップ実演", making:true},
+    {id:"t3_8", no:"3-8", title:"【提出】導員ボイスメモ(セレモニー・LINKセミナー)", rec:"セレモニーとLINKセミナーへの導員トークを録音して、担当コーチにLINEで送ろう",
+      link:{url:yt(V_DEMO,6612), label:"▶ お手本をみる(1:50:12から)", end:"〜1:52:14まで", alt:true}},
+  ]},
+  {tag:"WEEK 4", title:"🎪 実戦週", sub:"本物の現場へ", tasks:[
+    {id:"t4_1", no:"4-1", title:"グルコン本番のながれ 通し観察(長いので2〜3日に分けてOK)", rec:"自分ならどの体験シェアを話すか、録音してみよう",
+      link:{url:yt(V_DEMO,1691), label:"▶ 動画をみる(28:11から)", end:"〜1:30:03まで", alt:true}},
+    {id:"t4_2", no:"4-2", title:"実戦サブ参加の心得(当日なにをするか)", making:true},
+    {id:"t4_3", no:"4-3", title:"アフター後のアップへの電話 お手本", rec:"報告の型を録音してみよう",
+      link:{url:yt(V_TRAINING,2330), label:"▶ 動画をみる(38:50から)", end:"〜40:51まで"}},
+  ]},
+];
+
+/* ================================================================ */
+let member = null;          // {id, pin, name}
+let progress = {};          // {taskId:true}
+const $ = (s)=>document.querySelector(s);
+
+const availTasks = WEEKS.flatMap(w=>w.tasks).filter(t=>!t.making);
+const TOTAL = availTasks.length;
+
+/* ---------- 系列セレクト生成 ---------- */
+(function(){
+  const sel = document.getElementById("inKeiretsu");
+  sel.innerHTML = '<option value="">選択してください</option>'
+    + KEIRETSU.map(k=>`<option value="${k}">${k}</option>`).join("")
+    + '<option value="__other__">その他(自分で入力)</option>';
+  sel.addEventListener("change", ()=>{
+    document.getElementById("inKeiretsuOther").style.display =
+      sel.value === "__other__" ? "block" : "none";
+  });
+})();
+
+/* ---------- login ---------- */
+async function login(){
+  const id = $("#inId").value.trim();
+  const pin = $("#inPin").value.trim();
+  const name = $("#inName").value.trim();
+  let keiretsu = $("#inKeiretsu").value;
+  if(keiretsu === "__other__") keiretsu = $("#inKeiretsuOther").value.trim();
+  const err = $("#loginErr");
+  err.style.display = "none";
+  if(!id || !/^\d{4}$/.test(pin)){
+    err.textContent = "会員番号と、4桁の数字のパスワードを入力してください";
+    err.style.display = "block";
+    return;
+  }
+  member = {id, pin, name, keiretsu};
+  // ローカル読み込み
+  progress = JSON.parse(localStorage.getItem("gcon_progress_"+id) || "{}");
+  const savedName = localStorage.getItem("gcon_name_"+id);
+  if(savedName && !member.name) member.name = savedName;
+  const savedK = localStorage.getItem("gcon_keiretsu_"+id);
+  if(savedK && !member.keiretsu) member.keiretsu = savedK;
+
+  // サーバーから読み込み(設定済みの場合)
+  if(GAS_URL){
+    setSync("☁️ 読み込み中…");
+    try{
+      const res = await fetch(`${GAS_URL}?action=load&id=${encodeURIComponent(id)}&pin=${encodeURIComponent(pin)}`);
+      const j = await res.json();
+      if(j.ok === false && j.error === "pin"){
+        err.textContent = "パスワードが一致しません。忘れた場合は担当コーチにご確認ください。";
+        err.style.display = "block";
+        member = null;
+        return;
+      }
+      if(j.ok && j.data){
+        const server = JSON.parse(j.data);
+        progress = Object.assign({}, server, progress); // ローカルとマージ
+        if(j.name && !member.name) member.name = j.name;
+        if(j.keiretsu && !member.keiretsu) member.keiretsu = j.keiretsu;
+      }
+    }catch(e){ /* オフラインでもOK */ }
+  }
+  localStorage.setItem("gcon_member", JSON.stringify(member));
+  if(member.name) localStorage.setItem("gcon_name_"+id, member.name);
+  if(member.keiretsu) localStorage.setItem("gcon_keiretsu_"+id, member.keiretsu);
+  enterApp();
+  saveAll(); // 初回登録も兼ねて同期
+}
+
+function logout(){
+  localStorage.removeItem("gcon_member");
+  location.reload();
+}
+
+function enterApp(){
+  $("#loginView").style.display = "none";
+  $("#appView").style.display = "block";
+  $("#helloName").textContent = (member.name ? member.name+"さん、" : "") + "こんにちは!";
+  $("#memberIdLabel").textContent = "会員番号:" + member.id + (member.keiretsu ? "|" + member.keiretsu : "");
+  render();
+}
+
+/* ---------- render ---------- */
+function render(){
+  const root = $("#weeksRoot");
+  root.innerHTML = "";
+  WEEKS.forEach((w, wi)=>{
+    const avail = w.tasks.filter(t=>!t.making);
+    const done = avail.filter(t=>progress[t.id]).length;
+    const sec = document.createElement("section");
+    sec.className = "week" + (isCurrentWeek(wi) ? " open" : "");
+    sec.innerHTML = `
+      <button class="week-head" onclick="this.parentElement.classList.toggle('open')">
+        <span class="tag">${w.tag}</span>
+        <span class="t"><b>${w.title}</b><small>${w.sub}</small></span>
+        <span class="mini-bar">
+          <span class="bar"><i style="width:${avail.length? done/avail.length*100 : 0}%"></i></span>
+          <small>${done}/${avail.length}</small>
+        </span>
+        <span class="chev">▼</span>
+      </button>
+      <div class="week-body"></div>`;
+    const body = sec.querySelector(".week-body");
+    w.tasks.forEach(t=>{
+      const el = document.createElement("div");
+      el.className = "task" + (t.making ? " making" : (progress[t.id] ? " done" : ""));
+      el.innerHTML = `
+        <div class="task-top">
+          <span class="task-no">${t.no}</span>
+          <h4>${t.title}${t.making ? '<span class="badge-making">🎥 制作中</span>' : ""}</h4>
+        </div>
+        ${t.rec && !t.making ? `<div class="rec"><b>🎙️ 録音チャレンジ:</b>${t.rec}</div>` : ""}
+        <div class="task-actions">
+          ${t.link && !t.making ? `<a class="btn-video ${t.link.alt?'alt':''}" href="${t.link.url}" target="_blank" rel="noopener">${t.link.label}${t.link.end?` <span class="end">${t.link.end}</span>`:""}</a>` : ""}
+          ${t.making
+            ? `<span class="making-note">公開されたらお知らせします。おたのしみに!</span>`
+            : `<button class="chk" onclick="toggle('${t.id}')">${progress[t.id] ? "✓ できた!" : "できたら押す"}</button>`}
+        </div>`;
+      body.appendChild(el);
+    });
+    root.appendChild(sec);
+  });
+  updateOverall();
+}
+
+/* 今やるべき週を推定して最初から開く(順番に埋まっていく前提) */
+function isCurrentWeek(wi){
+  for(let i=0;i<WEEKS.length;i++){
+    const avail = WEEKS[i].tasks.filter(t=>!t.making);
+    const allDone = avail.length>0 && avail.every(t=>progress[t.id]);
+    if(!allDone) return i===wi;
+  }
+  return wi===WEEKS.length-1;
+}
+
+function updateOverall(){
+  const done = availTasks.filter(t=>progress[t.id]).length;
+  $("#doneCount").textContent = done;
+  $("#totalCount").textContent = TOTAL;
+  $("#overallBar").style.width = (TOTAL? done/TOTAL*100 : 0) + "%";
+  const pct = done/TOTAL;
+  $("#cheerEmoji").textContent = pct>=1 ? "🎉" : pct>=.75 ? "🔥" : pct>=.5 ? "🌟" : pct>=.25 ? "🌿" : "🌱";
+}
+
+/* ---------- toggle & save ---------- */
+function toggle(id){
+  progress[id] = !progress[id];
+  if(!progress[id]) delete progress[id];
+  else toast(randomCheer());
+  localStorage.setItem("gcon_progress_"+member.id, JSON.stringify(progress));
+  render();
+  saveAll();
+}
+
+const CHEERS = ["ナイス!🌟","その調子!🔥","一歩前進!🌿","すばらしい!👏","コツコツが勝つコツ!💪"];
+const randomCheer = ()=>CHEERS[Math.floor(Math.random()*CHEERS.length)];
+
+let saveTimer = null;
+function saveAll(){
+  if(!GAS_URL){ setSync("📱 この端末に保存中(オンライン同期は準備中)"); return; }
+  setSync("☁️ 保存中…");
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async ()=>{
+    try{
+      const body = new URLSearchParams({
+        action:"save", id:member.id, pin:member.pin, name:member.name||"",
+        keiretsu: member.keiretsu||"",
+        data: JSON.stringify(progress)
+      });
+      const res = await fetch(GAS_URL, {method:"POST", body});
+      const j = await res.json();
+      if(j.ok===false && j.error==="pin"){ setSync("⚠️ パスワードが一致しません(コーチにご相談ください)"); return; }
+      setSync("✅ 保存済み(どの端末からでも続きができます)");
+    }catch(e){
+      setSync("📱 この端末に保存しました(電波のあるところで自動同期されます)");
+    }
+  }, 600);
+}
+const setSync = (msg)=>{ $("#syncStatus").textContent = msg; };
+
+function toast(msg){
+  const t = $("#toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"), 1600);
+}
+
+/* ---------- ホーム画面追加(PWA) ---------- */
+let deferredPrompt = null;
+const ua = navigator.userAgent;
+const isIOS = /iphone|ipad|ipod/i.test(ua);
+const isLINE = /Line\//i.test(ua);
+const isStandalone = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("./gcon-sw.js").catch(()=>{});
+}
+
+window.addEventListener("beforeinstallprompt", (e)=>{
+  e.preventDefault();
+  deferredPrompt = e;           // Androidでワンタップ追加が可能な状態
+  maybeShowBanner();
+});
+
+function maybeShowBanner(){
+  if(isStandalone) return;                                    // もう追加済み
+  if(localStorage.getItem("gcon_install_dismissed")) return;  // ✕を押した人
+  document.getElementById("installBanner").classList.add("show");
+}
+
+function installApp(){
+  if(deferredPrompt){
+    // Android Chrome:ネイティブの追加ダイアログをワンタップで表示
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(()=>{
+      deferredPrompt = null;
+      document.getElementById("installBanner").classList.remove("show");
+    });
+  }else{
+    // iPhoneなど:手動手順ガイドを表示
+    showInstallHelp();
+  }
+}
+
+function showInstallHelp(){
+  document.getElementById("imLineNote").style.display = isLINE ? "block" : "none";
+  document.getElementById("imIos").style.display = isIOS ? "block" : "none";
+  document.getElementById("imAndroid").style.display = isIOS ? "none" : "block";
+  document.getElementById("installModal").classList.add("show");
+}
+function closeInstallModal(){
+  document.getElementById("installModal").classList.remove("show");
+}
+function dismissInstall(){
+  localStorage.setItem("gcon_install_dismissed","1");
+  document.getElementById("installBanner").classList.remove("show");
+}
+
+/* iOS(とLINEブラウザ)はbeforeinstallpromptが来ないので、少し待ってからバナー表示 */
+if(!isStandalone && (isIOS || isLINE)){
+  setTimeout(maybeShowBanner, 1500);
+}
+
+/* ---------- auto login ---------- */
+(function(){
+  const saved = localStorage.getItem("gcon_member");
+  if(saved){
+    member = JSON.parse(saved);
+    progress = JSON.parse(localStorage.getItem("gcon_progress_"+member.id) || "{}");
+    enterApp();
+    if(GAS_URL){
+      // バックグラウンドで最新を取得
+      fetch(`${GAS_URL}?action=load&id=${encodeURIComponent(member.id)}&pin=${encodeURIComponent(member.pin)}`)
+        .then(r=>r.json()).then(j=>{
+          if(j.ok && j.data){
+            progress = Object.assign({}, JSON.parse(j.data), progress);
+            localStorage.setItem("gcon_progress_"+member.id, JSON.stringify(progress));
+            render();
+            setSync("✅ 同期ずみ");
+          }
+        }).catch(()=>{});
+    } else {
+      setSync("📱 この端末に保存中(オンライン同期は準備中)");
+    }
+  }
+})();
+</script>
+</body>
+</html>
