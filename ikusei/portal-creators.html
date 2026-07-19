@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- v2 (2026-07-20) ゴールバナー中央寄せ修正版 -->
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -61,7 +62,8 @@
   .tile .tag{margin-top:10px;border-top:1.5px dashed #D8E4DC;padding-top:10px;font-size:13px;font-weight:700;color:var(--green-leaf);text-align:center;}
   .tile.t2 .tag{color:var(--blue);border-color:#D3E2F2;}
   .tile.t3 .tag{color:var(--purple);border-color:#E2DAF2;}
-  .tile .btns{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;justify-content:center;}
+  .tile .btns{display:flex;flex-direction:column;align-items:stretch;gap:8px;margin-top:14px;}
+  .tile.t3 .btns{align-items:center;}
   .btn{
     display:inline-block;text-decoration:none;text-align:center;
     font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:13.5px;
@@ -80,7 +82,7 @@
   .tile-arrow.a2{color:var(--blue);}
 
   /* ===== goal ===== */
- .wrap.goal{margin:26px auto;display:block;}
+  .wrap.goal{margin:26px auto;display:block;}
   .goal-card{
     background:linear-gradient(135deg,#5E8FD8,#9E7CD4);
     color:var(--white);border-radius:var(--radius);padding:20px 22px;
@@ -128,7 +130,7 @@
       <p>コミュニティをサポートする基本的な考え方やスキルを身につけるプログラム。まずは「ぴよぴよ脱出クイズ」7問から。</p>
       <div class="tag">サポート力の基礎を固める</div>
       <div class="btns">
-        <a class="btn" href="./piyo-quiz.html">🐣 ①をひらく</a>
+        <a class="btn" href="./piyo-quiz.html">🐣 始める</a>
       </div>
     </div>
 
@@ -141,7 +143,7 @@
       <div class="tag">人を導き、場をつくる力を育てる</div>
       <div class="btns">
         <a class="btn sub" href="./gcon-roadmap.html">🗺 4週間の地図</a>
-        <a class="btn" href="./gcon-mypage.html">🌱 ②マイページ</a>
+        <a class="btn" href="./gcon-mypage.html">🌱 始める</a>
       </div>
     </div>
 
@@ -177,7 +179,7 @@
 
 <footer>
   <div class="f-title">学びのポータルサイト(クリエイターズ用)</div>
-  交通整備課|クリエイターズ育成部門|統括:さかいあたる
+  交通整備課|クリエイターズ育成部門<br><span style="opacity:.5;">v2</span>
 </footer>
 
 </body>
