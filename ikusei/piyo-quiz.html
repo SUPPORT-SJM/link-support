@@ -100,7 +100,7 @@
   .a-box b{color:var(--green-deep);}
   .slot{margin-top:10px;font-size:12px;color:#8A8A80;background:#F6F6F4;border:1.5px dashed #D8D8D0;border-radius:10px;padding:8px 12px;}
   .q-actions{display:flex;gap:8px;margin-top:12px;}
-  .btn-self{background:var(--white);border:2px solid var(--green-mist);border-radius:999px;padding:9px 18px;font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:13.5px;color:#7A8A80;}
+  .btn-self{background:var(--white);border:2px solid var(--green-mist);border-radius:999px;padding:8px 16px;font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:13px;color:#7A8A80;}
   .btn-self.on{background:var(--amber-soft);border-color:var(--amber);color:#8A6D00;}
 
   /* ===== graduation ===== */
@@ -386,15 +386,13 @@ function render(){
       <div class="q-btns">
         <button class="q-toggle hintbtn" id="hbtn_${item.id}" onclick="toggleHint('${item.id}')">💡 ヒントを見る</button>
         <button class="q-toggle" id="abtn_${item.id}" onclick="toggleAns('${item.id}')">こたえを見る</button>
+        <button class="btn-self ${selfChecks[item.id]?'on':''}" onclick="toggleSelf('${item.id}')">${selfChecks[item.id] ? "🐣 じぶんチェック済み" : "おぼえたら押す"}</button>
       </div>
       <div class="q-hint"><div class="h-box">${hintInner || "ヒントは準備中です"}</div></div>
       <div class="q-ans">
         <div class="a-box">${item.a}</div>
         ${item.video ? `<a class="q-toggle" style="display:inline-block;text-decoration:none;margin:10px 0 0;" href="${item.video.url}" target="_blank" rel="noopener">${item.video.label}</a>` : ""}
         ${item.slot ? `<div class="slot">${item.slot}</div>` : ""}
-        <div class="q-actions">
-          <button class="btn-self ${selfChecks[item.id]?'on':''}" onclick="toggleSelf('${item.id}')">${selfChecks[item.id] ? "🐣 じぶんチェック済み" : "おぼえたら押す"}</button>
-        </div>
       </div>`;
     root.appendChild(el);
   });
