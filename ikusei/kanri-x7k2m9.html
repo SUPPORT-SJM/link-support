@@ -705,6 +705,10 @@ function closeDetail(){
   detailData = null;
 }
 
+window.addEventListener("pageshow", function(e){
+  if(e.persisted){ location.reload(); }
+});
+
 function toast(msg){
   const t = $("#toast");
   t.textContent = msg;
@@ -718,6 +722,6 @@ function toast(msg){
 
 
 </script>
-<div class="verTag">v1.7 (2026/08/14)</div>
+<div class="verTag">v1.8 (2026/08/14)</div>
 </body>
 </html>

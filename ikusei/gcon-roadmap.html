@@ -484,7 +484,7 @@
 <footer>
   <div class="f-title">交通整備課|クリエイターズ育成部門</div>
   4週間後、一緒にみんなの夢を加速させましょう 🚀
-  <div class="verTag" style="margin-top:8px;color:rgba(255,255,255,.4);">v1.7 (2026/08/14)</div>
+  <div class="verTag" style="margin-top:8px;color:rgba(255,255,255,.4);">v1.8 (2026/08/14)</div>
 </footer>
 
 <script>
@@ -509,6 +509,17 @@
   const who = document.getElementById("navWho");
   if(who) who.textContent = (m.name ? m.name+"さん" : "会員番号 "+m.id) + (m.keiretsu ? "｜"+m.keiretsu : "");
 })();
+
+/* ブラウザの「戻る」で表示されたときも、ログイン状態を確認し直す */
+window.addEventListener("pageshow", function(e){
+  if(!e.persisted) return;
+  let mm = null;
+  try{ mm = JSON.parse(localStorage.getItem("skyarc_member")||"null"); }catch(err){}
+  if(!mm || !mm.id){ location.replace("./index.html"); return; }
+  const who = document.getElementById("navWho");
+  if(who) who.textContent = (mm.name ? mm.name+"さん" : "会員番号 "+mm.id) + (mm.keiretsu ? "｜"+mm.keiretsu : "");
+});
+
 function skyLogout(){
   if(!confirm("ログアウトしますか?\n(この端末に残った学習の記録も消えます)")) return;
   clearSkyLocal();

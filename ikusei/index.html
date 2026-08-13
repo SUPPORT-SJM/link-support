@@ -126,7 +126,7 @@
       交通整備課|クリエイターズ育成部門<br>
       <a href="./kanri-x7k2m9.html" style="color:#B8B4C8;font-size:10.5px;">管理画面(クリエイターズ以上)</a>
     </p>
-    <div class="verTag">v1.7 (2026/08/14)</div>
+    <div class="verTag">v1.8 (2026/08/14)</div>
   </div>
 
   <div id="loading">
@@ -343,6 +343,29 @@ async function login(){
     hint.textContent = "おかえりなさい" + (m.name ? "、"+m.name+"さん" : "") + "!Googleで本人確認をしてから「ログイン」を押してください。";
   }
 })();
+
+/* ブラウザの「戻る」で表示されたときは、状態を作り直す */
+window.addEventListener("pageshow", function(e){
+  if(e.persisted){
+    // メモリから復元された場合は、いったんログイン前の画面に戻す
+    googleEmail = "";
+    const gd = document.getElementById("gDone");
+    const gb = document.getElementById("gBtnWrap");
+    const mf = document.getElementById("mainFields");
+    const lb = document.getElementById("loginBtn");
+    if(gd) gd.classList.remove("show");
+    if(gb) gb.style.display = "flex";
+    if(mf) mf.classList.add("locked");
+    if(lb){ lb.classList.add("locked"); lb.disabled = false; lb.textContent = "ログイン ▶"; }
+    const fa = document.getElementById("formArea");
+    const ld = document.getElementById("loading");
+    if(fa) fa.style.display = "block";
+    if(ld) ld.style.display = "none";
+    const er = document.getElementById("err");
+    if(er) er.style.display = "none";
+    try{ google.accounts.id.disableAutoSelect(); }catch(err){}
+  }
+});
 
 if("serviceWorker" in navigator){ navigator.serviceWorker.register("./gcon-sw.js").catch(()=>{}); }
 </script>
