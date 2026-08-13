@@ -61,6 +61,8 @@
   td{padding:9px 8px;border-top:1px solid var(--line);font-size:13px;vertical-align:middle;}
   tr:hover td{background:#FAFAFE;}
   .nm{font-weight:700;}
+  .nm-link{color:var(--deep);text-decoration:underline;text-underline-offset:2px;}
+  .nm-link:hover{color:var(--blue);}
   .id{font-size:11px;color:#8B889E;font-family:monospace;}
   .kei{font-size:11.5px;color:#66647A;}
   .prog{font-size:11.5px;white-space:nowrap;}
@@ -81,6 +83,33 @@
   .scope-btn{background:none;color:var(--blue);font-size:11px;text-decoration:underline;padding:2px;}
   .scope-view{font-size:11px;color:#8B889E;}
   .empty{text-align:center;padding:40px;color:#8B889E;}
+  /* 個人詳細モーダル */
+  #detailModal{display:none;position:fixed;inset:0;z-index:70;background:rgba(30,26,50,.55);align-items:center;justify-content:center;padding:16px;}
+  #detailModal.show{display:flex;}
+  .dm-card{background:#fff;border-radius:18px;width:100%;max-width:560px;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 14px 50px rgba(0,0,0,.3);}
+  .dm-head{padding:20px 22px 14px;border-bottom:1px solid var(--line);}
+  .dm-head h3{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;color:var(--deep);font-size:17px;}
+  .dm-head .sub{font-size:12px;color:#77748A;margin-top:2px;}
+  .dm-body{padding:16px 22px;overflow-y:auto;flex:1;}
+  .dm-sec{margin-bottom:20px;}
+  .dm-sec h4{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:14px;color:var(--deep);margin-bottom:4px;display:flex;justify-content:space-between;align-items:center;}
+  .dm-sec .cnt{font-size:11.5px;color:#77748A;font-weight:400;}
+  .dm-sec .grad{display:inline-block;background:var(--leaf);color:#fff;font-size:11px;font-weight:700;border-radius:999px;padding:3px 11px;margin-left:6px;}
+  .dm-tools{display:flex;gap:6px;margin:8px 0 10px;}
+  .dm-tools button{font-size:11px;background:var(--mist);color:var(--deep);border-radius:999px;padding:5px 12px;font-weight:700;}
+  .dm-item{display:flex;align-items:center;gap:9px;padding:9px 11px;border:1.5px solid var(--line);border-radius:10px;margin-bottom:5px;cursor:pointer;font-size:13px;}
+  .dm-item:hover{background:#FAFAFE;}
+  .dm-item.checked{background:#EAF7F0;border-color:var(--leaf);}
+  .dm-item input{width:17px;height:17px;accent-color:var(--leaf);cursor:pointer;flex-shrink:0;}
+  .dm-item .code{font-family:monospace;font-size:10.5px;color:#A8A4BC;flex-shrink:0;min-width:48px;}
+  .dm-item .nm2{flex:1;}
+  .dm-item .selfmark{font-size:11px;color:var(--amber);flex-shrink:0;}
+  .dm-foot{padding:14px 22px 18px;border-top:1px solid var(--line);display:flex;gap:8px;}
+  .dm-foot button{flex:1;padding:13px;border-radius:11px;font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:14px;}
+  .dm-save{background:var(--deep);color:#fff;}
+  .dm-cancel{background:var(--mist);color:var(--deep);}
+  .dm-note{font-size:11px;color:#8B889E;margin-top:8px;line-height:1.7;}
+
   /* 担当系列えらぶモーダル */
   #scopeModal{display:none;position:fixed;inset:0;z-index:60;background:rgba(30,26,50,.55);align-items:center;justify-content:center;padding:18px;}
   #scopeModal.show{display:flex;}
@@ -185,6 +214,20 @@
   </main>
 </div>
 
+<div id="detailModal" onclick="if(event.target===this)closeDetail()">
+  <div class="dm-card">
+    <div class="dm-head">
+      <h3 id="dmName"></h3>
+      <p class="sub" id="dmSub"></p>
+    </div>
+    <div class="dm-body" id="dmBody"></div>
+    <div class="dm-foot">
+      <button class="dm-cancel" onclick="closeDetail()">とじる</button>
+      <button class="dm-save" onclick="saveMarks()">先生の丸を保存</button>
+    </div>
+  </div>
+</div>
+
 <div id="scopeModal" onclick="if(event.target===this)closeScope()">
   <div class="sm-card">
     <h3>担当系列をえらぶ</h3>
@@ -203,6 +246,42 @@
 <script>
 const GAS_URL = "https://script.google.com/macros/s/AKfycbzY2l20zwGULjnKRUqvRpbH79fPkl5e-sWNVoXEIgBrDpqhjDAx2zLvJuqO3sZxAfHj/exec";
 const GOOGLE_CLIENT_ID = "315827385958-ikdpkfhkr6nmrgql470aolt4pv27pak3.apps.googleusercontent.com";
+
+/* ================================================================
+   項目マスタ:先生の丸をつける画面に出る名前
+   ※教材ページ(piyo-quiz.html / gcon-mypage.html)で項目を増やしたら、
+     ここにも同じIDで追加してください。
+================================================================ */
+const ITEM_MASTER = {
+  piyo: {
+    label: "① ぴよぴよ脱出クイズ",
+    items: [
+      ["P1","1stサポート4つ"],
+      ["P2","ボーナスの種類5つ"],
+      ["P3","マップ図・ランクが影響する箇所"],
+      ["P4","マップ図・数値の反映日"],
+      ["P5","概要書面と契約書面のちがい"],
+      ["P6","クーリングオフの期間"],
+      ["P7","クリエの5スキル"],
+    ]
+  },
+  gr: {
+    label: "② グルコンリーダー育成",
+    items: [
+      ["GR0_1","地図を読む"],["GR0_2","録音のやり方"],
+      ["GR1_1","フォーカスとは"],["GR1_2","5つの質問 お手本"],["GR1_3","規模感の深掘り"],
+      ["GR1_4","逆算の質問"],["GR1_5","NG例→OK例"],
+      ["GR2_1","Tアップとは"],["GR2_2","お手本:経営者向け"],["GR2_3","お手本:MLM経験者向け"],
+      ["GR2_4","お手本:会社員・主婦向け"],["GR2_5","TアップNG例→OK例"],["GR2_6","質問だしの促し方"],
+      ["GR2_7","【提出】Tアップ ボイスメモ"],
+      ["GR3_1","アフター4ステップ"],["GR3_2","リストアップの進行"],["GR3_3","優先順位3つ"],
+      ["GR3_4","連絡文テンプレ"],["GR3_5","今やる理由"],["GR3_6","温度差2人の段取り"],
+      ["GR3_7","スモールステップ実演"],["GR3_8","【提出】導員 ボイスメモ"],
+      ["GR4_1","グルコン本番 通し観察"],["GR4_2","実戦サブ参加の心得"],["GR4_3","アップへの電話 お手本"],
+    ]
+  }
+};
+const APPS = Object.keys(ITEM_MASTER).join(",");
 
 /* 系列リスト ※育成サイト側と同じものに揃えてください */
 const KEIRETSU = [
@@ -358,7 +437,7 @@ function render(){
       : "";
 
     return `<tr>
-      <td><span class="nm">${m.name || "(名前未登録)"}</span><br><span class="id">${m.id}</span></td>
+      <td><a href="#" class="nm nm-link" onclick="openDetail('${m.id}');return false;">${m.name || "(名前未登録)"}</a><br><span class="id">${m.id}</span></td>
       <td class="kei">${m.keiretsu || "–"}</td>
       <td class="prog">${piyo}</td>
       <td class="prog">${gr}</td>
@@ -437,6 +516,125 @@ async function saveScope(){
   }catch(e){ toast("通信できませんでした"); }
 }
 
+
+/* ================= 個人詳細:先生の丸をつける ================= */
+let detailData = null;
+
+async function openDetail(id){
+  try{
+    toast("読み込んでいます…");
+    const url = `${GAS_URL}?action=adminDetail&id=${encodeURIComponent(admin.id)}&pin=${encodeURIComponent(admin.pin)}&email=${encodeURIComponent(admin.email)}&target=${encodeURIComponent(id)}&apps=${encodeURIComponent(APPS)}`;
+    const res = await fetch(url);
+    const j = await res.json();
+    if(j.ok === false){
+      toast({outofscope:"担当系列外の方です", notfound:"見つかりませんでした"}[j.error] || "読み込めませんでした");
+      return;
+    }
+    detailData = j;
+    renderDetail();
+    document.getElementById("detailModal").classList.add("show");
+  }catch(e){ toast("通信できませんでした"); }
+}
+
+function renderDetail(){
+  const m = detailData.member;
+  document.getElementById("dmName").textContent = (m.name || "(名前未登録)") + "さん";
+  document.getElementById("dmSub").textContent =
+    m.id + "｜" + (m.keiretsu || "系列未設定") + (m.role ? "｜" + m.role : "");
+
+  const body = document.getElementById("dmBody");
+  body.innerHTML = Object.keys(ITEM_MASTER).map(app=>{
+    const master = ITEM_MASTER[app];
+    const pg = detailData.progress[app] || {marks:[], self:{}, grad:""};
+    const marks = pg.marks || [];
+    const self = pg.self || {};
+    const rows = master.items.map(([code,label])=>{
+      const on = marks.indexOf(code) >= 0;
+      const didSelf = !!self[code];
+      return `<label class="dm-item ${on?'checked':''}" data-app="${app}">
+        <input type="checkbox" value="${code}" ${on?'checked':''}
+          onchange="this.closest('.dm-item').classList.toggle('checked', this.checked); updateCount('${app}')">
+        <span class="code">${code}</span>
+        <span class="nm2">${label}</span>
+        ${didSelf ? '<span class="selfmark">🐣本人✓</span>' : ''}
+      </label>`;
+    }).join("");
+    return `<div class="dm-sec">
+      <h4>
+        <span>${master.label}${pg.grad ? `<span class="grad">${pg.grad}</span>` : ""}</span>
+        <span class="cnt" id="cnt_${app}">⭕ ${marks.length} / ${master.items.length}</span>
+      </h4>
+      <div class="dm-tools">
+        <button onclick="checkAll('${app}',true)">すべて選択</button>
+        <button onclick="checkAll('${app}',false)">すべて解除</button>
+        <button onclick="copySelf('${app}')">🐣本人チェックに合わせる</button>
+      </div>
+      ${rows}
+      ${pg.updated ? `<p class="dm-note">最終更新:${pg.updated}</p>` : ""}
+    </div>`;
+  }).join("");
+}
+
+function updateCount(app){
+  const boxes = document.querySelectorAll(`.dm-item[data-app="${app}"] input:checked`);
+  const total = ITEM_MASTER[app].items.length;
+  const el = document.getElementById("cnt_"+app);
+  if(el) el.textContent = `⭕ ${boxes.length} / ${total}`;
+}
+
+function checkAll(app, on){
+  document.querySelectorAll(`.dm-item[data-app="${app}"]`).forEach(el=>{
+    const box = el.querySelector("input");
+    box.checked = on;
+    el.classList.toggle("checked", on);
+  });
+  updateCount(app);
+}
+
+/* 本人がチェックした項目に合わせる(答え合わせの下地に) */
+function copySelf(app){
+  const self = (detailData.progress[app] || {}).self || {};
+  document.querySelectorAll(`.dm-item[data-app="${app}"]`).forEach(el=>{
+    const box = el.querySelector("input");
+    const on = !!self[box.value];
+    box.checked = on;
+    el.classList.toggle("checked", on);
+  });
+  updateCount(app);
+  toast("本人チェックに合わせました(確認して保存してください)");
+}
+
+async function saveMarks(){
+  if(!detailData) return;
+  const target = detailData.member.id;
+  try{
+    for(const app of Object.keys(ITEM_MASTER)){
+      const checked = Array.from(document.querySelectorAll(`.dm-item[data-app="${app}"] input:checked`)).map(b=>b.value);
+      const items = ITEM_MASTER[app].items.map(x=>x[0]).join(",");
+      const before = ((detailData.progress[app]||{}).marks || []).join(",");
+      if(checked.join(",") === before) continue;   // 変更なしはスキップ
+      const body = new URLSearchParams({
+        action:"adminSetMarks", id:admin.id, pin:admin.pin, email:admin.email,
+        target:String(target), app:app, marks:checked.join(","), items:items
+      });
+      const res = await fetch(GAS_URL, {method:"POST", body});
+      const j = await res.json();
+      if(j.ok === false){
+        toast({outofscope:"担当系列外の方は操作できません"}[j.error] || "保存できませんでした");
+        return;
+      }
+    }
+    toast("先生の丸を保存しました⭕");
+    closeDetail();
+    load();
+  }catch(e){ toast("通信できませんでした"); }
+}
+
+function closeDetail(){
+  document.getElementById("detailModal").classList.remove("show");
+  detailData = null;
+}
+
 function toast(msg){
   const t = $("#toast");
   t.textContent = msg;
@@ -450,6 +648,6 @@ function toast(msg){
 
 
 </script>
-<div class="verTag">v1.4 (2026/08/14)</div>
+<div class="verTag">v1.5 (2026/08/14)</div>
 </body>
 </html>
