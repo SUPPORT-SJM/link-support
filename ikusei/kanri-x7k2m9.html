@@ -83,6 +83,15 @@
   .scope-btn{background:none;color:var(--blue);font-size:11px;text-decoration:underline;padding:2px;}
   .scope-view{font-size:11px;color:#8B889E;}
   .empty{text-align:center;padding:40px;color:#8B889E;}
+  /* クリエ用:会員をさがす */
+  #findBox{background:#fff;border-radius:14px;padding:20px;box-shadow:0 1px 6px rgba(0,0,0,.06);max-width:460px;margin:0 auto;}
+  #findBox h2{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;color:var(--deep);font-size:16px;margin-bottom:4px;}
+  #findBox .lead{font-size:12.5px;color:#77748A;margin-bottom:16px;line-height:1.7;}
+  #findBox .field{margin-bottom:13px;}
+  #findBox select{width:100%;padding:12px 13px;font-size:16px;border:2px solid var(--line);border-radius:10px;font-family:inherit;background:var(--paper);}
+  #findBox .btn-find{width:100%;padding:13px;border-radius:11px;background:var(--deep);color:#fff;font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:15px;}
+  #findBox .hint{font-size:11.5px;color:#8B889E;margin-top:12px;line-height:1.8;}
+
   /* 個人詳細モーダル */
   #detailModal{display:none;position:fixed;inset:0;z-index:70;background:rgba(30,26,50,.55);align-items:center;justify-content:center;padding:16px;}
   #detailModal.show{display:flex;}
@@ -144,7 +153,7 @@
 <div id="loginView">
   <div class="lcard">
     <h1>🔐 育成システム 管理画面</h1>
-    <p class="sub">管理者・チーム代表・アドバンス専用<br>Googleアカウントで本人確認します</p>
+    <p class="sub">クリエイターズ以上の方がお使いいただけます<br>Googleアカウントで本人確認します</p>
     <div class="err" id="err"></div>
 
     <div class="gsec">
@@ -190,7 +199,26 @@
   <div class="bar"><div class="wrap" id="scopeLine"></div></div>
 
   <main>
-    <div class="wrap">
+    <div class="wrap" id="findArea" style="display:none;">
+      <div id="findBox">
+        <h2>🐣 ぴよぴよの丸をつける</h2>
+        <p class="lead">会員番号と系列を入力すると、その方のぴよぴよ脱出クイズの答え合わせができます。</p>
+        <div class="field">
+          <label style="display:block;font-size:12.5px;font-weight:700;color:var(--deep);margin-bottom:5px;">会員番号</label>
+          <input type="text" id="findId" inputmode="numeric" placeholder="00012345"
+                 style="width:100%;padding:12px 13px;font-size:16px;border:2px solid var(--line);border-radius:10px;font-family:inherit;background:var(--paper);">
+        </div>
+        <div class="field">
+          <label style="display:block;font-size:12.5px;font-weight:700;color:var(--deep);margin-bottom:5px;">系列</label>
+          <select id="findKeiretsu"></select>
+        </div>
+        <button class="btn-find" onclick="findMember()">この方を呼び出す</button>
+        <p class="hint">※ 会員番号と系列の両方が合っていないと開けません。<br>
+        ※ 呼び出せない場合は、ご本人に番号と系列をご確認ください。</p>
+      </div>
+    </div>
+
+    <div class="wrap" id="listArea">
       <table>
         <thead>
           <tr>
@@ -208,7 +236,12 @@
         ⭕ = 先生の丸の数 / 🐣 = 本人チェックの数<br>
 「クリエ」を付けると②③が解放されます。<br>
         権限は積み重ね式です:管理画面に入るには「アドバンス」が必要で、そこに「系列代表」「チーム代表」を追加します。<br>
-        操作できる範囲 — チーム代表/管理者:全員・全フラグ・担当系列の設定 ／ 系列代表:担当系列のクリエ・アドバンス ／ アドバンス:担当系列のクリエのみ
+        操作できる範囲<br>
+        ・チーム代表/管理者:全員の閲覧・全フラグ・担当系列の設定<br>
+        ・系列代表:担当系列の閲覧、クリエ/アドバンスの付与<br>
+        ・アドバンス:担当系列の閲覧、クリエの付与<br>
+        ・クリエ:一覧は見られません(会員番号+系列で呼び出して①の丸つけのみ)<br>
+        ※ 丸つけは系列に関係なく全会員が対象です
       </div>
     </div>
   </main>
@@ -517,17 +550,42 @@ async function saveScope(){
 }
 
 
+
+/* ================= クリエ用:会員をさがす ================= */
+function buildFindKeiretsu(){
+  const sel = document.getElementById("findKeiretsu");
+  if(sel.options.length > 0) return;
+  sel.innerHTML = '<option value="">選択してください</option>'
+    + KEIRETSU.map(k=>`<option value="${k}">${k}</option>`).join("");
+}
+
+function findMember(){
+  const id = document.getElementById("findId").value.trim();
+  const kei = document.getElementById("findKeiretsu").value;
+  if(!id){ toast("会員番号を入力してください"); return; }
+  if(!kei){ toast("系列を選んでください"); return; }
+  openDetail(id, kei);
+}
+
 /* ================= 個人詳細:先生の丸をつける ================= */
 let detailData = null;
 
-async function openDetail(id){
+let findKeiretsu = "";   // クリエが検索したときの系列
+
+async function openDetail(id, keiretsu){
+  findKeiretsu = keiretsu || "";
   try{
     toast("読み込んでいます…");
-    const url = `${GAS_URL}?action=adminDetail&id=${encodeURIComponent(admin.id)}&pin=${encodeURIComponent(admin.pin)}&email=${encodeURIComponent(admin.email)}&target=${encodeURIComponent(id)}&apps=${encodeURIComponent(APPS)}`;
+    const url = `${GAS_URL}?action=adminDetail&id=${encodeURIComponent(admin.id)}&pin=${encodeURIComponent(admin.pin)}&email=${encodeURIComponent(admin.email)}&target=${encodeURIComponent(id)}&apps=${encodeURIComponent(APPS)}&keiretsu=${encodeURIComponent(findKeiretsu)}`;
     const res = await fetch(url);
     const j = await res.json();
     if(j.ok === false){
-      toast({outofscope:"担当系列外の方です", notfound:"見つかりませんでした"}[j.error] || "読み込めませんでした");
+      toast({
+        outofscope:"担当系列外の方です",
+        notfound:"その会員番号は見つかりませんでした",
+        needkeiretsu:"系列を選んでください",
+        keiretsu_mismatch:"会員番号と系列が一致しません。ご確認ください"
+      }[j.error] || "読み込めませんでした");
       return;
     }
     detailData = j;
@@ -542,8 +600,13 @@ function renderDetail(){
   document.getElementById("dmSub").textContent =
     m.id + "｜" + (m.keiretsu || "系列未設定") + (m.role ? "｜" + m.role : "");
 
+  // 自分が丸をつけられるプログラムだけ表示
+  const showApps = detailData.canMarkApps && detailData.canMarkApps.length
+    ? Object.keys(ITEM_MASTER).filter(a => detailData.canMarkApps.indexOf(a) >= 0)
+    : Object.keys(ITEM_MASTER);
+
   const body = document.getElementById("dmBody");
-  body.innerHTML = Object.keys(ITEM_MASTER).map(app=>{
+  body.innerHTML = showApps.map(app=>{
     const master = ITEM_MASTER[app];
     const pg = detailData.progress[app] || {marks:[], self:{}, grad:""};
     const marks = pg.marks || [];
@@ -608,25 +671,32 @@ async function saveMarks(){
   if(!detailData) return;
   const target = detailData.member.id;
   try{
-    for(const app of Object.keys(ITEM_MASTER)){
+    const apps = detailData.canMarkApps && detailData.canMarkApps.length
+      ? detailData.canMarkApps : Object.keys(ITEM_MASTER);
+    for(const app of apps){
+      const boxes = document.querySelectorAll(`.dm-item[data-app="${app}"]`);
+      if(boxes.length === 0) continue;   // 画面に出ていないものは触らない
       const checked = Array.from(document.querySelectorAll(`.dm-item[data-app="${app}"] input:checked`)).map(b=>b.value);
       const items = ITEM_MASTER[app].items.map(x=>x[0]).join(",");
       const before = ((detailData.progress[app]||{}).marks || []).join(",");
       if(checked.join(",") === before) continue;   // 変更なしはスキップ
       const body = new URLSearchParams({
         action:"adminSetMarks", id:admin.id, pin:admin.pin, email:admin.email,
-        target:String(target), app:app, marks:checked.join(","), items:items
+        target:String(target), app:app, marks:checked.join(","), items:items,
+        keiretsu: findKeiretsu
       });
       const res = await fetch(GAS_URL, {method:"POST", body});
       const j = await res.json();
       if(j.ok === false){
-        toast({outofscope:"担当系列外の方は操作できません"}[j.error] || "保存できませんでした");
+        toast({outofscope:"担当系列外の方は操作できません",
+               noperm_app:"このプログラムの丸をつける権限がありません",
+               keiretsu_mismatch:"会員番号と系列が一致しません"}[j.error] || "保存できませんでした");
         return;
       }
     }
     toast("先生の丸を保存しました⭕");
     closeDetail();
-    load();
+    if(!data.listDenied) load();
   }catch(e){ toast("通信できませんでした"); }
 }
 
@@ -648,6 +718,6 @@ function toast(msg){
 
 
 </script>
-<div class="verTag">v1.5 (2026/08/14)</div>
+<div class="verTag">v1.7 (2026/08/14)</div>
 </body>
 </html>
