@@ -70,9 +70,9 @@
   #loading small{font-size:12px;color:#7A8A80;}
 
   .verTag{
-    position:fixed;left:0;right:0;bottom:8px;
-    text-align:center;font-size:9.5px;color:rgba(255,255,255,.45);
-    letter-spacing:.05em;font-family:monospace;pointer-events:none;
+    display:block;text-align:center;
+    font-size:9.5px;color:#C3BFD4;letter-spacing:.05em;
+    font-family:monospace;margin-top:6px;
   }
 </style>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -125,6 +125,7 @@
       <a href="#" onclick="if(confirm('この端末に保存された学習の記録を消します。よろしいですか?\n(スプレッドシート側の記録は消えません)')){clearSkyLocal();location.reload();}return false;" style="color:#9AA8A0;">この端末の記録をリセット</a><br>
       交通整備課|クリエイターズ育成部門
     </p>
+    <div class="verTag">v1.2 (2026/08/14)</div>
   </div>
 
   <div id="loading">
@@ -344,6 +345,5 @@ async function login(){
 
 if("serviceWorker" in navigator){ navigator.serviceWorker.register("./gcon-sw.js").catch(()=>{}); }
 </script>
-<div class="verTag">v1.1 (2026/08/14)</div>
 </body>
 </html>
