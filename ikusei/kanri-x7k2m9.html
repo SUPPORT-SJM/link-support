@@ -27,6 +27,14 @@
   .field label{display:block;font-size:12.5px;font-weight:700;color:var(--deep);margin-bottom:5px;}
   .field input{width:100%;padding:12px 13px;font-size:16px;border:2px solid var(--line);border-radius:10px;font-family:inherit;background:var(--paper);}
   .field input:focus{outline:none;border-color:var(--leaf);}
+  .gsec{margin-bottom:16px;padding-bottom:16px;border-bottom:1.5px solid var(--line);}
+  .gsec .lead{font-size:12px;color:#77748A;margin-bottom:9px;text-align:center;}
+  #gBtnWrap{display:flex;justify-content:center;min-height:44px;}
+  .gdone{display:none;background:#EAF7F0;border-radius:10px;padding:10px 12px;font-size:12px;color:#2F7A5C;text-align:center;line-height:1.6;}
+  .gdone.show{display:block;}
+  .gdone b{display:block;font-size:12.5px;}
+  .gdone a{color:#77748A;font-size:11px;}
+  .locked{opacity:.4;pointer-events:none;}
   .btn-main{width:100%;padding:14px;border-radius:12px;background:var(--deep);color:#fff;font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:15px;}
   .err{display:none;background:#FDEBEB;color:#B33;border-radius:9px;padding:10px 13px;font-size:12.5px;margin-bottom:12px;}
 
@@ -63,6 +71,7 @@
   }
   .fbtn.on{background:var(--leaf);border-color:var(--leaf);color:#fff;}
   .fbtn.adv.on{background:var(--blue);border-color:var(--blue);}
+  .fbtn.kei.on{background:#7BB3A0;border-color:#7BB3A0;color:#fff;}
   .fbtn.rep.on{background:var(--amber);border-color:var(--amber);color:#5C4200;}
   .fbtn.adm.on{background:var(--red);border-color:var(--red);color:#fff;}
   .fbtn:disabled{opacity:.35;cursor:not-allowed;}
@@ -72,6 +81,7 @@
   #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
   .legend{font-size:11px;color:#8B889E;margin-top:12px;line-height:1.9;}
 </style>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
 
@@ -79,21 +89,30 @@
 <div id="loginView">
   <div class="lcard">
     <h1>🔐 育成システム 管理画面</h1>
-    <p class="sub">管理者・チーム代表・アドバンス専用</p>
+    <p class="sub">管理者・チーム代表・アドバンス専用<br>Googleアカウントで本人確認します</p>
     <div class="err" id="err"></div>
-    <div class="field">
-      <label>会員番号</label>
-      <input type="text" id="inId" inputmode="numeric" placeholder="00012345">
+
+    <div class="gsec">
+      <p class="lead">Googleアカウントで本人確認します</p>
+      <div id="gBtnWrap"></div>
+      <div class="gdone" id="gDone">
+        <b>✅ 確認できました</b>
+        <span id="gMail"></span><br>
+        <a href="#" onclick="resetGoogle();return false;">別のアカウントにする</a>
+      </div>
     </div>
-    <div class="field">
-      <label>パスワード(4桁)</label>
-      <input type="password" id="inPin" inputmode="numeric" maxlength="4">
+
+    <div id="mainFields" class="locked">
+      <div class="field">
+        <label>会員番号</label>
+        <input type="text" id="inId" inputmode="numeric" placeholder="00012345">
+      </div>
+      <div class="field">
+        <label>パスワード(4桁)</label>
+        <input type="password" id="inPin" inputmode="numeric" maxlength="4">
+      </div>
     </div>
-    <div class="field">
-      <label>管理パスワード</label>
-      <input type="password" id="inPass" placeholder="管理者から共有されたもの">
-    </div>
-    <button class="btn-main" id="loginBtn" onclick="login()">ログイン</button>
+    <button class="btn-main locked" id="loginBtn" onclick="login()">ログイン</button>
   </div>
 </div>
 
@@ -132,7 +151,9 @@
       </table>
       <div class="legend">
         ⭕ = 先生の丸の数 / 🐣 = 本人チェックの数<br>
-        「クリエ」を付けると②③が解放されます。アドバンスは担当系列の方のクリエ付与のみ可能です。
+「クリエ」を付けると②③が解放されます。<br>
+        権限は積み重ね式です:管理画面に入るには「アドバンス」が必要で、そこに「系列代表」「チーム代表」を追加します。<br>
+        操作できる範囲 — チーム代表/管理者:全員・全フラグ ／ 系列代表:担当系列のクリエ・アドバンス ／ アドバンス:担当系列のクリエのみ
       </div>
     </div>
   </main>
@@ -142,25 +163,68 @@
 
 <script>
 const GAS_URL = "https://script.google.com/macros/s/AKfycbzY2l20zwGULjnKRUqvRpbH79fPkl5e-sWNVoXEIgBrDpqhjDAx2zLvJuqO3sZxAfHj/exec";
+const GOOGLE_CLIENT_ID = "315827385958-ikdpkfhkr6nmrgql470aolt4pv27pak3.apps.googleusercontent.com";
 const $ = (s)=>document.querySelector(s);
-let admin = null;       // {id,pin,pass}
+let admin = null;       // {id,pin,email}
+let googleEmail = "";
+
+function decodeJwt(token){
+  try{
+    const base = token.split(".")[1].replace(/-/g,"+").replace(/_/g,"/");
+    const json = decodeURIComponent(atob(base).split("").map(c=>
+      "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2)).join(""));
+    return JSON.parse(json);
+  }catch(e){ return null; }
+}
+function onGoogleCredential(response){
+  const info = decodeJwt(response.credential);
+  if(!info || !info.email){
+    $("#err").textContent = "Googleアカウントの確認に失敗しました";
+    $("#err").style.display = "block"; return;
+  }
+  googleEmail = info.email;
+  $("#gBtnWrap").style.display = "none";
+  $("#gDone").classList.add("show");
+  $("#gMail").textContent = googleEmail;
+  $("#mainFields").classList.remove("locked");
+  $("#loginBtn").classList.remove("locked");
+}
+function resetGoogle(){
+  googleEmail = "";
+  $("#gDone").classList.remove("show");
+  $("#gBtnWrap").style.display = "flex";
+  $("#mainFields").classList.add("locked");
+  $("#loginBtn").classList.add("locked");
+  try{ google.accounts.id.disableAutoSelect(); }catch(e){}
+}
+window.onload = function(){
+  try{
+    google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: onGoogleCredential, auto_select: false });
+    google.accounts.id.renderButton(document.getElementById("gBtnWrap"),
+      { theme:"outline", size:"large", text:"signin_with", locale:"ja", width:300 });
+  }catch(e){
+    document.getElementById("gBtnWrap").innerHTML =
+      '<p style="font-size:12px;color:#B33;">Googleログインを読み込めませんでした</p>';
+  }
+};
 let data = null;        // サーバーからの一覧
 
 async function login(){
   const id = $("#inId").value.trim();
   const pin = $("#inPin").value.trim();
-  const pass = $("#inPass").value;
   const err = $("#err");
   err.style.display = "none";
-  if(!id || !pin || !pass){
-    err.textContent = "すべて入力してください"; err.style.display="block"; return;
+  if(!googleEmail){
+    err.textContent = "先にGoogleで本人確認をしてください"; err.style.display="block"; return;
+  }
+  if(!id || !pin){
+    err.textContent = "会員番号とパスワードを入力してください"; err.style.display="block"; return;
   }
   $("#loginBtn").disabled = true;
   $("#loginBtn").textContent = "確認中…";
-  admin = {id, pin, pass};
+  admin = {id, pin, email:googleEmail};
   const ok = await load(true);
   if(ok){
-    sessionStorage.setItem("skyadmin", JSON.stringify(admin));
     $("#loginView").style.display = "none";
     $("#appView").style.display = "block";
   }else{
@@ -171,18 +235,19 @@ async function login(){
 }
 
 function logout(){
-  sessionStorage.removeItem("skyadmin");
+  try{ google.accounts.id.disableAutoSelect(); }catch(e){}
   location.reload();
 }
 
 async function load(isLogin){
   try{
-    const url = `${GAS_URL}?action=adminList&id=${encodeURIComponent(admin.id)}&pin=${encodeURIComponent(admin.pin)}&pass=${encodeURIComponent(admin.pass)}`;
+    const url = `${GAS_URL}?action=adminList&id=${encodeURIComponent(admin.id)}&pin=${encodeURIComponent(admin.pin)}&email=${encodeURIComponent(admin.email)}`;
     const res = await fetch(url);
     const j = await res.json();
     if(j.ok === false){
       const msg = {
-        adminpass:"管理パスワードが違います",
+        needgoogle:"Googleでの本人確認が必要です",
+        email:"この会員番号は別のGoogleアカウント(" + (j.savedHint||"***") + ")で登録されています",
         pin:"パスワードが違います",
         noperm:"この会員番号には管理権限がありません",
         nomember:"会員番号が見つかりません"
@@ -192,7 +257,8 @@ async function load(isLogin){
       return false;
     }
     data = j;
-    $("#meLine").textContent = (j.adminName||"") + "さん｜" + (j.isFull ? "全体管理" : "担当系列のみ");
+    const lvl = j.isFull ? "全体管理" : (j.isKeiRep ? "系列代表(担当系列)" : "アドバンス(担当系列)");
+    $("#meLine").textContent = (j.adminName||"") + "さん｜" + lvl;
     $("#scopeLine").innerHTML = j.isFull
       ? `全 <b>${j.members.length}</b> 名を表示中`
       : `担当系列:<b>${(j.scope||[]).join(" / ") || "未設定"}</b> <span class="chip">${j.members.length}名</span>`;
@@ -229,13 +295,17 @@ function render(){
       : (m.grSelf || m.grMark ? `<span class="wip">✓${m.grSelf}/${m.grItems||"–"}</span>` : '<span class="wip">–</span>');
 
     const canFull = data.isFull;
+    const canKei = data.isKeiRep;
+    const allowed = canFull ? ["クリエ","アドバンス","系列代表","チーム代表","管理者"]
+                  : canKei ? ["クリエ","アドバンス"]
+                  : ["クリエ"];
     const fb = (flag, cls) => {
       const on = has(m.role, flag);
-      const disabled = (!canFull && flag !== "クリエ") ? "disabled" : "";
+      const disabled = allowed.indexOf(flag) < 0 ? "disabled" : "";
       return `<button class="fbtn ${cls} ${on?'on':''}" ${disabled}
         onclick="setFlag('${m.id}','${flag}',${on?0:1})">${flag}</button>`;
     };
-    const scopeBtn = canFull && has(m.role,"アドバンス")
+    const scopeBtn = (canFull || canKei) && has(m.role,"アドバンス")
       ? `<br><button class="scope-btn" onclick="editScope('${m.id}','${(m.scope||"").replace(/'/g,"")}')">担当系列: ${m.scope || "未設定"}</button>`
       : "";
 
@@ -244,7 +314,7 @@ function render(){
       <td class="kei">${m.keiretsu || "–"}</td>
       <td class="prog">${piyo}</td>
       <td class="prog">${gr}</td>
-      <td><div class="flags">${fb("クリエ","")}${fb("アドバンス","adv")}${fb("チーム代表","rep")}${fb("管理者","adm")}</div>${scopeBtn}</td>
+      <td><div class="flags">${fb("クリエ","")}${fb("アドバンス","adv")}${fb("系列代表","kei")}${fb("チーム代表","rep")}${fb("管理者","adm")}</div>${scopeBtn}</td>
       <td class="kei">${m.lastSeen || "–"}</td>
     </tr>`;
   }).join("");
@@ -254,13 +324,15 @@ async function setFlag(target, flag, on){
   if(flag === "管理者" && on && !confirm("この方に「管理者」権限を与えます。よろしいですか?")) return;
   try{
     const body = new URLSearchParams({
-      action:"adminSetRole", id:admin.id, pin:admin.pin, pass:admin.pass,
+      action:"adminSetRole", id:admin.id, pin:admin.pin, email:admin.email,
       target:String(target), flag:flag, on:String(on)
     });
     const res = await fetch(GAS_URL, {method:"POST", body});
     const j = await res.json();
     if(j.ok === false){
-      toast({outofscope:"担当系列外の方は操作できません", noperm:"権限がありません"}[j.error] || "変更できませんでした");
+      toast({outofscope:"担当系列外の方は操作できません",
+             scopelimit:"自分の担当系列の範囲でのみ設定できます",
+             noperm:"この権限は操作できません"}[j.error] || "変更できませんでした");
       return;
     }
     toast(flag + (on ? " を付与しました" : " を外しました"));
@@ -273,12 +345,17 @@ async function editScope(target, current){
   if(v === null) return;
   try{
     const body = new URLSearchParams({
-      action:"adminSetScope", id:admin.id, pin:admin.pin, pass:admin.pass,
+      action:"adminSetScope", id:admin.id, pin:admin.pin, email:admin.email,
       target:String(target), scope:v
     });
     const res = await fetch(GAS_URL, {method:"POST", body});
     const j = await res.json();
-    if(j.ok === false){ toast("変更できませんでした"); return; }
+    if(j.ok === false){
+      toast({outofscope:"担当系列外の方は操作できません",
+             scopelimit:"自分の担当系列の範囲でのみ設定できます",
+             noperm:"権限がありません"}[j.error] || "変更できませんでした");
+      return;
+    }
     toast("担当系列を更新しました");
     load();
   }catch(e){ toast("通信できませんでした"); }
@@ -291,22 +368,11 @@ function toast(msg){
   setTimeout(()=>t.classList.remove("show"), 2000);
 }
 
-["inId","inPin","inPass"].forEach(k=>{
+["inId","inPin"].forEach(k=>{
   document.getElementById(k).addEventListener("keydown", e=>{ if(e.key==="Enter") login(); });
 });
 
-/* セッション中は再ログイン不要(タブを閉じると消えます) */
-(function(){
-  const s = sessionStorage.getItem("skyadmin");
-  if(!s) return;
-  try{ admin = JSON.parse(s); }catch(e){ return; }
-  load(true).then(ok=>{
-    if(ok){
-      $("#loginView").style.display = "none";
-      $("#appView").style.display = "block";
-    }else{ admin = null; sessionStorage.removeItem("skyadmin"); }
-  });
-})();
+
 </script>
 </body>
 </html>
