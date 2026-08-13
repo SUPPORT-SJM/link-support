@@ -125,7 +125,7 @@
       <span class="pb hot">クリエイターズ育成プログラム ①</span>
     </div>
     <h1>🐣 ぴよぴよ脱出クイズ</h1>
-    <p class="sub">7問すべてに<b>先生の丸⭕</b>がついたら卒業です。答え合わせは担当コーチと行います。</p>
+    <p class="sub">全問に<b>先生の丸⭕</b>がついたら卒業です。答え合わせは担当コーチと行います。</p>
     <div class="login-err" id="loginErr"></div>
     <div class="field">
       <label>会員番号</label>
@@ -187,11 +187,11 @@
     <div class="prog-card">
       <div class="row">
         <b>⭕ 先生の丸</b>
-        <span class="cnt"><span id="teacherN">0</span> / 7</span>
+        <span class="cnt"><span id="teacherN">0</span> / <span id="totalN">7</span></span>
       </div>
       <div class="bar"><i id="progBar"></i></div>
       <div class="subrow">
-        <small>じぶんチェック:<span id="selfN">0</span>/7 → 答え合わせで先生の丸⭕がもらえます</small>
+        <small>じぶんチェック:<span id="selfN">0</span>/<span id="totalN2">7</span> → 答え合わせで先生の丸⭕がもらえます</small>
         <button class="btn-refresh" onclick="refreshMarks(true)">🔄 先生の丸を確認する</button>
       </div>
     </div>
@@ -209,8 +209,9 @@
   </section>
 
   <footer>
+    <a href="./home.html" style="color:var(--green-leaf);font-weight:700;text-decoration:none;">🏠 マイホームにもどる</a><br>
     クリエイターズ育成プログラム ①<br>
-    交通整備課|クリエイターズ育成部門|統括:さかいあたる
+    交通整備課|クリエイターズ育成部門
   </footer>
 </div>
 
@@ -221,7 +222,31 @@
    設定:GASのURL(②マイページと同じもの)を貼り付けてください。
    空("")のままでも動きます(その場合は自分チェックのみモード)。
 ================================================================ */
-const GAS_URL = "";
+/* ================================================================
+   接続先の設定【将来の系列分割用】
+   ----------------------------------------------------------------
+   ★いまは全系列が同じ1ファイルに保存されます("default" だけ)。
+   ★人数が増えて分けたくなったら、系列名をキーにURLを足すだけ。
+     会員の操作は何も変わりません(自動で振り分けられます)。
+
+     例)HEROとFairyTailだけ別ファイルにする場合:
+       const GAS_MAP = {
+         "🪽HERO":      "https://…HERO用のURL…/exec",
+         "📚FairyTail": "https://…FairyTail用のURL…/exec",
+         "default":     "https://script.google.com/macros/s/AKfycbzY2l20zwGULjnKRUqvRpbH79fPkl5e-sWNVoXEIgBrDpqhjDAx2zLvJuqO3sZxAfHj/exec"
+       };
+================================================================ */
+const GAS_MAP = {
+  "default": "https://script.google.com/macros/s/AKfycbzY2l20zwGULjnKRUqvRpbH79fPkl5e-sWNVoXEIgBrDpqhjDAx2zLvJuqO3sZxAfHj/exec"
+};
+
+/* 系列に応じた接続先を返す(見つからなければ default) */
+function gasUrlFor(keiretsu){
+  try{ return GAS_MAP[keiretsu] || GAS_MAP["default"] || ""; }
+  catch(e){ return GAS_MAP["default"] || ""; }
+}
+
+const APP_ID  = "piyo";   /* このサイトの名前(スプレッドシートのタブ名になります) */
 
 /* 系列名リスト ※gcon-mypage.html と同じリストに揃えて編集してね */
 const KEIRETSU = [
@@ -235,12 +260,12 @@ const KEIRETSU = [
    hint = {text, links:[{url,label}], slot}/こたえ側は video:{url,label} と slot
 ================================================================ */
 const QUIZ = [
-  {id:"q1", q:"1stサポート4つは何でしょう?",
+  {id:"P1", q:"1stサポート4つは何でしょう?",
    hint:{text:"新しいメンバーさんが最初に案内される「4つの場」のこと。ぜんぶ会やイベントの名前だよ。チームLINEの案内を思い出してみて!",
          slot:"🎥 ヒント動画:制作中"},
    a:`<ol><li>ユーザーサポート会(動画視聴会)</li><li>グルコン</li><li>LINKセミナー</li><li>チーム交流会</li></ol>`,
    slot:"🎥 かいせつ動画:制作中"},
-  {id:"q2", q:"ボーナスの種類5つは何でしょう?それぞれ説明もできますか?",
+  {id:"P2", q:"ボーナスの種類5つは何でしょう?それぞれ説明もできますか?",
    hint:{text:"「ス」ではじまるものが2つあるよ。ビジネスマイページの報酬のページをひらいて見てみるのもアリ!",
          slot:"🔗 参考リンク:あとで追加"},
    a:`<ol>
@@ -251,28 +276,28 @@ const QUIZ = [
       <li><b>シェアボーナス</b>:全体から500円プール/全サイト売上からも10%を条件によりランク取得者に分配(コネクターシェア・リンカーシェアの2種類)</li>
       </ol>`,
    slot:"🎥 かいせつ動画:新しく撮影予定"},
-  {id:"q3", q:"ビジネスマイページのマップ図で、ランクが影響する箇所はどの項目でしょう?",
+  {id:"P3", q:"ビジネスマイページのマップ図で、ランクが影響する箇所はどの項目でしょう?",
    hint:{text:"じっさいに自分のマップ図をひらいて、ランクの条件になっている数字をさがしてみよう。3つあるよ。",
          slot:"🖼 画像つきヒント:制作中"},
    a:`<ol><li>直紹介数(自分を含める)</li><li>当月自己購入メンバー</li><li>当月自己購入メンバー(パーソナル)</li></ol>`,
    slot:"🖼 マップ図の画像つき解説:制作中"},
-  {id:"q4", q:"ビジネスマイページのマップ図に、数値が反映する日はいつでしょう?",
+  {id:"P4", q:"ビジネスマイページのマップ図に、数値が反映する日はいつでしょう?",
    hint:{text:"支払い方法(クレカ/口座振替)によって、日にちがちがうよ。",
          slot:"🖼 画像つきヒント:制作中"},
    a:`<p><b>クレカ</b>:13日引き落とし→反映は14日(遅くとも15日ごろ)</p>
       <p><b>口座振替</b>:21日の朝4時ごろ</p>`,
    slot:"🖼 マップ図の画像つき解説:制作中"},
-  {id:"q5", q:"概要書面と契約書面の違いは何でしょう?",
+  {id:"P5", q:"概要書面と契約書面の違いは何でしょう?",
    hint:{text:"わたすタイミングが「登録の前」か「後」か、に注目!",
          slot:"🎥 ヒント動画:制作中"},
    a:`<p><b>概要書面</b>:登録<b>前</b>に渡す書類で「概要」が書いてある。本人の意志で電子PDFか書面を選ぶ。</p>
       <p><b>契約書面</b>:登録<b>後</b>に郵送で届き「契約内容」が書かれている。</p>`,
    slot:"🎥 かいせつ動画:制作中"},
-  {id:"q6", q:"クーリングオフはいつから何日間でしょう?",
+  {id:"P6", q:"クーリングオフはいつから何日間でしょう?",
    hint:{text:"2週間より長いよ。数えはじめる日は「契約書面が届いてから」。"},
    a:`<p>契約書面が届いてから<b>20日間</b></p>`,
    slot:"🎥 かいせつ動画:制作中"},
-  {id:"q7", q:"クリエの5スキルは何でしょう?",
+  {id:"P7", q:"クリエの5スキルは何でしょう?",
    hint:{text:"「けねん…」「シミュ…」「せん…」+実技で大事な2つ(フォーカス・導員)。",
          slot:"🎥 ヒント動画:制作中"},
    a:`<ol><li>懸念解消</li><li>導員</li><li>フォーカス</li><li>シミュレーション</li><li>戦略</li></ol>`,
@@ -280,6 +305,9 @@ const QUIZ = [
 ];
 
 /* ================================================================ */
+/* 全項目のID一覧(P1,P2,... 形式でスプレッドシートに渡します) */
+const ITEM_IDS = QUIZ.map(q=>q.id).join(",");
+
 let member = null;
 let selfChecks = {};   // じぶんチェック(この端末)
 let teacher = {};      // 先生の丸(スプレッドシートから)
@@ -310,13 +338,13 @@ async function login(){
     return;
   }
   member = {id, pin, name, keiretsu};
-  selfChecks = JSON.parse(localStorage.getItem("piyo_self_"+id) || "{}");
+  selfChecks = JSON.parse(localStorage.getItem("piyo_self_v2_"+id) || "{}");
 
-  if(GAS_URL){
+  if(gasUrlFor(member ? member.keiretsu : "")){
     // 登録(初回)+先生の丸を読み込み
     try{
-      const body = new URLSearchParams({action:"piyoreg", id, pin, name:name||"", keiretsu:keiretsu||""});
-      const res = await fetch(GAS_URL, {method:"POST", body});
+      const body = new URLSearchParams({action:"login", app:APP_ID, id, pin, name:name||"", keiretsu:keiretsu||""});
+      const res = await fetch(gasUrlFor(keiretsu), {method:"POST", body});
       const j = await res.json();
       if(j.ok === false && j.error === "pin"){
         err.textContent = "パスワードが一致しません。忘れた場合は担当コーチにご確認ください。";
@@ -346,17 +374,20 @@ function enterQuiz(){
 }
 
 async function refreshMarks(showToast){
-  if(!GAS_URL){
+  if(!gasUrlFor(member && member.keiretsu)){
     if(showToast) toast("オンライン同期は準備中です");
     update();
     return;
   }
   try{
-    const res = await fetch(`${GAS_URL}?action=piyoload&id=${encodeURIComponent(member.id)}&pin=${encodeURIComponent(member.pin)}`);
+    const res = await fetch(`${gasUrlFor(member && member.keiretsu)}?action=load&app=${APP_ID}&id=${encodeURIComponent(member.id)}&pin=${encodeURIComponent(member.pin)}&items=${encodeURIComponent(ITEM_IDS)}`);
     const j = await res.json();
     if(j.ok && j.marks){
       teacher = {};
-      j.marks.forEach((m,i)=>{ if(m) teacher["q"+(i+1)] = true; });
+      j.marks.forEach(name=>{ teacher[name] = true; });
+      if(j.data){
+        try{ selfChecks = Object.assign({}, JSON.parse(j.data), selfChecks); }catch(e){}
+      }
       render();
       if(showToast) toast("先生の丸を更新しました⭕");
     }
@@ -367,10 +398,16 @@ async function refreshMarks(showToast){
 
 function render(){
   const root = $("#quizRoot");
+  // 描き直す前に、いま開いているヒント・答えを記憶しておく
+  const prev = {};
+  root.querySelectorAll(".q").forEach(el=>{
+    prev[el.id] = {h:el.classList.contains("hint-open"), a:el.classList.contains("open")};
+  });
   root.innerHTML = "";
   QUIZ.forEach((item, i)=>{
+    const st = prev["card_"+item.id] || {};
     const el = document.createElement("div");
-    el.className = "q" + (teacher[item.id] ? " approved" : "");
+    el.className = "q" + (teacher[item.id] ? " approved" : "") + (st.h ? " hint-open" : "") + (st.a ? " open" : "");
     el.id = "card_"+item.id;
     const h = item.hint || {};
     const hintInner =
@@ -384,8 +421,8 @@ function render(){
       </div>
       <span class="t-badge">${teacher[item.id] ? "⭕ 先生の丸、もらった!" : "👨‍🏫 先生の丸:答え合わせでもらえるよ"}</span>
       <div class="q-btns">
-        <button class="q-toggle hintbtn" id="hbtn_${item.id}" onclick="toggleHint('${item.id}')">💡 ヒントを見る</button>
-        <button class="q-toggle" id="abtn_${item.id}" onclick="toggleAns('${item.id}')">こたえを見る</button>
+        <button class="q-toggle hintbtn" id="hbtn_${item.id}" onclick="toggleHint('${item.id}')">${st.h ? "💡 ヒントをとじる" : "💡 ヒントを見る"}</button>
+        <button class="q-toggle" id="abtn_${item.id}" onclick="toggleAns('${item.id}')">${st.a ? "こたえをとじる" : "こたえを見る"}</button>
         <button class="btn-self ${selfChecks[item.id]?'on':''}" onclick="toggleSelf('${item.id}')">${selfChecks[item.id] ? "🐣 じぶんチェック済み" : "おぼえたら押す"}</button>
       </div>
       <div class="q-hint"><div class="h-box">${hintInner || "ヒントは準備中です"}</div></div>
@@ -412,16 +449,32 @@ function toggleSelf(id){
   selfChecks[id] = !selfChecks[id];
   if(!selfChecks[id]) delete selfChecks[id];
   else toast("いいね!コーチと答え合わせしよう📞");
-  localStorage.setItem("piyo_self_"+member.id, JSON.stringify(selfChecks));
+  localStorage.setItem("piyo_self_v2_"+member.id, JSON.stringify(selfChecks));
   render();
+  saveSelf();
+}
+
+let saveTimer = null;
+function saveSelf(){
+  if(!gasUrlFor(member && member.keiretsu)) return;
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(()=>{
+    const body = new URLSearchParams({
+      action:"save", app:APP_ID, id:member.id, pin:member.pin,
+      items:ITEM_IDS, data:JSON.stringify(selfChecks)
+    });
+    fetch(gasUrlFor(member && member.keiretsu), {method:"POST", body}).catch(()=>{});
+  }, 700);
 }
 function update(){
   const tn = Object.keys(teacher).length;
   const sn = Object.keys(selfChecks).length;
   $("#teacherN").textContent = tn;
+  $("#totalN").textContent = QUIZ.length;
   $("#selfN").textContent = sn;
+  if($("#totalN2")) $("#totalN2").textContent = QUIZ.length;
   $("#progBar").style.width = (tn/QUIZ.length*100) + "%";
-  $("#gradCard").classList.toggle("show", tn === QUIZ.length);
+  $("#gradCard").classList.toggle("show", QUIZ.length>0 && QUIZ.every(q=>teacher[q.id]));
 }
 function toast(msg){
   const t = $("#toast");
@@ -432,10 +485,18 @@ function toast(msg){
 
 /* auto login */
 (function(){
+  // 玄関(index.html)でログイン済みならその情報を使う
+  const sky = localStorage.getItem("skyarc_member");
+  if(sky && !localStorage.getItem("piyo_member")){
+    try{
+      const m = JSON.parse(sky);
+      if(m && m.id) localStorage.setItem("piyo_member", JSON.stringify(m));
+    }catch(e){}
+  }
   const saved = localStorage.getItem("piyo_member");
   if(saved){
     member = JSON.parse(saved);
-    selfChecks = JSON.parse(localStorage.getItem("piyo_self_"+member.id) || "{}");
+    selfChecks = JSON.parse(localStorage.getItem("piyo_self_v2_"+member.id) || "{}");
     enterQuiz();
     refreshMarks(false);
   }
