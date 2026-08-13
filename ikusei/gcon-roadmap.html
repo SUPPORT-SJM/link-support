@@ -254,18 +254,18 @@
     background:rgba(110,95,181,.96);backdrop-filter:blur(6px);
     color:#fff;
   }
-  #skyNav .inner{
+  #skyNav .sky-inner{
     max-width:560px;margin:0 auto;padding:9px 16px;
     display:flex;align-items:center;justify-content:space-between;gap:10px;
     font-size:12px;
   }
-  #skyNav a.back{
+  #skyNav a.sky-back{
     color:#fff;text-decoration:none;font-weight:700;
     background:rgba(255,255,255,.18);border-radius:999px;padding:6px 14px;
     white-space:nowrap;
   }
-  #skyNav .who{opacity:.9;flex:1;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  #skyNav button.out{
+  #skyNav .sky-who{opacity:.9;flex:1;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  #skyNav button.sky-out{
     background:rgba(255,255,255,.18);color:#fff;border:none;
     font-family:inherit;font-size:11.5px;font-weight:700;
     border-radius:999px;padding:6px 13px;cursor:pointer;white-space:nowrap;
@@ -300,10 +300,10 @@
 </head>
 <body>
 
-<div id="skyNav"><div class="inner">
-  <a class="back" id="navBack" href="./portal-supporter.html">‹ ポータル</a>
-  <span class="who" id="navWho"></span>
-  <button class="out" onclick="skyLogout()">ログアウト</button>
+<div id="skyNav"><div class="sky-inner">
+  <a class="sky-back" id="navBack" href="./portal-supporter.html">‹ ポータル</a>
+  <span class="sky-who" id="navWho"></span>
+  <button class="sky-out" onclick="skyLogout()">ログアウト</button>
 </div></div>
 <header class="hero">
   <div class="wrap">
@@ -484,6 +484,7 @@
 <footer>
   <div class="f-title">交通整備課|クリエイターズ育成部門</div>
   4週間後、一緒にみんなの夢を加速させましょう 🚀
+  <div class="verTag" style="margin-top:8px;color:rgba(255,255,255,.4);">v1.3 (2026/08/14)</div>
 </footer>
 
 <script>
@@ -526,6 +527,5 @@ function clearSkyLocal(){
   }catch(e){}
 }
 </script>
-<div class="verTag">v1.1 (2026/08/14)</div>
 </body>
 </html>
