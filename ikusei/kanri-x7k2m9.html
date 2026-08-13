@@ -177,6 +177,10 @@
       </div>
     </div>
     <button class="btn-main locked" id="loginBtn" onclick="login()">ログイン</button>
+    <p style="text-align:center;margin-top:16px;">
+      <a href="./index.html" style="color:#8B889E;font-size:12px;">‹ 育成プログラムにもどる</a>
+    </p>
+    <div class="verTag">v1.9 (2026/08/14)</div>
   </div>
 </div>
 
@@ -191,7 +195,7 @@
       <div class="tools">
         <input class="search" id="search" placeholder="名前・番号で検索" oninput="render()">
         <button onclick="load()">🔄 更新</button>
-        <button onclick="logout()">ログアウト</button>
+        <button onclick="logout()">ログアウトして育成へ戻る</button>
       </div>
     </div>
   </div>
@@ -243,6 +247,7 @@
         ・クリエ:一覧は見られません(会員番号+系列で呼び出して①の丸つけのみ)<br>
         ※ 丸つけは系列に関係なく全会員が対象です
       </div>
+      <div class="verTag" style="margin-top:16px;">v1.9 (2026/08/14)</div>
     </div>
   </main>
 </div>
@@ -394,7 +399,7 @@ async function login(){
 
 function logout(){
   try{ google.accounts.id.disableAutoSelect(); }catch(e){}
-  location.reload();
+  location.href = "./index.html";
 }
 
 async function load(isLogin){
@@ -722,6 +727,5 @@ function toast(msg){
 
 
 </script>
-<div class="verTag">v1.8 (2026/08/14)</div>
 </body>
 </html>
