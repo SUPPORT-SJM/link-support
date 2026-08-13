@@ -288,9 +288,10 @@
   </main>
 
   <footer>
+    <a href="./home.html" style="color:var(--green-leaf);font-weight:700;text-decoration:none;">🏠 マイホームにもどる</a><br>
     クリエイターズ育成プログラム<br>
     ① ぴよぴよ脱出クイズ|② グルコンリーダー育成(このページ)<br>
-    交通整備課|クリエイターズ育成部門|統括:さかいあたる<br>
+    交通整備課|クリエイターズ育成部門<br>
     <a href="#" onclick="showInstallHelp();return false;" style="color:var(--green-leaf);font-weight:700;">📲 ホーム画面に追加する方法</a>
   </footer>
 </div>
@@ -334,7 +335,31 @@
    設定:GASを設置したらURLをここに貼り付けてください。
    空("")のままでも動きます(その場合は端末保存のみモード)。
 ================================================================ */
-const GAS_URL = "";
+/* ================================================================
+   接続先の設定【将来の系列分割用】
+   ----------------------------------------------------------------
+   ★いまは全系列が同じ1ファイルに保存されます("default" だけ)。
+   ★人数が増えて分けたくなったら、系列名をキーにURLを足すだけ。
+     会員の操作は何も変わりません(自動で振り分けられます)。
+
+     例)HEROとFairyTailだけ別ファイルにする場合:
+       const GAS_MAP = {
+         "🪽HERO":      "https://…HERO用のURL…/exec",
+         "📚FairyTail": "https://…FairyTail用のURL…/exec",
+         "default":     "https://script.google.com/macros/s/AKfycbzY2l20zwGULjnKRUqvRpbH79fPkl5e-sWNVoXEIgBrDpqhjDAx2zLvJuqO3sZxAfHj/exec"
+       };
+================================================================ */
+const GAS_MAP = {
+  "default": "https://script.google.com/macros/s/AKfycbzY2l20zwGULjnKRUqvRpbH79fPkl5e-sWNVoXEIgBrDpqhjDAx2zLvJuqO3sZxAfHj/exec"
+};
+
+/* 系列に応じた接続先を返す(見つからなければ default) */
+function gasUrlFor(keiretsu){
+  try{ return GAS_MAP[keiretsu] || GAS_MAP["default"] || ""; }
+  catch(e){ return GAS_MAP["default"] || ""; }
+}
+
+const APP_ID  = "gr";   /* このサイトの名前(スプレッドシートのタブ名になります) */
 
 /* ================================================================
    系列名リスト(正式版)。変更があればここを編集してください。
@@ -371,54 +396,54 @@ const yt = (id,sec)=>`https://youtu.be/${id}?t=${sec}`;
 ================================================================ */
 const WEEKS = [
   {tag:"はじめに", title:"オリエンテーション", sub:"最初にここだけ見てね", tasks:[
-    {id:"t0_1", no:"0-1", title:"「4週間の地図」を読む", rec:"読み終わったら、いちばん気になった週を担当コーチにLINEしてみよう",
+    {id:"GR0_1", no:"0-1", title:"「4週間の地図」を読む", rec:"読み終わったら、いちばん気になった週を担当コーチにLINEしてみよう",
       link:{url:"./gcon-roadmap.html", label:"🗺 地図をひらく", end:""}},
-    {id:"t0_2", no:"0-2", title:"録音のやり方(スマホのボイスメモ)", making:true},
+    {id:"GR0_2", no:"0-2", title:"録音のやり方(スマホのボイスメモ)", making:true},
   ]},
   {tag:"WEEK 1", title:"🔍 フォーカス週", sub:"夢を聞ける人になる", tasks:[
-    {id:"t1_1", no:"1-1", title:"フォーカスとは?目的は「自分ごとにさせる」", rec:"目的を自分の言葉で30秒、録音してみよう",
+    {id:"GR1_1", no:"1-1", title:"フォーカスとは?目的は「自分ごとにさせる」", rec:"目的を自分の言葉で30秒、録音してみよう",
       link:{url:yt(V_TRAINING,545), label:"▶ 動画をみる(9:05から)", end:"〜10:47まで"}},
-    {id:"t1_2", no:"1-2", title:"5つの質問 お手本実演(翔子さん)", rec:"5つの質問を通しで録音してみよう",
+    {id:"GR1_2", no:"1-2", title:"5つの質問 お手本実演(翔子さん)", rec:"5つの質問を通しで録音してみよう",
       link:{url:yt(V_DEMO,204), label:"▶ 動画をみる(3:24から)", end:"〜7:43まで", alt:true}},
-    {id:"t1_3", no:"1-3", title:"規模感の深掘り(「世界平和です」への返し方)", rec:"深掘りの質問だけ録音してみよう",
+    {id:"GR1_3", no:"1-3", title:"規模感の深掘り(「世界平和です」への返し方)", rec:"深掘りの質問だけ録音してみよう",
       link:{url:yt(V_TRAINING,588), label:"▶ 動画をみる(9:48から)", end:"〜11:43まで"}},
-    {id:"t1_4", no:"1-4", title:"逆算の質問(3年後カフェの例)", rec:"逆算の質問を録音してみよう",
+    {id:"GR1_4", no:"1-4", title:"逆算の質問(3年後カフェの例)", rec:"逆算の質問を録音してみよう",
       link:{url:yt(V_TRAINING,787), label:"▶ 動画をみる(13:07から)", end:"〜14:28まで"}},
-    {id:"t1_5", no:"1-5", title:"フォーカスNG例→OK例 くらべてみよう", making:true},
+    {id:"GR1_5", no:"1-5", title:"フォーカスNG例→OK例 くらべてみよう", making:true},
   ]},
   {tag:"WEEK 2", title:"🌟 Tアップ週", sub:"30秒で人を輝かせる", tasks:[
-    {id:"t2_1", no:"2-1", title:"Tアップとは?「解説」とのちがい・キューピット役", rec:"ちがいを自分の言葉で30秒、録音してみよう",
+    {id:"GR2_1", no:"2-1", title:"Tアップとは?「解説」とのちがい・キューピット役", rec:"ちがいを自分の言葉で30秒、録音してみよう",
       link:{url:yt(V_TRAINING,868), label:"▶ 動画をみる(14:28から)", end:"〜16:24まで"}},
-    {id:"t2_2", no:"2-2", title:"お手本:経営者さん向けTアップ30秒", making:true},
-    {id:"t2_3", no:"2-3", title:"お手本:MLM経験者さん向け30秒", making:true},
-    {id:"t2_4", no:"2-4", title:"お手本:会社員・主婦さん向け30秒", making:true},
-    {id:"t2_5", no:"2-5", title:"TアップNG例→OK例 くらべてみよう", making:true},
-    {id:"t2_6", no:"2-6", title:"質問だしの促し方+挙手ボタン練習", rec:"促しのセリフを録音してみよう",
+    {id:"GR2_2", no:"2-2", title:"お手本:経営者さん向けTアップ30秒", making:true},
+    {id:"GR2_3", no:"2-3", title:"お手本:MLM経験者さん向け30秒", making:true},
+    {id:"GR2_4", no:"2-4", title:"お手本:会社員・主婦さん向け30秒", making:true},
+    {id:"GR2_5", no:"2-5", title:"TアップNG例→OK例 くらべてみよう", making:true},
+    {id:"GR2_6", no:"2-6", title:"質問だしの促し方+挙手ボタン練習", rec:"促しのセリフを録音してみよう",
       link:{url:yt(V_DEMO,1345), label:"▶ 動画をみる(22:25から)", end:"〜26:30まで", alt:true}},
-    {id:"t2_7", no:"2-7", title:"【提出】Tアップ ボイスメモ(代表と系列代表/実績と人柄)", rec:"翔子さんと自分の系列代表のTアップを録音して、担当コーチにLINEで送ろう"},
+    {id:"GR2_7", no:"2-7", title:"【提出】Tアップ ボイスメモ(代表と系列代表/実績と人柄)", rec:"翔子さんと自分の系列代表のTアップを録音して、担当コーチにLINEで送ろう"},
   ]},
   {tag:"WEEK 3", title:"🔥 アフター週(いちばん大事!)", sub:"その場でやり切る力", tasks:[
-    {id:"t3_1", no:"3-1", title:"アフター4ステップと「アポ出し最優先」の理由", rec:"理由を自分の言葉で録音してみよう",
+    {id:"GR3_1", no:"3-1", title:"アフター4ステップと「アポ出し最優先」の理由", rec:"理由を自分の言葉で録音してみよう",
       link:{url:yt(V_DEMO,5415), label:"▶ 動画をみる(1:30:15から)", end:"〜1:33:36まで", alt:true}},
-    {id:"t3_2", no:"3-2", title:"リストアップの進行 お手本(3分タイマー)", rec:"進行のセリフを録音してみよう",
+    {id:"GR3_2", no:"3-2", title:"リストアップの進行 お手本(3分タイマー)", rec:"進行のセリフを録音してみよう",
       link:{url:yt(V_DEMO,5803), label:"▶ 動画をみる(1:36:43から)", end:"〜1:38:02まで", alt:true}},
-    {id:"t3_3", no:"3-3", title:"優先順位3つ+星じるしの案内", rec:"3つの項目の案内を録音してみよう",
+    {id:"GR3_3", no:"3-3", title:"優先順位3つ+星じるしの案内", rec:"3つの項目の案内を録音してみよう",
       link:{url:yt(V_DEMO,6026), label:"▶ 動画をみる(1:40:26から)", end:"〜1:42:27まで", alt:true}},
-    {id:"t3_4", no:"3-4", title:"連絡文テンプレ+断り文を分けるワケ", rec:"自分の知り合い1人向けにアレンジして音読録音→コーチにLINEで送ろう",
+    {id:"GR3_4", no:"3-4", title:"連絡文テンプレ+断り文を分けるワケ", rec:"自分の知り合い1人向けにアレンジして音読録音→コーチにLINEで送ろう",
       link:{url:yt(V_DEMO,6427), label:"▶ 動画をみる(1:47:07から)", end:"〜1:50:12まで", alt:true}},
-    {id:"t3_5", no:"3-5", title:"「今やる理由」の伝え方", rec:"トークを録音してみよう",
+    {id:"GR3_5", no:"3-5", title:"「今やる理由」の伝え方", rec:"トークを録音してみよう",
       link:{url:yt(V_DEMO,6734), label:"▶ 動画をみる(1:52:14から)", end:"〜1:54:37まで", alt:true}},
-    {id:"t3_6", no:"3-6", title:"温度差のある2人アフターの段取り", rec:"段取りを口頭で説明して録音してみよう",
+    {id:"GR3_6", no:"3-6", title:"温度差のある2人アフターの段取り", rec:"段取りを口頭で説明して録音してみよう",
       link:{url:yt(V_DEMO,5882), label:"▶ 動画をみる(1:38:02から)", end:"〜1:40:26まで", alt:true}},
-    {id:"t3_7", no:"3-7", title:"抵抗がある方へのスモールステップ実演", making:true},
-    {id:"t3_8", no:"3-8", title:"【提出】導員ボイスメモ(セレモニー・LINKセミナー)", rec:"セレモニーとLINKセミナーへの導員トークを録音して、担当コーチにLINEで送ろう",
+    {id:"GR3_7", no:"3-7", title:"抵抗がある方へのスモールステップ実演", making:true},
+    {id:"GR3_8", no:"3-8", title:"【提出】導員ボイスメモ(セレモニー・LINKセミナー)", rec:"セレモニーとLINKセミナーへの導員トークを録音して、担当コーチにLINEで送ろう",
       link:{url:yt(V_DEMO,6612), label:"▶ お手本をみる(1:50:12から)", end:"〜1:52:14まで", alt:true}},
   ]},
   {tag:"WEEK 4", title:"🎪 実戦週", sub:"本物の現場へ", tasks:[
-    {id:"t4_1", no:"4-1", title:"グルコン本番のながれ 通し観察(長いので2〜3日に分けてOK)", rec:"自分ならどの体験シェアを話すか、録音してみよう",
+    {id:"GR4_1", no:"4-1", title:"グルコン本番のながれ 通し観察(長いので2〜3日に分けてOK)", rec:"自分ならどの体験シェアを話すか、録音してみよう",
       link:{url:yt(V_DEMO,1691), label:"▶ 動画をみる(28:11から)", end:"〜1:30:03まで", alt:true}},
-    {id:"t4_2", no:"4-2", title:"実戦サブ参加の心得(当日なにをするか)", making:true},
-    {id:"t4_3", no:"4-3", title:"アフター後のアップへの電話 お手本", rec:"報告の型を録音してみよう",
+    {id:"GR4_2", no:"4-2", title:"実戦サブ参加の心得(当日なにをするか)", making:true},
+    {id:"GR4_3", no:"4-3", title:"アフター後のアップへの電話 お手本", rec:"報告の型を録音してみよう",
       link:{url:yt(V_TRAINING,2330), label:"▶ 動画をみる(38:50から)", end:"〜40:51まで"}},
   ]},
 ];
@@ -430,6 +455,7 @@ const $ = (s)=>document.querySelector(s);
 
 const availTasks = WEEKS.flatMap(w=>w.tasks).filter(t=>!t.making);
 const TOTAL = availTasks.length;
+const ITEM_IDS = availTasks.map(t=>t.id).join(",");
 
 /* ---------- 系列セレクト生成 ---------- */
 (function(){
@@ -459,17 +485,18 @@ async function login(){
   }
   member = {id, pin, name, keiretsu};
   // ローカル読み込み
-  progress = JSON.parse(localStorage.getItem("gcon_progress_"+id) || "{}");
+  progress = JSON.parse(localStorage.getItem("gcon_progress_v2_"+id) || "{}");
   const savedName = localStorage.getItem("gcon_name_"+id);
   if(savedName && !member.name) member.name = savedName;
   const savedK = localStorage.getItem("gcon_keiretsu_"+id);
   if(savedK && !member.keiretsu) member.keiretsu = savedK;
 
   // サーバーから読み込み(設定済みの場合)
-  if(GAS_URL){
+  if(gasUrlFor(keiretsu || (member&&member.keiretsu) || "")){
     setSync("☁️ 読み込み中…");
     try{
-      const res = await fetch(`${GAS_URL}?action=load&id=${encodeURIComponent(id)}&pin=${encodeURIComponent(pin)}`);
+      await fetch(gasUrlFor(keiretsu), {method:"POST", body:new URLSearchParams({action:"login", app:APP_ID, id, pin, name:name||"", keiretsu:keiretsu||""})});
+      const res = await fetch(`${gasUrlFor(keiretsu)}?action=load&app=${APP_ID}&id=${encodeURIComponent(id)}&pin=${encodeURIComponent(pin)}&items=${encodeURIComponent(ITEM_IDS)}`);
       const j = await res.json();
       if(j.ok === false && j.error === "pin"){
         err.textContent = "パスワードが一致しません。忘れた場合は担当コーチにご確認ください。";
@@ -508,12 +535,15 @@ function enterApp(){
 /* ---------- render ---------- */
 function render(){
   const root = $("#weeksRoot");
+  // 描き直す前に、いま開いている週を記憶しておく(初回だけ自動判定)
+  const prevOpen = Array.from(root.querySelectorAll(".week")).map(el=>el.classList.contains("open"));
   root.innerHTML = "";
   WEEKS.forEach((w, wi)=>{
     const avail = w.tasks.filter(t=>!t.making);
     const done = avail.filter(t=>progress[t.id]).length;
     const sec = document.createElement("section");
-    sec.className = "week" + (isCurrentWeek(wi) ? " open" : "");
+    const isOpen = prevOpen.length ? prevOpen[wi] : isCurrentWeek(wi);
+    sec.className = "week" + (isOpen ? " open" : "");
     sec.innerHTML = `
       <button class="week-head" onclick="this.parentElement.classList.toggle('open')">
         <span class="tag">${w.tag}</span>
@@ -572,7 +602,7 @@ function toggle(id){
   progress[id] = !progress[id];
   if(!progress[id]) delete progress[id];
   else toast(randomCheer());
-  localStorage.setItem("gcon_progress_"+member.id, JSON.stringify(progress));
+  localStorage.setItem("gcon_progress_v2_"+member.id, JSON.stringify(progress));
   render();
   saveAll();
 }
@@ -582,17 +612,17 @@ const randomCheer = ()=>CHEERS[Math.floor(Math.random()*CHEERS.length)];
 
 let saveTimer = null;
 function saveAll(){
-  if(!GAS_URL){ setSync("📱 この端末に保存中(オンライン同期は準備中)"); return; }
+  if(!gasUrlFor(member && member.keiretsu)){ setSync("📱 この端末に保存中(オンライン同期は準備中)"); return; }
   setSync("☁️ 保存中…");
   clearTimeout(saveTimer);
   saveTimer = setTimeout(async ()=>{
     try{
       const body = new URLSearchParams({
-        action:"save", id:member.id, pin:member.pin, name:member.name||"",
-        keiretsu: member.keiretsu||"",
+        action:"save", app:APP_ID, id:member.id, pin:member.pin, name:member.name||"",
+        keiretsu: member.keiretsu||"", items: ITEM_IDS,
         data: JSON.stringify(progress)
       });
-      const res = await fetch(GAS_URL, {method:"POST", body});
+      const res = await fetch(gasUrlFor(member && member.keiretsu), {method:"POST", body});
       const j = await res.json();
       if(j.ok===false && j.error==="pin"){ setSync("⚠️ パスワードが一致しません(コーチにご相談ください)"); return; }
       setSync("✅ 保存済み(どの端末からでも続きができます)");
@@ -668,18 +698,26 @@ if(!isStandalone && (isIOS || isLINE)){
 
 /* ---------- auto login ---------- */
 (function(){
+  // 玄関(index.html)でログイン済みならその情報を使う
+  const sky = localStorage.getItem("skyarc_member");
+  if(sky && !localStorage.getItem("gcon_member")){
+    try{
+      const m = JSON.parse(sky);
+      if(m && m.id) localStorage.setItem("gcon_member", JSON.stringify(m));
+    }catch(e){}
+  }
   const saved = localStorage.getItem("gcon_member");
   if(saved){
     member = JSON.parse(saved);
-    progress = JSON.parse(localStorage.getItem("gcon_progress_"+member.id) || "{}");
+    progress = JSON.parse(localStorage.getItem("gcon_progress_v2_"+member.id) || "{}");
     enterApp();
-    if(GAS_URL){
+    if(gasUrlFor(keiretsu || (member&&member.keiretsu) || "")){
       // バックグラウンドで最新を取得
-      fetch(`${GAS_URL}?action=load&id=${encodeURIComponent(member.id)}&pin=${encodeURIComponent(member.pin)}`)
+      fetch(`${gasUrlFor(member && member.keiretsu)}?action=load&app=${APP_ID}&id=${encodeURIComponent(member.id)}&pin=${encodeURIComponent(member.pin)}&items=${encodeURIComponent(ITEM_IDS)}`)
         .then(r=>r.json()).then(j=>{
           if(j.ok && j.data){
             progress = Object.assign({}, JSON.parse(j.data), progress);
-            localStorage.setItem("gcon_progress_"+member.id, JSON.stringify(progress));
+            localStorage.setItem("gcon_progress_v2_"+member.id, JSON.stringify(progress));
             render();
             setSync("✅ 同期ずみ");
           }
