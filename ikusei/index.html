@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>スカイアーク育成プログラム|ログイン</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="manifest" href="./gcon-manifest.json">
+<link rel="icon" type="image/png" sizes="64x64" href="./gcon-icon-64.png">
+<link rel="apple-touch-icon" href="./gcon-icon-180.png">
+<meta name="theme-color" content="#6E5FB5">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="育成プログラム">
+<style>
+  :root{
+    --deep:#6E5FB5; --leaf:#4FB08C; --mist:#EDEAF9;
+    --paper:#FBF8FE; --ink:#22322A;
+    --amber:#F5C452; --white:#FFFFFF;
+    --grad:linear-gradient(150deg,#9A86E0 0%,#6E5FB5 45%,#5E8FD8 100%);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:"Zen Kaku Gothic New",sans-serif;
+    background:var(--grad);color:var(--ink);line-height:1.75;font-size:15.5px;
+    min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;
+  }
+  button{font-family:inherit;cursor:pointer;border:none;}
+
+  .card{background:var(--white);border-radius:26px;padding:34px 24px 30px;width:100%;max-width:410px;box-shadow:0 12px 44px rgba(0,0,0,.26);}
+  .logo{font-size:46px;text-align:center;line-height:1;}
+  h1{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;color:var(--deep);font-size:21px;line-height:1.5;margin:10px 0 4px;text-align:center;}
+  .sub{font-size:12.5px;color:#5A6B60;margin-bottom:24px;text-align:center;}
+  .field{margin-bottom:15px;}
+  .field label{display:block;font-size:13px;font-weight:700;color:var(--deep);margin-bottom:6px;}
+  .field input,.field select{width:100%;padding:13px 14px;font-size:16px;border:2px solid var(--mist);border-radius:12px;font-family:inherit;background:var(--paper);}
+  .field input:focus,.field select:focus{outline:none;border-color:var(--leaf);}
+  .field small{font-size:11px;color:#7A8A80;display:block;margin-top:4px;}
+  .btn-main{width:100%;padding:15px;border-radius:14px;background:var(--leaf);color:var(--white);font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:16px;margin-top:4px;}
+  .btn-main:active{transform:scale(.98);}
+  .btn-main:disabled{opacity:.6;}
+  .err{display:none;background:#FDEBEB;color:#B33;border-radius:10px;padding:10px 14px;font-size:13px;margin-bottom:14px;}
+  .note{font-size:11px;color:#8A9A90;text-align:center;margin-top:16px;line-height:1.8;}
+
+  /* 遷移中の表示 */
+  #loading{display:none;text-align:center;padding:20px 0;}
+  #loading .spin{
+    width:44px;height:44px;margin:0 auto 14px;
+    border:4px solid var(--mist);border-top-color:var(--leaf);
+    border-radius:50%;animation:sp 1s linear infinite;
+  }
+  @keyframes sp{to{transform:rotate(360deg);}}
+  #loading p{font-family:"Zen Maru Gothic",sans-serif;font-weight:700;color:var(--deep);font-size:15px;}
+  #loading small{font-size:12px;color:#7A8A80;}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div id="formArea">
+    <div class="logo">🌱</div>
+    <h1>スカイアーク<br>育成プログラム</h1>
+    <p class="sub">会員番号でログインしてください</p>
+
+    <div class="err" id="err"></div>
+
+    <div class="field">
+      <label>会員番号</label>
+      <input type="text" id="inId" inputmode="numeric" placeholder="例:00012345" autocomplete="username">
+    </div>
+    <div class="field">
+      <label>パスワード(4桁の数字)</label>
+      <input type="password" id="inPin" inputmode="numeric" maxlength="4" placeholder="初回は好きな4桁の数字を決めてください" autocomplete="current-password">
+      <small>※次回から同じ会員番号とパスワードで、どの端末からでも続きができます。忘れた場合は担当コーチへ。</small>
+    </div>
+    <div class="field">
+      <label>系列</label>
+      <select id="inKeiretsu"></select>
+      <input type="text" id="inKeiretsuOther" placeholder="系列名を入力してください" style="display:none;margin-top:8px;">
+    </div>
+    <div class="field">
+      <label>お名前(初回のみ)</label>
+      <input type="text" id="inName" placeholder="例:高山翔子">
+    </div>
+
+    <button class="btn-main" id="loginBtn" onclick="login()">ログイン ▶</button>
+    <p class="note">交通整備課|クリエイターズ育成部門</p>
+  </div>
+
+  <div id="loading">
+    <div class="spin"></div>
+    <p id="loadMsg">確認しています…</p>
+    <small id="loadSub">まもなく画面が切り替わります</small>
+  </div>
+</div>
+
+<script>
+/* ================================================================
+   接続先の設定【将来の系列分割用】
+   ----------------------------------------------------------------
+   ★いまは全系列が同じ1ファイルに保存されます("default" だけ)。
+   ★人数が増えて分けたくなったら、系列名をキーにURLを足すだけ。
+================================================================ */
+const GAS_MAP = {
+  "default": "https://script.google.com/macros/s/AKfycbzY2l20zwGULjnKRUqvRpbH79fPkl5e-sWNVoXEIgBrDpqhjDAx2zLvJuqO3sZxAfHj/exec"
+};
+function gasUrlFor(keiretsu){
+  try{ return GAS_MAP[keiretsu] || GAS_MAP["default"] || ""; }
+  catch(e){ return GAS_MAP["default"] || ""; }
+}
+
+/* 行き先の設定:役職に「クリエ」が含まれていればクリエ用ポータルへ */
+const PAGE_CRIE      = "./portal-creators.html";
+const PAGE_SUPPORTER = "./portal-supporter.html";
+
+const KEIRETSU = [
+  "🚀SkyExceed","🦅Zenith1","🏰Utop","🌟グローハピネス🌟","🥷HOT STUFF⚜️",
+  "TELLUS.","FEAT","🌬️ザ・クラウドブルー(蒼雲)","✈️JET RISE","✨アフロディーテ",
+  "⭐️ルミナス","エネルギー🔥","💎プリズム","📚FairyTail","ミラメリ🪄","🪽HERO","♾️ZERO♾️",
+];
+
+const $ = (s)=>document.querySelector(s);
+
+/* 系列セレクト生成 */
+(function(){
+  const sel = $("#inKeiretsu");
+  sel.innerHTML = '<option value="">選択してください</option>'
+    + KEIRETSU.map(k=>`<option value="${k}">${k}</option>`).join("")
+    + '<option value="__other__">その他(自分で入力)</option>';
+  sel.addEventListener("change", ()=>{
+    $("#inKeiretsuOther").style.display = sel.value === "__other__" ? "block" : "none";
+  });
+})();
+
+function goTo(member){
+  const isCrie = (member.role || "").indexOf("クリエ") >= 0;
+  $("#formArea").style.display = "none";
+  $("#loading").style.display = "block";
+  $("#loadMsg").textContent = (member.name ? member.name + "さん、" : "") + "ようこそ!";
+  $("#loadSub").textContent = isCrie
+    ? "クリエイターズのページをひらいています…"
+    : "サポーターのページをひらいています…";
+  setTimeout(()=>{ location.href = isCrie ? PAGE_CRIE : PAGE_SUPPORTER; }, 900);
+}
+
+async function login(){
+  const id = $("#inId").value.trim();
+  const pin = $("#inPin").value.trim();
+  const name = $("#inName").value.trim();
+  let keiretsu = $("#inKeiretsu").value;
+  if(keiretsu === "__other__") keiretsu = $("#inKeiretsuOther").value.trim();
+  const err = $("#err");
+  err.style.display = "none";
+
+  if(!id || !/^\d{4}$/.test(pin)){
+    err.textContent = "会員番号と、4桁の数字のパスワードを入力してください";
+    err.style.display = "block"; return;
+  }
+
+  $("#loginBtn").disabled = true;
+  $("#loginBtn").textContent = "確認中…";
+  try{
+    const body = new URLSearchParams({action:"login", id, pin, name:name||"", keiretsu:keiretsu||""});
+    const res = await fetch(gasUrlFor(keiretsu), {method:"POST", body});
+    const j = await res.json();
+    if(j.ok === false){
+      err.textContent = j.error === "pin"
+        ? "パスワードが一致しません。忘れた場合は担当コーチにご確認ください。"
+        : "ログインできませんでした。もう一度お試しください。";
+      err.style.display = "block";
+      return;
+    }
+    const member = {
+      id, pin,
+      name: j.name || name,
+      keiretsu: j.keiretsu || keiretsu,
+      role: j.role || ""
+    };
+    localStorage.setItem("skyarc_member", JSON.stringify(member));
+    goTo(member);
+  }catch(e){
+    err.textContent = "通信できませんでした。電波のよい場所でお試しください。";
+    err.style.display = "block";
+  }finally{
+    $("#loginBtn").disabled = false;
+    $("#loginBtn").textContent = "ログイン ▶";
+  }
+}
+
+/* Enterキーでログイン */
+["inId","inPin","inName"].forEach(idName=>{
+  document.getElementById(idName).addEventListener("keydown", e=>{
+    if(e.key === "Enter") login();
+  });
+});
+
+/* すでにログイン済みなら、役職を確認してから自動で移動 */
+(async function(){
+  const saved = localStorage.getItem("skyarc_member");
+  if(!saved) return;
+  let member;
+  try{ member = JSON.parse(saved); }catch(e){ return; }
+  if(!member || !member.id) return;
+
+  $("#formArea").style.display = "none";
+  $("#loading").style.display = "block";
+  $("#loadMsg").textContent = "おかえりなさい!";
+  $("#loadSub").textContent = "最新の状況を確認しています…";
+
+  try{
+    // 最新の役職を取り直す(クリエ昇格が反映されるように)
+    const body = new URLSearchParams({action:"login", id:member.id, pin:member.pin,
+                                      name:member.name||"", keiretsu:member.keiretsu||""});
+    const res = await fetch(gasUrlFor(member.keiretsu), {method:"POST", body});
+    const j = await res.json();
+    if(j.ok){
+      member.role = j.role || "";
+      member.name = j.name || member.name;
+      member.keiretsu = j.keiretsu || member.keiretsu;
+      localStorage.setItem("skyarc_member", JSON.stringify(member));
+    }
+  }catch(e){ /* オフラインなら前回の役職のまま進む */ }
+
+  goTo(member);
+})();
+
+if("serviceWorker" in navigator){ navigator.serviceWorker.register("./gcon-sw.js").catch(()=>{}); }
+</script>
+</body>
+</html>
