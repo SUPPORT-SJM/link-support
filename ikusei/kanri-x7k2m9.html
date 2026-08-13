@@ -2,6 +2,9 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex,nofollow">
 <title>管理画面</title>
@@ -97,6 +100,12 @@
   #toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;font-size:13px;border-radius:999px;padding:10px 20px;opacity:0;transition:all .3s;z-index:50;}
   #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
   .legend{font-size:11px;color:#8B889E;margin-top:12px;line-height:1.9;}
+
+  .verTag{
+    display:block;text-align:center;
+    font-size:9.5px;color:#B4B0C4;letter-spacing:.05em;
+    padding:6px 0 14px;font-family:monospace;
+  }
 </style>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
@@ -441,5 +450,6 @@ function toast(msg){
 
 
 </script>
+<div class="verTag">v1.1 (2026/08/14)</div>
 </body>
 </html>

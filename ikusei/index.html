@@ -2,6 +2,9 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>スカイアーク育成プログラム|ログイン</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -65,6 +68,12 @@
   @keyframes sp{to{transform:rotate(360deg);}}
   #loading p{font-family:"Zen Maru Gothic",sans-serif;font-weight:700;color:var(--deep);font-size:15px;}
   #loading small{font-size:12px;color:#7A8A80;}
+
+  .verTag{
+    position:fixed;left:0;right:0;bottom:8px;
+    text-align:center;font-size:9.5px;color:rgba(255,255,255,.45);
+    letter-spacing:.05em;font-family:monospace;pointer-events:none;
+  }
 </style>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
@@ -335,5 +344,6 @@ async function login(){
 
 if("serviceWorker" in navigator){ navigator.serviceWorker.register("./gcon-sw.js").catch(()=>{}); }
 </script>
+<div class="verTag">v1.1 (2026/08/14)</div>
 </body>
 </html>
