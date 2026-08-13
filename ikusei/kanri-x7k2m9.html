@@ -76,7 +76,24 @@
   .fbtn.adm.on{background:var(--red);border-color:var(--red);color:#fff;}
   .fbtn:disabled{opacity:.35;cursor:not-allowed;}
   .scope-btn{background:none;color:var(--blue);font-size:11px;text-decoration:underline;padding:2px;}
+  .scope-view{font-size:11px;color:#8B889E;}
   .empty{text-align:center;padding:40px;color:#8B889E;}
+  /* 担当系列えらぶモーダル */
+  #scopeModal{display:none;position:fixed;inset:0;z-index:60;background:rgba(30,26,50,.55);align-items:center;justify-content:center;padding:18px;}
+  #scopeModal.show{display:flex;}
+  .sm-card{background:#fff;border-radius:18px;padding:22px;width:100%;max-width:460px;max-height:82vh;overflow-y:auto;box-shadow:0 14px 50px rgba(0,0,0,.3);}
+  .sm-card h3{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;color:var(--deep);font-size:16px;margin-bottom:2px;}
+  .sm-card .who{font-size:12px;color:#77748A;margin-bottom:14px;}
+  .sm-list{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:16px;}
+  .sm-item{display:flex;align-items:center;gap:7px;padding:8px 10px;border:1.5px solid var(--line);border-radius:10px;font-size:12.5px;cursor:pointer;}
+  .sm-item:hover{background:#FAFAFE;}
+  .sm-item.checked{background:#EAF7F0;border-color:var(--leaf);font-weight:700;}
+  .sm-item input{width:15px;height:15px;accent-color:var(--leaf);cursor:pointer;}
+  .sm-own{font-size:11.5px;color:#77748A;background:var(--paper);border-radius:9px;padding:9px 11px;margin-bottom:14px;line-height:1.6;}
+  .sm-btns{display:flex;gap:8px;}
+  .sm-btns button{flex:1;padding:12px;border-radius:11px;font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:14px;}
+  .sm-save{background:var(--deep);color:#fff;}
+  .sm-cancel{background:var(--mist);color:var(--deep);}
   #toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;font-size:13px;border-radius:999px;padding:10px 20px;opacity:0;transition:all .3s;z-index:50;}
   #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
   .legend{font-size:11px;color:#8B889E;margin-top:12px;line-height:1.9;}
@@ -153,10 +170,23 @@
         ⭕ = 先生の丸の数 / 🐣 = 本人チェックの数<br>
 「クリエ」を付けると②③が解放されます。<br>
         権限は積み重ね式です:管理画面に入るには「アドバンス」が必要で、そこに「系列代表」「チーム代表」を追加します。<br>
-        操作できる範囲 — チーム代表/管理者:全員・全フラグ ／ 系列代表:担当系列のクリエ・アドバンス ／ アドバンス:担当系列のクリエのみ
+        操作できる範囲 — チーム代表/管理者:全員・全フラグ・担当系列の設定 ／ 系列代表:担当系列のクリエ・アドバンス ／ アドバンス:担当系列のクリエのみ
       </div>
     </div>
   </main>
+</div>
+
+<div id="scopeModal" onclick="if(event.target===this)closeScope()">
+  <div class="sm-card">
+    <h3>担当系列をえらぶ</h3>
+    <p class="who" id="smWho"></p>
+    <p class="sm-own" id="smOwn"></p>
+    <div class="sm-list" id="smList"></div>
+    <div class="sm-btns">
+      <button class="sm-cancel" onclick="closeScope()">キャンセル</button>
+      <button class="sm-save" onclick="saveScope()">保存する</button>
+    </div>
+  </div>
 </div>
 
 <div id="toast"></div>
@@ -164,6 +194,13 @@
 <script>
 const GAS_URL = "https://script.google.com/macros/s/AKfycbzY2l20zwGULjnKRUqvRpbH79fPkl5e-sWNVoXEIgBrDpqhjDAx2zLvJuqO3sZxAfHj/exec";
 const GOOGLE_CLIENT_ID = "315827385958-ikdpkfhkr6nmrgql470aolt4pv27pak3.apps.googleusercontent.com";
+
+/* 系列リスト ※育成サイト側と同じものに揃えてください */
+const KEIRETSU = [
+  "🚀SkyExceed","🦅Zenith1","🏰Utop","🌟グローハピネス🌟","🥷HOT STUFF⚜️",
+  "TELLUS.","FEAT","🌬️ザ・クラウドブルー(蒼雲)","✈️JET RISE","✨アフロディーテ",
+  "⭐️ルミナス","エネルギー🔥","💎プリズム","📚FairyTail","ミラメリ🪄","🪽HERO","♾️ZERO♾️",
+];
 const $ = (s)=>document.querySelector(s);
 let admin = null;       // {id,pin,email}
 let googleEmail = "";
@@ -305,8 +342,10 @@ function render(){
       return `<button class="fbtn ${cls} ${on?'on':''}" ${disabled}
         onclick="setFlag('${m.id}','${flag}',${on?0:1})">${flag}</button>`;
     };
-    const scopeBtn = (canFull || canKei) && has(m.role,"アドバンス")
-      ? `<br><button class="scope-btn" onclick="editScope('${m.id}','${(m.scope||"").replace(/'/g,"")}')">担当系列: ${m.scope || "未設定"}</button>`
+    const scopeBtn = has(m.role,"アドバンス")
+      ? (canFull
+          ? `<br><button class="scope-btn" onclick="openScope('${m.id}')">担当系列: ${m.scope || "未設定"} ▾</button>`
+          : `<br><span class="scope-view">担当系列: ${m.scope || "未設定"}</span>`)
       : "";
 
     return `<tr>
@@ -340,13 +379,40 @@ async function setFlag(target, flag, on){
   }catch(e){ toast("通信できませんでした"); }
 }
 
-async function editScope(target, current){
-  const v = prompt("担当系列をカンマ区切りで入力してください\n(自分の系列は自動で含まれます)\n\n例)🪽HERO,📚FairyTail", current);
-  if(v === null) return;
+let scopeTarget = null;
+
+function openScope(id){
+  const m = data.members.find(x => String(x.id) === String(id));
+  if(!m) return;
+  scopeTarget = m;
+  const selected = (m.scope || "").split(/[,、\s]+/).filter(x=>x);
+  document.getElementById("smWho").textContent =
+    (m.name || "(名前未登録)") + "さん(" + m.id + ")";
+  document.getElementById("smOwn").textContent =
+    "所属系列「" + (m.keiretsu || "未設定") + "」は自動で担当に含まれます。その先の系列だけ選んでください。";
+  document.getElementById("smList").innerHTML = KEIRETSU.map((k,i)=>{
+    const on = selected.indexOf(k) >= 0;
+    return `<label class="sm-item ${on?'checked':''}" id="smi_${i}">
+      <input type="checkbox" value="${k}" ${on?'checked':''}
+        onchange="document.getElementById('smi_${i}').classList.toggle('checked', this.checked)">
+      <span>${k}</span></label>`;
+  }).join("");
+  document.getElementById("scopeModal").classList.add("show");
+}
+
+function closeScope(){
+  document.getElementById("scopeModal").classList.remove("show");
+  scopeTarget = null;
+}
+
+async function saveScope(){
+  if(!scopeTarget) return;
+  const checked = Array.from(document.querySelectorAll("#smList input:checked")).map(el=>el.value);
+  const scope = checked.join(",");
   try{
     const body = new URLSearchParams({
       action:"adminSetScope", id:admin.id, pin:admin.pin, email:admin.email,
-      target:String(target), scope:v
+      target:String(scopeTarget.id), scope:scope
     });
     const res = await fetch(GAS_URL, {method:"POST", body});
     const j = await res.json();
@@ -356,7 +422,8 @@ async function editScope(target, current){
              noperm:"権限がありません"}[j.error] || "変更できませんでした");
       return;
     }
-    toast("担当系列を更新しました");
+    toast(checked.length ? "担当系列を更新しました" : "担当系列をクリアしました");
+    closeScope();
     load();
   }catch(e){ toast("通信できませんでした"); }
 }
