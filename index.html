@@ -2,506 +2,348 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="robots" content="noindex, nofollow">
-<meta name="googlebot" content="noindex, nofollow">
-<title>LINK 初期サポートの流れ</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<title>スカイアーク育成プログラム|ログイン</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="manifest" href="./gcon-manifest.json">
+<link rel="icon" type="image/png" sizes="64x64" href="./gcon-icon-64.png">
+<link rel="apple-touch-icon" href="./gcon-icon-180.png">
+<meta name="theme-color" content="#6E5FB5">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="育成プログラム">
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Noto Sans JP',sans-serif;background:#FFFBF7;padding:16px 14px 48px}
-.wrap{max-width:390px;margin:0 auto}
+  :root{
+    --deep:#6E5FB5; --leaf:#4FB08C; --mist:#EDEAF9;
+    --paper:#FBF8FE; --ink:#22322A;
+    --amber:#F5C452; --white:#FFFFFF;
+    --grad:linear-gradient(150deg,#9A86E0 0%,#6E5FB5 45%,#5E8FD8 100%);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:"Zen Kaku Gothic New",sans-serif;
+    background:var(--grad);color:var(--ink);line-height:1.75;font-size:15.5px;
+    min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;
+  }
+  button{font-family:inherit;cursor:pointer;border:none;}
 
-.welcome{background:linear-gradient(135deg,#FFF8E1,#FFF0F0);border-radius:16px;padding:20px 16px;margin-bottom:16px;border:1px solid #FFD6A0;text-align:center}
-.welcome h1{font-size:17px;font-weight:700;color:#E65100;line-height:1.7;margin:8px 0}
-.welcome p{font-size:13px;color:#795548;line-height:1.9}
+  .card{background:var(--white);border-radius:26px;padding:34px 24px 30px;width:100%;max-width:410px;box-shadow:0 12px 44px rgba(0,0,0,.26);}
+  .logo{font-size:46px;text-align:center;line-height:1;}
+  h1{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;color:var(--deep);font-size:21px;line-height:1.5;margin:10px 0 4px;text-align:center;}
+  .sub{font-size:12.5px;color:#5A6B60;margin-bottom:24px;text-align:center;}
+  .field{margin-bottom:15px;}
+  .field label{display:block;font-size:13px;font-weight:700;color:var(--deep);margin-bottom:6px;}
+  .field input,.field select{width:100%;padding:13px 14px;font-size:16px;border:2px solid var(--mist);border-radius:12px;font-family:inherit;background:var(--paper);}
+  .field input:focus,.field select:focus{outline:none;border-color:var(--leaf);}
+  .field small{font-size:11px;color:#7A8A80;display:block;margin-top:4px;}
+  .btn-main{width:100%;padding:15px;border-radius:14px;background:var(--leaf);color:var(--white);font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:16px;margin-top:4px;}
+  .btn-main:active{transform:scale(.98);}
+  .btn-main:disabled{opacity:.6;}
+  .gsec{margin-bottom:18px;padding-bottom:18px;border-bottom:1.5px solid var(--mist);}
+  .gsec .lead{font-size:12.5px;color:#5A6B60;margin-bottom:10px;text-align:center;}
+  #gBtnWrap{display:flex;justify-content:center;min-height:44px;}
+  .gdone{
+    display:none;background:#EAF7F0;border-radius:12px;padding:11px 14px;
+    font-size:12.5px;color:#2F7A5C;text-align:center;line-height:1.6;
+  }
+  .gdone.show{display:block;}
+  .gdone b{display:block;font-size:13px;}
+  .gdone a{color:#5A6B60;font-size:11px;}
+  .locked{opacity:.45;pointer-events:none;}
+  .welcome{background:#EAF7F0;color:#2F7A5C;border-radius:10px;padding:10px 14px;font-size:12.5px;margin-bottom:14px;line-height:1.6;}
+  .err{display:none;background:#FDEBEB;color:#B33;border-radius:10px;padding:10px 14px;font-size:13px;margin-bottom:14px;}
+  .note{font-size:11px;color:#8A9A90;text-align:center;margin-top:16px;line-height:1.8;}
 
-.hero{background:#FFF0F0;border-radius:16px;padding:20px 16px;margin-bottom:20px;border:1px solid #FFD6D6}
-.hero h2{font-size:18px;font-weight:700;color:#C62828;margin-bottom:12px;line-height:1.6;text-align:center}
-.hero-body{font-size:14px;color:#5D4037;line-height:2.1}
-.hero-body p{margin-bottom:4px}
-.hero-em{background:#FFECB3;border-radius:8px;padding:10px 12px;font-size:14px;color:#5D4037;line-height:1.85;margin-top:10px;border-left:3px solid #FFB300}
+  /* 遷移中の表示 */
+  #loading{display:none;text-align:center;padding:20px 0;}
+  #loading .spin{
+    width:44px;height:44px;margin:0 auto 14px;
+    border:4px solid var(--mist);border-top-color:var(--leaf);
+    border-radius:50%;animation:sp 1s linear infinite;
+  }
+  @keyframes sp{to{transform:rotate(360deg);}}
+  #loading p{font-family:"Zen Maru Gothic",sans-serif;font-weight:700;color:var(--deep);font-size:15px;}
+  #loading small{font-size:12px;color:#7A8A80;}
 
-.phase{font-size:15px;font-weight:700;color:#2E7D32;margin:24px 0 10px;padding-bottom:6px;border-bottom:2px solid #A5D6A7}
-.phase-b{color:#1B5E20;border-bottom-color:#81C784}
-.emoji-row{font-size:18px;letter-spacing:2px;margin:4px 0 10px}
-.hint{font-size:15px;font-weight:700;color:#FF7043;text-align:center;margin-bottom:14px;background:#FFF0EB;border:2px solid #FFAB76;border-radius:10px;padding:10px 12px}
-
-.card{background:#fff;border:1px solid #C8E6C9;border-radius:12px;margin-bottom:10px;overflow:hidden;transition:border-color 0.3s}
-.card.done{border-color:#FFAB76}
-.card-head{display:flex;align-items:stretch;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
-.card-num{background:#43A047;color:#fff;font-size:16px;font-weight:700;padding:8px 14px;display:flex;align-items:center;justify-content:center;min-width:44px;flex-shrink:0;transition:background 0.3s}
-.card.done .card-num{background:#FF7043}
-.card-ttl{background:#E8F5E9;color:#1B5E20;font-size:14px;font-weight:700;padding:8px 12px;flex:1;display:flex;align-items:center;line-height:1.5;transition:background 0.3s,color 0.3s;gap:6px}
-.card.done .card-ttl{background:#FFF0EB;color:#BF360C}
-.card-arrow{background:#E8F5E9;color:#43A047;font-size:18px;padding:8px 12px;display:flex;align-items:center;transition:transform 0.3s,background 0.3s;flex-shrink:0}
-.card.done .card-arrow{background:#FFF0EB;color:#FF7043}
-.card-arrow.open{transform:rotate(180deg)}
-.card-body{max-height:0;overflow:hidden;transition:max-height 0.4s ease}
-.card-body.open{max-height:3000px}
-.card-inner{padding:14px;font-size:14px;color:#5D4037;line-height:1.9}
-.card-inner p{margin-bottom:6px}
-.card-inner p:last-child{margin-bottom:0}
-
-.badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 7px;border-radius:20px;flex-shrink:0}
-.badge-yet{background:#E8F5E9;color:#2E7D32}
-.badge-done{background:#FF7043;color:#fff}
-
-.done-btn{display:block;width:100%;margin-top:12px;padding:12px;border-radius:10px;font-size:15px;font-weight:700;text-align:center;cursor:pointer;border:none;font-family:'Noto Sans JP',sans-serif;transition:background 0.3s}
-.done-btn-pending{background:#E8F5E9;color:#2E7D32;border:2px solid #A5D6A7}
-.done-btn-done{background:#FF7043;color:#fff;border:2px solid #E64A19}
-
-.step-list{display:flex;flex-direction:column;gap:7px;margin-bottom:8px}
-.step-row{display:flex;align-items:flex-start;gap:8px;font-size:14px;color:#4E342E;line-height:1.7}
-.stag{background:#E3F2FD;color:#0D47A1;border-radius:5px;padding:2px 8px;font-size:12px;font-weight:700;white-space:nowrap;flex-shrink:0;margin-top:2px}
-.note{background:#FFF8E1;border-radius:8px;padding:10px 12px;font-size:13px;color:#5D4037;line-height:1.85;border-left:3px solid #FFD54F;margin-top:8px}
-.italic{font-size:13px;color:#8D6E63;line-height:1.85;margin-top:8px;font-style:italic}
-.bullet{display:flex;align-items:flex-start;gap:8px;font-size:14px;color:#4E342E;line-height:1.8;margin-bottom:6px}
-.bullet:last-child{margin-bottom:0}
-.dot{width:20px;height:20px;border-radius:50%;border:2px solid #A5D6A7;flex-shrink:0;margin-top:2px}
-.em-line{font-size:20px;letter-spacing:3px;margin:6px 0;text-align:center}
-.arrow{text-align:center;font-size:20px;margin:8px 0;color:#FF7043}
-.divider{border:none;border-top:2px dashed #F0E0D0;margin:24px 0}
-.img-wrap{border-radius:12px;overflow:hidden;border:1px solid #F0E0D0;margin:12px 0}
-.img-wrap img{width:100%;display:block}
-
-.lnk{display:block;margin-top:10px;padding:12px;color:#fff;border-radius:10px;text-align:center;font-weight:700;text-decoration:none;font-size:14px}
-.lnk-b{background:linear-gradient(90deg,#60B0F4,#22D3EE);border:2px solid #3B82F6}
-.lnk-green{background:linear-gradient(90deg,#34D399,#10B981);border:2px solid #22C55E}
-.lnk-amber{background:linear-gradient(90deg,#FB923C,#F97316);border:2px solid #F97316}
-.lnk-yellow{background:linear-gradient(90deg,#FCD34D,#F59E0B);border:2px solid #EAB308;color:#78350F}
-.lnk-rose{background:linear-gradient(90deg,#FB7185,#F43F5E);border:2px solid #F43F5E}
-.lnk-purple{background:linear-gradient(90deg,#A78BFA,#8B5CF6);border:2px solid #7C3AED}
-.lnk-red{background:linear-gradient(90deg,#F87171,#EF4444);border:2px solid #EF4444}
-.lnk-gold{background:linear-gradient(90deg,#FCD34D,#F59E0B);border:2px solid #D97706;color:#78350F}
-.lnk-teal{background:linear-gradient(90deg,#2DD4BF,#14B8A6);border:2px solid #0D9488}
-
-.btn-box{padding:14px;border-radius:12px;margin:10px 0}
-.btn-box-blue{background:linear-gradient(90deg,#DBEAFE,#CFFAFE);border:2px solid #3B82F6}
-.btn-box-green{background:linear-gradient(90deg,#D1FAE5,#ECFDF5);border:2px solid #22C55E}
-.btn-box-orange{background:linear-gradient(90deg,#FEF3C7,#FFF7ED);border:2px solid #F97316}
-.btn-box-yellow{background:linear-gradient(90deg,#FEF9C3,#FEF3C7);border:2px solid #EAB308}
-.btn-box-rose{background:linear-gradient(90deg,#FFE4E6,#FDF2F8);border:2px solid #F43F5E}
-.btn-box-purple{background:linear-gradient(90deg,#F3E8FF,#FDF4FF);border:2px solid #7C3AED}
-.btn-box-teal{background:linear-gradient(90deg,#CCFBF1,#F0FDFA);border:2px solid #0D9488}
-.btn-label{font-size:12px;font-weight:700;text-align:center;margin-bottom:8px}
-.btn-box-blue .btn-label{color:#1D4ED8}
-.btn-box-green .btn-label{color:#15803D}
-.btn-box-orange .btn-label{color:#C2410C}
-.btn-box-yellow .btn-label{color:#92400E}
-.btn-box-rose .btn-label{color:#BE123C}
-.btn-box-purple .btn-label{color:#6D28D9}
-.btn-box-teal .btn-label{color:#0F766E}
-
-.gen-box{background:#FFF8F5;border:1px solid #FFD0B0;border-radius:12px;padding:14px;margin-bottom:20px}
-.gen-label{font-size:12px;font-weight:700;color:#FF7043;margin-bottom:6px;display:block}
-.gen-input{width:100%;border:1px solid #FFCCBC;border-radius:8px;padding:10px 12px;font-size:14px;font-family:'Noto Sans JP',sans-serif;color:#4E342E;background:#fff;margin-bottom:12px;outline:none}
-.gen-input:focus{border-color:#FF7043}
-.gen-select{width:100%;border:1px solid #FFCCBC;border-radius:8px;padding:10px 12px;font-size:14px;font-family:'Noto Sans JP',sans-serif;color:#4E342E;background:#fff;margin-bottom:12px;outline:none}
-.result-label{font-size:12px;font-weight:700;color:#888;margin-bottom:6px}
-.result-box{background:#FFF0EB;border:2px solid #FF7043;border-radius:10px;padding:12px 14px;font-size:16px;font-weight:700;color:#BF360C;line-height:1.6;min-height:48px;margin-bottom:14px;word-break:break-all;text-align:center}
-#copyBtn{display:block !important;width:100% !important;padding:16px !important;border-radius:12px !important;background:#FF7043 !important;background-color:#FF7043 !important;border:none !important;cursor:pointer !important;font-family:'Noto Sans JP',sans-serif !important;font-size:18px !important;font-weight:700 !important;color:#ffffff !important;-webkit-text-fill-color:#ffffff !important;text-align:center !important;letter-spacing:0.05em !important}
-.copy-hint{font-size:12px;color:#A1887F;text-align:center;margin-top:8px}
-
-.footer{background:#FFF0F0;border-radius:16px;padding:18px 16px;margin-top:8px;border:1px solid #FFD6D6}
-.footer h3{font-size:13px;font-weight:700;color:#C62828;margin-bottom:10px;line-height:1.6;text-align:center}
-.footer-body{font-size:14px;color:#5D4037;line-height:2}
-.footer-body p{margin-bottom:6px}
-.footer-body p:last-child{margin-bottom:0}
+  .verTag{
+    display:block;text-align:center;
+    font-size:9.5px;color:#C3BFD4;letter-spacing:.05em;
+    font-family:monospace;margin-top:6px;
+  }
 </style>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
-<div class="wrap">
 
-<div class="welcome">
-  <div style="font-size:32px;margin-bottom:8px">🎉</div>
-  <h1>LINKへようこそ！<br>これからLINKを最大限活用する<br>準備を始めましょう✨️</h1>
-  <p>あなたの"やりたい"が加速していきます💡<br>まずはこの流れに沿って進めてみてください！</p>
-</div>
+<div class="card">
+  <div id="formArea">
+    <div class="logo">🌱</div>
+    <h1>スカイアーク<br>育成プログラム</h1>
+    <p class="sub">会員番号でログインしてください</p>
 
-<div class="hero">
-  <h2>🌸 初期サポートの流れ 🌸</h2>
-  <div class="hero-body">
-    <p>LINKは完全フリービジネスですが、</p>
-    <p>初期だけルールがあります👍</p>
-    <p>これは皆さんがスムーズに、</p>
-    <p>LINKを活用出来るようにする為です⚡</p>
-  </div>
-  <div class="hero-em">『 入ったけど、LINKを使えてない😢』<br>を無くすためです✨</div>
-</div>
+    <div class="err" id="err"></div>
+    <div class="welcome" id="welcomeBack" style="display:none;"></div>
 
-<p class="hint">👇 各項目をタップすると詳細が開きます👇<br>1️⃣ 2️⃣ 3️⃣ 4️⃣ 5️⃣</p>
-
-<div style="background:#E8F5E9;border:1px solid #A5D6A7;border-radius:12px;padding:12px 14px;margin-bottom:16px;font-size:13px;color:#2E7D32;line-height:1.85">
-  💡 ここで書かれている期限はあくまで目安ですので、早く済ませたい方は気にせず最速で5つのステップを終わらせてかまいません😀
-</div>
-
-<div class="phase">本日</div>
-<div class="emoji-row">⚡</div>
-
-<div class="card" id="card-1">
-  <div class="card-head" onclick="toggle(this)">
-    <div class="card-num">1</div>
-    <div class="card-ttl">ホーム画面に LINKポータル（全サイト総合案内）を置く<span class="badge badge-yet" id="badge-1">未</span></div>
-    <div class="card-arrow">▼</div>
-  </div>
-  <div class="card-body">
-    <div class="card-inner">
-      <p>LINKポータルをアプリみたく<br>スマホのホーム画面上に保存する</p>
-      <p>✅ LINKツールの総合案内サイトです💁‍♀️</p>
-      <p>✅ 下記の手順でスマホのホーム画面上に<br>置いておくと便利です😊</p>
-      <div class="note" style="margin-top:10px">
-        📱 <strong>LINEからこのサイトを開いている方へ</strong><br>
-        まず外部ブラウザで開く必要があります！<br>
-        下のボタンからブラウザで開いてください👇
+    <div class="gsec">
+      <p class="lead">まず Google アカウントで本人確認します</p>
+      <div id="gBtnWrap"></div>
+      <div class="gdone" id="gDone">
+        <b>✅ 確認できました</b>
+        <span id="gMail"></span><br>
+        <a href="#" onclick="resetGoogle();return false;">別のアカウントにする</a>
       </div>
-      <a href="intent://app.link-event-x.com#Intent;scheme=https;package=com.android.chrome;end" style="display:block;width:100%;padding:14px 16px;border-radius:12px;background:#10B981;color:#fff;font-size:14px;font-weight:700;text-decoration:none;margin-top:10px">
-        🤖 Androidの方はこちら<br>
-        <span style="font-size:11px;font-weight:400;opacity:0.9">→ Chromeで開く</span>
-      </a>
-      <div style="background:#F0FFF8;border:1px solid #C8E6C9;border-radius:12px;padding:14px;margin-top:8px;margin-bottom:14px">
-        <p style="font-size:13px;font-weight:700;color:#2E7D32;margin-bottom:8px">🤖 Androidの方 ホーム画面への追加手順</p>
-        <p style="font-size:13px;color:#5D4037;line-height:1.9;margin-bottom:4px">① 上のボタンをタップしてChromeから開く</p>
-        <p style="font-size:13px;color:#5D4037;line-height:1.9">② 右上「︙」→「ホーム画面に追加」をタップ→ホーム画面に追加されます✨️</p>
-      </div>
-
-      <a href="https://app.link-event-x.com" target="_blank" style="display:block;width:100%;padding:14px 16px;border-radius:12px;background:#0072FF;color:#fff;font-size:14px;font-weight:700;text-decoration:none;margin-top:8px">
-        🍎 iPhoneの方はこちら<br>
-        <span style="font-size:11px;font-weight:400;opacity:0.9">→ Safariで開く</span>
-      </a>
-      <div style="background:#EBF4FF;border:1px solid #BBDEFB;border-radius:12px;padding:14px;margin-top:8px">
-        <p style="font-size:13px;font-weight:700;color:#1565C0;margin-bottom:8px">🍎 iPhoneの方 ホーム画面への追加手順</p>
-        <p style="font-size:13px;color:#5D4037;line-height:1.9;margin-bottom:4px">① 上のボタンをタップしてSafariから開く</p>
-        <p style="font-size:13px;color:#5D4037;line-height:1.9;margin-bottom:4px">② 画面下部の「共有ボタン（□に↑）」をタップ</p>
-        <p style="font-size:13px;color:#5D4037;line-height:1.9;margin-bottom:4px">③ メニューをスクロールして「ホーム画面に追加」をタップ</p>
-        <p style="font-size:13px;color:#5D4037;line-height:1.9">④ 右上の「追加」をタップ→ホーム画面に追加されます✨️</p>
-      </div>
-      <div style="background:#FFF8F5;border:1px solid #FFCCBC;border-radius:12px;padding:14px;margin-top:8px">
-        <p style="font-size:13px;font-weight:700;color:#BF360C;margin-bottom:10px">💻 その他の端末の方</p>
-        <a href="https://app.link-event-x.com" target="_blank" class="lnk lnk-b">🔗 LINKポータルを開く</a>
-      </div>
-      <button class="done-btn done-btn-pending" id="btn-1" onclick="markDone('1')">☑️ 完了したらここを押してね！</button>
     </div>
-  </div>
-</div>
 
-<div class="card" id="card-2">
-  <div class="card-head" onclick="toggle(this)">
-    <div class="card-num">2</div>
-    <div class="card-ttl">LINK information（公式ライン）に入る<span class="badge badge-yet" id="badge-2">未</span></div>
-    <div class="card-arrow">▼</div>
-  </div>
-  <div class="card-body">
-    <div class="card-inner">
-      <p>👇 ここからお入りください 👇</p>
-      <div class="btn-box btn-box-green">
-        <p class="btn-label">👇 タップしてLINE登録 👇</p>
-        <a href="https://s.lmes.jp/landing-qr/2008524921-7QZ2vX3X?uLand=iRyJ9G" target="_blank" class="lnk lnk-green">📲 LINK information に登録する</a>
-      </div>
-      <p style="font-size:13px;color:#5D4037;line-height:1.9;margin-top:10px">今回は登録が完了していればOKです😀<br>内容や使い方は触ってみて分かる方は続けてみてください！</p>
-      <button class="done-btn done-btn-pending" id="btn-2" onclick="markDone('2')">☑️ 完了したらここを押してね！</button>
+    <div id="mainFields" class="locked">
+
+    <div class="field">
+      <label>会員番号</label>
+      <input type="text" id="inId" inputmode="numeric" placeholder="例:00012345" autocomplete="username">
     </div>
-  </div>
-</div>
-
-<div class="phase phase-b">2週間以内に</div>
-<div class="emoji-row">⚡⚡⚡</div>
-
-<div class="card" id="card-s">
-  <div class="card-head" onclick="toggle(this)">
-    <div class="card-num">★</div>
-    <div class="card-ttl">LINK informationのリッチメニューを解放する<span class="badge badge-yet" id="badge-s">未</span></div>
-    <div class="card-arrow">▼</div>
-  </div>
-  <div class="card-body">
-    <div class="card-inner">
-      <p style="font-size:14px;color:#5D4037;line-height:1.9;margin-bottom:8px">✅ 大切なリッチメニューは、チュートリアルを<br>ある程度まで進めたら開放される仕組みです！そこまですぐに進めてくださいね✨</p>
-      <div class="img-wrap">
-        <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/002-LQDBlJxycWBg3cvPUmUZQQvawvqQgg.jpg" alt="リッチメニュー解放イメージ">
-      </div>
-      <p style="font-size:14px;color:#5D4037;line-height:1.9;margin-bottom:8px">✅ こちらはLINK内の全ての情報検索が出来る<br>LINK公式ラインです！</p>
-      <p style="font-size:14px;color:#5D4037;line-height:1.9;margin-bottom:6px">Q&amp;Aやニーズ別診断、様々な情報を探したり、スタンプラリーがあったり、ワクワクします😲</p>
-      <p style="font-size:14px;color:#5D4037;line-height:1.9;margin-bottom:10px">こちら5つのステップからなるチュートリアルを終わらせれば通常の使い方が出来ます。</p>
-      <p style="font-size:13px;font-weight:700;color:#1565C0;margin-bottom:8px">📋 チュートリアル：ステップ5つ</p>
-      <div class="step-list">
-        <div class="step-row"><div class="stag">step❶</div>ルール動画</div>
-        <div class="step-row"><div class="stag">step❷</div>動き方動画</div>
-        <div class="step-row"><div class="stag">step❸</div>sasaeaiマッチング動画▶︎制作 <a href="sasaeai.html" style="font-size:11px;color:#1565C0;font-weight:700;text-decoration:none;background:#E3F2FD;padding:2px 7px;border-radius:4px;margin-left:4px">詳細→</a></div>
-        <div class="step-row"><div class="stag">step❹</div>LINKベース▶︎制作 <a href="linkbase.html" style="font-size:11px;color:#1565C0;font-weight:700;text-decoration:none;background:#E3F2FD;padding:2px 7px;border-radius:4px;margin-left:4px">詳細→</a></div>
-        <div class="step-row"><div class="stag">step❺</div>LINK information使い方動画視聴</div>
-      </div>
-      <div class="note" style="margin-top:10px">📝 step❸❹で制作したものは、<strong>初期サポートグループライン</strong>にURLを必ず貼ってください</div>
-      <p style="font-size:14px;color:#5D4037;line-height:1.9;margin-top:10px;margin-bottom:6px">こちらチュートリアルが終わるまでに出てくる動画は<br>すべて必ずしっかり全部見て下さい🎞️</p>
-      <p style="font-size:14px;color:#5D4037;line-height:1.9;margin-bottom:10px">途中でクイズが出てくるので内容も把握して正解して下さいね😀</p>
-      <p style="font-size:14px;color:#5D4037;line-height:1.9;margin-bottom:8px">こちら下記は、特につまづきやすいstep3と4に関しての補足事項です💡</p>
-      <div class="btn-box btn-box-orange" style="margin-top:8px">
-        <p class="btn-label">👇 タップして詳細をチェック 👇</p>
-        <a href="step3-4.html" target="_blank" class="lnk lnk-amber">📄 step3・4 補足事項を見る</a>
-      </div>
-      <div class="note" style="margin-top:8px">
-        <div class="bullet"><div class="dot"></div><div>リッチメニューが開放されない</div></div>
-        <div class="bullet"><div class="dot"></div><div>途中わからない問題がある</div></div>
-        <p style="margin-top:6px">などは、初期サポートグループラインでご質問ください❤️</p>
-      </div>
-      <button class="done-btn done-btn-pending" id="btn-s" onclick="markDone('s')">☑️ 完了したらここを押してね！</button>
+    <div class="field">
+      <label>パスワード(4桁の数字)</label>
+      <input type="password" id="inPin" inputmode="numeric" maxlength="4" placeholder="初回は好きな4桁の数字を決めてください" autocomplete="current-password">
+      <small>※次回から同じ会員番号とパスワードで、どの端末からでも続きができます。忘れた場合は担当コーチへ。</small>
     </div>
-  </div>
-</div>
-
-<div class="phase">1ヶ月間以内で</div>
-<div class="emoji-row">⚡⚡⚡⚡</div>
-
-<div class="card" id="card-3">
-  <div class="card-head" onclick="toggle(this)">
-    <div class="card-num">3</div>
-    <div class="card-ttl">LINKセミナー・LINKセレモニー<span class="badge badge-yet" id="badge-3">未</span></div>
-    <div class="card-arrow">▼</div>
-  </div>
-  <div class="card-body">
-    <div class="card-inner">
-      <p>リッチメニューの解放を進めながら、LINKの全貌を知っていきましょう✨</p>
-      <p>それに、必須になってくるのが、</p>
-      <p>📚 LINKセミナー<br>🎖️ LINKセレモニー</p>
-      <p>です✨</p>
-      <p>【聞く】LINKセミナーで<br>知識を整え、魅力やルートがわかり、</p>
-      <div class="arrow">↓</div>
-      <p>【見て体感する】LINKセレモニーで<br>規模感、繋がり、ブランディングがわかります😲</p>
-      <p>📝 セレモニーは申し込みも先着なので、<br>早めに申し込まれた方が有利です⚡</p>
-      <p>またセレモニーは2000人が<br>日本中や世界から集まる結集ポイントです。</p>
-      <p>ベストな繋がりも増えたり飲み放題／ブュッフェもあり、最高峰のパーティーです🎉</p>
-      <p>この二つは、本当に明確になるので<br>忙しい方でも皆さん<br>必ず優先的に出られます✨</p>
-      <div class="btn-box btn-box-yellow">
-        <p class="btn-label">👇 タップして詳細をチェック 👇</p>
-        <a href="link-seminar.html" target="_blank" class="lnk lnk-yellow">⭐️ 必須！LINKセミナーに関する記載</a>
-      </div>
-      <div class="btn-box btn-box-rose">
-        <p class="btn-label">👇 タップして詳細をチェック 👇</p>
-        <a href="https://link-event-x.com/node/1181" target="_blank" class="lnk lnk-rose">⭐️ LINK No.1 LINKセレモニーに関する記載</a>
-      </div>
-      <div class="note">📝 申し込みは最下部の「申し込みはこちらから」、Googleフォームに記入ください</div>
-      <div class="bullet" style="margin-top:12px"><div class="dot"></div><div>5種類のLINKセミナー（LINKの宝の地図🗺️）を視聴する事</div></div>
-      <div class="note">📝 どうしても出れない場合、『最低でも2つ』✨<br>残りのものは『登録3ヶ月以内』で視聴してください⚡</div>
-      <div class="bullet" style="margin-top:10px"><div class="dot"></div><div>🆓 直近のLINKセレモニーの予約</div></div>
-      <button class="done-btn done-btn-pending" id="btn-3" onclick="markDone('3')">☑️ 完了したらここを押してね！</button>
+    <div class="field">
+      <label>系列</label>
+      <select id="inKeiretsu"></select>
+      <input type="text" id="inKeiretsuOther" placeholder="系列名を入力してください" style="display:none;margin-top:8px;">
     </div>
-  </div>
-</div>
-
-<div class="card" id="card-4">
-  <div class="card-head" onclick="toggle(this)">
-    <div class="card-num">4</div>
-    <div class="card-ttl">LINKスケジュールサイトの使い方を覚える<span class="badge badge-yet" id="badge-4">未</span></div>
-    <div class="card-arrow">▼</div>
-  </div>
-  <div class="card-body">
-    <div class="card-inner">
-      <p>上記の最も大切なLINKセミナー／LINKセレモニーを中心に、それ以外にも様々な環境に触れてみよう✨</p>
-      <p>その為に、大切なサイトの使い方をお伝えしておきます！</p>
-      <p>✅ LINKを知る事から始まり、<br>関係構築や事業の集客ポイント探し<br>学びや成長にまで使える最重要サイトです😲</p>
-      <p>✅ こちらは①LINKポータルや②LINK informationからも飛ぶ事が出来ます。</p>
-      <div class="btn-box btn-box-purple">
-        <p class="btn-label">📖 順番に見ていってください</p>
-        <a href="https://link-event-x.com" target="_blank" class="lnk lnk-purple">🌐 LINK公式公認スケジュールサイト</a>
-        <a href="https://www.youtube.com/watch?v=GqEtcSaU05c" target="_blank" class="lnk lnk-red" style="margin-top:8px">▶️ スケジュールサイト使い方動画</a>
-        <a href="schedule-tips.html" target="_blank" class="lnk lnk-gold" style="margin-top:8px">💡 スケジュールサイト豆知識はこちら</a>
-      </div>
-      <button class="done-btn done-btn-pending" id="btn-4" onclick="markDone('4')">☑️ 完了したらここを押してね！</button>
+    <div class="field">
+      <label>お名前(初回のみ)</label>
+      <input type="text" id="inName" placeholder="例:高山翔子">
     </div>
-  </div>
-</div>
 
-<div class="card" id="card-5">
-  <div class="card-head" onclick="toggle(this)">
-    <div class="card-num">5</div>
-    <div class="card-ttl">オープンチャットに入る<span class="badge badge-yet" id="badge-5">未</span></div>
-    <div class="card-arrow">▼</div>
-  </div>
-  <div class="card-body">
-    <div class="card-inner">
-      <p>いよいよ初期サポートも最後です😲</p>
-      <p>下記のLINEオープンチャットにお入りください⚡</p>
-      <div class="arrow">↓</div>
-      <div class="btn-box btn-box-teal">
-        <p class="btn-label">👇 タップしてチェック 👇</p>
-        <a href="openchat.html" target="_blank" class="lnk lnk-teal">📋 入るべきオープンチャット集</a>
-      </div>
-      <button class="done-btn done-btn-pending" id="btn-5" onclick="markDone('5')">☑️ 完了したらここを押してね！</button>
     </div>
+    <button class="btn-main locked" id="loginBtn" onclick="login()">ログイン ▶</button>
+    <p class="note">
+      <a href="#" onclick="if(confirm('この端末に保存された学習の記録を消します。よろしいですか?\n(スプレッドシート側の記録は消えません)')){clearSkyLocal();location.reload();}return false;" style="color:#9AA8A0;">この端末の記録をリセット</a><br>
+      交通整備課|クリエイターズ育成部門
+    </p>
+    <div class="verTag">v1.4 (2026/08/14)</div>
   </div>
-</div>
 
-<p class="hint" style="margin-top:16px">👆 各項目をタップすると詳細が開きます👆<br>1️⃣ 2️⃣ 3️⃣ 4️⃣ 5️⃣</p>
-
-<div class="note" style="margin-bottom:12px">
-  <p>✅ LINK informationにある最初のルール動画でもありましたが、<br>LINK内の全てのオプチャに入る時は、</p>
-  <p style="margin-top:6px">参加する名前の後に、<br><strong>【自分の所属するチーム名/系列名】</strong>を入れましょう✨️</p>
-  <p style="margin-top:6px">例）🌈高山翔子/Skyarc/🚀SkyExceed</p>
-  <p>意味「名前/チーム名/系列名」</p>
-</div>
-
-<div class="gen-box">
-  <label class="gen-label">👤 あなたの名前を入力</label>
-  <input class="gen-input" id="nameInput" type="text" placeholder="例：高山翔子">
-  <label class="gen-label">🏷️ チーム名/系列を選ぶ</label>
-  <select class="gen-select" id="seriesSelect">
-    <option value="">-- 系列を選んでください --</option>
-    <option value="🚀SkyExceed">🚀SkyExceed</option>
-    <option value="🦅Zenith1">🦅Zenith1</option>
-    <option value="🏰Utop">🏰Utop</option>
-    <option value="🌬️ザ・クラウドブルー(蒼雲）">🌬️ザ・クラウドブルー(蒼雲）</option>
-    <option value="📚FairyTail">📚FairyTail</option>
-    <option value="✨アフロディーテ">✨アフロディーテ</option>
-    <option value="🌟グローハピネス🌟">🌟グローハピネス🌟</option>
-    <option value="🥷HOT STUFF ⚜️">🥷HOT STUFF ⚜️</option>
-    <option value="TELLUS.">TELLUS.</option>
-    <option value="♾️ZERO♾️">♾️ZERO♾️</option>
-    <option value="✈️JET RISE">✈️JET RISE</option>
-    <option value="⭐️ルミナス">⭐️ルミナス</option>
-    <option value="エネルギー🔥">エネルギー🔥</option>
-    <option value="FEAT">FEAT</option>
-    <option value="ミラメリ🪄">ミラメリ🪄</option>
-    <option value="🪽HERO">🪽HERO</option>
-    <option value="💎プリズム">💎プリズム</option>
-  </select>
-  <div class="result-label">✅ あなたのオプチャ用ニックネーム</div>
-  <div class="result-box" id="resultBox">👆 名前と系列を入力してください</div>
-  <button id="copyBtn" onclick="copyResult()">📋 タップしてコピー！</button>
-  <div class="copy-hint" id="copyHint">↑ コピーしてオープンチャットのニックネームに貼り付けてください</div>
-</div>
-
-<div style="margin-bottom:20px">
-  <p style="font-size:13px;font-weight:700;color:#5D4037;margin-bottom:10px;text-align:center">📖 特に大事な2つのサイトの設定ガイド 📖</p>
-  <a href="sasaeai.html" style="display:flex;align-items:center;gap:10px;padding:14px 16px;background:#E3F2FD;border:2px solid #90CAF9;border-radius:12px;text-decoration:none;margin-bottom:10px">
-    <span style="font-size:22px">🤝</span>
-    <div>
-      <div style="font-size:13px;font-weight:700;color:#1565C0;line-height:1.5">SASAEAIマッチングサイト</div>
-      <div style="font-size:11px;color:#1976D2">初期設定ガイドを見る →</div>
-    </div>
-  </a>
-  <a href="linkbase.html" style="display:flex;align-items:center;gap:10px;padding:14px 16px;background:#E8F5E9;border:2px solid #A5D6A7;border-radius:12px;text-decoration:none">
-    <span style="font-size:22px">🏰</span>
-    <div>
-      <div style="font-size:13px;font-weight:700;color:#2E7D32;line-height:1.5">LINK-BASEサイト掲載</div>
-      <div style="font-size:11px;color:#388E3C">掲載設定ガイドを見る →</div>
-    </div>
-  </a>
-</div>
-
-<div class="footer">
-  <h3>✨ これにて、初期サポートの内容は全て載せました✨</h3>
-  <div class="footer-body">
-    <p>③〜⑤が1ヶ月以内ですが、実は、</p>
-    <p>✨ LINKセミナーとセレモニーの予約申し込むだけだったり、<br>✨ 各種オプチャに入るだけだったり</p>
-    <p>なので、非常に簡単です⭐️</p>
-    <p>《1時間ほど》で終わりますので、<br>登録した日にやり切ってしまう人も多いです⭐️⭐️</p>
-    <p style="margin-top:8px;font-size:13px">※ LINKセミナーの実際のリアルタイム参加（orどうしても無理な方は視聴会）だけは、1ヶ月の中で最低2種類、3ヶ月で5種類見てもらう必要がありますが💡</p>
+  <div id="loading">
+    <div class="spin"></div>
+    <p id="loadMsg">確認しています…</p>
+    <small id="loadSub">まもなく画面が切り替わります</small>
   </div>
-</div>
-
-<div style="margin-bottom:20px;margin-top:16px">
-  <p style="font-size:13px;font-weight:700;color:#E65100;line-height:1.7;margin-bottom:10px;text-align:center">🌈 👇️ Skyarcの仲間と早く繋がっていきたい人向け 👇️ 🌈</p>
-  <a href="skyarc.html" style="display:flex;align-items:center;gap:10px;padding:14px 16px;background:linear-gradient(135deg,#FFF8E1,#FFF0F0);border:2px solid #FFD6A0;border-radius:12px;text-decoration:none">
-    <span style="font-size:22px">🌈</span>
-    <div>
-      <div style="font-size:13px;font-weight:700;color:#E65100;line-height:1.5">Skyarcの各種情報を見る方法</div>
-      <div style="font-size:11px;color:#FF7043;margin-top:2px">Skyarcチームページを見る →</div>
-    </div>
-  </a>
-</div>
-
-</div>
-
-<div style="text-align:center;margin-top:16px">
-  <a href="portal-setup.html" style="display:inline-block;font-size:13px;font-weight:700;color:#FF7043;text-decoration:none;border:2px solid #FFCCBC;border-radius:10px;padding:10px 20px;background:#FFF8F5">🧰 便利ボタン集</a>
-</div>
-
-<div style="text-align:center;margin-top:10px">
-  <a href="sitemap.html" style="font-size:12px;color:#A1887F;text-decoration:none;border:1px solid #E0D0C0;border-radius:8px;padding:6px 14px;background:#FFFDF9">🗺️ サイトマップ</a>
 </div>
 
 <script>
-const KEYS=['1','2','s','3','4','5'];
-
-function toggle(head){
-  const arrow=head.querySelector('.card-arrow');
-  const body=head.nextElementSibling;
-  arrow.classList.toggle('open');
-  body.classList.toggle('open');
+/* ================================================================
+   接続先の設定【将来の系列分割用】
+   ----------------------------------------------------------------
+   ★いまは全系列が同じ1ファイルに保存されます("default" だけ)。
+   ★人数が増えて分けたくなったら、系列名をキーにURLを足すだけ。
+================================================================ */
+const GAS_MAP = {
+  "default": "https://script.google.com/macros/s/AKfycbzY2l20zwGULjnKRUqvRpbH79fPkl5e-sWNVoXEIgBrDpqhjDAx2zLvJuqO3sZxAfHj/exec"
+};
+function gasUrlFor(keiretsu){
+  try{ return GAS_MAP[keiretsu] || GAS_MAP["default"] || ""; }
+  catch(e){ return GAS_MAP["default"] || ""; }
 }
 
-function markDone(id){
-  const done=localStorage.getItem('link_done_'+id)==='1';
-  if(done){
-    localStorage.removeItem('link_done_'+id);
-    applyState(id,false);
-  } else {
-    localStorage.setItem('link_done_'+id,'1');
-    applyState(id,true);
+/* 行き先の設定:役職に「クリエ」が含まれていればクリエ用ポータルへ */
+const PAGE_CRIE      = "./portal-creators.html";
+const PAGE_SUPPORTER = "./portal-supporter.html";
+
+const KEIRETSU = [
+  "🚀SkyExceed","🦅Zenith1","🏰Utop","🌟グローハピネス🌟","🥷HOT STUFF⚜️",
+  "TELLUS.","FEAT","🌬️ザ・クラウドブルー(蒼雲)","✈️JET RISE","✨アフロディーテ",
+  "⭐️ルミナス","エネルギー🔥","💎プリズム","📚FairyTail","ミラメリ🪄","🪽HERO","♾️ZERO♾️",
+];
+
+const GOOGLE_CLIENT_ID = "315827385958-ikdpkfhkr6nmrgql470aolt4pv27pak3.apps.googleusercontent.com";
+const $ = (s)=>document.querySelector(s);
+let googleEmail = "";
+
+/* JWTを読んでメールアドレスを取り出す */
+function decodeJwt(token){
+  try{
+    const base = token.split(".")[1].replace(/-/g,"+").replace(/_/g,"/");
+    const json = decodeURIComponent(atob(base).split("").map(c=>
+      "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2)).join(""));
+    return JSON.parse(json);
+  }catch(e){ return null; }
+}
+
+function onGoogleCredential(response){
+  const info = decodeJwt(response.credential);
+  if(!info || !info.email){
+    $("#err").textContent = "Googleアカウントの確認に失敗しました。もう一度お試しください。";
+    $("#err").style.display = "block";
+    return;
+  }
+  googleEmail = info.email;
+  $("#gBtnWrap").style.display = "none";
+  $("#gDone").classList.add("show");
+  $("#gMail").textContent = googleEmail;
+  $("#mainFields").classList.remove("locked");
+  $("#loginBtn").classList.remove("locked");
+  if(info.name && !$("#inName").value) $("#inName").value = info.name;
+}
+
+function resetGoogle(){
+  googleEmail = "";
+  $("#gDone").classList.remove("show");
+  $("#gBtnWrap").style.display = "flex";
+  $("#mainFields").classList.add("locked");
+  $("#loginBtn").classList.add("locked");
+  try{ google.accounts.id.disableAutoSelect(); }catch(e){}
+}
+
+/* Googleボタンを描画 */
+window.onload = function(){
+  try{
+    google.accounts.id.initialize({
+      client_id: GOOGLE_CLIENT_ID,
+      callback: onGoogleCredential,
+      auto_select: false
+    });
+    google.accounts.id.renderButton(
+      document.getElementById("gBtnWrap"),
+      { theme:"outline", size:"large", text:"signin_with", locale:"ja", width:320 }
+    );
+  }catch(e){
+    document.getElementById("gBtnWrap").innerHTML =
+      '<p style="font-size:12px;color:#B33;">Googleログインを読み込めませんでした。通信環境を確認して再読み込みしてください。</p>';
+  }
+};
+
+/* 系列セレクト生成 */
+(function(){
+  const sel = $("#inKeiretsu");
+  sel.innerHTML = '<option value="">選択してください</option>'
+    + KEIRETSU.map(k=>`<option value="${k}">${k}</option>`).join("")
+    + '<option value="__other__">その他(自分で入力)</option>';
+  sel.addEventListener("change", ()=>{
+    $("#inKeiretsuOther").style.display = sel.value === "__other__" ? "block" : "none";
+  });
+})();
+
+/* この端末に残っているログイン情報・進捗キャッシュを全部消す */
+function clearSkyLocal(){
+  try{
+    const keys = [];
+    for(let i=0;i<localStorage.length;i++){
+      const k = localStorage.key(i);
+      if(k && (k.indexOf("skyarc_")===0 || k.indexOf("piyo_")===0 || k.indexOf("gcon_")===0)) keys.push(k);
+    }
+    keys.forEach(k=>localStorage.removeItem(k));
+  }catch(e){}
+}
+
+function goTo(member){
+  const isCrie = (member.role || "").indexOf("クリエ") >= 0;
+  $("#formArea").style.display = "none";
+  $("#loading").style.display = "block";
+  $("#loadMsg").textContent = (member.name ? member.name + "さん、" : "") + "ようこそ!";
+  $("#loadSub").textContent = isCrie
+    ? "クリエイターズのページをひらいています…"
+    : "サポーターのページをひらいています…";
+  setTimeout(()=>{ location.href = isCrie ? PAGE_CRIE : PAGE_SUPPORTER; }, 900);
+}
+
+async function login(){
+  const id = $("#inId").value.trim();
+  const pin = $("#inPin").value.trim();
+  const name = $("#inName").value.trim();
+  let keiretsu = $("#inKeiretsu").value;
+  if(keiretsu === "__other__") keiretsu = $("#inKeiretsuOther").value.trim();
+  const err = $("#err");
+  err.style.display = "none";
+
+  if(!googleEmail){
+    err.textContent = "先に「Googleでログイン」で本人確認をしてください";
+    err.style.display = "block"; return;
+  }
+  if(!id || !/^\d{4}$/.test(pin)){
+    err.textContent = "会員番号と、4桁の数字のパスワードを入力してください";
+    err.style.display = "block"; return;
+  }
+
+  $("#loginBtn").disabled = true;
+  $("#loginBtn").textContent = "確認中…";
+  try{
+    const body = new URLSearchParams({action:"login", id, pin, email:googleEmail, name:name||"", keiretsu:keiretsu||""});
+    const res = await fetch(gasUrlFor(keiretsu), {method:"POST", body});
+    const j = await res.json();
+    if(j.ok === false){
+      if(j.error === "pin"){
+        err.textContent = "パスワードが一致しません。忘れた場合は担当コーチにご確認ください。";
+      }else if(j.error === "email"){
+        err.textContent = "この会員番号は別のGoogleアカウント(" + (j.savedHint||"***") + ")で登録されています。そちらでログインするか、担当コーチにご相談ください。";
+      }else{
+        err.textContent = "ログインできませんでした。もう一度お試しください。";
+      }
+      err.style.display = "block";
+      return;
+    }
+    const member = {
+      id, pin, email: googleEmail,
+      name: j.name || name,
+      keiretsu: j.keiretsu || keiretsu,
+      role: j.role || ""
+    };
+    // 別の会員番号でログインしたら、前の人のデータを消す
+    try{
+      const prev = JSON.parse(localStorage.getItem("skyarc_member")||"null");
+      if(prev && String(prev.id) !== String(id)) clearSkyLocal();
+    }catch(e){}
+    localStorage.setItem("skyarc_member", JSON.stringify(member));
+    goTo(member);
+  }catch(e){
+    err.textContent = "通信できませんでした。電波のよい場所でお試しください。";
+    err.style.display = "block";
+  }finally{
+    $("#loginBtn").disabled = false;
+    $("#loginBtn").textContent = "ログイン ▶";
   }
 }
 
-function applyState(id,done){
-  const card=document.getElementById('card-'+id);
-  const btn=document.getElementById('btn-'+id);
-  const badge=document.getElementById('badge-'+id);
-  if(done){
-    card.classList.add('done');
-    btn.textContent='✅ 完了！（もう一度押すと戻せます）';
-    btn.className='done-btn done-btn-done';
-    badge.textContent='完了✓';
-    badge.className='badge badge-done';
-  } else {
-    card.classList.remove('done');
-    btn.textContent='☑️ 完了したらここを押してね！';
-    btn.className='done-btn done-btn-pending';
-    badge.textContent='未';
-    badge.className='badge badge-yet';
-  }
-}
-
-KEYS.forEach(id=>{
-  if(localStorage.getItem('link_done_'+id)==='1') applyState(id,true);
+/* Enterキーでログイン */
+["inId","inPin","inName"].forEach(idName=>{
+  document.getElementById(idName).addEventListener("keydown", e=>{
+    if(e.key === "Enter") login();
+  });
 });
 
-const nameInput=document.getElementById('nameInput');
-const seriesSelect=document.getElementById('seriesSelect');
-const resultBox=document.getElementById('resultBox');
-const copyBtn=document.getElementById('copyBtn');
-const copyHint=document.getElementById('copyHint');
+/* 前回の入力を呼び出して埋めておく(自動では移動しません) */
+(function(){
+  const saved = localStorage.getItem("skyarc_member");
+  if(!saved) return;
+  let m;
+  try{ m = JSON.parse(saved); }catch(e){ return; }
+  if(!m || !m.id) return;
 
-function update(){
-  const name=nameInput.value.trim();
-  const series=seriesSelect.value;
-  if(!name&&!series){resultBox.textContent='👆 名前と系列を入力してください';return;}
-  if(!name){resultBox.textContent='👆 名前を入力してください';return;}
-  if(!series){resultBox.textContent='👆 系列を選んでください';return;}
-  resultBox.textContent='🌈'+name+'/Skyarc/'+series;
-}
+  $("#inId").value = m.id;
+  if(m.pin) $("#inPin").value = m.pin;
+  if(m.name) $("#inName").value = m.name;
+  if(m.keiretsu){
+    const sel = $("#inKeiretsu");
+    const found = Array.from(sel.options).some(o=>o.value === m.keiretsu);
+    if(found){ sel.value = m.keiretsu; }
+    else{
+      sel.value = "__other__";
+      $("#inKeiretsuOther").style.display = "block";
+      $("#inKeiretsuOther").value = m.keiretsu;
+    }
+  }
+  const hint = document.getElementById("welcomeBack");
+  if(hint){
+    hint.style.display = "block";
+    hint.textContent = "おかえりなさい" + (m.name ? "、"+m.name+"さん" : "") + "!Googleで本人確認をしてから「ログイン」を押してください。";
+  }
+})();
 
-function copyResult(){
-  const name=nameInput.value.trim();
-  const series=seriesSelect.value;
-  if(!name||!series){copyHint.textContent='⚠️ 先に名前と系列を入力してください';return;}
-  navigator.clipboard.writeText(resultBox.textContent).then(()=>{
-    copyBtn.textContent='✅ コピーしました！';
-    copyBtn.style.setProperty('background','#43A047','important');
-    copyBtn.style.setProperty('background-color','#43A047','important');
-    copyBtn.style.setProperty('color','#ffffff','important');
-    copyBtn.style.setProperty('-webkit-text-fill-color','#ffffff','important');
-    copyHint.textContent='✅ コピーされました！ニックネームに貼り付けてください';
-    setTimeout(()=>{
-      copyBtn.textContent='📋 タップしてコピー！';
-      copyBtn.style.setProperty('background','#FF7043','important');
-      copyBtn.style.setProperty('background-color','#FF7043','important');
-      copyBtn.style.setProperty('color','#ffffff','important');
-      copyBtn.style.setProperty('-webkit-text-fill-color','#ffffff','important');
-      copyHint.textContent='↑ コピーしてオープンチャットのニックネームに貼り付けてください';
-    },3000);
-  });
-}
-
-nameInput.addEventListener('input',update);
-seriesSelect.addEventListener('change',update);
+if("serviceWorker" in navigator){ navigator.serviceWorker.register("./gcon-sw.js").catch(()=>{}); }
 </script>
 </body>
 </html>

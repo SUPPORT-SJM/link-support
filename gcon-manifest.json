@@ -1,0 +1,15 @@
+{
+  "name": "クリエイターズ育成 マイページ",
+  "short_name": "クリエ育成",
+  "description": "スカイアーク クリエイターズ育成プログラム",
+  "start_url": "./gcon-mypage.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#6E5FB5",
+  "theme_color": "#6E5FB5",
+  "icons": [
+    { "src": "./gcon-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./gcon-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "./gcon-icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
