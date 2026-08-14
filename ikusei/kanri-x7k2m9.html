@@ -144,6 +144,31 @@
     font-size:9.5px;color:#B4B0C4;letter-spacing:.05em;
     padding:6px 0 14px;font-family:monospace;
   }
+  /* 会員の登録・編集 */
+  #memModal{display:none;position:fixed;inset:0;z-index:75;background:rgba(30,26,50,.55);align-items:center;justify-content:center;padding:16px;}
+  #memModal.show{display:flex;}
+  .mm-card{background:#fff;border-radius:18px;width:100%;max-width:460px;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 14px 50px rgba(0,0,0,.3);}
+  .mm-head{padding:20px 22px 14px;border-bottom:1px solid var(--line);}
+  .mm-head h3{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;color:var(--deep);font-size:17px;}
+  .mm-head .sub{font-size:11.5px;color:#77748A;margin-top:2px;}
+  .mm-body{padding:16px 22px;overflow-y:auto;flex:1;}
+  .mm-f{margin-bottom:13px;}
+  .mm-f label{display:block;font-size:12px;font-weight:700;color:var(--deep);margin-bottom:5px;}
+  .mm-f input,.mm-f select{width:100%;padding:11px 12px;font-size:15px;border:2px solid var(--line);border-radius:9px;font-family:inherit;background:var(--paper);}
+  .mm-f input:focus,.mm-f select:focus{outline:none;border-color:var(--leaf);}
+  .mm-f .hint{font-size:11px;color:#8B889E;margin-top:4px;line-height:1.6;}
+  .mm-roles{display:flex;gap:6px;flex-wrap:wrap;margin-top:2px;}
+  .mm-role{border:1.5px solid var(--line);background:#fff;color:#8B889E;border-radius:999px;padding:6px 13px;font-size:12px;font-weight:700;cursor:pointer;}
+  .mm-role.on{background:var(--leaf);border-color:var(--leaf);color:#fff;}
+  .mm-foot{padding:14px 22px 18px;border-top:1px solid var(--line);display:flex;gap:8px;}
+  .mm-foot button{flex:1;padding:13px;border-radius:11px;font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:14px;}
+  .mm-save{background:var(--deep);color:#fff;}
+  .mm-cancel{background:var(--mist);color:var(--deep);}
+  .mm-msg{display:none;border-radius:9px;padding:9px 12px;font-size:12px;margin-bottom:12px;line-height:1.6;}
+  .mm-msg.err{display:block;background:#FDEBEB;color:#B33;}
+  .mm-msg.ok{display:block;background:#EAF7F0;color:#2F7A5C;}
+  .btn-add{background:var(--leaf);color:#fff;font-size:12px;border-radius:999px;padding:7px 16px;font-weight:700;}
+
   /* パスワード再設定 */
   #pinModal{display:none;position:fixed;inset:0;z-index:80;background:rgba(30,26,50,.6);align-items:center;justify-content:center;padding:18px;}
   #pinModal.show{display:flex;}
@@ -206,7 +231,7 @@
     <p style="text-align:center;margin-top:16px;">
       <a href="./index.html" style="color:#8B889E;font-size:12px;">‹ 育成プログラムにもどる</a>
     </p>
-    <div class="verTag">v1.10 (2026/08/14)</div>
+    <div class="verTag">v1.11 (2026/08/14)</div>
   </div>
 </div>
 
@@ -220,6 +245,7 @@
       </div>
       <div class="tools">
         <input class="search" id="search" placeholder="名前・番号で検索" oninput="render()">
+        <button class="btn-add" id="btnAdd" onclick="openMember(null)" style="display:none;">＋ 会員を追加</button>
         <button onclick="load()">🔄 更新</button>
         <button onclick="logout()">ログアウトして育成へ戻る</button>
       </div>
@@ -271,11 +297,75 @@
         ・系列代表:担当系列の閲覧、クリエ/アドバンスの付与<br>
         ・アドバンス:担当系列の閲覧、クリエの付与<br>
         ・クリエ:一覧は見られません(会員番号+系列で呼び出して①の丸つけのみ)<br>
-        ※ 丸つけは系列に関係なく全会員が対象です
+        ※ 丸つけは系列に関係なく全会員が対象です<br>
+        <br>
+        <b>会員の登録・編集</b>(管理者/チーム代表のみ)<br>
+        ・右上「＋会員を追加」… 新しい会員を登録(代表陣の事前登録などに)<br>
+        ・各行の「編集」… 名前・系列・パスワード・役職・担当系列の変更<br>
+        ・名前をクリック → 詳細画面で先生の丸と本人チェックを修正できます
       </div>
-      <div class="verTag" style="margin-top:16px;">v1.10 (2026/08/14)</div>
+      <div class="verTag" style="margin-top:16px;">v1.11 (2026/08/14)</div>
     </div>
   </main>
+</div>
+
+<div id="memModal" onclick="if(event.target===this)closeMember()">
+  <div class="mm-card">
+    <div class="mm-head">
+      <h3 id="mmTitle">会員を追加</h3>
+      <p class="sub" id="mmSub">管理者・チーム代表のみ操作できます</p>
+    </div>
+    <div class="mm-body">
+      <div class="mm-msg" id="mmMsg"></div>
+
+      <div class="mm-f">
+        <label>会員番号 <span style="color:#B33;">*</span></label>
+        <input type="text" id="mmId" inputmode="numeric" placeholder="00012345">
+        <p class="hint">頭の000も含めて入力してください</p>
+      </div>
+
+      <div class="mm-f">
+        <label>お名前</label>
+        <input type="text" id="mmName" placeholder="例:高山翔子">
+      </div>
+
+      <div class="mm-f">
+        <label>系列</label>
+        <select id="mmKeiretsu"></select>
+      </div>
+
+      <div class="mm-f">
+        <label>パスワード(4桁)</label>
+        <input type="text" id="mmPin" inputmode="numeric" maxlength="4" placeholder="例:1234">
+        <p class="hint" id="mmPinHint">新規は必須。編集のときは、変更する場合だけ入力してください。</p>
+      </div>
+
+      <div class="mm-f">
+        <label>役職</label>
+        <div class="mm-roles" id="mmRoles"></div>
+        <p class="hint">管理画面に入るには「アドバンス」以上が必要です(クリエは①の丸つけのみ)</p>
+      </div>
+
+      <div class="mm-f" id="mmScopeWrap" style="display:none;">
+        <label>担当系列</label>
+        <div id="mmScopeList" style="display:grid;grid-template-columns:1fr 1fr;gap:5px;"></div>
+        <p class="hint">アドバンス以上の方が受け持つ系列です(所属系列は自動で含まれます)</p>
+      </div>
+
+      <div class="mm-f" id="mmEmailWrap">
+        <label>Googleアカウント</label>
+        <input type="text" id="mmEmail" placeholder="未登録(初回ログイン時に自動記録)">
+        <p class="hint">
+          <a href="#" onclick="clearMemberEmail();return false;" style="color:#B33;">このアカウント登録をリセットする</a><br>
+          ※ 機種変更などでGoogleアカウントが変わった方に使います
+        </p>
+      </div>
+    </div>
+    <div class="mm-foot">
+      <button class="mm-cancel" onclick="closeMember()">とじる</button>
+      <button class="mm-save" onclick="saveMember()">保存する</button>
+    </div>
+  </div>
 </div>
 
 <div id="detailModal" onclick="if(event.target===this)closeDetail()">
@@ -511,7 +601,7 @@ function render(){
       <td class="prog">${piyo}</td>
       <td class="prog">${gr}</td>
       <td><div class="flags">${fb("クリエ","")}${fb("アドバンス","adv")}${fb("系列代表","kei")}${fb("チーム代表","rep")}${fb("管理者","adm")}</div>${scopeBtn}</td>
-      <td class="kei">${m.lastSeen || "–"}</td>
+      <td class="kei">${m.lastSeen || "–"}${canFull ? `<br><button class="scope-btn" onclick='openMember(${JSON.stringify(m).replace(/'/g,"&#39;")})'>編集</button>` : ""}</td>
     </tr>`;
   }).join("");
 }
@@ -651,6 +741,117 @@ async function submitPinReset(){
 }
 
 
+
+/* ================= 会員の登録・編集 ================= */
+const ROLE_LIST = ["クリエ","アドバンス","系列代表","チーム代表","管理者"];
+let memEditing = null;   // null=新規 / オブジェクト=編集
+let memClearEmail = false;
+
+function openMember(m){
+  memEditing = m;
+  memClearEmail = false;
+  const msg = document.getElementById("mmMsg");
+  msg.className = "mm-msg";
+
+  document.getElementById("mmTitle").textContent = m ? "会員情報の編集" : "会員を追加";
+  document.getElementById("mmSub").textContent = m
+    ? "変更したい項目だけ入力してください"
+    : "会員番号とパスワードは必須です";
+
+  // 系列セレクト
+  const ksel = document.getElementById("mmKeiretsu");
+  ksel.innerHTML = '<option value="">選択してください</option>'
+    + KEIRETSU.map(k=>`<option value="${k}">${k}</option>`).join("");
+
+  document.getElementById("mmId").value = m ? m.id : "";
+  document.getElementById("mmId").readOnly = !!m;
+  document.getElementById("mmId").style.background = m ? "#EFEDF5" : "var(--paper)";
+  document.getElementById("mmName").value = m ? (m.name||"") : "";
+  ksel.value = m ? (m.keiretsu||"") : "";
+  document.getElementById("mmPin").value = "";
+  document.getElementById("mmPinHint").textContent = m
+    ? "変更する場合だけ入力してください(空欄なら現在のまま)"
+    : "新規登録には必須です";
+  document.getElementById("mmEmail").value = m ? (m.email||"") : "";
+  document.getElementById("mmEmail").readOnly = true;
+  document.getElementById("mmEmailWrap").style.display = m ? "block" : "none";
+
+  // 役職ボタン
+  const cur = m ? String(m.role||"").split(/[,、\s]+/).filter(x=>x) : [];
+  document.getElementById("mmRoles").innerHTML = ROLE_LIST.map(r=>
+    `<button class="mm-role ${cur.indexOf(r)>=0?'on':''}" data-role="${r}"
+      onclick="this.classList.toggle('on');updateScopeVisibility()">${r}</button>`).join("");
+
+  // 担当系列
+  const scope = m ? String(m.scope||"").split(/[,、\s]+/).filter(x=>x) : [];
+  document.getElementById("mmScopeList").innerHTML = KEIRETSU.map((k,i)=>{
+    const on = scope.indexOf(k) >= 0;
+    return `<label class="sm-item ${on?'checked':''}" id="mms_${i}" style="font-size:12px;padding:7px 9px;">
+      <input type="checkbox" value="${k}" ${on?'checked':''}
+        onchange="document.getElementById('mms_${i}').classList.toggle('checked', this.checked)">
+      <span>${k}</span></label>`;
+  }).join("");
+  updateScopeVisibility();
+
+  document.getElementById("memModal").classList.add("show");
+}
+
+function updateScopeVisibility(){
+  const roles = Array.from(document.querySelectorAll("#mmRoles .mm-role.on")).map(b=>b.dataset.role);
+  const need = roles.some(r=>["アドバンス","系列代表","チーム代表"].indexOf(r)>=0);
+  document.getElementById("mmScopeWrap").style.display = need ? "block" : "none";
+}
+
+function clearMemberEmail(){
+  if(!confirm("このGoogleアカウントの登録を消します。\n次回ログイン時のアカウントが新しく登録されます。よろしいですか?")) return;
+  memClearEmail = true;
+  document.getElementById("mmEmail").value = "(リセットします)";
+}
+
+function closeMember(){
+  document.getElementById("memModal").classList.remove("show");
+  memEditing = null;
+}
+
+async function saveMember(){
+  const msg = document.getElementById("mmMsg");
+  const show = (t,cls)=>{ msg.textContent = t; msg.className = "mm-msg " + cls; };
+
+  const id = document.getElementById("mmId").value.trim();
+  const pin = document.getElementById("mmPin").value.trim();
+  const name = document.getElementById("mmName").value.trim();
+  const keiretsu = document.getElementById("mmKeiretsu").value;
+  const roles = Array.from(document.querySelectorAll("#mmRoles .mm-role.on")).map(b=>b.dataset.role);
+  const scope = Array.from(document.querySelectorAll("#mmScopeList input:checked")).map(b=>b.value);
+
+  if(!id){ show("会員番号を入力してください","err"); return; }
+  if(!memEditing && !/^\d{4}$/.test(pin)){ show("新規登録にはパスワード(4桁)が必要です","err"); return; }
+  if(pin && !/^\d{4}$/.test(pin)){ show("パスワードは4桁の数字で入力してください","err"); return; }
+
+  show("保存しています…","ok");
+  try{
+    const params = {
+      action:"adminUpsertMember", id:admin.id, pin:admin.pin, email:admin.email,
+      targetId:id, name:name, keiretsu:keiretsu,
+      role:roles.join(","), scope:scope.join(",")
+    };
+    if(pin) params.newPin = pin;
+    if(memClearEmail) params.clearEmail = "1";
+
+    const res = await fetch(GAS_URL, {method:"POST", body:new URLSearchParams(params)});
+    const j = await res.json();
+    if(j.ok === false){
+      show({noperm:"この操作の権限がありません",
+            badpin:"パスワードは4桁の数字で入力してください",
+            missing:"会員番号を入力してください"}[j.error] || "保存できませんでした","err");
+      return;
+    }
+    toast(j.created ? "会員を登録しました" : "会員情報を更新しました");
+    closeMember();
+    load();
+  }catch(e){ show("通信できませんでした","err"); }
+}
+
 /* ================= クリエ用:会員をさがす ================= */
 function buildFindKeiretsu(){
   const sel = document.getElementById("findKeiretsu");
@@ -694,8 +895,11 @@ async function openDetail(id, keiretsu){
   }catch(e){ toast("通信できませんでした"); }
 }
 
+let selfEditMode = {};   // app名 → true で本人チェック編集モード
+
 function renderDetail(){
   const m = detailData.member;
+  const canEditSelf = data && data.isFull;
   document.getElementById("dmName").textContent = (m.name || "(名前未登録)") + "さん";
   document.getElementById("dmSub").textContent =
     m.id + "｜" + (m.keiretsu || "系列未設定") + (m.role ? "｜" + m.role : "");
@@ -714,6 +918,16 @@ function renderDetail(){
     const rows = master.items.map(([code,label])=>{
       const on = marks.indexOf(code) >= 0;
       const didSelf = !!self[code];
+      const editing = !!selfEditMode[app];
+      if(editing){
+        return `<label class="dm-item ${didSelf?'checked':''}" data-selfapp="${app}" style="border-color:${didSelf?'#F5C452':'var(--line)'};background:${didSelf?'#FDF6E4':'#fff'};">
+          <input type="checkbox" value="${code}" ${didSelf?'checked':''}
+            onchange="this.closest('.dm-item').classList.toggle('checked', this.checked)">
+          <span class="code">${code}</span>
+          <span class="nm2">${label}</span>
+          <span class="selfmark">🐣本人チェック</span>
+        </label>`;
+      }
       return `<label class="dm-item ${on?'checked':''}" data-app="${app}">
         <input type="checkbox" value="${code}" ${on?'checked':''}
           onchange="this.closest('.dm-item').classList.toggle('checked', this.checked); updateCount('${app}')">
@@ -731,11 +945,20 @@ function renderDetail(){
         <button onclick="checkAll('${app}',true)">すべて選択</button>
         <button onclick="checkAll('${app}',false)">すべて解除</button>
         <button onclick="copySelf('${app}')">🐣本人チェックに合わせる</button>
+        ${canEditSelf ? `<button onclick="toggleSelfEdit('${app}')" id="selfBtn_${app}">🐣本人チェックを直す</button>` : ""}
       </div>
       ${rows}
       ${pg.updated ? `<p class="dm-note">最終更新:${pg.updated}</p>` : ""}
     </div>`;
   }).join("");
+}
+
+function toggleSelfEdit(app){
+  selfEditMode[app] = !selfEditMode[app];
+  renderDetail();
+  const btn = document.getElementById("selfBtn_"+app);
+  if(btn) btn.textContent = selfEditMode[app] ? "⭕先生の丸にもどす" : "🐣本人チェックを直す";
+  toast(selfEditMode[app] ? "本人チェックの編集モードです(保存で反映)" : "先生の丸の編集にもどりました");
 }
 
 function updateCount(app){
@@ -774,6 +997,18 @@ async function saveMarks(){
     const apps = detailData.canMarkApps && detailData.canMarkApps.length
       ? detailData.canMarkApps : Object.keys(ITEM_MASTER);
     for(const app of apps){
+      // 本人チェックの編集モード
+      if(selfEditMode[app]){
+        const selfChecked = Array.from(document.querySelectorAll(`.dm-item[data-selfapp="${app}"] input:checked`)).map(b=>b.value);
+        const items2 = ITEM_MASTER[app].items.map(x=>x[0]).join(",");
+        const res2 = await fetch(GAS_URL, {method:"POST", body:new URLSearchParams({
+          action:"adminSetSelf", id:admin.id, pin:admin.pin, email:admin.email,
+          target:String(target), app:app, self:selfChecked.join(","), items:items2
+        })});
+        const j2 = await res2.json();
+        if(j2.ok === false){ toast("本人チェックを保存できませんでした"); return; }
+        continue;
+      }
       const boxes = document.querySelectorAll(`.dm-item[data-app="${app}"]`);
       if(boxes.length === 0) continue;   // 画面に出ていないものは触らない
       const checked = Array.from(document.querySelectorAll(`.dm-item[data-app="${app}"] input:checked`)).map(b=>b.value);
@@ -803,6 +1038,7 @@ async function saveMarks(){
 function closeDetail(){
   document.getElementById("detailModal").classList.remove("show");
   detailData = null;
+  selfEditMode = {};
 }
 
 window.addEventListener("pageshow", function(e){
