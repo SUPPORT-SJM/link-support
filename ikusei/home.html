@@ -120,10 +120,10 @@
       <input type="text" id="inId" inputmode="numeric" placeholder="例:00012345" autocomplete="username">
     </div>
     <div class="field">
-      <label>パスワード(4桁の数字)</label>
+      <label>パスコード(4桁の数字)</label>
       <input type="password" id="inPin" inputmode="numeric" maxlength="4" placeholder="初回は好きな4桁の数字を決めてください" autocomplete="current-password">
-      <small>※次回から同じ会員番号とパスワードで、どの端末からでも続きができます。<br>
-      <a href="./index.html" style="color:var(--leaf);font-weight:700;">パスワードを忘れた・変更したい方はこちら</a></small>
+      <small>※次回から同じ会員番号とパスコードで、どの端末からでも続きができます。<br>
+      <a href="./index.html" style="color:var(--leaf);font-weight:700;">パスコードを忘れた・変更したい方はこちら</a></small>
     </div>
     <div class="field">
       <label>系列</label>
@@ -164,7 +164,7 @@
 
   <footer>
     交通整備課|クリエイターズ育成部門
-    <div class="verTag" style="margin-top:8px;color:rgba(255,255,255,.4);">v1.23 (2026/08/14)</div>
+    <div class="verTag" style="margin-top:8px;color:rgba(255,255,255,.4);">v1.25 (2026/08/14)</div>
 </footer>
 </div>
 
@@ -250,7 +250,7 @@ async function login(){
   const err = $("#loginErr");
   err.style.display = "none";
   if(!id || !/^\d{4}$/.test(pin)){
-    err.textContent = "会員番号と、4桁の数字のパスワードを入力してください";
+    err.textContent = "会員番号と、4桁の数字のパスコードを入力してください";
     err.style.display = "block"; return;
   }
   $("#loginBtn").disabled = true;
@@ -261,7 +261,7 @@ async function login(){
     const j = await res.json();
     if(j.ok === false){
       err.textContent = j.error === "pin"
-        ? "パスワードが一致しません。忘れた場合は担当コーチにご確認ください。"
+        ? "パスコードが一致しません。忘れた場合は担当コーチにご確認ください。"
         : "ログインできませんでした。もう一度お試しください。";
       err.style.display = "block";
       return;

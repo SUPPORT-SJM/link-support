@@ -83,7 +83,7 @@
     font-family:monospace;margin-top:6px;
   }
 
-  /* パスワード再設定 */
+  /* パスコード再設定 */
   #pinModal{display:none;position:fixed;inset:0;z-index:80;background:rgba(30,26,50,.6);align-items:center;justify-content:center;padding:18px;}
   #pinModal.show{display:flex;}
   .pm-card{background:#fff;border-radius:20px;padding:26px 22px;width:100%;max-width:390px;box-shadow:0 14px 50px rgba(0,0,0,.3);max-height:88vh;overflow-y:auto;}
@@ -123,7 +123,7 @@
       <div class="how">
         <b style="display:inline;">▼ どちらかをお試しください</b><br>
         ① 下の「Googleアカウントをお持ちでない方はこちら」から、<br>
-        　 会員番号とパスワードでログイン<br>
+        　 会員番号とパスコードでログイン<br>
         ② 画面右下の「⋮」→「他のアプリで開く」でSafari/Chromeへ移動
       </div>
     </div>
@@ -151,10 +151,10 @@
       <input type="text" id="inId" inputmode="numeric" placeholder="例:00012345" autocomplete="username">
     </div>
     <div class="field">
-      <label>パスワード(4桁の数字)</label>
+      <label>パスコード(4桁の数字)</label>
       <input type="password" id="inPin" inputmode="numeric" maxlength="4" placeholder="初回は好きな4桁の数字を決めてください" autocomplete="current-password">
-      <small>※次回から同じ会員番号とパスワードで、どの端末からでも続きができます。<br>
-      <a href="#" onclick="openPinReset();return false;" style="color:var(--leaf);font-weight:700;">パスワードを忘れた・変更したい方はこちら</a><br>
+      <small>※次回から同じ会員番号とパスコードで、どの端末からでも続きができます。<br>
+      <a href="#" onclick="openPinReset();return false;" style="color:var(--leaf);font-weight:700;">パスコードを忘れた・変更したい方はこちら</a><br>
       <a href="../touroku.html" style="color:var(--leaf);font-weight:700;">はじめての方はこちらから登録</a></small>
     </div>
     <div class="field">
@@ -174,7 +174,7 @@
       交通整備課|クリエイターズ育成部門<br>
       <a href="./kanri-x7k2m9.html" style="color:#B8B4C8;font-size:10.5px;">管理画面(クリエイターズ以上)</a>
     </p>
-    <div class="verTag">v1.23 (2026/08/14)</div>
+    <div class="verTag">v1.25 (2026/08/14)</div>
   </div>
 
   <div id="loading">
@@ -241,7 +241,7 @@ function decodeJwt(token){
 
 function onGoogleCredential(response){
   const info = decodeJwt(response.credential);
-  // パスワード再設定の画面が開いているときは、そちらへ渡す
+  // パスコード再設定の画面が開いているときは、そちらへ渡す
   if(document.getElementById("pinModal").classList.contains("show")){
     if(info && info.email) pinResetGoogleOk(info.email);
     return;
@@ -262,7 +262,7 @@ function onGoogleCredential(response){
 }
 
 /* Googleアカウントに紐づく会員情報を呼び出して自動入力する
-   (パスワードは自動で入りません。ご自身で入力していただきます) */
+   (パスコードは自動で入りません。ご自身で入力していただきます) */
 async function fillFromEmail(email){
   const hint = document.getElementById("welcomeBack");
   try{
@@ -275,7 +275,7 @@ async function fillFromEmail(email){
       if(hint){
         hint.style.display = "block";
         hint.innerHTML = "おかえりなさい、<b>" + (j.members[0].name || j.members[0].id) +
-          "</b>さん!<br>パスワード(4桁)を入力して「ログイン」を押してください。";
+          "</b>さん!<br>パスコード(4桁)を入力して「ログイン」を押してください。";
       }
       $("#inPin").focus();
     }else{
@@ -298,7 +298,7 @@ function pickMember(i){
   if(!m) return;
   applyMember(m);
   const hint = document.getElementById("welcomeBack");
-  if(hint) hint.innerHTML = "<b>" + (m.name || m.id) + "</b>さんでログインします。<br>パスワード(4桁)を入力してください。";
+  if(hint) hint.innerHTML = "<b>" + (m.name || m.id) + "</b>さんでログインします。<br>パスコード(4桁)を入力してください。";
   $("#inPin").focus();
 }
 
@@ -317,7 +317,7 @@ function applyMember(m){
   }
 }
 
-/* Googleを使わずに、会員番号+パスワードだけでログインする */
+/* Googleを使わずに、会員番号+パスコードだけでログインする */
 function skipGoogle(){
   googleEmail = "";
   $("#gBtnWrap").style.display = "none";
@@ -325,7 +325,7 @@ function skipGoogle(){
   $("#mainFields").classList.remove("locked");
   $("#loginBtn").classList.remove("locked");
   const link = document.getElementById("skipLink");
-  if(link) link.innerHTML = '<span style="color:#2F7A5C;">会員番号とパスワードでログインします</span>　<a href="#" onclick="backToGoogle();return false;" style="color:#8A9A90;">Googleに戻す</a>';
+  if(link) link.innerHTML = '<span style="color:#2F7A5C;">会員番号とパスコードでログインします</span>　<a href="#" onclick="backToGoogle();return false;" style="color:#8A9A90;">Googleに戻す</a>';
   $("#inId").focus();
 }
 
@@ -411,7 +411,7 @@ async function login(){
   err.style.display = "none";
 
   if(!id || !/^\d{4}$/.test(pin)){
-    err.textContent = "会員番号と、4桁の数字のパスワードを入力してください";
+    err.textContent = "会員番号と、4桁の数字のパスコードを入力してください";
     err.style.display = "block"; return;
   }
 
@@ -423,7 +423,7 @@ async function login(){
     const j = await res.json();
     if(j.ok === false){
       if(j.error === "pin"){
-        err.textContent = "パスワードが一致しません。忘れた場合は担当コーチにご確認ください。";
+        err.textContent = "パスコードが一致しません。忘れた場合は担当コーチにご確認ください。";
       }else if(j.error === "email"){
         err.textContent = "この会員番号は別のGoogleアカウント(" + (j.savedHint||"***") + ")で登録されています。そちらでログインするか、担当コーチにご相談ください。";
       }else{
@@ -463,7 +463,7 @@ async function login(){
 });
 
 
-/* ================= パスワード再設定 ================= */
+/* ================= パスコード再設定 ================= */
 let pmEmail = "";
 let pmInited = false;
 
@@ -505,8 +505,8 @@ async function submitPinReset(){
 
   if(!pmEmail){ show("先にGoogleアカウントで本人確認をしてください","err"); return; }
   if(!id){ show("会員番号を入力してください","err"); return; }
-  if(!/^\d{4}$/.test(p1)){ show("新しいパスワードは4桁の数字で入力してください","err"); return; }
-  if(p1 !== p2){ show("2つのパスワードが一致しません","err"); return; }
+  if(!/^\d{4}$/.test(p1)){ show("新しいパスコードは4桁の数字で入力してください","err"); return; }
+  if(p1 !== p2){ show("2つのパスコードが一致しません","err"); return; }
 
   show("変更しています…","ok");
   try{
@@ -517,11 +517,11 @@ async function submitPinReset(){
       show({
         nomember:"その会員番号は登録されていません",
         email:"この会員番号は別のGoogleアカウント(" + (j.savedHint||"***") + ")で登録されています。そちらでお試しいただくか、担当コーチにご相談ください。",
-        badpin:"パスワードは4桁の数字で入力してください"
+        badpin:"パスコードは4桁の数字で入力してください"
       }[j.error] || "変更できませんでした", "err");
       return;
     }
-    show("✅ 変更しました!新しいパスワードでログインしてください。","ok");
+    show("✅ 変更しました!新しいパスコードでログインしてください。","ok");
     setTimeout(()=>{ closePinReset(); }, 2200);
   }catch(e){ show("通信できませんでした。電波のよい場所でお試しください。","err"); }
 }
@@ -549,7 +549,7 @@ async function submitPinReset(){
   const hint = document.getElementById("welcomeBack");
   if(hint){
     hint.style.display = "block";
-    hint.textContent = "おかえりなさい" + (m.name ? "、"+m.name+"さん" : "") + "!Googleで本人確認をして、パスワードを入力してください。";
+    hint.textContent = "おかえりなさい" + (m.name ? "、"+m.name+"さん" : "") + "!Googleで本人確認をして、パスコードを入力してください。";
   }
 })();
 
@@ -581,7 +581,7 @@ if("serviceWorker" in navigator){ navigator.serviceWorker.register("./gcon-sw.js
 
 <div id="pinModal" onclick="if(event.target===this)closePinReset()">
   <div class="pm-card">
-    <h3>🔑 パスワードの再設定</h3>
+    <h3>🔑 パスコードの再設定</h3>
     <p class="pm-lead">Googleアカウントで本人確認をして、<br>新しい4桁を決めてください。</p>
     <div class="pm-msg" id="pmMsg"></div>
 
@@ -592,9 +592,9 @@ if("serviceWorker" in navigator){ navigator.serviceWorker.register("./gcon-sw.js
     </div>
 
     <div class="pm-sec pm-fields" id="pmFields">
-      <p class="pm-step">② 会員番号と新しいパスワード</p>
+      <p class="pm-step">② 会員番号と新しいパスコード</p>
       <input type="text" id="pmId" inputmode="numeric" placeholder="会員番号(例:00012345)">
-      <input type="password" id="pmPin1" inputmode="numeric" maxlength="4" placeholder="新しいパスワード(4桁)">
+      <input type="password" id="pmPin1" inputmode="numeric" maxlength="4" placeholder="新しいパスコード(4桁)">
       <input type="password" id="pmPin2" inputmode="numeric" maxlength="4" placeholder="もう一度入力">
     </div>
 

@@ -280,9 +280,9 @@
       <input type="text" id="inId" inputmode="numeric" placeholder="例:00012345" autocomplete="username">
     </div>
     <div class="field">
-      <label>パスワード(4桁の数字)</label>
+      <label>パスコード(4桁の数字)</label>
       <input type="password" id="inPin" inputmode="numeric" maxlength="4" placeholder="初回は好きな4桁の数字を決めてください" autocomplete="current-password">
-      <small>※次回から同じ会員番号とパスワードで、どの端末からでも続きができます。忘れた場合は担当コーチへ。</small>
+      <small>※次回から同じ会員番号とパスコードで、どの端末からでも続きができます。忘れた場合は担当コーチへ。</small>
     </div>
     <div class="field">
       <label>系列</label>
@@ -335,7 +335,7 @@
     ① ぴよぴよ脱出クイズ|② グルコンリーダー育成(このページ)<br>
     交通整備課|クリエイターズ育成部門<br>
     <a href="#" onclick="showInstallHelp();return false;" style="color:var(--green-leaf);font-weight:700;">📲 ホーム画面に追加する方法</a>
-    <div class="verTag" style="margin-top:8px;color:rgba(255,255,255,.4);">v1.23 (2026/08/14)</div>
+    <div class="verTag" style="margin-top:8px;color:rgba(255,255,255,.4);">v1.25 (2026/08/14)</div>
 </footer>
 </div>
 
@@ -522,7 +522,7 @@ async function login(){
   const err = $("#loginErr");
   err.style.display = "none";
   if(!id || !/^\d{4}$/.test(pin)){
-    err.textContent = "会員番号と、4桁の数字のパスワードを入力してください";
+    err.textContent = "会員番号と、4桁の数字のパスコードを入力してください";
     err.style.display = "block";
     return;
   }
@@ -542,7 +542,7 @@ async function login(){
       const res = await fetch(`${gasUrlFor(keiretsu)}?action=load&app=${APP_ID}&id=${encodeURIComponent(id)}&pin=${encodeURIComponent(pin)}&items=${encodeURIComponent(ITEM_IDS)}`);
       const j = await res.json();
       if(j.ok === false && j.error === "pin"){
-        err.textContent = "パスワードが一致しません。忘れた場合は担当コーチにご確認ください。";
+        err.textContent = "パスコードが一致しません。忘れた場合は担当コーチにご確認ください。";
         err.style.display = "block";
         member = null;
         return;
@@ -664,7 +664,7 @@ function saveAll(){
       });
       const res = await fetch(gasUrlFor(member && member.keiretsu), {method:"POST", body});
       const j = await res.json();
-      if(j.ok===false && j.error==="pin"){ setSync("⚠️ パスワードが一致しません(コーチにご相談ください)"); return; }
+      if(j.ok===false && j.error==="pin"){ setSync("⚠️ パスコードが一致しません(コーチにご相談ください)"); return; }
       setSync("✅ 保存済み(どの端末からでも続きができます)");
     }catch(e){
       setSync("📱 この端末に保存しました(電波のあるところで自動同期されます)");

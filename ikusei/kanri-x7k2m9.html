@@ -177,7 +177,7 @@
   .mm-msg.ok{display:block;background:#EAF7F0;color:#2F7A5C;}
   .btn-add{background:var(--leaf);color:#fff;font-size:12px;border-radius:999px;padding:7px 16px;font-weight:700;}
 
-  /* パスワード再設定 */
+  /* パスコード再設定 */
   #pinModal{display:none;position:fixed;inset:0;z-index:80;background:rgba(30,26,50,.6);align-items:center;justify-content:center;padding:18px;}
   #pinModal.show{display:flex;}
   .pm-card{background:#fff;border-radius:20px;padding:26px 22px;width:100%;max-width:390px;box-shadow:0 14px 50px rgba(0,0,0,.3);max-height:88vh;overflow-y:auto;}
@@ -233,10 +233,10 @@
         <input type="text" id="inId" inputmode="numeric" placeholder="00012345">
       </div>
       <div class="field">
-        <label>パスワード(4桁)</label>
+        <label>パスコード(4桁)</label>
         <input type="password" id="inPin" inputmode="numeric" maxlength="4">
         <p style="font-size:11px;margin-top:5px;">
-          <a href="#" onclick="openPinReset();return false;" style="color:#4FB08C;font-weight:700;">パスワードを忘れた・変更したい方はこちら</a>
+          <a href="#" onclick="openPinReset();return false;" style="color:#4FB08C;font-weight:700;">パスコードを忘れた・変更したい方はこちら</a>
         </p>
       </div>
     </div>
@@ -244,7 +244,7 @@
     <p style="text-align:center;margin-top:16px;">
       <a href="./index.html" style="color:#8B889E;font-size:12px;">‹ 育成プログラムにもどる</a>
     </p>
-    <div class="verTag">v1.23 (2026/08/14)</div>
+    <div class="verTag">v1.25 (2026/08/14)</div>
   </div>
 </div>
 
@@ -316,10 +316,10 @@
         <br>
         <b>会員の登録・編集</b>(管理者/チーム代表のみ)<br>
         ・右上「＋会員を追加」… 新しい会員を登録(代表陣の事前登録などに)<br>
-        ・各行の「編集」… 名前・系列・パスワード・役職・担当系列の変更<br>
+        ・各行の「編集」… 名前・系列・パスコード・役職・担当系列の変更<br>
         ・名前をクリック → 詳細画面で先生の丸と本人チェックを修正できます
       </div>
-      <div class="verTag" style="margin-top:16px;">v1.23 (2026/08/14)</div>
+      <div class="verTag" style="margin-top:16px;">v1.25 (2026/08/14)</div>
     </div>
   </main>
 </div>
@@ -350,7 +350,7 @@
       </div>
 
       <div class="mm-f">
-        <label>パスワード(4桁)</label>
+        <label>パスコード(4桁)</label>
         <input type="text" id="mmPin" inputmode="numeric" maxlength="4" placeholder="例:1234">
         <p class="hint" id="mmPinHint">新規は必須。編集のときは、変更する場合だけ入力してください。</p>
       </div>
@@ -526,7 +526,7 @@ function onGoogleCredential(response){
   fillFromEmail(googleEmail);
 }
 
-/* Googleアカウントに紐づく会員番号を自動で入れる(パスワードは手入力) */
+/* Googleアカウントに紐づく会員番号を自動で入れる(パスコードは手入力) */
 async function fillFromEmail(email){
   try{
     const res = await fetch(`${GAS_URL}?action=byEmail&email=${encodeURIComponent(email)}`);
@@ -567,7 +567,7 @@ async function login(){
     err.textContent = "先にGoogleで本人確認をしてください"; err.style.display="block"; return;
   }
   if(!id || !pin){
-    err.textContent = "会員番号とパスワードを入力してください"; err.style.display="block"; return;
+    err.textContent = "会員番号とパスコードを入力してください"; err.style.display="block"; return;
   }
   $("#loginBtn").disabled = true;
   $("#loginBtn").textContent = "確認中…";
@@ -605,7 +605,7 @@ async function load(isLogin){
       const msg = {
         needgoogle:"Googleでの本人確認が必要です",
         email:"この会員番号は別のGoogleアカウント(" + (j.savedHint||"***") + ")で登録されています",
-        pin:"パスワードが違います",
+        pin:"パスコードが違います",
         noperm:"この会員番号には管理権限がありません",
         nomember:"会員番号が見つかりません"
       }[j.error] || "読み込めませんでした";
@@ -752,7 +752,7 @@ async function saveScope(){
 
 
 
-/* ================= パスワード再設定 ================= */
+/* ================= パスコード再設定 ================= */
 let pmEmail = "";
 let pmInited = false;
 
@@ -794,8 +794,8 @@ async function submitPinReset(){
 
   if(!pmEmail){ show("先にGoogleアカウントで本人確認をしてください","err"); return; }
   if(!id){ show("会員番号を入力してください","err"); return; }
-  if(!/^\d{4}$/.test(p1)){ show("新しいパスワードは4桁の数字で入力してください","err"); return; }
-  if(p1 !== p2){ show("2つのパスワードが一致しません","err"); return; }
+  if(!/^\d{4}$/.test(p1)){ show("新しいパスコードは4桁の数字で入力してください","err"); return; }
+  if(p1 !== p2){ show("2つのパスコードが一致しません","err"); return; }
 
   show("変更しています…","ok");
   try{
@@ -806,11 +806,11 @@ async function submitPinReset(){
       show({
         nomember:"その会員番号は登録されていません",
         email:"この会員番号は別のGoogleアカウント(" + (j.savedHint||"***") + ")で登録されています。そちらでお試しいただくか、担当コーチにご相談ください。",
-        badpin:"パスワードは4桁の数字で入力してください"
+        badpin:"パスコードは4桁の数字で入力してください"
       }[j.error] || "変更できませんでした", "err");
       return;
     }
-    show("✅ 変更しました!新しいパスワードでログインしてください。","ok");
+    show("✅ 変更しました!新しいパスコードでログインしてください。","ok");
     setTimeout(()=>{ closePinReset(); }, 2200);
   }catch(e){ show("通信できませんでした。電波のよい場所でお試しください。","err"); }
 }
@@ -831,7 +831,7 @@ function openMember(m){
   document.getElementById("mmTitle").textContent = m ? "会員情報の編集" : "会員を追加";
   document.getElementById("mmSub").textContent = m
     ? "変更したい項目だけ入力してください"
-    : "会員番号とパスワードは必須です";
+    : "会員番号とパスコードは必須です";
 
   // 系列セレクト
   const ksel = document.getElementById("mmKeiretsu");
@@ -907,8 +907,8 @@ async function saveMember(){
   const scope = Array.from(document.querySelectorAll("#mmScopeList input:checked")).map(b=>b.value);
 
   if(!id){ show("会員番号を入力してください","err"); return; }
-  if(!memEditing && !/^\d{4}$/.test(pin)){ show("新規登録にはパスワード(4桁)が必要です","err"); return; }
-  if(pin && !/^\d{4}$/.test(pin)){ show("パスワードは4桁の数字で入力してください","err"); return; }
+  if(!memEditing && !/^\d{4}$/.test(pin)){ show("新規登録にはパスコード(4桁)が必要です","err"); return; }
+  if(pin && !/^\d{4}$/.test(pin)){ show("パスコードは4桁の数字で入力してください","err"); return; }
 
   show("保存しています…","ok");
   try{
@@ -927,7 +927,7 @@ async function saveMember(){
     const j = await res.json();
     if(j.ok === false){
       show({noperm:"この操作の権限がありません",
-            badpin:"パスワードは4桁の数字で入力してください",
+            badpin:"パスコードは4桁の数字で入力してください",
             missing:"会員番号を入力してください"}[j.error] || "保存できませんでした","err");
       return;
     }
@@ -1145,7 +1145,7 @@ function toast(msg){
 </script>
 <div id="pinModal" onclick="if(event.target===this)closePinReset()">
   <div class="pm-card">
-    <h3>🔑 パスワードの再設定</h3>
+    <h3>🔑 パスコードの再設定</h3>
     <p class="pm-lead">Googleアカウントで本人確認をして、<br>新しい4桁を決めてください。</p>
     <div class="pm-msg" id="pmMsg"></div>
 
@@ -1156,9 +1156,9 @@ function toast(msg){
     </div>
 
     <div class="pm-sec pm-fields" id="pmFields">
-      <p class="pm-step">② 会員番号と新しいパスワード</p>
+      <p class="pm-step">② 会員番号と新しいパスコード</p>
       <input type="text" id="pmId" inputmode="numeric" placeholder="会員番号(例:00012345)">
-      <input type="password" id="pmPin1" inputmode="numeric" maxlength="4" placeholder="新しいパスワード(4桁)">
+      <input type="password" id="pmPin1" inputmode="numeric" maxlength="4" placeholder="新しいパスコード(4桁)">
       <input type="password" id="pmPin2" inputmode="numeric" maxlength="4" placeholder="もう一度入力">
     </div>
 
