@@ -62,6 +62,7 @@
   .f{margin-bottom:14px;}
   .f label{display:block;font-size:12.5px;font-weight:700;color:var(--deep);margin-bottom:5px;}
   .f label .req{color:#D9534F;font-size:11px;margin-left:3px;}
+  .f label .opt{color:#A8B4AC;font-size:11px;margin-left:3px;font-weight:400;}
   .f input,.f select{width:100%;padding:12px 13px;font-size:16px;border:2px solid var(--mist);border-radius:11px;font-family:inherit;background:var(--paper);}
   .f input:focus,.f select:focus{outline:none;border-color:var(--leaf);}
   .f .hint{font-size:11px;color:#7A8A80;margin-top:4px;line-height:1.7;}
@@ -108,7 +109,7 @@
   <div id="formView">
     <div class="logo">🌱</div>
     <h1>スカイアーク<br>会員登録</h1>
-    <p class="sub">ご入会おめでとうございます!<br>あとで使う情報を、ここに登録しておきましょう。</p>
+    <p class="sub">ご入会おめでとうございます!<br>あとで使う情報を、ここに登録しておきましょう。<br>紹介者の情報は分かる範囲で大丈夫です。</p>
 
     <div class="inapp-warn" id="inappWarn">
       <b>⚠️ アプリ内ブラウザで開いています</b>
@@ -149,6 +150,7 @@
 
     <div class="sec locked" id="fields">
       <p class="step">② あなたの情報</p>
+      <p class="tab-lead" style="margin-bottom:14px;">会員番号・パスワード・お名前・系列は必須です。<br>紹介者の情報は、分かる範囲で大丈夫です。</p>
 
       <div class="f">
         <label>会員番号 <span class="req">必須</span></label>
@@ -173,26 +175,26 @@
         <input type="text" id="inKeiretsuOther" placeholder="系列名を入力してください" style="display:none;margin-top:8px;">
       </div>
 
-      <p class="step" style="margin-top:20px;">③ 紹介してくださった方</p>
+      <p class="step" style="margin-top:22px;">③ 紹介してくださった方 <span style="font-weight:400;font-size:11.5px;color:#A8B4AC;">(分かる範囲でOK)</span></p>
 
       <div class="f">
-        <label>紹介者の会員番号 <span class="req">必須</span></label>
+        <label>紹介者の会員番号 <span class="opt">任意</span></label>
         <input type="text" id="inIntro" inputmode="numeric" placeholder="00012345" oninput="lookup('inIntro','introFound')">
         <p class="found ng" id="introFound"></p>
-        <p class="hint">あなたをお誘いくださった方の会員番号です。<br>分からない場合は、その方に聞いてください</p>
+        <p class="hint">あなたをお誘いくださった方の会員番号です。<br>分からない場合は空欄のままで大丈夫です</p>
       </div>
 
       <div class="f">
-        <label>アップのクリエイターズ会員番号</label>
+        <label>アップのクリエイターズ会員番号 <span class="opt">任意</span></label>
         <input type="text" id="inUpline" inputmode="numeric" placeholder="分かる方だけ" oninput="lookup('inUpline','upFound')">
         <p class="found ng" id="upFound"></p>
-        <p class="hint">紹介者の方と同じ場合は、同じ番号を入れてください。<br>分からない場合は空欄でOKです(あとで登録されます)</p>
+        <p class="hint">紹介者の方と同じ場合は、同じ番号を入れてください。<br>分からない場合は空欄のままで大丈夫です</p>
       </div>
     </div>
 
     <button class="btn-main locked" id="submitBtn" onclick="submitForm()">登録する</button>
     <p class="note">交通整備課|クリエイターズ育成部門</p>
-    <div class="verTag">v1.21 (2026/08/14)</div>
+    <div class="verTag">v1.23 (2026/08/14)</div>
   </div>
 
   <!-- ===== 完了画面 ===== -->
@@ -208,11 +210,11 @@
       <div class="row"><span>パスワード</span><span id="dPin"></span></div>
       <div class="row"><span>連絡先</span><span id="dMail" style="font-size:11.5px;"></span></div>
       <p class="tip">💡 この会員番号とパスワードで、育成プログラムにログインできます。<br>
-      忘れた場合も、同じGoogleアカウントがあれば再設定できます。</p>
+      お名前・系列・紹介者などは、あとからいつでも登録・変更できます。</p>
     </div>
 
     <a class="btn-guide" id="guideLink" href="./index.html">📘 初期サポートガイドへ進む</a>
-    <div class="verTag">v1.21 (2026/08/14)</div>
+    <div class="verTag">v1.23 (2026/08/14)</div>
   </div>
 </div>
 
@@ -403,7 +405,7 @@ async function submitForm(){
   if(!/^\d{4}$/.test(pin)){ show("パスワードは4桁の数字で入力してください","err"); return; }
   if(!name){ show("お名前を入力してください","err"); return; }
   if(!keiretsu){ show("系列を選んでください","err"); return; }
-  if(!intro){ show("紹介者の会員番号を入力してください","err"); return; }
+
 
   $("#submitBtn").disabled = true;
   $("#submitBtn").textContent = "登録しています…";
