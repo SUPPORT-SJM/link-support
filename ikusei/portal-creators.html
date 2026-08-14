@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- v2 (2026-07-20) ゴールバナー中央寄せ修正版 -->
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -145,6 +144,11 @@
   }
   #skyNav .sky-inner{max-width:560px;margin:0 auto;padding:9px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px;}
   #skyNav .sky-who{opacity:.9;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  #skyNav a.sky-admin{
+    background:rgba(255,255,255,.22);color:#fff;text-decoration:none;
+    font-size:11.5px;font-weight:700;border-radius:999px;padding:6px 13px;
+    white-space:nowrap;flex-shrink:0;
+  }
   #skyNav button.sky-out{background:rgba(255,255,255,.18);color:#fff;border:none;font-family:inherit;font-size:11.5px;font-weight:700;border-radius:999px;padding:6px 13px;cursor:pointer;white-space:nowrap;}
   footer{background:var(--green-deep);color:#E6E0F8;text-align:center;padding:28px 20px 36px;font-size:12px;line-height:2;}
   footer .f-title{font-family:"Zen Maru Gothic",sans-serif;font-weight:700;color:var(--white);font-size:13.5px;}
@@ -160,6 +164,7 @@
 
 <div id="skyNav"><div class="sky-inner">
   <span class="sky-who" id="navWho"></span>
+  <a class="sky-admin" id="navAdmin" href="./kanri-x7k2m9.html" style="display:none;">🔐 管理画面</a>
   <button class="sky-out" onclick="skyLogout()">ログアウト</button>
 </div></div>
 <header class="hero">
@@ -238,8 +243,8 @@
 
 <footer>
   <div class="f-title">学びのポータルサイト(クリエイターズ用)</div>
-  交通整備課|クリエイターズ育成部門<br><span style="opacity:.5;">v2</span>
-  <div class="verTag" style="margin-top:8px;color:rgba(255,255,255,.4);">v1.15 (2026/08/14)</div>
+  交通整備課|クリエイターズ育成部門
+  <div class="verTag" style="margin-top:8px;color:rgba(255,255,255,.4);">v1.17 (2026/08/14)</div>
 </footer>
 
 
@@ -252,6 +257,9 @@
   if(!m || !m.id){ location.replace("./index.html"); return; }
   const who = document.getElementById("navWho");
   if(who) who.textContent = (m.name ? m.name+"さん" : "会員番号 "+m.id) + (m.keiretsu ? "｜"+m.keiretsu : "");
+  // クリエイターズ以上なら管理画面へのリンクを出す
+  const adminLink = document.getElementById("navAdmin");
+  if(adminLink && (m.crie === true || String(m.role||"") !== "")) adminLink.style.display = "inline-block";
 })();
 
 /* ブラウザの「戻る」で表示されたときも、ログイン状態を確認し直す */
@@ -262,6 +270,8 @@ window.addEventListener("pageshow", function(e){
   if(!mm || !mm.id){ location.replace("./index.html"); return; }
   const who = document.getElementById("navWho");
   if(who) who.textContent = (mm.name ? mm.name+"さん" : "会員番号 "+mm.id) + (mm.keiretsu ? "｜"+mm.keiretsu : "");
+  const adminLink = document.getElementById("navAdmin");
+  if(adminLink && (mm.crie === true || String(mm.role||"") !== "")) adminLink.style.display = "inline-block";
 });
 
 function skyLogout(){

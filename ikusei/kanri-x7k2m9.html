@@ -231,7 +231,7 @@
     <p style="text-align:center;margin-top:16px;">
       <a href="./index.html" style="color:#8B889E;font-size:12px;">‹ 育成プログラムにもどる</a>
     </p>
-    <div class="verTag">v1.15 (2026/08/14)</div>
+    <div class="verTag">v1.17 (2026/08/14)</div>
   </div>
 </div>
 
@@ -246,6 +246,7 @@
       <div class="tools">
         <input class="search" id="search" placeholder="名前・番号で検索" oninput="render()">
         <button class="btn-add" id="btnAdd" onclick="openMember(null)" style="display:none;">＋ 会員を追加</button>
+        <button id="btnBackPortal" onclick="backToPortal()">‹ ポータルへ</button>
         <button onclick="location.href='./creamap-x7k2m9.html'">🗺 クリエマップ</button>
         <button onclick="load()">🔄 更新</button>
         <button onclick="logout()">ログアウトして育成へ戻る</button>
@@ -305,7 +306,7 @@
         ・各行の「編集」… 名前・系列・パスワード・役職・担当系列の変更<br>
         ・名前をクリック → 詳細画面で先生の丸と本人チェックを修正できます
       </div>
-      <div class="verTag" style="margin-top:16px;">v1.15 (2026/08/14)</div>
+      <div class="verTag" style="margin-top:16px;">v1.17 (2026/08/14)</div>
     </div>
   </main>
 </div>
@@ -545,6 +546,14 @@ async function login(){
   }
   $("#loginBtn").disabled = false;
   $("#loginBtn").textContent = "ログイン";
+}
+
+/* ログアウトせずにポータルへ戻る(役職で行き先を判定) */
+function backToPortal(){
+  let m = null;
+  try{ m = JSON.parse(localStorage.getItem("skyarc_member")||"null"); }catch(e){}
+  if(!m || !m.id){ location.href = "./index.html"; return; }
+  location.href = (m.crie === true) ? "./portal-creators.html" : "./portal-supporter.html";
 }
 
 function logout(){

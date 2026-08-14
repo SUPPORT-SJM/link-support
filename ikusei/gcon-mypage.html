@@ -246,6 +246,11 @@
     white-space:nowrap;
   }
   #skyNav .sky-who{opacity:.9;flex:1;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  #skyNav a.sky-admin{
+    background:rgba(255,255,255,.22);color:#fff;text-decoration:none;
+    font-size:11px;font-weight:700;border-radius:999px;padding:6px 11px;
+    white-space:nowrap;flex-shrink:0;
+  }
   #skyNav button.sky-out{
     background:rgba(255,255,255,.18);color:#fff;border:none;
     font-family:inherit;font-size:11.5px;font-weight:700;
@@ -297,6 +302,7 @@
 <div id="skyNav"><div class="sky-inner">
   <a class="sky-back" id="navBack" href="./portal-supporter.html">‹ ポータル</a>
   <span class="sky-who" id="navWho"></span>
+  <a class="sky-admin" id="navAdmin" href="./kanri-x7k2m9.html" style="display:none;">🔐 管理</a>
   <button class="sky-out" onclick="skyLogout()">ログアウト</button>
 </div></div>
 
@@ -329,7 +335,7 @@
     ① ぴよぴよ脱出クイズ|② グルコンリーダー育成(このページ)<br>
     交通整備課|クリエイターズ育成部門<br>
     <a href="#" onclick="showInstallHelp();return false;" style="color:var(--green-leaf);font-weight:700;">📲 ホーム画面に追加する方法</a>
-    <div class="verTag" style="margin-top:8px;color:rgba(255,255,255,.4);">v1.15 (2026/08/14)</div>
+    <div class="verTag" style="margin-top:8px;color:rgba(255,255,255,.4);">v1.17 (2026/08/14)</div>
 </footer>
 </div>
 
@@ -760,6 +766,8 @@ if(!isStandalone && (isIOS || isLINE)){
 
   const who = document.getElementById("navWho");
   if(who) who.textContent = (m.name ? m.name+"さん" : "会員番号 "+m.id) + (m.keiretsu ? "｜"+m.keiretsu : "");
+  const adminLink = document.getElementById("navAdmin");
+  if(adminLink && (m.crie === true || String(m.role||"") !== "")) adminLink.style.display = "inline-block";
 })();
 
 /* ブラウザの「戻る」で表示されたときも、ログイン状態を確認し直す */
@@ -770,6 +778,8 @@ window.addEventListener("pageshow", function(e){
   if(!mm || !mm.id){ location.replace("./index.html"); return; }
   const who = document.getElementById("navWho");
   if(who) who.textContent = (mm.name ? mm.name+"さん" : "会員番号 "+mm.id) + (mm.keiretsu ? "｜"+mm.keiretsu : "");
+  const adminLink = document.getElementById("navAdmin");
+  if(adminLink && (mm.crie === true || String(mm.role||"") !== "")) adminLink.style.display = "inline-block";
 });
 
 function skyLogout(){
