@@ -130,6 +130,12 @@
     white-space:nowrap;
   }
   #skyNav .sky-who{opacity:.9;flex:1;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+  #skyNav .sky-badges{display:inline-flex;gap:3px;margin-right:5px;flex-shrink:0;}
+  #skyNav .sky-badge{
+    background:rgba(255,255,255,.28);border-radius:999px;
+    padding:2px 8px;font-size:11px;white-space:nowrap;
+  }
   #skyNav a.sky-admin{
     background:rgba(255,255,255,.22);color:#fff;text-decoration:none;
     font-size:11px;font-weight:700;border-radius:999px;padding:6px 11px;
@@ -162,7 +168,7 @@
       <span class="pb hot">クリエイターズ育成プログラム ①</span>
     </div>
     <h1>🐣 ぴよぴよ脱出クイズ</h1>
-    <p class="sub">全問に<b>先生の丸⭕</b>がついたら卒業です。答え合わせは担当コーチと行います。</p>
+    <p class="sub">クリエイターズに上がるまでに、この7問を答えられるようになりましょう。<br>答え合わせは担当のクリエイターズまたはアドバンスと行います。</p>
     <div class="login-err" id="loginErr"></div>
     <div class="field">
       <label>会員番号</label>
@@ -171,7 +177,7 @@
     <div class="field">
       <label>パスコード(4桁の数字)</label>
       <input type="password" id="inPin" inputmode="numeric" maxlength="4" placeholder="初回は好きな4桁の数字を決めてください" autocomplete="current-password">
-      <small>※忘れた場合は担当コーチにご確認ください。</small>
+      <small>※忘れた場合は担当のクリエイターズまたはアドバンスにご確認ください。</small>
     </div>
     <div class="field">
       <label>系列</label>
@@ -190,7 +196,7 @@
 <div id="quizView">
 <div id="skyNav"><div class="sky-inner">
   <a class="sky-back" id="navBack" href="./portal-supporter.html">‹ ポータル</a>
-  <span class="sky-who" id="navWho"></span>
+  <span class="sky-badges" id="navBadges"></span><span class="sky-who" id="navWho"></span>
   <a class="sky-admin" id="navAdmin" href="./kanri-x7k2m9.html" style="display:none;">🔐 管理</a>
   <button class="sky-out" onclick="skyLogout()">ログアウト</button>
 </div></div>
@@ -220,7 +226,7 @@
         <span class="arw">›</span>
         <div class="node"><span class="em">🎓</span><b>クリエ昇格</b><small>5人紹介+面談</small></div>
         <span class="arw">›</span>
-        <div class="node"><span class="em">🔒</span><b>つづきの<br>プログラム</b><small>コーチから案内</small></div>
+        <div class="node"><span class="em">🔒</span><b>つづきの<br>プログラム</b><small>クリエ昇格後に</small></div>
       </div>
       <p class="map-note">💡 ①はメンバーさんの「サポーター育成」とクリエさんの「育成プログラム①」の<b>共通の入口</b>です。</p>
     </div>
@@ -246,7 +252,7 @@
       <div id="gradCard">
         <div class="big">🐣→🐔</div>
         <h3>ぴよぴよ卒業、おめでとう!</h3>
-        <p>先生の丸が7つそろいました!すばらしい🎉<br>つぎのステップは、担当コーチから案内があります。おたのしみに🌱</p>
+        <p>7問すべてに先生の丸がそろいました!すばらしい🎉<br>つぎのステップは、担当のクリエイターズまたはアドバンスから案内があります。おたのしみに🌱</p>
       </div>
     </div>
   </section>
@@ -254,7 +260,7 @@
   <footer>
     クリエイターズ育成プログラム ①<br>
     交通整備課|クリエイターズ育成部門
-    <div class="verTag" style="margin-top:8px;color:rgba(255,255,255,.4);">v1.28 (2026/08/14)</div>
+    <div class="verTag" style="margin-top:8px;color:rgba(255,255,255,.4);">v1.33 (2026/08/14)</div>
 </footer>
 </div>
 
@@ -390,7 +396,7 @@ async function login(){
       const res = await fetch(gasUrlFor(keiretsu), {method:"POST", body});
       const j = await res.json();
       if(j.ok === false && j.error === "pin"){
-        err.textContent = "パスコードが一致しません。忘れた場合は担当コーチにご確認ください。";
+        err.textContent = "パスコードが一致しません。忘れた場合は担当のクリエイターズまたはアドバンスにご確認ください。";
         err.style.display = "block";
         member = null;
         return;
@@ -488,7 +494,7 @@ function toggleAns(id){
 function toggleSelf(id){
   selfChecks[id] = !selfChecks[id];
   if(!selfChecks[id]) delete selfChecks[id];
-  else toast("いいね!コーチと答え合わせしよう📞");
+  else toast("いいね!担当の方と答え合わせしよう📞");
   localStorage.setItem("piyo_self_v2_"+member.id, JSON.stringify(selfChecks));
   render();
   saveSelf();
@@ -555,6 +561,12 @@ function toast(msg){
   if(who) who.textContent = (m.name ? m.name+"さん" : "会員番号 "+m.id) + (m.keiretsu ? "｜"+m.keiretsu : "");
   const adminLink = document.getElementById("navAdmin");
   if(adminLink && (m.crie === true || String(m.role||"") !== "")) adminLink.style.display = "inline-block";
+
+  // 修了バッジを表示
+  const bw = document.getElementById("navBadges");
+  if(bw && Array.isArray(m.badges) && m.badges.length){
+    bw.innerHTML = m.badges.map(b=>`<span class="sky-badge" title="${b.label}">${b.mark} ${b.label}</span>`).join("");
+  }
 })();
 
 /* ブラウザの「戻る」で表示されたときも、ログイン状態を確認し直す */
@@ -567,6 +579,12 @@ window.addEventListener("pageshow", function(e){
   if(who) who.textContent = (mm.name ? mm.name+"さん" : "会員番号 "+mm.id) + (mm.keiretsu ? "｜"+mm.keiretsu : "");
   const adminLink = document.getElementById("navAdmin");
   if(adminLink && (mm.crie === true || String(mm.role||"") !== "")) adminLink.style.display = "inline-block";
+
+  // 修了バッジを表示
+  const bw = document.getElementById("navBadges");
+  if(bw && Array.isArray(mm.badges) && mm.badges.length){
+    bw.innerHTML = mm.badges.map(b=>`<span class="sky-badge" title="${b.label}">${b.mark} ${b.label}</span>`).join("");
+  }
 });
 
 function skyLogout(){

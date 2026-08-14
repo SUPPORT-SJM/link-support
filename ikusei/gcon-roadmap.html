@@ -265,6 +265,12 @@
     white-space:nowrap;
   }
   #skyNav .sky-who{opacity:.9;flex:1;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+  #skyNav .sky-badges{display:inline-flex;gap:3px;margin-right:5px;flex-shrink:0;}
+  #skyNav .sky-badge{
+    background:rgba(255,255,255,.28);border-radius:999px;
+    padding:2px 8px;font-size:11px;white-space:nowrap;
+  }
   #skyNav a.sky-admin{
     background:rgba(255,255,255,.22);color:#fff;text-decoration:none;
     font-size:11px;font-weight:700;border-radius:999px;padding:6px 11px;
@@ -307,7 +313,7 @@
 
 <div id="skyNav"><div class="sky-inner">
   <a class="sky-back" id="navBack" href="./portal-supporter.html">‹ ポータル</a>
-  <span class="sky-who" id="navWho"></span>
+  <span class="sky-badges" id="navBadges"></span><span class="sky-who" id="navWho"></span>
   <a class="sky-admin" id="navAdmin" href="./kanri-x7k2m9.html" style="display:none;">🔐 管理</a>
   <button class="sky-out" onclick="skyLogout()">ログアウト</button>
 </div></div>
@@ -490,7 +496,7 @@
 <footer>
   <div class="f-title">交通整備課|クリエイターズ育成部門</div>
   4週間後、一緒にみんなの夢を加速させましょう 🚀
-  <div class="verTag" style="margin-top:8px;color:rgba(255,255,255,.4);">v1.28 (2026/08/14)</div>
+  <div class="verTag" style="margin-top:8px;color:rgba(255,255,255,.4);">v1.33 (2026/08/14)</div>
 </footer>
 
 <script>
@@ -516,6 +522,12 @@
   if(who) who.textContent = (m.name ? m.name+"さん" : "会員番号 "+m.id) + (m.keiretsu ? "｜"+m.keiretsu : "");
   const adminLink = document.getElementById("navAdmin");
   if(adminLink && (m.crie === true || String(m.role||"") !== "")) adminLink.style.display = "inline-block";
+
+  // 修了バッジを表示
+  const bw = document.getElementById("navBadges");
+  if(bw && Array.isArray(m.badges) && m.badges.length){
+    bw.innerHTML = m.badges.map(b=>`<span class="sky-badge" title="${b.label}">${b.mark} ${b.label}</span>`).join("");
+  }
 })();
 
 /* ブラウザの「戻る」で表示されたときも、ログイン状態を確認し直す */
@@ -528,6 +540,12 @@ window.addEventListener("pageshow", function(e){
   if(who) who.textContent = (mm.name ? mm.name+"さん" : "会員番号 "+mm.id) + (mm.keiretsu ? "｜"+mm.keiretsu : "");
   const adminLink = document.getElementById("navAdmin");
   if(adminLink && (mm.crie === true || String(mm.role||"") !== "")) adminLink.style.display = "inline-block";
+
+  // 修了バッジを表示
+  const bw = document.getElementById("navBadges");
+  if(bw && Array.isArray(mm.badges) && mm.badges.length){
+    bw.innerHTML = mm.badges.map(b=>`<span class="sky-badge" title="${b.label}">${b.mark} ${b.label}</span>`).join("");
+  }
 });
 
 function skyLogout(){
