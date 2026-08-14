@@ -26,6 +26,14 @@
   .lcard{background:var(--white);border-radius:20px;padding:30px 24px;width:100%;max-width:380px;box-shadow:0 10px 40px rgba(0,0,0,.3);}
   .lcard h1{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;color:var(--deep);font-size:19px;text-align:center;margin-bottom:4px;}
   .lcard .sub{font-size:12px;color:#77748A;text-align:center;margin-bottom:20px;line-height:1.7;}
+
+  .inapp-warn{
+    display:none;background:#FFF3D6;border:1.5px solid #F0C86A;border-radius:12px;
+    padding:12px 14px;font-size:12px;color:#7A5A00;line-height:1.75;margin-bottom:14px;
+  }
+  .inapp-warn.show{display:block;}
+  .inapp-warn b{display:block;font-size:12.5px;margin-bottom:3px;}
+  .inapp-warn .how{margin-top:7px;padding-top:7px;border-top:1px dashed #E5CE94;font-size:11.5px;}
   .gsec{margin-bottom:16px;padding-bottom:16px;border-bottom:1.5px solid var(--line);}
   .gsec .lead{font-size:12px;color:#77748A;margin-bottom:9px;text-align:center;}
   #gBtnWrap{display:flex;justify-content:center;min-height:44px;}
@@ -125,6 +133,11 @@
   <div class="lcard">
     <h1>🗺 クリエマップ</h1>
     <p class="sub">クリエイターズの系統図です<br>アドバンス以上の方がご覧いただけます</p>
+    <div class="inapp-warn" id="inappWarn">
+      <b>⚠️ アプリ内ブラウザで開いています</b>
+      LINEなどのアプリ内では、Googleログインがご利用いただけません。
+      <div class="how">画面右下の「⋮」→「他のアプリで開く」でSafari/Chromeへ移動してください。</div>
+    </div>
     <div class="err" id="err"></div>
 
     <div class="gsec">
@@ -147,7 +160,7 @@
     <p style="text-align:center;margin-top:14px;">
       <a href="./kanri-x7k2m9.html" style="color:#8B889E;font-size:11.5px;">‹ 管理画面にもどる</a>
     </p>
-    <div class="verTag">v1.17 (2026/08/14)</div>
+    <div class="verTag">v1.20 (2026/08/14)</div>
   </div>
 </div>
 
@@ -192,7 +205,7 @@
         ①🎓=ぴよぴよ卒業 ／ ②の数字=グルコンリーダー育成の先生の丸<br>
         カードをクリックすると、その方から下だけを表示します。会員名簿の「アップの会員番号」欄でつながりを設定してください。
       </div>
-      <div class="verTag">v1.17 (2026/08/14)</div>
+      <div class="verTag">v1.20 (2026/08/14)</div>
     </div>
   </main>
 </div>
@@ -210,6 +223,21 @@ let rootId = null, view = "chart", maxDepth = 5;
 let crumbs = [];
 
 /* ---------- Googleログイン ---------- */
+
+/* ===== アプリ内ブラウザの検知(LINE・Instagram等ではGoogleログインが使えません) ===== */
+function isInAppBrowser(){
+  const ua = navigator.userAgent || "";
+  return /Line\//i.test(ua) || /FBAN|FBAV|Instagram/i.test(ua) || /Twitter/i.test(ua);
+}
+function showInAppWarning(){
+  if(!isInAppBrowser()) return false;
+  const el = document.getElementById("inappWarn");
+  if(el) el.classList.add("show");
+  const g = document.getElementById("gBtnWrap");
+  if(g) g.style.opacity = ".45";
+  return true;
+}
+
 function decodeJwt(token){
   try{
     const base = token.split(".")[1].replace(/-/g,"+").replace(/_/g,"/");
@@ -242,6 +270,7 @@ async function fillFromEmail(email){
   }catch(e){}
 }
 window.onload = function(){
+  showInAppWarning();
   try{
     google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: onGoogleCredential, auto_select:false });
     google.accounts.id.renderButton(document.getElementById("gBtnWrap"),
