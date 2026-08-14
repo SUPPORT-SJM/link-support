@@ -14,6 +14,7 @@
 <link rel="apple-touch-icon" href="./ikusei/gcon-icon-180.png">
 <meta name="theme-color" content="#6E5FB5">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
   :root{
     --deep:#6E5FB5; --leaf:#4FB08C; --mist:#EDEAF9;
@@ -78,6 +79,41 @@
   .msg.ok{display:block;background:#EAF7F0;color:#2F7A5C;}
   .note{font-size:11px;color:#8A9A90;text-align:center;margin-top:16px;line-height:1.8;}
   .note a{color:#8A9A90;}
+
+  /* ご案内キット(折りたたみ) */
+  .kit{margin-top:22px;border-top:1.5px solid var(--mist);padding-top:16px;}
+  .kit-toggle{
+    width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;
+    background:var(--paper);border:1.5px solid var(--mist);border-radius:12px;
+    padding:12px 14px;font-family:"Zen Maru Gothic",sans-serif;font-weight:700;
+    font-size:13px;color:var(--deep);
+  }
+  .kit-toggle .arw{font-size:11px;color:#A8B4AC;transition:transform .25s;}
+  .kit.open .kit-toggle .arw{transform:rotate(180deg);}
+  .kit-body{display:none;padding-top:14px;}
+  .kit.open .kit-body{display:block;}
+  .kit-lead{font-size:11.5px;color:#7A8A80;line-height:1.75;margin-bottom:12px;}
+  .kit-f{margin-bottom:12px;}
+  .kit-f label{display:block;font-size:12px;font-weight:700;color:var(--deep);margin-bottom:5px;}
+  .kit-f input{width:100%;padding:11px 12px;font-size:15px;border:2px solid var(--mist);border-radius:10px;font-family:inherit;background:var(--paper);}
+  .kit-f input:focus{outline:none;border-color:var(--leaf);}
+  .kit-text{
+    background:var(--paper);border:1.5px solid var(--mist);border-radius:11px;
+    padding:12px 14px;font-size:12.5px;line-height:1.9;white-space:pre-wrap;
+    word-break:break-all;color:#3E5248;margin-bottom:10px;
+  }
+  .kit-btns{display:flex;gap:8px;margin-bottom:14px;}
+  .kit-btns button{
+    flex:1;padding:12px;border-radius:11px;
+    font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:13px;
+  }
+  .kit-copy{background:var(--leaf);color:#fff;}
+  .kit-qr{background:var(--mist);color:var(--deep);}
+  #qrArea{display:none;text-align:center;padding:16px;background:#fff;border:1.5px solid var(--mist);border-radius:12px;}
+  #qrArea.show{display:block;}
+  #qrBox{display:flex;justify-content:center;margin-bottom:10px;}
+  #qrBox img,#qrBox canvas{border-radius:6px;}
+  #qrArea .cap{font-size:11.5px;color:#7A8A80;line-height:1.7;}
 
   /* 完了画面 */
   #doneView{display:none;text-align:center;}
@@ -193,8 +229,36 @@
     </div>
 
     <button class="btn-main locked" id="submitBtn" onclick="submitForm()">登録する</button>
+    <div class="kit" id="kit">
+      <button class="kit-toggle" onclick="document.getElementById('kit').classList.toggle('open');drawKit();">
+        <span>📣 このページを人に伝える</span>
+        <span class="arw">▼</span>
+      </button>
+      <div class="kit-body">
+        <p class="kit-lead">ご案内の文章とQRコードをご用意しました。<br>
+        新しく入られた方への声かけにお使いください。</p>
+
+        <div class="kit-f">
+          <label>あなたの会員番号(任意)</label>
+          <input type="text" id="kitId" inputmode="numeric" placeholder="00012345" oninput="drawKit()">
+        </div>
+
+        <div class="kit-text" id="kitText"></div>
+
+        <div class="kit-btns">
+          <button class="kit-copy" onclick="copyKit()">📋 文章をコピー</button>
+          <button class="kit-qr" onclick="toggleQr()">📱 QRコード</button>
+        </div>
+
+        <div id="qrArea">
+          <div id="qrBox"></div>
+          <p class="cap">この画面を見せて、読み取ってもらってください</p>
+        </div>
+      </div>
+    </div>
+
     <p class="note">交通整備課|クリエイターズ育成部門</p>
-    <div class="verTag">v1.26 (2026/08/14)</div>
+    <div class="verTag">v1.27 (2026/08/14)</div>
   </div>
 
   <!-- ===== 完了画面 ===== -->
@@ -214,7 +278,7 @@
     </div>
 
     <a class="btn-guide" id="guideLink" href="./index.html">📘 初期サポートガイドへ進む</a>
-    <div class="verTag">v1.26 (2026/08/14)</div>
+    <div class="verTag">v1.27 (2026/08/14)</div>
   </div>
 </div>
 
@@ -341,6 +405,7 @@ window.onload = function(){
       '<p style="font-size:12px;color:#B33;">Googleログインを読み込めませんでした。通信環境を確認して再読み込みしてください。</p>';
   }
   document.getElementById("guideLink").href = GUIDE_URL;
+  drawKit();
 };
 
 /* すでに登録済みの内容を呼び出す */
@@ -440,6 +505,73 @@ async function submitForm(){
   }finally{
     $("#submitBtn").disabled = false;
     $("#submitBtn").textContent = "登録する";
+  }
+}
+
+
+/* ================= ご案内キット(人に伝える) ================= */
+const PAGE_URL = location.href.split("?")[0].split("#")[0];
+let qrDrawn = false;
+
+function kitMessage(){
+  const myId = document.getElementById("kitId").value.trim();
+  let t = "ご入会おめでとうございます✨\n\n"
+        + "今後のサポートに必要な情報なので、こちらからご登録ください🙏\n\n"
+        + "▼会員情報登録はこちら\n"
+        + PAGE_URL;
+  if(myId){
+    t += "\n\n「紹介者の会員番号」には【" + myId + "】を入れてください😊";
+  }
+  return t;
+}
+
+function drawKit(){
+  const el = document.getElementById("kitText");
+  if(el) el.textContent = kitMessage();
+}
+
+async function copyKit(){
+  const text = kitMessage();
+  try{
+    await navigator.clipboard.writeText(text);
+    show("文章をコピーしました。そのまま貼り付けてお使いください📋","ok");
+  }catch(e){
+    // クリップボードが使えない環境向け
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    try{
+      document.execCommand("copy");
+      show("文章をコピーしました📋","ok");
+    }catch(e2){
+      show("コピーできませんでした。上の文章を長押しして選択してください。","err");
+    }
+    document.body.removeChild(ta);
+  }
+}
+
+function toggleQr(){
+  const area = document.getElementById("qrArea");
+  const opened = area.classList.toggle("show");
+  if(opened && !qrDrawn){
+    try{
+      if(typeof QRCode === "undefined") throw new Error("no lib");
+      new QRCode(document.getElementById("qrBox"), {
+        text: PAGE_URL,
+        width: 190, height: 190,
+        colorDark: "#3B3550", colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.M
+      });
+      qrDrawn = true;
+    }catch(e){
+      // ライブラリが読み込めない場合は画像で表示
+      document.getElementById("qrBox").innerHTML =
+        '<img src="https://api.qrserver.com/v1/create-qr-code/?size=190x190&data='
+        + encodeURIComponent(PAGE_URL) + '" alt="QRコード" width="190" height="190">';
+      qrDrawn = true;
+    }
   }
 }
 
