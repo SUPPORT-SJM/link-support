@@ -231,7 +231,7 @@
     <p style="text-align:center;margin-top:16px;">
       <a href="./index.html" style="color:#8B889E;font-size:12px;">‹ 育成プログラムにもどる</a>
     </p>
-    <div class="verTag">v1.11 (2026/08/14)</div>
+    <div class="verTag">v1.12 (2026/08/14)</div>
   </div>
 </div>
 
@@ -246,6 +246,7 @@
       <div class="tools">
         <input class="search" id="search" placeholder="名前・番号で検索" oninput="render()">
         <button class="btn-add" id="btnAdd" onclick="openMember(null)" style="display:none;">＋ 会員を追加</button>
+        <button onclick="location.href='./creamap-x7k2m9.html'">🗺 クリエマップ</button>
         <button onclick="load()">🔄 更新</button>
         <button onclick="logout()">ログアウトして育成へ戻る</button>
       </div>
@@ -304,7 +305,7 @@
         ・各行の「編集」… 名前・系列・パスワード・役職・担当系列の変更<br>
         ・名前をクリック → 詳細画面で先生の丸と本人チェックを修正できます
       </div>
-      <div class="verTag" style="margin-top:16px;">v1.11 (2026/08/14)</div>
+      <div class="verTag" style="margin-top:16px;">v1.12 (2026/08/14)</div>
     </div>
   </main>
 </div>
@@ -344,6 +345,12 @@
         <label>役職</label>
         <div class="mm-roles" id="mmRoles"></div>
         <p class="hint">管理画面に入るには「アドバンス」以上が必要です(クリエは①の丸つけのみ)</p>
+      </div>
+
+      <div class="mm-f">
+        <label>アップの会員番号</label>
+        <input type="text" id="mmUpline" inputmode="numeric" placeholder="00012345(クリエイターズ以上)">
+        <p class="hint">この方を紹介・育成したクリエイターズの会員番号です。クリエマップ(系統図)に使われます。</p>
       </div>
 
       <div class="mm-f" id="mmScopeWrap" style="display:none;">
@@ -772,6 +779,7 @@ function openMember(m){
   document.getElementById("mmPinHint").textContent = m
     ? "変更する場合だけ入力してください(空欄なら現在のまま)"
     : "新規登録には必須です";
+  document.getElementById("mmUpline").value = m ? (m.upline||"") : "";
   document.getElementById("mmEmail").value = m ? (m.email||"") : "";
   document.getElementById("mmEmail").readOnly = true;
   document.getElementById("mmEmailWrap").style.display = m ? "block" : "none";
@@ -833,6 +841,7 @@ async function saveMember(){
     const params = {
       action:"adminUpsertMember", id:admin.id, pin:admin.pin, email:admin.email,
       targetId:id, name:name, keiretsu:keiretsu,
+      upline:document.getElementById("mmUpline").value.trim(),
       role:roles.join(","), scope:scope.join(",")
     };
     if(pin) params.newPin = pin;

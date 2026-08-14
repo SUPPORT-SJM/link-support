@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>クリエマップ|育成システム</title>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+  :root{
+    --deep:#3B3550; --leaf:#4FB08C; --mist:#EDEAF9;
+    --paper:#F7F6FA; --ink:#22222A;
+    --amber:#F5C452; --red:#E8788A; --blue:#5E8FD8; --purple:#9E7CD4;
+    --white:#fff; --line:#E2E0EA;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:"Zen Kaku Gothic New",sans-serif;background:var(--paper);color:var(--ink);line-height:1.7;font-size:14.5px;}
+  button{font-family:inherit;cursor:pointer;border:none;}
+
+  /* login */
+  #loginView{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--deep);padding:20px;}
+  .lcard{background:var(--white);border-radius:20px;padding:30px 24px;width:100%;max-width:380px;box-shadow:0 10px 40px rgba(0,0,0,.3);}
+  .lcard h1{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;color:var(--deep);font-size:19px;text-align:center;margin-bottom:4px;}
+  .lcard .sub{font-size:12px;color:#77748A;text-align:center;margin-bottom:20px;line-height:1.7;}
+  .gsec{margin-bottom:16px;padding-bottom:16px;border-bottom:1.5px solid var(--line);}
+  .gsec .lead{font-size:12px;color:#77748A;margin-bottom:9px;text-align:center;}
+  #gBtnWrap{display:flex;justify-content:center;min-height:44px;}
+  .gdone{display:none;background:#EAF7F0;border-radius:10px;padding:10px 12px;font-size:12px;color:#2F7A5C;text-align:center;line-height:1.6;}
+  .gdone.show{display:block;}
+  .locked{opacity:.4;pointer-events:none;}
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:12.5px;font-weight:700;color:var(--deep);margin-bottom:5px;}
+  .field input{width:100%;padding:12px 13px;font-size:16px;border:2px solid var(--line);border-radius:10px;font-family:inherit;background:var(--paper);}
+  .field input:focus{outline:none;border-color:var(--leaf);}
+  .btn-main{width:100%;padding:14px;border-radius:12px;background:var(--deep);color:#fff;font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:15px;}
+  .err{display:none;background:#FDEBEB;color:#B33;border-radius:9px;padding:10px 13px;font-size:12.5px;margin-bottom:12px;}
+
+  /* app */
+  #appView{display:none;}
+  .head{background:var(--deep);color:#fff;padding:14px 0;position:sticky;top:0;z-index:20;}
+  .head .wrap{max-width:1400px;margin:0 auto;padding:0 16px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;}
+  .head h1{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:16px;}
+  .head .me{font-size:11px;opacity:.85;}
+  .head .tools{display:flex;gap:7px;align-items:center;flex-wrap:wrap;}
+  .head button{background:rgba(255,255,255,.16);color:#fff;font-size:12px;border-radius:999px;padding:7px 14px;font-weight:700;}
+  .head button.on{background:var(--leaf);}
+  .head select{padding:7px 11px;border-radius:999px;border:none;font-size:12px;font-family:inherit;}
+
+  .crumb{background:#fff;border-bottom:1px solid var(--line);padding:9px 0;font-size:12px;}
+  .crumb .wrap{max-width:1400px;margin:0 auto;padding:0 16px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+  .crumb a{color:var(--blue);cursor:pointer;text-decoration:underline;}
+  .crumb .sep{color:#B4B0C4;}
+  .crumb .now{font-weight:700;color:var(--deep);}
+  .crumb .cnt{margin-left:auto;color:#77748A;}
+
+  main{padding:20px 0 60px;}
+  .wrap{max-width:1400px;margin:0 auto;padding:0 16px;}
+
+  /* ===== 組織図(横に広がる) ===== */
+  #chartArea{overflow-x:auto;padding-bottom:20px;}
+  .org{display:flex;flex-direction:column;align-items:center;min-width:max-content;padding:10px 20px;}
+  .org-row{display:flex;justify-content:center;align-items:flex-start;gap:14px;}
+  .org-node{display:flex;flex-direction:column;align-items:center;}
+  .card{
+    background:#fff;border-radius:12px;padding:9px 13px;min-width:118px;max-width:150px;
+    box-shadow:0 2px 7px rgba(0,0,0,.08);border-top:4px solid var(--leaf);
+    text-align:center;cursor:pointer;transition:transform .12s;
+  }
+  .card:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(0,0,0,.14);}
+  .card.adv{border-top-color:var(--blue);}
+  .card.kei{border-top-color:#7BB3A0;}
+  .card.rep{border-top-color:var(--amber);}
+  .card.adm{border-top-color:var(--red);}
+  .card .nm{font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:13px;color:var(--deep);line-height:1.4;
+            overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .card .kei-s{font-size:10px;color:#8B889E;margin-top:1px;}
+  .card .prog{font-size:10.5px;margin-top:4px;color:#66647A;white-space:nowrap;}
+  .card .prog .g{color:var(--leaf);font-weight:700;}
+  .card .child{
+    display:inline-block;margin-top:5px;background:var(--mist);color:var(--deep);
+    font-size:10px;font-weight:700;border-radius:999px;padding:2px 8px;
+  }
+  .connector{width:2px;height:16px;background:var(--line);}
+  .hbar{height:2px;background:var(--line);}
+  .more{
+    background:var(--mist);color:var(--deep);border-radius:10px;padding:9px 13px;
+    font-size:11.5px;font-weight:700;cursor:pointer;min-width:100px;text-align:center;
+  }
+
+  /* ===== ツリー(折りたたみ) ===== */
+  #treeArea{display:none;}
+  .tnode{margin-left:0;}
+  .trow{
+    display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:9px;
+    background:#fff;margin-bottom:4px;box-shadow:0 1px 3px rgba(0,0,0,.05);
+  }
+  .trow:hover{background:#FAFAFE;}
+  .tbtn{width:22px;height:22px;border-radius:6px;background:var(--mist);color:var(--deep);font-size:11px;font-weight:900;flex-shrink:0;}
+  .tbtn.empty{background:none;cursor:default;color:transparent;}
+  .trow .nm{font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:13.5px;cursor:pointer;}
+  .trow .nm:hover{color:var(--blue);}
+  .trow .kei-s{font-size:11px;color:#8B889E;}
+  .trow .prog{font-size:11px;color:#66647A;margin-left:auto;white-space:nowrap;}
+  .trow .prog .g{color:var(--leaf);font-weight:700;}
+  .trow .badge{font-size:10px;font-weight:700;border-radius:999px;padding:2px 8px;background:var(--mist);color:var(--deep);}
+  .tchildren{margin-left:22px;border-left:2px solid var(--line);padding-left:10px;display:none;}
+  .tchildren.open{display:block;}
+
+  .empty{text-align:center;padding:50px 20px;color:#8B889E;}
+  .legend{font-size:11px;color:#8B889E;margin-top:18px;line-height:1.9;}
+  .legend .dot{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:3px;vertical-align:-1px;}
+  #toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;font-size:13px;border-radius:999px;padding:10px 20px;opacity:0;transition:all .3s;z-index:50;}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .verTag{display:block;text-align:center;font-size:9.5px;color:#B4B0C4;letter-spacing:.05em;padding:8px 0 20px;font-family:monospace;}
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN ===== -->
+<div id="loginView">
+  <div class="lcard">
+    <h1>🗺 クリエマップ</h1>
+    <p class="sub">クリエイターズの系統図です<br>アドバンス以上の方がご覧いただけます</p>
+    <div class="err" id="err"></div>
+
+    <div class="gsec">
+      <p class="lead">Googleアカウントで本人確認します</p>
+      <div id="gBtnWrap"></div>
+      <div class="gdone" id="gDone">✅ 確認できました<br><span id="gMail"></span></div>
+    </div>
+
+    <div id="mainFields" class="locked">
+      <div class="field">
+        <label>会員番号</label>
+        <input type="text" id="inId" inputmode="numeric" placeholder="00012345">
+      </div>
+      <div class="field">
+        <label>パスワード(4桁)</label>
+        <input type="password" id="inPin" inputmode="numeric" maxlength="4">
+      </div>
+    </div>
+    <button class="btn-main locked" id="loginBtn" onclick="login()">ログイン</button>
+    <p style="text-align:center;margin-top:14px;">
+      <a href="./kanri-x7k2m9.html" style="color:#8B889E;font-size:11.5px;">‹ 管理画面にもどる</a>
+    </p>
+    <div class="verTag">v1.12 (2026/08/14)</div>
+  </div>
+</div>
+
+<!-- ===== APP ===== -->
+<div id="appView">
+  <div class="head">
+    <div class="wrap">
+      <div>
+        <h1>🗺 クリエマップ</h1>
+        <div class="me" id="meLine"></div>
+      </div>
+      <div class="tools">
+        <select id="rootSel" onchange="changeRoot(this.value)"></select>
+        <button id="btnChart" class="on" onclick="setView('chart')">組織図</button>
+        <button id="btnTree" onclick="setView('tree')">ツリー</button>
+        <select id="depthSel" onchange="setDepth(this.value)">
+          <option value="3">3段まで</option>
+          <option value="4">4段まで</option>
+          <option value="5" selected>5段まで</option>
+          <option value="6">6段まで</option>
+        </select>
+        <button onclick="location.href='./kanri-x7k2m9.html'">管理画面</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="crumb">
+    <div class="wrap" id="crumbLine"></div>
+  </div>
+
+  <main>
+    <div class="wrap">
+      <div id="chartArea"></div>
+      <div id="treeArea"></div>
+      <div class="legend">
+        カードの色 —
+        <span><span class="dot" style="background:#4FB08C;"></span>クリエ</span>　
+        <span><span class="dot" style="background:#5E8FD8;"></span>アドバンス</span>　
+        <span><span class="dot" style="background:#7BB3A0;"></span>系列代表</span>　
+        <span><span class="dot" style="background:#F5C452;"></span>チーム代表</span>　
+        <span><span class="dot" style="background:#E8788A;"></span>管理者</span><br>
+        ①🎓=ぴよぴよ卒業 ／ ②の数字=グルコンリーダー育成の先生の丸<br>
+        カードをクリックすると、その方から下だけを表示します。会員名簿の「アップの会員番号」欄でつながりを設定してください。
+      </div>
+      <div class="verTag">v1.12 (2026/08/14)</div>
+    </div>
+  </main>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const GAS_URL = "https://script.google.com/macros/s/AKfycbzY2l20zwGULjnKRUqvRpbH79fPkl5e-sWNVoXEIgBrDpqhjDAx2zLvJuqO3sZxAfHj/exec";
+const GOOGLE_CLIENT_ID = "315827385958-ikdpkfhkr6nmrgql470aolt4pv27pak3.apps.googleusercontent.com";
+const $ = (s)=>document.querySelector(s);
+
+let admin = null, googleEmail = "";
+let members = [], byId = {}, children = {};
+let rootId = null, view = "chart", maxDepth = 5;
+let crumbs = [];
+
+/* ---------- Googleログイン ---------- */
+function decodeJwt(token){
+  try{
+    const base = token.split(".")[1].replace(/-/g,"+").replace(/_/g,"/");
+    const json = decodeURIComponent(atob(base).split("").map(c=>
+      "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2)).join(""));
+    return JSON.parse(json);
+  }catch(e){ return null; }
+}
+function onGoogleCredential(response){
+  const info = decodeJwt(response.credential);
+  if(!info || !info.email){ showErr("Googleアカウントの確認に失敗しました"); return; }
+  googleEmail = info.email;
+  $("#gBtnWrap").style.display = "none";
+  $("#gDone").classList.add("show");
+  $("#gMail").textContent = googleEmail;
+  $("#mainFields").classList.remove("locked");
+  $("#loginBtn").classList.remove("locked");
+}
+window.onload = function(){
+  try{
+    google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: onGoogleCredential, auto_select:false });
+    google.accounts.id.renderButton(document.getElementById("gBtnWrap"),
+      { theme:"outline", size:"large", text:"signin_with", locale:"ja", width:300 });
+  }catch(e){
+    document.getElementById("gBtnWrap").innerHTML = '<p style="font-size:12px;color:#B33;">Googleログインを読み込めませんでした</p>';
+  }
+};
+function showErr(t){ const e=$("#err"); e.textContent=t; e.style.display="block"; }
+
+async function login(){
+  const id = $("#inId").value.trim(), pin = $("#inPin").value.trim();
+  $("#err").style.display = "none";
+  if(!googleEmail){ showErr("先にGoogleで本人確認をしてください"); return; }
+  if(!id || !pin){ showErr("会員番号とパスワードを入力してください"); return; }
+  $("#loginBtn").disabled = true; $("#loginBtn").textContent = "確認中…";
+  admin = {id, pin, email:googleEmail};
+  const ok = await load(true);
+  if(ok){ $("#loginView").style.display="none"; $("#appView").style.display="block"; }
+  else admin = null;
+  $("#loginBtn").disabled = false; $("#loginBtn").textContent = "ログイン";
+}
+
+async function load(isLogin){
+  try{
+    const url = `${GAS_URL}?action=adminList&id=${encodeURIComponent(admin.id)}&pin=${encodeURIComponent(admin.pin)}&email=${encodeURIComponent(admin.email)}`;
+    const res = await fetch(url);
+    const j = await res.json();
+    if(j.ok === false || j.listDenied){
+      const msg = j.listDenied ? "この画面はアドバンス以上の方がご覧になれます" :
+        ({email:"登録されているGoogleアカウントと違います", pin:"パスワードが違います",
+          noperm:"この会員番号には権限がありません", nomember:"会員番号が見つかりません"}[j.error] || "読み込めませんでした");
+      if(isLogin) showErr(msg); else toast(msg);
+      return false;
+    }
+    // クリエ以上だけを対象にする
+    members = (j.members||[]).filter(m => String(m.role||"").indexOf("クリエ") >= 0
+                                       || String(m.role||"").indexOf("アドバンス") >= 0
+                                       || String(m.role||"").indexOf("代表") >= 0
+                                       || String(m.role||"").indexOf("管理者") >= 0);
+    buildIndex();
+    $("#meLine").textContent = (j.adminName||"") + "さん｜" + (j.isFull ? "全体" : "担当系列");
+    buildRootSelect();
+    render();
+    return true;
+  }catch(e){
+    if(isLogin) showErr("通信できませんでした"); else toast("通信できませんでした");
+    return false;
+  }
+}
+
+/* ---------- 家系図の組み立て ---------- */
+const norm = (v)=> String(v==null?"":v).trim().replace(/^0+/,"") || String(v||"");
+
+function buildIndex(){
+  byId = {}; children = {};
+  members.forEach(m=>{ byId[norm(m.id)] = m; });
+  members.forEach(m=>{
+    const up = norm(m.upline);
+    if(up && byId[up]){
+      (children[up] = children[up] || []).push(m);
+    }
+  });
+  // 名前順に整える
+  Object.keys(children).forEach(k=> children[k].sort((a,b)=> (a.name||"").localeCompare(b.name||"","ja")));
+}
+
+function roots(){
+  // アップが未設定、またはアップが一覧にいない人がルート
+  return members.filter(m=>{
+    const up = norm(m.upline);
+    return !up || !byId[up];
+  }).sort((a,b)=> (a.keiretsu||"").localeCompare(b.keiretsu||"","ja"));
+}
+
+function buildRootSelect(){
+  const sel = $("#rootSel");
+  const rs = roots();
+  sel.innerHTML = '<option value="">全体を表示</option>'
+    + rs.map(m=>`<option value="${norm(m.id)}">${m.name||m.id}(${m.keiretsu||"系列なし"})</option>`).join("");
+}
+
+function changeRoot(id){
+  rootId = id || null;
+  crumbs = [];
+  if(id && byId[id]) crumbs = buildCrumbs(id);
+  render();
+}
+
+function buildCrumbs(id){
+  const path = [];
+  let cur = byId[id];
+  let guard = 0;
+  while(cur && guard++ < 20){
+    path.unshift(cur);
+    const up = norm(cur.upline);
+    cur = (up && byId[up]) ? byId[up] : null;
+  }
+  return path;
+}
+
+function drill(id){
+  rootId = id;
+  crumbs = buildCrumbs(id);
+  $("#rootSel").value = "";
+  render();
+}
+
+function setView(v){
+  view = v;
+  $("#btnChart").classList.toggle("on", v==="chart");
+  $("#btnTree").classList.toggle("on", v==="tree");
+  $("#chartArea").style.display = v==="chart" ? "block" : "none";
+  $("#treeArea").style.display  = v==="tree"  ? "block" : "none";
+  render();
+}
+function setDepth(d){ maxDepth = Number(d); render(); }
+
+/* ---------- 表示 ---------- */
+function roleClass(role){
+  const r = String(role||"");
+  if(r.indexOf("管理者")>=0) return "adm";
+  if(r.indexOf("チーム代表")>=0) return "rep";
+  if(r.indexOf("系列代表")>=0) return "kei";
+  if(r.indexOf("アドバンス")>=0) return "adv";
+  return "";
+}
+function progText(m){
+  const p1 = m.piyoDone ? '<span class="g">①🎓</span>' : `①${m.piyoMark||0}/${m.piyoItems||"–"}`;
+  const p2 = m.grDone ? '<span class="g">②🎓</span>' : (m.grMark ? `②${m.grMark}/${m.grItems||"–"}` : "②–");
+  return p1 + "　" + p2;
+}
+function countAll(id){
+  let n = 0;
+  (children[id]||[]).forEach(c=>{ n += 1 + countAll(norm(c.id)); });
+  return n;
+}
+
+function render(){
+  const crumbEl = $("#crumbLine");
+  if(crumbs.length){
+    crumbEl.innerHTML = '<a onclick="changeRoot(\\'\\')">全体</a>'
+      + crumbs.map((m,i)=> `<span class="sep">›</span>` +
+          (i===crumbs.length-1 ? `<span class="now">${m.name||m.id}</span>`
+                               : `<a onclick="drill('${norm(m.id)}')">${m.name||m.id}</a>`)).join("")
+      + `<span class="cnt">配下 ${countAll(norm(crumbs[crumbs.length-1].id))} 名</span>`;
+  }else{
+    crumbEl.innerHTML = `<span class="now">全体</span><span class="cnt">クリエイターズ以上 ${members.length} 名</span>`;
+  }
+
+  if(view === "chart") renderChart(); else renderTree();
+}
+
+/* 組織図 */
+function renderChart(){
+  const area = $("#chartArea");
+  const list = rootId ? [byId[rootId]] : roots();
+  if(!list.length || !list[0]){
+    area.innerHTML = '<div class="empty">表示する方がいません。<br>会員名簿の「アップの会員番号」欄を設定してください。</div>';
+    return;
+  }
+  area.innerHTML = '<div class="org">' + list.map(m=>nodeHtml(m,1)).join("") + '</div>';
+}
+
+function nodeHtml(m, depth){
+  const id = norm(m.id);
+  const kids = children[id] || [];
+  const total = countAll(id);
+  const card = `<div class="card ${roleClass(m.role)}" onclick="drill('${id}')">
+      <div class="nm">${m.name || "(名前未登録)"}</div>
+      <div class="kei-s">${m.keiretsu || "–"}</div>
+      <div class="prog">${progText(m)}</div>
+      ${total ? `<span class="child">配下 ${total}</span>` : ""}
+    </div>`;
+
+  if(!kids.length) return `<div class="org-node">${card}</div>`;
+
+  if(depth >= maxDepth){
+    return `<div class="org-node">${card}
+      <div class="connector"></div>
+      <div class="more" onclick="drill('${id}')">▼ この先 ${total} 名<br>クリックで表示</div>
+    </div>`;
+  }
+  return `<div class="org-node">${card}
+    <div class="connector"></div>
+    <div class="org-row">${kids.map(k=>nodeHtml(k, depth+1)).join("")}</div>
+  </div>`;
+}
+
+/* ツリー */
+function renderTree(){
+  const area = $("#treeArea");
+  const list = rootId ? [byId[rootId]] : roots();
+  if(!list.length || !list[0]){
+    area.innerHTML = '<div class="empty">表示する方がいません。<br>会員名簿の「アップの会員番号」欄を設定してください。</div>';
+    return;
+  }
+  area.innerHTML = list.map(m=>treeHtml(m,1)).join("");
+}
+
+function treeHtml(m, depth){
+  const id = norm(m.id);
+  const kids = children[id] || [];
+  const total = countAll(id);
+  const open = depth <= 2;
+  return `<div class="tnode">
+    <div class="trow">
+      ${kids.length
+        ? `<button class="tbtn" onclick="toggleTree(this)">${open?"−":"+"}</button>`
+        : `<button class="tbtn empty">・</button>`}
+      <span class="nm" onclick="drill('${id}')">${m.name || "(名前未登録)"}</span>
+      <span class="kei-s">${m.keiretsu || "–"}</span>
+      ${total ? `<span class="badge">配下 ${total}</span>` : ""}
+      <span class="prog">${progText(m)}</span>
+    </div>
+    ${kids.length ? `<div class="tchildren ${open?'open':''}">${kids.map(k=>treeHtml(k, depth+1)).join("")}</div>` : ""}
+  </div>`;
+}
+
+function toggleTree(btn){
+  const kids = btn.closest(".tnode").querySelector(".tchildren");
+  if(!kids) return;
+  const opened = kids.classList.toggle("open");
+  btn.textContent = opened ? "−" : "+";
+}
+
+function toast(msg){
+  const t = $("#toast");
+  t.textContent = msg; t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"), 2000);
+}
+["inId","inPin"].forEach(k=>{
+  document.getElementById(k).addEventListener("keydown", e=>{ if(e.key==="Enter") login(); });
+});
+window.addEventListener("pageshow", function(e){ if(e.persisted) location.reload(); });
+</script>
+</body>
+</html>
