@@ -248,7 +248,7 @@
   <footer>
     クリエイターズ育成プログラム ①<br>
     交通整備課|クリエイターズ育成部門
-    <div class="verTag" style="margin-top:8px;color:rgba(255,255,255,.4);">v1.13 (2026/08/14)</div>
+    <div class="verTag" style="margin-top:8px;color:rgba(255,255,255,.4);">v1.14 (2026/08/14)</div>
 </footer>
 </div>
 
@@ -541,7 +541,7 @@ function toast(msg){
   try{ m = JSON.parse(localStorage.getItem("skyarc_member")||"null"); }catch(e){}
   if(!m || !m.id){ location.replace("./index.html"); return; }
 
-  const isCrie = (m.role||"").indexOf("クリエ") >= 0;
+  const isCrie = m.crie === true;
   const back = document.getElementById("navBack");
   if(back) back.href = isCrie ? "./portal-creators.html" : "./portal-supporter.html";
 

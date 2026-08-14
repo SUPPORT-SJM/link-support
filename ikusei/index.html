@@ -151,7 +151,7 @@
       交通整備課|クリエイターズ育成部門<br>
       <a href="./kanri-x7k2m9.html" style="color:#B8B4C8;font-size:10.5px;">管理画面(クリエイターズ以上)</a>
     </p>
-    <div class="verTag">v1.13 (2026/08/14)</div>
+    <div class="verTag">v1.14 (2026/08/14)</div>
   </div>
 
   <div id="loading">
@@ -330,7 +330,7 @@ function clearSkyLocal(){
 }
 
 function goTo(member){
-  const isCrie = (member.role || "").indexOf("クリエ") >= 0;
+  const isCrie = member.crie === true || member.crie === "true";
   $("#formArea").style.display = "none";
   $("#loading").style.display = "block";
   $("#loadMsg").textContent = (member.name ? member.name + "さん、" : "") + "ようこそ!";
@@ -379,7 +379,8 @@ async function login(){
       id, pin, email: googleEmail,
       name: j.name || name,
       keiretsu: j.keiretsu || keiretsu,
-      role: j.role || ""
+      role: j.role || "",
+      crie: j.crie === true
     };
     // 別の会員番号でログインしたら、前の人のデータを消す
     try{

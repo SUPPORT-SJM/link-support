@@ -231,7 +231,7 @@
     <p style="text-align:center;margin-top:16px;">
       <a href="./index.html" style="color:#8B889E;font-size:12px;">‹ 育成プログラムにもどる</a>
     </p>
-    <div class="verTag">v1.13 (2026/08/14)</div>
+    <div class="verTag">v1.14 (2026/08/14)</div>
   </div>
 </div>
 
@@ -291,13 +291,13 @@
       </table>
       <div class="legend">
         ⭕ = 先生の丸の数 / 🐣 = 本人チェックの数<br>
-「クリエ」を付けると②③が解放されます。<br>
+「クリエ」を押すと会員名簿の<b>クリエイターズ列が○</b>になり、②③の教材が解放されます。<br>
         権限は積み重ね式です:管理画面に入るには「アドバンス」が必要で、そこに「系列代表」「チーム代表」を追加します。<br>
         操作できる範囲<br>
         ・チーム代表/管理者:全員の閲覧・全フラグ・担当系列の設定<br>
         ・系列代表:担当系列の閲覧、クリエ/アドバンスの付与<br>
         ・アドバンス:担当系列の閲覧、クリエの付与<br>
-        ・クリエ:一覧は見られません(会員番号+系列で呼び出して①の丸つけのみ)<br>
+        ・クリエイターズ(役職なし):一覧は見られません(会員番号+系列で呼び出して①の丸つけのみ)<br>
         ※ 丸つけは系列に関係なく全会員が対象です<br>
         <br>
         <b>会員の登録・編集</b>(管理者/チーム代表のみ)<br>
@@ -305,7 +305,7 @@
         ・各行の「編集」… 名前・系列・パスワード・役職・担当系列の変更<br>
         ・名前をクリック → 詳細画面で先生の丸と本人チェックを修正できます
       </div>
-      <div class="verTag" style="margin-top:16px;">v1.13 (2026/08/14)</div>
+      <div class="verTag" style="margin-top:16px;">v1.14 (2026/08/14)</div>
     </div>
   </main>
 </div>
@@ -339,6 +339,15 @@
         <label>パスワード(4桁)</label>
         <input type="text" id="mmPin" inputmode="numeric" maxlength="4" placeholder="例:1234">
         <p class="hint" id="mmPinHint">新規は必須。編集のときは、変更する場合だけ入力してください。</p>
+      </div>
+
+      <div class="mm-f">
+        <label>クリエイターズ</label>
+        <label style="display:flex;align-items:center;gap:8px;padding:9px 11px;border:1.5px solid var(--line);border-radius:9px;cursor:pointer;font-size:13px;" id="mmCrieWrap">
+          <input type="checkbox" id="mmCrie" style="width:17px;height:17px;accent-color:var(--leaf);"
+            onchange="document.getElementById('mmCrieWrap').style.background=this.checked?'#EAF7F0':'#fff'">
+          <span>クリエイターズ(②③の教材が解放されます)</span>
+        </label>
       </div>
 
       <div class="mm-f">
@@ -577,6 +586,8 @@ async function load(isLogin){
 }
 
 function has(role, flag){ return String(role||"").indexOf(flag) >= 0; }
+/* クリエイターズは専用フラグ */
+function hasCrie(m){ return m.crie === true; }
 
 function render(){
   if(!data) return;
@@ -604,7 +615,7 @@ function render(){
                   : canKei ? ["クリエ","アドバンス"]
                   : ["クリエ"];
     const fb = (flag, cls) => {
-      const on = has(m.role, flag);
+      const on = (flag === "クリエ") ? hasCrie(m) : has(m.role, flag);
       const disabled = allowed.indexOf(flag) < 0 ? "disabled" : "";
       return `<button class="fbtn ${cls} ${on?'on':''}" ${disabled}
         onclick="setFlag('${m.id}','${flag}',${on?0:1})">${flag}</button>`;
@@ -763,7 +774,7 @@ async function submitPinReset(){
 
 
 /* ================= 会員の登録・編集 ================= */
-const ROLE_LIST = ["クリエ","アドバンス","系列代表","チーム代表","管理者"];
+const ROLE_LIST = ["アドバンス","系列代表","チーム代表","管理者"];
 let memEditing = null;   // null=新規 / オブジェクト=編集
 let memClearEmail = false;
 
@@ -792,6 +803,9 @@ function openMember(m){
   document.getElementById("mmPinHint").textContent = m
     ? "変更する場合だけ入力してください(空欄なら現在のまま)"
     : "新規登録には必須です";
+  const cb = document.getElementById("mmCrie");
+  cb.checked = m ? (m.crie === true) : false;
+  document.getElementById("mmCrieWrap").style.background = cb.checked ? "#EAF7F0" : "#fff";
   document.getElementById("mmUpline").value = m ? (m.upline||"") : "";
   document.getElementById("mmEmail").value = m ? (m.email||"") : "";
   document.getElementById("mmEmail").readOnly = true;
@@ -855,6 +869,7 @@ async function saveMember(){
       action:"adminUpsertMember", id:admin.id, pin:admin.pin, email:admin.email,
       targetId:id, name:name, keiretsu:keiretsu,
       upline:document.getElementById("mmUpline").value.trim(),
+      crie:document.getElementById("mmCrie").checked ? "1" : "0",
       role:roles.join(","), scope:scope.join(",")
     };
     if(pin) params.newPin = pin;
