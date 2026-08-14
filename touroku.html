@@ -131,7 +131,7 @@
       </div>
 
       <div id="authGoogle">
-        <p class="tab-lead">Googleアカウント(Gmail)をお持ちの方はこちら。<br>ワンタップで登録でき、パスワードを忘れたときも安心です。</p>
+        <p class="tab-lead">Googleアカウント(Gmail)をお持ちの方はこちら。<br>ワンタップで登録でき、パスコードを忘れたときも安心です。</p>
         <div id="gBtnWrap"></div>
         <div class="gdone" id="gDone">
           <b>✅ 確認できました</b>
@@ -150,7 +150,7 @@
 
     <div class="sec locked" id="fields">
       <p class="step">② あなたの情報</p>
-      <p class="tab-lead" style="margin-bottom:14px;">会員番号・パスワード・お名前・系列は必須です。<br>紹介者の情報は、分かる範囲で大丈夫です。</p>
+      <p class="tab-lead" style="margin-bottom:14px;">会員番号・パスコード・お名前・系列は必須です。<br>紹介者の情報は、分かる範囲で大丈夫です。</p>
 
       <div class="f">
         <label>会員番号 <span class="req">必須</span></label>
@@ -159,9 +159,9 @@
       </div>
 
       <div class="f">
-        <label>パスワード(4桁の数字) <span class="req">必須</span></label>
-        <input type="password" id="inPin" inputmode="numeric" maxlength="4" placeholder="好きな4桁を決めてください">
-        <p class="hint">育成プログラムのログインに使います。忘れないものにしてください</p>
+        <label>パスコード(4桁の数字) <span class="req">必須</span></label>
+        <input type="password" id="inPin" inputmode="numeric" maxlength="4" placeholder="数字4桁">
+        <p class="hint">スカイアークのサイト内で使うパスコードです</p>
       </div>
 
       <div class="f">
@@ -178,23 +178,21 @@
       <p class="step" style="margin-top:22px;">③ 紹介してくださった方 <span style="font-weight:400;font-size:11.5px;color:#A8B4AC;">(分かる範囲でOK)</span></p>
 
       <div class="f">
-        <label>紹介者の会員番号 <span class="opt">任意</span></label>
+        <label>紹介者の会員番号 <span class="opt">任意・分かる方だけ</span></label>
         <input type="text" id="inIntro" inputmode="numeric" placeholder="00012345" oninput="lookup('inIntro','introFound')">
         <p class="found ng" id="introFound"></p>
-        <p class="hint">あなたをお誘いくださった方の会員番号です。<br>分からない場合は空欄のままで大丈夫です</p>
       </div>
 
       <div class="f">
-        <label>アップのクリエイターズ会員番号 <span class="opt">任意</span></label>
-        <input type="text" id="inUpline" inputmode="numeric" placeholder="分かる方だけ" oninput="lookup('inUpline','upFound')">
+        <label>アップのクリエイターズ会員番号 <span class="opt">任意・分かる方だけ</span></label>
+        <input type="text" id="inUpline" inputmode="numeric" placeholder="00012345" oninput="lookup('inUpline','upFound')">
         <p class="found ng" id="upFound"></p>
-        <p class="hint">紹介者の方と同じ場合は、同じ番号を入れてください。<br>分からない場合は空欄のままで大丈夫です</p>
       </div>
     </div>
 
     <button class="btn-main locked" id="submitBtn" onclick="submitForm()">登録する</button>
     <p class="note">交通整備課|クリエイターズ育成部門</p>
-    <div class="verTag">v1.23 (2026/08/14)</div>
+    <div class="verTag">v1.25 (2026/08/14)</div>
   </div>
 
   <!-- ===== 完了画面 ===== -->
@@ -207,14 +205,14 @@
       <div class="row"><span>会員番号</span><span id="dId"></span></div>
       <div class="row"><span>お名前</span><span id="dName"></span></div>
       <div class="row"><span>系列</span><span id="dKei"></span></div>
-      <div class="row"><span>パスワード</span><span id="dPin"></span></div>
+      <div class="row"><span>パスコード</span><span id="dPin"></span></div>
       <div class="row"><span>連絡先</span><span id="dMail" style="font-size:11.5px;"></span></div>
-      <p class="tip">💡 この会員番号とパスワードで、育成プログラムにログインできます。<br>
+      <p class="tip">💡 この会員番号とパスコードで、育成プログラムにログインできます。<br>
       お名前・系列・紹介者などは、あとからいつでも登録・変更できます。</p>
     </div>
 
     <a class="btn-guide" id="guideLink" href="./index.html">📘 初期サポートガイドへ進む</a>
-    <div class="verTag">v1.23 (2026/08/14)</div>
+    <div class="verTag">v1.25 (2026/08/14)</div>
   </div>
 </div>
 
@@ -402,7 +400,7 @@ async function submitForm(){
   if(authMode === "google" && !googleEmail){ show("Googleアカウントで本人確認をしてください","err"); return; }
   if(authMode === "mail" && !mailOk){ show("メールアドレスをご確認ください","err"); return; }
   if(!id){ show("会員番号を入力してください","err"); return; }
-  if(!/^\d{4}$/.test(pin)){ show("パスワードは4桁の数字で入力してください","err"); return; }
+  if(!/^\d{4}$/.test(pin)){ show("パスコードは4桁の数字で入力してください","err"); return; }
   if(!name){ show("お名前を入力してください","err"); return; }
   if(!keiretsu){ show("系列を選んでください","err"); return; }
 
@@ -421,7 +419,7 @@ async function submitForm(){
       show({
         email:"この会員番号は別の連絡先(" + (j.savedHint||"***") + ")で登録されています。お心当たりがない場合は担当の方にご相談ください。",
         bademail:"メールアドレスの形をご確認ください",
-        badpin:"パスワードは4桁の数字で入力してください",
+        badpin:"パスコードは4桁の数字で入力してください",
         missing:"入力内容をご確認ください"
       }[j.error] || "登録できませんでした。もう一度お試しください。", "err");
       return;
