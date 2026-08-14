@@ -144,6 +144,29 @@
     font-size:9.5px;color:#B4B0C4;letter-spacing:.05em;
     padding:6px 0 14px;font-family:monospace;
   }
+  /* パスワード再設定 */
+  #pinModal{display:none;position:fixed;inset:0;z-index:80;background:rgba(30,26,50,.6);align-items:center;justify-content:center;padding:18px;}
+  #pinModal.show{display:flex;}
+  .pm-card{background:#fff;border-radius:20px;padding:26px 22px;width:100%;max-width:390px;box-shadow:0 14px 50px rgba(0,0,0,.3);max-height:88vh;overflow-y:auto;}
+  .pm-card h3{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:17px;margin-bottom:4px;text-align:center;}
+  .pm-card .pm-lead{font-size:12px;margin-bottom:18px;text-align:center;line-height:1.7;}
+  .pm-step{font-size:12px;font-weight:700;margin-bottom:7px;}
+  .pm-sec{margin-bottom:16px;padding-bottom:16px;border-bottom:1.5px solid #E9E6F2;}
+  .pm-sec:last-of-type{border-bottom:none;}
+  #pmGoogleWrap{display:flex;justify-content:center;min-height:44px;}
+  .pm-done{display:none;background:#EAF7F0;border-radius:10px;padding:10px 12px;font-size:12px;color:#2F7A5C;text-align:center;line-height:1.6;}
+  .pm-done.show{display:block;}
+  .pm-fields{opacity:.4;pointer-events:none;}
+  .pm-fields.on{opacity:1;pointer-events:auto;}
+  .pm-card input{width:100%;padding:12px 13px;font-size:16px;border:2px solid #E9E6F2;border-radius:10px;font-family:inherit;background:#FBF8FE;margin-bottom:10px;}
+  .pm-card input:focus{outline:none;border-color:#4FB08C;}
+  .pm-btns{display:flex;gap:8px;margin-top:6px;}
+  .pm-btns button{flex:1;padding:13px;border-radius:11px;font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:14px;border:none;cursor:pointer;}
+  .pm-save{background:#4FB08C;color:#fff;}
+  .pm-cancel{background:#EDEAF9;color:#6E5FB5;}
+  .pm-msg{display:none;border-radius:9px;padding:9px 12px;font-size:12px;margin-bottom:12px;line-height:1.6;}
+  .pm-msg.err{display:block;background:#FDEBEB;color:#B33;}
+  .pm-msg.ok{display:block;background:#EAF7F0;color:#2F7A5C;}
 </style>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
@@ -174,13 +197,16 @@
       <div class="field">
         <label>パスワード(4桁)</label>
         <input type="password" id="inPin" inputmode="numeric" maxlength="4">
+        <p style="font-size:11px;margin-top:5px;">
+          <a href="#" onclick="openPinReset();return false;" style="color:#4FB08C;font-weight:700;">パスワードを忘れた・変更したい方はこちら</a>
+        </p>
       </div>
     </div>
     <button class="btn-main locked" id="loginBtn" onclick="login()">ログイン</button>
     <p style="text-align:center;margin-top:16px;">
       <a href="./index.html" style="color:#8B889E;font-size:12px;">‹ 育成プログラムにもどる</a>
     </p>
-    <div class="verTag">v1.9 (2026/08/14)</div>
+    <div class="verTag">v2.0 (2026/08/14)</div>
   </div>
 </div>
 
@@ -247,7 +273,7 @@
         ・クリエ:一覧は見られません(会員番号+系列で呼び出して①の丸つけのみ)<br>
         ※ 丸つけは系列に関係なく全会員が対象です
       </div>
-      <div class="verTag" style="margin-top:16px;">v1.9 (2026/08/14)</div>
+      <div class="verTag" style="margin-top:16px;">v2.0 (2026/08/14)</div>
     </div>
   </main>
 </div>
@@ -328,6 +354,7 @@ const KEIRETSU = [
   "⭐️ルミナス","エネルギー🔥","💎プリズム","📚FairyTail","ミラメリ🪄","🪽HERO","♾️ZERO♾️",
 ];
 const $ = (s)=>document.querySelector(s);
+const PIN_RESET_URL = GAS_URL;
 let admin = null;       // {id,pin,email}
 let googleEmail = "";
 
@@ -341,6 +368,10 @@ function decodeJwt(token){
 }
 function onGoogleCredential(response){
   const info = decodeJwt(response.credential);
+  if(document.getElementById("pinModal").classList.contains("show")){
+    if(info && info.email) pinResetGoogleOk(info.email);
+    return;
+  }
   if(!info || !info.email){
     $("#err").textContent = "Googleアカウントの確認に失敗しました";
     $("#err").style.display = "block"; return;
@@ -556,6 +587,70 @@ async function saveScope(){
 
 
 
+/* ================= パスワード再設定 ================= */
+let pmEmail = "";
+let pmInited = false;
+
+function openPinReset(){
+  document.getElementById("pinModal").classList.add("show");
+  const msg = document.getElementById("pmMsg");
+  msg.className = "pm-msg";
+  if(!pmInited){
+    pmInited = true;
+    try{
+      google.accounts.id.renderButton(document.getElementById("pmGoogleWrap"),
+        { theme:"outline", size:"large", text:"signin_with", locale:"ja", width:300 });
+    }catch(e){
+      document.getElementById("pmGoogleWrap").innerHTML =
+        '<p style="font-size:12px;color:#B33;">Googleログインを読み込めませんでした</p>';
+    }
+  }
+}
+
+function closePinReset(){
+  document.getElementById("pinModal").classList.remove("show");
+}
+
+/* Google確認が済んだら呼ばれる(共通のコールバックから) */
+function pinResetGoogleOk(email){
+  pmEmail = email;
+  document.getElementById("pmGoogleWrap").style.display = "none";
+  document.getElementById("pmDone").classList.add("show");
+  document.getElementById("pmMail").textContent = email;
+  document.getElementById("pmFields").classList.add("on");
+}
+
+async function submitPinReset(){
+  const msg = document.getElementById("pmMsg");
+  const id = document.getElementById("pmId").value.trim();
+  const p1 = document.getElementById("pmPin1").value.trim();
+  const p2 = document.getElementById("pmPin2").value.trim();
+  const show = (t, cls)=>{ msg.textContent = t; msg.className = "pm-msg " + cls; };
+
+  if(!pmEmail){ show("先にGoogleアカウントで本人確認をしてください","err"); return; }
+  if(!id){ show("会員番号を入力してください","err"); return; }
+  if(!/^\d{4}$/.test(p1)){ show("新しいパスワードは4桁の数字で入力してください","err"); return; }
+  if(p1 !== p2){ show("2つのパスワードが一致しません","err"); return; }
+
+  show("変更しています…","ok");
+  try{
+    const body = new URLSearchParams({action:"resetPin", id:id, email:pmEmail, newPin:p1});
+    const res = await fetch(PIN_RESET_URL, {method:"POST", body});
+    const j = await res.json();
+    if(j.ok === false){
+      show({
+        nomember:"その会員番号は登録されていません",
+        email:"この会員番号は別のGoogleアカウント(" + (j.savedHint||"***") + ")で登録されています。そちらでお試しいただくか、担当コーチにご相談ください。",
+        badpin:"パスワードは4桁の数字で入力してください"
+      }[j.error] || "変更できませんでした", "err");
+      return;
+    }
+    show("✅ 変更しました!新しいパスワードでログインしてください。","ok");
+    setTimeout(()=>{ closePinReset(); }, 2200);
+  }catch(e){ show("通信できませんでした。電波のよい場所でお試しください。","err"); }
+}
+
+
 /* ================= クリエ用:会員をさがす ================= */
 function buildFindKeiretsu(){
   const sel = document.getElementById("findKeiretsu");
@@ -727,5 +822,30 @@ function toast(msg){
 
 
 </script>
+<div id="pinModal" onclick="if(event.target===this)closePinReset()">
+  <div class="pm-card">
+    <h3>🔑 パスワードの再設定</h3>
+    <p class="pm-lead">Googleアカウントで本人確認をして、<br>新しい4桁を決めてください。</p>
+    <div class="pm-msg" id="pmMsg"></div>
+
+    <div class="pm-sec">
+      <p class="pm-step">① Googleアカウントで本人確認</p>
+      <div id="pmGoogleWrap"></div>
+      <div class="pm-done" id="pmDone">✅ 確認できました<br><span id="pmMail"></span></div>
+    </div>
+
+    <div class="pm-sec pm-fields" id="pmFields">
+      <p class="pm-step">② 会員番号と新しいパスワード</p>
+      <input type="text" id="pmId" inputmode="numeric" placeholder="会員番号(例:00012345)">
+      <input type="password" id="pmPin1" inputmode="numeric" maxlength="4" placeholder="新しいパスワード(4桁)">
+      <input type="password" id="pmPin2" inputmode="numeric" maxlength="4" placeholder="もう一度入力">
+    </div>
+
+    <div class="pm-btns">
+      <button class="pm-cancel" onclick="closePinReset()">とじる</button>
+      <button class="pm-save" onclick="submitPinReset()">変更する</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
