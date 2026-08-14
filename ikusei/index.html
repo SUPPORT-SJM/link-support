@@ -151,7 +151,7 @@
       交通整備課|クリエイターズ育成部門<br>
       <a href="./kanri-x7k2m9.html" style="color:#B8B4C8;font-size:10.5px;">管理画面(クリエイターズ以上)</a>
     </p>
-    <div class="verTag">v1.12 (2026/08/14)</div>
+    <div class="verTag">v1.13 (2026/08/14)</div>
   </div>
 
   <div id="loading">
@@ -220,6 +220,63 @@ function onGoogleCredential(response){
   $("#mainFields").classList.remove("locked");
   $("#loginBtn").classList.remove("locked");
   if(info.name && !$("#inName").value) $("#inName").value = info.name;
+  fillFromEmail(info.email);
+}
+
+/* Googleアカウントに紐づく会員情報を呼び出して自動入力する
+   (パスワードは自動で入りません。ご自身で入力していただきます) */
+async function fillFromEmail(email){
+  const hint = document.getElementById("welcomeBack");
+  try{
+    const res = await fetch(`${gasUrlFor("")}?action=byEmail&email=${encodeURIComponent(email)}`);
+    const j = await res.json();
+    if(!j.ok || !j.members || j.members.length === 0) return;
+
+    if(j.members.length === 1){
+      applyMember(j.members[0]);
+      if(hint){
+        hint.style.display = "block";
+        hint.innerHTML = "おかえりなさい、<b>" + (j.members[0].name || j.members[0].id) +
+          "</b>さん!<br>パスワード(4桁)を入力して「ログイン」を押してください。";
+      }
+      $("#inPin").focus();
+    }else{
+      // 複数の会員番号が紐づいている場合は選んでもらう
+      if(hint){
+        hint.style.display = "block";
+        hint.innerHTML = "このGoogleアカウントには複数の会員番号があります。どちらでログインしますか?<br>"
+          + j.members.map((m,i)=>
+              `<button type="button" onclick="pickMember(${i})"
+                style="margin:6px 6px 0 0;background:var(--leaf);color:#fff;border:none;border-radius:999px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;">
+                ${m.name || m.id}(${m.keiretsu || "系列なし"})</button>`).join("");
+      }
+      window.__memberChoices = j.members;
+    }
+  }catch(e){ /* 取得できなくても手入力で進めます */ }
+}
+
+function pickMember(i){
+  const m = (window.__memberChoices || [])[i];
+  if(!m) return;
+  applyMember(m);
+  const hint = document.getElementById("welcomeBack");
+  if(hint) hint.innerHTML = "<b>" + (m.name || m.id) + "</b>さんでログインします。<br>パスワード(4桁)を入力してください。";
+  $("#inPin").focus();
+}
+
+function applyMember(m){
+  $("#inId").value = m.id || "";
+  if(m.name) $("#inName").value = m.name;
+  if(m.keiretsu){
+    const sel = $("#inKeiretsu");
+    const found = Array.from(sel.options).some(o=>o.value === m.keiretsu);
+    if(found){ sel.value = m.keiretsu; $("#inKeiretsuOther").style.display = "none"; }
+    else{
+      sel.value = "__other__";
+      $("#inKeiretsuOther").style.display = "block";
+      $("#inKeiretsuOther").value = m.keiretsu;
+    }
+  }
 }
 
 function resetGoogle(){
@@ -420,7 +477,6 @@ async function submitPinReset(){
   if(!m || !m.id) return;
 
   $("#inId").value = m.id;
-  if(m.pin) $("#inPin").value = m.pin;
   if(m.name) $("#inName").value = m.name;
   if(m.keiretsu){
     const sel = $("#inKeiretsu");
@@ -435,7 +491,7 @@ async function submitPinReset(){
   const hint = document.getElementById("welcomeBack");
   if(hint){
     hint.style.display = "block";
-    hint.textContent = "おかえりなさい" + (m.name ? "、"+m.name+"さん" : "") + "!Googleで本人確認をしてから「ログイン」を押してください。";
+    hint.textContent = "おかえりなさい" + (m.name ? "、"+m.name+"さん" : "") + "!Googleで本人確認をして、パスワードを入力してください。";
   }
 })();
 
