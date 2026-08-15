@@ -11,8 +11,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="manifest" href="./gcon-manifest.json">
-<link rel="icon" type="image/png" sizes="64x64" href="./gcon-icon-64.png">
-<link rel="apple-touch-icon" href="./gcon-icon-180.png">
+<link rel="icon" type="image/png" sizes="64x64" href="../img/gcon-icon-64.png">
+<link rel="apple-touch-icon" href="../img/gcon-icon-180.png">
 <meta name="theme-color" content="#6E5FB5">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="育成プログラム">
@@ -108,6 +108,7 @@
   .pm-msg.ok{display:block;background:#EAF7F0;color:#2F7A5C;}
 </style>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
+<link rel="stylesheet" href="../beta.css">
 </head>
 <body>
 
@@ -174,7 +175,7 @@
       交通整備課|クリエイターズ育成部門<br>
       <a href="./kanri-x7k2m9.html" style="color:#B8B4C8;font-size:10.5px;">管理画面(クリエイターズ以上)</a>
     </p>
-    <div class="verTag">v1.33 (2026/08/14)</div>
+    <div class="verTag">v1.41 (2026/08/15)</div>
   </div>
 
   <div id="loading">
@@ -391,6 +392,11 @@ function clearSkyLocal(){
 }
 
 function goTo(member){
+  // サポーター未満の方には、まだ早い旨をご案内します
+  if(member.sup !== true && member.crie !== true){
+    location.href = "./member.html";
+    return;
+  }
   const isCrie = member.crie === true || member.crie === "true";
   $("#formArea").style.display = "none";
   $("#loading").style.display = "block";
@@ -437,6 +443,7 @@ async function login(){
       name: j.name || name,
       keiretsu: j.keiretsu || keiretsu,
       role: j.role || "",
+      sup: j.sup === true,
       crie: j.crie === true,
       badges: j.badges || [],
       celebrate: j.celebrate || ""

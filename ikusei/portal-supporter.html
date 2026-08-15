@@ -10,8 +10,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="icon" type="image/png" sizes="64x64" href="./piyo-icon-64.png">
-<link rel="apple-touch-icon" href="./piyo-icon-180.png">
+<link rel="icon" type="image/png" sizes="64x64" href="../img/piyo-icon-64.png">
+<link rel="apple-touch-icon" href="../img/piyo-icon-180.png">
 <meta name="theme-color" content="#6E5FB5">
 <style>
   :root{
@@ -82,6 +82,63 @@
   #skyNav .sky-who{opacity:.9;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 
 
+  /* ===== 昇格おめでとう演出 ===== */
+  #celebrate{
+    display:none;position:fixed;inset:0;z-index:100;
+    background:rgba(40,28,70,.72);backdrop-filter:blur(3px);
+    align-items:center;justify-content:center;padding:20px;
+  }
+  #celebrate.show{display:flex;}
+  .celeb-card{
+    background:#fff;border-radius:26px;padding:36px 26px 30px;
+    width:100%;max-width:400px;text-align:center;position:relative;
+    box-shadow:0 20px 60px rgba(0,0,0,.35);
+    animation:celebPop .55s cubic-bezier(.22,1.4,.44,1) both;
+  }
+  @keyframes celebPop{
+    0%{opacity:0;transform:scale(.7) translateY(30px);}
+    100%{opacity:1;transform:scale(1) translateY(0);}
+  }
+  .celeb-card .crackers{font-size:52px;line-height:1;margin-bottom:6px;}
+  .celeb-card .crackers span{display:inline-block;}
+  .celeb-card .crackers .l{animation:shakeL 1.1s ease-in-out infinite;}
+  .celeb-card .crackers .r{animation:shakeR 1.1s ease-in-out infinite;}
+  @keyframes shakeL{0%,100%{transform:rotate(-14deg);}50%{transform:rotate(-30deg) translateY(-5px);}}
+  @keyframes shakeR{0%,100%{transform:rotate(14deg);}50%{transform:rotate(30deg) translateY(-5px);}}
+  .celeb-card h2{
+    font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:23px;line-height:1.5;margin-bottom:6px;
+    background:linear-gradient(90deg,#E88BB4,#EFA07A,#5BB98C,#5E8FD8,#A587DC);
+    background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;
+    animation:rainbowFlow 6s ease infinite;
+  }
+  .celeb-card .who{font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:15px;color:var(--green-deep);margin-bottom:14px;}
+  .celeb-card .msg{font-size:13.5px;color:#5A6B60;line-height:1.95;margin-bottom:20px;}
+  .celeb-card .newbadge{
+    display:inline-flex;align-items:center;gap:6px;
+    background:linear-gradient(110deg,#F49AC1,#F5C06A,#8FD9A8,#6FC7D9,#9B8BE0);
+    background-size:200% auto;animation:rainbowFlow 8s ease infinite;
+    color:#fff;border-radius:999px;padding:9px 20px;
+    font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:14px;
+    margin-bottom:20px;box-shadow:0 4px 14px rgba(0,0,0,.16);
+  }
+  .celeb-btn{
+    width:100%;padding:15px;border-radius:15px;
+    background:var(--green-deep);color:#fff;
+    font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:15.5px;
+  }
+  /* 紙吹雪 */
+  .confetti{position:fixed;inset:0;pointer-events:none;z-index:101;overflow:hidden;}
+  .confetti i{
+    position:absolute;top:-14px;width:9px;height:14px;opacity:.95;
+    animation:fall linear forwards;
+  }
+  @keyframes fall{
+    0%{transform:translateY(-20px) rotate(0deg);opacity:1;}
+    100%{transform:translateY(105vh) rotate(720deg);opacity:.9;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .celeb-card,.celeb-card h2,.celeb-card .crackers span,.confetti i{animation:none !important;}
+  }
   .my-badges{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:16px;}
   .my-badge{
     display:inline-flex;align-items:center;gap:5px;
@@ -111,6 +168,7 @@
     padding:6px 0 10px;font-family:monospace;
   }
 </style>
+<link rel="stylesheet" href="../beta.css">
 </head>
 <body>
 
@@ -178,7 +236,7 @@
 <footer>
   <div class="f-title">サポーター育成マニュアル(入口ページ)</div>
   交通整備課|クリエイターズ育成部門
-  <div class="verTag" style="margin-top:8px;color:rgba(255,255,255,.4);">v1.33 (2026/08/14)</div>
+  <div class="verTag" style="margin-top:8px;color:rgba(255,255,255,.4);">v1.41 (2026/08/15)</div>
 </footer>
 
 
@@ -243,6 +301,129 @@ function clearSkyLocal(){
     keys.forEach(k=>localStorage.removeItem(k));
   }catch(e){}
 }
+</script>
+<div id="celebrate">
+  <div class="celeb-card">
+    <div class="crackers"><span class="l">🎉</span><span class="r">🎊</span></div>
+    <h2 id="celebTitle"></h2>
+    <p class="who" id="celebName"></p>
+    <div class="newbadge" id="celebBadge"></div>
+    <p class="msg" id="celebMsg"></p>
+    <button class="celeb-btn" onclick="closeCelebration()" id="celebBtn">ありがとう!はじめる ▶</button>
+  </div>
+</div>
+<div class="confetti" id="confetti" style="display:none;"></div>
+<script>
+/* ================================================================
+   昇格おめでとう演出(初回のみ)
+   ----------------------------------------------------------------
+   新しいお祝いを足すときは、CELEB にひとつ追加してください。
+   GAS側の CELEB_DEFS と key を合わせます。
+================================================================ */
+const CELEB = {
+  sup: {
+    title: "サポーター<br>認定おめでとうございます!",
+    badge: "🌱 SUPPORTER",
+    msg: "はじめてのご紹介、本当におめでとうございます✨<br><br>" +
+         "ここから、あなたが誰かを迎える番。<br>" +
+         "①ぴよぴよ脱出クイズが解放されました🐣<br><br>" +
+         "一緒に進んでいきましょう!",
+    btn: "ありがとう!はじめる ▶"
+  },
+  crie: {
+    title: "クリエイターズ<br>昇格おめでとうございます!",
+    badge: "🌈 CREATORS",
+    msg: "ここから、学べることが一気に広がります。<br>" +
+         "②グルコンリーダー育成、③戦略立案マニュアル…<br>" +
+         "どんどん進んでいきましょう🌱<br><br>" +
+         "これからのご活躍を、心から応援しています!",
+    btn: "ありがとう!はじめる ▶"
+  },
+  adv: {
+    title: "アドバンス<br>昇格おめでとうございます!",
+    badge: "⭐ ADVANCE",
+    msg: "100名を超えるチームを育てられました。<br>" +
+         "本当にすばらしいことです✨<br><br>" +
+         "これからは、あなたが誰かを引き上げる番。<br>" +
+         "管理画面から仲間の歩みを見守れます🌱",
+    btn: "ありがとう!つづける ▶"
+  },
+  keirep: {
+    title: "系列代表<br>就任おめでとうございます!",
+    badge: "👑 系列代表",
+    msg: "ひとつの系列を担う立場になられました。<br>" +
+         "ここまで築いてこられたご縁の積み重ねに、<br>" +
+         "心から敬意を表します✨<br><br>" +
+         "系列のみなさんの成長を、一緒に支えていきましょう🌱",
+    btn: "ありがとう!つづける ▶"
+  },
+  team: {
+    title: "チーム代表<br>就任おめでとうございます!",
+    badge: "🏆 チーム代表",
+    msg: "スカイアーク全体を導く立場になられました。<br>" +
+         "これまでの歩みが、たくさんの人の道をつくっています✨<br><br>" +
+         "これからも、ともに前へ進んでいきましょう🚀",
+    btn: "ありがとう!つづける ▶"
+  }
+};
+
+(function(){
+  let m = null;
+  try{ m = JSON.parse(localStorage.getItem("skyarc_member")||"null"); }catch(e){}
+  if(!m || !m.id) return;
+  const kind = m.celebrate;
+  if(!kind || !CELEB[kind]) return;
+
+  const c = CELEB[kind];
+  document.getElementById("celebTitle").innerHTML = c.title;
+  document.getElementById("celebBadge").textContent = c.badge;
+  document.getElementById("celebMsg").innerHTML = c.msg;
+  document.getElementById("celebBtn").textContent = c.btn;
+  document.getElementById("celebName").textContent = m.name ? m.name + "さん" : "";
+  document.getElementById("celebrate").dataset.kind = kind;
+  document.getElementById("celebrate").classList.add("show");
+  dropConfetti();
+})();
+
+function dropConfetti(){
+  const box = document.getElementById("confetti");
+  if(!box) return;
+  if(window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  box.style.display = "block";
+  const colors = ["#F49AC1","#F5A97A","#F5D06A","#8FD9A8","#6FC7D9","#7BA3E8","#A88BE0"];
+  for(let i=0;i<70;i++){
+    const p = document.createElement("i");
+    p.style.left = Math.random()*100 + "%";
+    p.style.background = colors[Math.floor(Math.random()*colors.length)];
+    p.style.animationDuration = (2.2 + Math.random()*1.8) + "s";
+    p.style.animationDelay = (Math.random()*1.2) + "s";
+    p.style.width = (6 + Math.random()*6) + "px";
+    p.style.height = (10 + Math.random()*10) + "px";
+    p.style.borderRadius = Math.random() > .5 ? "2px" : "50%";
+    box.appendChild(p);
+  }
+  setTimeout(()=>{ box.style.display = "none"; box.innerHTML = ""; }, 6000);
+}
+
+async function closeCelebration(){
+  document.getElementById("celebrate").classList.remove("show");
+  const box = document.getElementById("confetti");
+  if(box){ box.style.display = "none"; box.innerHTML = ""; }
+  // 「見ました」を記録して、次回から出ないようにする
+  let m = null;
+  try{ m = JSON.parse(localStorage.getItem("skyarc_member")||"null"); }catch(e){}
+  if(!m || !m.id) return;
+  const kind = document.getElementById("celebrate").dataset.kind || "crie";
+  m.celebrate = "";
+  localStorage.setItem("skyarc_member", JSON.stringify(m));
+  try{
+    await fetch(GAS_URL_CELEB, {method:"POST", body:new URLSearchParams({
+      action:"seenCelebration", id:m.id, pin:m.pin, kind:kind
+    })});
+  }catch(e){}
+}
+const GAS_URL_CELEB = "https://script.google.com/macros/s/AKfycbzY2l20zwGULjnKRUqvRpbH79fPkl5e-sWNVoXEIgBrDpqhjDAx2zLvJuqO3sZxAfHj/exec";
+
 </script>
 </body>
 </html>
