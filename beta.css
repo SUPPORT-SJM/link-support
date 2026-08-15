@@ -3,17 +3,26 @@
    ----------------------------------------------------------------
    ベータテストが終わったら、各ページの
    <link rel="stylesheet" href="beta.css"> の1行を消すだけで解除できます。
-   (育成フォルダ内のページは href="../beta.css" になっています)
+   (育成フォルダ内のページは href="../beta.css" です)
+
+   ページ側の body{background:...} に負けないよう、
+   html要素に背景を敷き、body側は透明にしています。
 ================================================================ */
-body{
+html{
   background-image:url("images/beta-bg.png") !important;
   background-repeat:repeat !important;
   background-size:340px auto !important;
   background-attachment:fixed !important;
   background-position:center top !important;
+  background-color:#FBF8FE !important;
 }
 
-/* 文字の読みやすさを保つため、カード類の背景は不透明のままにします */
+/* ページ側の背景色を透けさせて、htmlの模様を見せます */
+body{
+  background-color:transparent !important;
+  background-image:none !important;
+}
+
 @media (max-width:480px){
-  body{ background-size:260px auto !important; }
+  html{ background-size:250px auto !important; }
 }
