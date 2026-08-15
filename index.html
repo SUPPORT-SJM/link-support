@@ -6,15 +6,16 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>会員情報登録|スカイアーク</title>
+<title>スカイアーク育成プログラム|ログイン</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="icon" type="image/png" sizes="64x64" href="images/gcon-icon-64.png">
-<link rel="apple-touch-icon" href="images/gcon-icon-180.png">
+<link rel="manifest" href="./gcon-manifest.json">
+<link rel="icon" type="image/png" sizes="64x64" href="../images/gcon-icon-64.png">
+<link rel="apple-touch-icon" href="../images/gcon-icon-180.png">
 <meta name="theme-color" content="#6E5FB5">
-<script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="育成プログラム">
 <style>
   :root{
     --deep:#6E5FB5; --leaf:#4FB08C; --mist:#EDEAF9;
@@ -30,20 +31,29 @@
   }
   button{font-family:inherit;cursor:pointer;border:none;}
 
-  .card{background:var(--white);border-radius:24px;padding:30px 24px 26px;width:100%;max-width:430px;box-shadow:0 12px 44px rgba(0,0,0,.26);}
-  .logo{font-size:42px;text-align:center;line-height:1;}
-  h1{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;color:var(--deep);font-size:21px;line-height:1.5;margin:8px 0 4px;text-align:center;}
-  .sub{font-size:12.5px;color:#5A6B60;margin-bottom:20px;text-align:center;line-height:1.8;}
-
-  .sec{margin-bottom:16px;padding-bottom:16px;border-bottom:1.5px solid var(--mist);}
-  .sec:last-of-type{border-bottom:none;}
-  .step{font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:13px;color:var(--deep);margin-bottom:9px;}
+  .card{background:var(--white);border-radius:26px;padding:34px 24px 30px;width:100%;max-width:410px;box-shadow:0 12px 44px rgba(0,0,0,.26);}
+  .logo{font-size:46px;text-align:center;line-height:1;}
+  h1{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;color:var(--deep);font-size:21px;line-height:1.5;margin:10px 0 4px;text-align:center;}
+  .sub{font-size:12.5px;color:#5A6B60;margin-bottom:24px;text-align:center;}
+  .field{margin-bottom:15px;}
+  .field label{display:block;font-size:13px;font-weight:700;color:var(--deep);margin-bottom:6px;}
+  .field input,.field select{width:100%;padding:13px 14px;font-size:16px;border:2px solid var(--mist);border-radius:12px;font-family:inherit;background:var(--paper);}
+  .field input:focus,.field select:focus{outline:none;border-color:var(--leaf);}
+  .field small{font-size:11px;color:#7A8A80;display:block;margin-top:4px;}
+  .btn-main{width:100%;padding:15px;border-radius:14px;background:var(--leaf);color:var(--white);font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:16px;margin-top:4px;}
+  .btn-main:active{transform:scale(.98);}
+  .btn-main:disabled{opacity:.6;}
+  .gsec{margin-bottom:18px;padding-bottom:18px;border-bottom:1.5px solid var(--mist);}
+  .gsec .lead{font-size:12.5px;color:#5A6B60;margin-bottom:10px;text-align:center;}
   #gBtnWrap{display:flex;justify-content:center;min-height:44px;}
-  .gdone{display:none;background:#EAF7F0;border-radius:11px;padding:11px 13px;font-size:12.5px;color:#2F7A5C;text-align:center;line-height:1.6;}
+  .gdone{
+    display:none;background:#EAF7F0;border-radius:12px;padding:11px 14px;
+    font-size:12.5px;color:#2F7A5C;text-align:center;line-height:1.6;
+  }
   .gdone.show{display:block;}
   .gdone b{display:block;font-size:13px;}
-  .locked{opacity:.4;pointer-events:none;}
-
+  .gdone a{color:#5A6B60;font-size:11px;}
+  .locked{opacity:.45;pointer-events:none;}
 
   .inapp-warn{
     display:none;background:#FFF3D6;border:1.5px solid #F0C86A;border-radius:12px;
@@ -52,251 +62,147 @@
   .inapp-warn.show{display:block;}
   .inapp-warn b{display:block;font-size:12.5px;margin-bottom:3px;}
   .inapp-warn .how{margin-top:7px;padding-top:7px;border-top:1px dashed #E5CE94;font-size:11.5px;}
-  .tabs{display:flex;gap:6px;margin-bottom:12px;}
-  .tab{
-    flex:1;padding:10px 8px;border-radius:11px;background:var(--paper);
-    border:2px solid var(--mist);color:#7A8A80;
-    font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:12.5px;
-  }
-  .tab.on{background:var(--leaf);border-color:var(--leaf);color:#fff;}
-  .tab-lead{font-size:11.5px;color:#7A8A80;margin-bottom:10px;text-align:center;line-height:1.7;}
-  .f{margin-bottom:14px;}
-  .f label{display:block;font-size:12.5px;font-weight:700;color:var(--deep);margin-bottom:5px;}
-  .f label .req{color:#D9534F;font-size:11px;margin-left:3px;}
-  .f label .opt{color:#A8B4AC;font-size:11px;margin-left:3px;font-weight:400;}
-  .f input,.f select{width:100%;padding:12px 13px;font-size:16px;border:2px solid var(--mist);border-radius:11px;font-family:inherit;background:var(--paper);}
-  .f input:focus,.f select:focus{outline:none;border-color:var(--leaf);}
-  .f .hint{font-size:11px;color:#7A8A80;margin-top:4px;line-height:1.7;}
-  .f .found{font-size:11.5px;margin-top:5px;font-weight:700;}
-  .f .found.ok{color:#2F7A5C;}
-  .f .found.ng{color:#B4B0C4;}
-
-  .btn-main{width:100%;padding:15px;border-radius:14px;background:var(--leaf);color:var(--white);font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:16px;margin-top:6px;}
-  .btn-main:active{transform:scale(.98);}
-  .btn-main:disabled{opacity:.6;}
-  .msg{display:none;border-radius:11px;padding:11px 14px;font-size:12.5px;margin-bottom:14px;line-height:1.7;}
-  .msg.err{display:block;background:#FDEBEB;color:#B33;}
-  .msg.ok{display:block;background:#EAF7F0;color:#2F7A5C;}
+  .welcome{background:#EAF7F0;color:#2F7A5C;border-radius:10px;padding:10px 14px;font-size:12.5px;margin-bottom:14px;line-height:1.6;}
+  .err{display:none;background:#FDEBEB;color:#B33;border-radius:10px;padding:10px 14px;font-size:13px;margin-bottom:14px;}
   .note{font-size:11px;color:#8A9A90;text-align:center;margin-top:16px;line-height:1.8;}
-  .note a{color:#8A9A90;}
 
-  /* ご案内キット(折りたたみ) */
-  .kit{margin-top:22px;border-top:1.5px solid var(--mist);padding-top:16px;}
-  .kit-toggle{
-    width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;
-    background:var(--paper);border:1.5px solid var(--mist);border-radius:12px;
-    padding:12px 14px;font-family:"Zen Maru Gothic",sans-serif;font-weight:700;
-    font-size:13px;color:var(--deep);
+  /* 遷移中の表示 */
+  #loading{display:none;text-align:center;padding:20px 0;}
+  #loading .spin{
+    width:44px;height:44px;margin:0 auto 14px;
+    border:4px solid var(--mist);border-top-color:var(--leaf);
+    border-radius:50%;animation:sp 1s linear infinite;
   }
-  .kit-toggle .arw{font-size:11px;color:#A8B4AC;transition:transform .25s;}
-  .kit.open .kit-toggle .arw{transform:rotate(180deg);}
-  .kit-body{display:none;padding-top:14px;}
-  .kit.open .kit-body{display:block;}
-  .kit-lead{font-size:11.5px;color:#7A8A80;line-height:1.75;margin-bottom:12px;}
-  .kit-f{margin-bottom:12px;}
-  .kit-f label{display:block;font-size:12px;font-weight:700;color:var(--deep);margin-bottom:5px;}
-  .kit-f input{width:100%;padding:11px 12px;font-size:15px;border:2px solid var(--mist);border-radius:10px;font-family:inherit;background:var(--paper);}
-  .kit-f input:focus{outline:none;border-color:var(--leaf);}
-  .kit-text{
-    background:var(--paper);border:1.5px solid var(--mist);border-radius:11px;
-    padding:12px 14px;font-size:12.5px;line-height:1.9;white-space:pre-wrap;
-    word-break:break-all;color:#3E5248;margin-bottom:10px;
-  }
-  .kit-btns{display:flex;gap:8px;margin-bottom:14px;}
-  .kit-btns button{
-    flex:1;padding:12px;border-radius:11px;
-    font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:13px;
-  }
-  .kit-copy{background:var(--leaf);color:#fff;}
-  .kit-qr{background:var(--mist);color:var(--deep);}
-  #qrArea{display:none;text-align:center;padding:16px;background:#fff;border:1.5px solid var(--mist);border-radius:12px;}
-  #qrArea.show{display:block;}
-  #qrBox{display:flex;justify-content:center;margin-bottom:10px;}
-  #qrBox img,#qrBox canvas{border-radius:6px;}
-  #qrArea .cap{font-size:11.5px;color:#7A8A80;line-height:1.7;}
+  @keyframes sp{to{transform:rotate(360deg);}}
+  #loading p{font-family:"Zen Maru Gothic",sans-serif;font-weight:700;color:var(--deep);font-size:15px;}
+  #loading small{font-size:12px;color:#7A8A80;}
 
-  /* 完了画面 */
-  #doneView{display:none;text-align:center;}
-  #doneView .big{font-size:52px;line-height:1.2;}
-  #doneView h2{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;color:var(--deep);font-size:20px;margin:8px 0 6px;}
-  #doneView .lead{font-size:13.5px;color:#5A6B60;margin-bottom:20px;line-height:1.9;}
-  .mycard{background:var(--paper);border-radius:14px;padding:16px;text-align:left;margin-bottom:20px;}
-  .mycard .row{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:4px 0;}
-  .mycard .row span:first-child{color:#7A8A80;flex-shrink:0;}
-  .mycard .row span:last-child{font-weight:700;text-align:right;}
-  .mycard .tip{font-size:11.5px;color:#7A8A80;margin-top:10px;padding-top:10px;border-top:1px dashed #D8D8E4;line-height:1.7;}
-  .btn-guide{
-    display:block;width:100%;padding:16px;border-radius:14px;text-decoration:none;
-    background:var(--deep);color:var(--white);
-    font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:16px;margin-bottom:10px;
+  .verTag{
+    display:block;text-align:center;
+    font-size:9.5px;color:#C3BFD4;letter-spacing:.05em;
+    font-family:monospace;margin-top:6px;
   }
-  .btn-sub{
-    display:block;width:100%;padding:13px;border-radius:12px;text-decoration:none;
-    background:var(--mist);color:var(--deep);
-    font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:14px;
-  }
-  .verTag{display:block;text-align:center;font-size:9.5px;color:#C3BFD4;letter-spacing:.05em;font-family:monospace;margin-top:14px;}
+
+  /* パスコード再設定 */
+  #pinModal{display:none;position:fixed;inset:0;z-index:80;background:rgba(30,26,50,.6);align-items:center;justify-content:center;padding:18px;}
+  #pinModal.show{display:flex;}
+  .pm-card{background:#fff;border-radius:20px;padding:26px 22px;width:100%;max-width:390px;box-shadow:0 14px 50px rgba(0,0,0,.3);max-height:88vh;overflow-y:auto;}
+  .pm-card h3{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:17px;margin-bottom:4px;text-align:center;}
+  .pm-card .pm-lead{font-size:12px;margin-bottom:18px;text-align:center;line-height:1.7;}
+  .pm-step{font-size:12px;font-weight:700;margin-bottom:7px;}
+  .pm-sec{margin-bottom:16px;padding-bottom:16px;border-bottom:1.5px solid #E9E6F2;}
+  .pm-sec:last-of-type{border-bottom:none;}
+  #pmGoogleWrap{display:flex;justify-content:center;min-height:44px;}
+  .pm-done{display:none;background:#EAF7F0;border-radius:10px;padding:10px 12px;font-size:12px;color:#2F7A5C;text-align:center;line-height:1.6;}
+  .pm-done.show{display:block;}
+  .pm-fields{opacity:.4;pointer-events:none;}
+  .pm-fields.on{opacity:1;pointer-events:auto;}
+  .pm-card input{width:100%;padding:12px 13px;font-size:16px;border:2px solid #E9E6F2;border-radius:10px;font-family:inherit;background:#FBF8FE;margin-bottom:10px;}
+  .pm-card input:focus{outline:none;border-color:#4FB08C;}
+  .pm-btns{display:flex;gap:8px;margin-top:6px;}
+  .pm-btns button{flex:1;padding:13px;border-radius:11px;font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:14px;border:none;cursor:pointer;}
+  .pm-save{background:#4FB08C;color:#fff;}
+  .pm-cancel{background:#EDEAF9;color:#6E5FB5;}
+  .pm-msg{display:none;border-radius:9px;padding:9px 12px;font-size:12px;margin-bottom:12px;line-height:1.6;}
+  .pm-msg.err{display:block;background:#FDEBEB;color:#B33;}
+  .pm-msg.ok{display:block;background:#EAF7F0;color:#2F7A5C;}
 </style>
-<link rel="stylesheet" href="beta.css">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<link rel="stylesheet" href="../beta.css">
 </head>
 <body>
 
 <div class="card">
-  <!-- ===== 入力画面 ===== -->
-  <div id="formView">
+  <div id="formArea">
     <div class="logo">🌱</div>
-    <h1>スカイアーク<br>会員情報登録</h1>
-    <p class="sub">LINKご入会おめでとうございます!<br>スカイアークへようこそ🌱<br>
-    今後のサポートに必要な情報を、ここに登録しておきましょう。<br>
-    紹介者などの一部の情報は、分かる範囲で大丈夫です。</p>
+    <h1>スカイアーク<br>育成プログラム</h1>
+    <p class="sub">会員番号でログインしてください</p>
 
     <div class="inapp-warn" id="inappWarn">
       <b>⚠️ アプリ内ブラウザで開いています</b>
       LINEなどのアプリ内では、Googleログインがご利用いただけません。
       <div class="how">
         <b style="display:inline;">▼ どちらかをお試しください</b><br>
-        ① 上のタブで「メールアドレス」を選んでご登録<br>
+        ① 下の「Googleアカウントをお持ちでない方はこちら」から、<br>
+        　 会員番号とパスコードでログイン<br>
         ② 画面右下の「⋮」→「他のアプリで開く」でSafari/Chromeへ移動
       </div>
     </div>
-    <div class="msg" id="msg"></div>
+    <div class="err" id="err"></div>
+    <div class="welcome" id="welcomeBack" style="display:none;"></div>
 
-    <div class="sec">
-      <p class="step">① 連絡先の登録</p>
-
-      <div class="tabs" id="authTabs">
-        <button class="tab on" id="tabGoogle" onclick="switchAuth('google')">Googleアカウント</button>
-        <button class="tab" id="tabMail" onclick="switchAuth('mail')">メールアドレス</button>
+    <div class="gsec">
+      <p class="lead">Google アカウントで本人確認します</p>
+      <div id="gBtnWrap"></div>
+      <div class="gdone" id="gDone">
+        <b>✅ 確認できました</b>
+        <span id="gMail"></span><br>
+        <a href="#" onclick="resetGoogle();return false;">別のアカウントにする</a>
       </div>
-
-      <div id="authGoogle">
-        <p class="tab-lead">Googleアカウント(Gmail)をお持ちの方はこちら。<br>ワンタップで登録でき、パスコードを忘れたときも安心です。</p>
-        <div id="gBtnWrap"></div>
-        <div class="gdone" id="gDone">
-          <b>✅ 確認できました</b>
-          <span id="gMail"></span>
-        </div>
-      </div>
-
-      <div id="authMail" style="display:none;">
-        <p class="tab-lead">Googleアカウントをお持ちでない方は、<br>ふだんお使いのメールアドレスをご登録ください。</p>
-        <div class="f" style="margin-bottom:8px;">
-          <input type="email" id="inMail" placeholder="example@docomo.ne.jp" oninput="checkMail()">
-          <p class="hint" id="mailHint">LINKのご登録に使っているアドレスがおすすめです</p>
-        </div>
-      </div>
+      <p style="text-align:center;margin-top:10px;">
+        <a href="#" onclick="skipGoogle();return false;" id="skipLink"
+           style="color:#8A9A90;font-size:11.5px;">Googleアカウントをお持ちでない方はこちら</a>
+      </p>
     </div>
 
-    <div class="sec locked" id="fields">
-      <p class="step">② あなたの情報</p>
-      <p class="tab-lead" style="margin-bottom:14px;">会員番号・パスコード・お名前・系列は必須です。<br>紹介者の情報は、分かる範囲で大丈夫です。</p>
+    <div id="mainFields" class="locked">
 
-      <div class="f">
-        <label>会員番号 <span class="req">必須</span></label>
-        <input type="text" id="inId" inputmode="numeric" placeholder="00012345">
-        <p class="hint">頭の「000」も含めて入力してください</p>
-      </div>
-
-      <div class="f">
-        <label>パスコード(4桁の数字) <span class="req">必須</span></label>
-        <input type="password" id="inPin" inputmode="numeric" maxlength="4" placeholder="数字4桁">
-        <p class="hint" id="pinHint">スカイアークのサイト内で使うパスコードです</p>
-      </div>
-
-      <div class="f">
-        <label>お名前 <span class="req">必須</span></label>
-        <input type="text" id="inName" placeholder="例:高山翔子">
-      </div>
-
-      <div class="f">
-        <label>系列 <span class="req">必須</span></label>
-        <select id="inKeiretsu"></select>
-        <input type="text" id="inKeiretsuOther" placeholder="系列名を入力してください" style="display:none;margin-top:8px;">
-      </div>
-
-      <p class="step" style="margin-top:22px;">③ 紹介してくださった方 <span style="font-weight:400;font-size:11.5px;color:#A8B4AC;">(分かる範囲でOK)</span></p>
-
-      <div class="f">
-        <label>紹介者の会員番号 <span class="opt">任意・分かる方だけ</span></label>
-        <input type="text" id="inIntro" inputmode="numeric" placeholder="00012345" oninput="lookup('inIntro','introFound')">
-        <p class="found ng" id="introFound"></p>
-      </div>
-
-      <div class="f">
-        <label>アップのクリエイターズ会員番号 <span class="opt">任意・分かる方だけ</span></label>
-        <input type="text" id="inUpline" inputmode="numeric" placeholder="00012345" oninput="lookup('inUpline','upFound')">
-        <p class="found ng" id="upFound"></p>
-      </div>
+    <div class="field">
+      <label>会員番号</label>
+      <input type="text" id="inId" inputmode="numeric" placeholder="例:00012345" autocomplete="username">
+    </div>
+    <div class="field">
+      <label>パスコード(4桁の数字)</label>
+      <input type="password" id="inPin" inputmode="numeric" maxlength="4" placeholder="初回は好きな4桁の数字を決めてください" autocomplete="current-password">
+      <small>※次回から同じ会員番号とパスコードで、どの端末からでも続きができます。<br>
+      <a href="#" onclick="openPinReset();return false;" style="color:var(--leaf);font-weight:700;">パスコードを忘れた・変更したい方はこちら</a><br>
+      <a href="../touroku.html" style="color:var(--leaf);font-weight:700;">はじめての方はこちらから登録</a></small>
+    </div>
+    <div class="field">
+      <label>系列</label>
+      <select id="inKeiretsu"></select>
+      <input type="text" id="inKeiretsuOther" placeholder="系列名を入力してください" style="display:none;margin-top:8px;">
+    </div>
+    <div class="field">
+      <label>お名前(初回のみ)</label>
+      <input type="text" id="inName" placeholder="例:高山翔子">
     </div>
 
-    <button class="btn-main locked" id="submitBtn" onclick="submitForm()">登録する</button>
-    <div class="kit" id="kit">
-      <button class="kit-toggle" onclick="document.getElementById('kit').classList.toggle('open');drawKit();">
-        <span>📣 このページを人に伝える</span>
-        <span class="arw">▼</span>
-      </button>
-      <div class="kit-body">
-        <p class="kit-lead">ご案内の文章とQRコードをご用意しました。<br>
-        新しく入られた方への声かけにお使いください。</p>
-
-        <div class="kit-f">
-          <label>あなたの会員番号(任意)</label>
-          <input type="text" id="kitId" inputmode="numeric" placeholder="00012345" oninput="drawKit()">
-        </div>
-
-        <div class="kit-text" id="kitText"></div>
-
-        <div class="kit-btns">
-          <button class="kit-copy" onclick="copyKit()">📋 文章をコピー</button>
-          <button class="kit-qr" onclick="toggleQr()">📱 QRコード</button>
-        </div>
-
-        <div id="qrArea">
-          <div id="qrBox"></div>
-          <p class="cap">この画面を見せて、読み取ってもらってください</p>
-        </div>
-      </div>
     </div>
-
+    <button class="btn-main locked" id="loginBtn" onclick="login()">ログイン ▶</button>
     <p class="note">
+      <a href="#" onclick="if(confirm('この端末に保存された学習の記録を消します。よろしいですか?\n(スプレッドシート側の記録は消えません)')){clearSkyLocal();location.reload();}return false;" style="color:#9AA8A0;">この端末の記録をリセット</a><br>
       交通整備課|クリエイターズ育成部門<br>
-      <a href="./ikusei/" style="color:#B8B4C8;font-size:10.5px;">育成プログラム</a>
-      <span style="color:#D8D4E4;">|</span>
-      <a href="./ikusei/kanri-x7k2m9.html" style="color:#B8B4C8;font-size:10.5px;">管理画面</a>
+      <a href="./kanri-x7k2m9.html" style="color:#B8B4C8;font-size:10.5px;">管理画面(クリエイターズ以上)</a>
     </p>
     <div class="verTag">v1.40 (2026/08/15)</div>
   </div>
 
-  <!-- ===== 完了画面 ===== -->
-  <div id="doneView">
-    <div class="big" id="dEmoji">🎉</div>
-    <h2 id="dTitle">登録できました!</h2>
-    <p class="lead" id="dLead">この内容を、スクリーンショットなどで<br>控えておくと安心です。</p>
-
-    <div class="mycard">
-      <div class="row"><span>会員番号</span><span id="dId"></span></div>
-      <div class="row"><span>お名前</span><span id="dName"></span></div>
-      <div class="row"><span>系列</span><span id="dKei"></span></div>
-      <div class="row"><span>パスコード</span><span id="dPin"></span></div>
-      <div class="row"><span>連絡先</span><span id="dMail" style="font-size:11.5px;"></span></div>
-      <p class="tip">💡 この会員番号とパスコードで、育成プログラムにログインできます。<br>
-      お名前・系列・紹介者などは、あとからいつでも登録・変更できます。</p>
-    </div>
-
-    <a class="btn-guide" id="guideLink" href="./guide.html">📘 初期サポートガイドへ進む</a>
-    <div class="verTag">v1.40 (2026/08/15)</div>
+  <div id="loading">
+    <div class="spin"></div>
+    <p id="loadMsg">確認しています…</p>
+    <small id="loadSub">まもなく画面が切り替わります</small>
   </div>
 </div>
 
 <script>
 /* ================================================================
-   接続先(育成システムと同じGAS)
+   接続先の設定【将来の系列分割用】
+   ----------------------------------------------------------------
+   ★いまは全系列が同じ1ファイルに保存されます("default" だけ)。
+   ★人数が増えて分けたくなったら、系列名をキーにURLを足すだけ。
 ================================================================ */
-const GAS_URL = "https://script.google.com/macros/s/AKfycbzY2l20zwGULjnKRUqvRpbH79fPkl5e-sWNVoXEIgBrDpqhjDAx2zLvJuqO3sZxAfHj/exec";
-const GOOGLE_CLIENT_ID = "315827385958-ikdpkfhkr6nmrgql470aolt4pv27pak3.apps.googleusercontent.com";
+const GAS_MAP = {
+  "default": "https://script.google.com/macros/s/AKfycbzY2l20zwGULjnKRUqvRpbH79fPkl5e-sWNVoXEIgBrDpqhjDAx2zLvJuqO3sZxAfHj/exec"
+};
+function gasUrlFor(keiretsu){
+  try{ return GAS_MAP[keiretsu] || GAS_MAP["default"] || ""; }
+  catch(e){ return GAS_MAP["default"] || ""; }
+}
 
-/* 登録後に案内するページ */
-const GUIDE_URL = "./guide.html";   /* 初期サポートガイド */
+/* 行き先の設定:役職に「クリエ」が含まれていればクリエ用ポータルへ */
+const PAGE_CRIE      = "./portal-creators.html";
+const PAGE_SUPPORTER = "./portal-supporter.html";
 
 const KEIRETSU = [
   "🚀SkyExceed","🦅Zenith1","🏰Utop","🌟グローハピネス🌟","🥷HOT STUFF⚜️",
@@ -304,65 +210,12 @@ const KEIRETSU = [
   "⭐️ルミナス","エネルギー🔥","💎プリズム","📚FairyTail","ミラメリ🪄","🪽HERO","♾️ZERO♾️",
 ];
 
+const GOOGLE_CLIENT_ID = "315827385958-ikdpkfhkr6nmrgql470aolt4pv27pak3.apps.googleusercontent.com";
 const $ = (s)=>document.querySelector(s);
+const PIN_RESET_URL = gasUrlFor("");
 let googleEmail = "";
-let authMode = "google";   // "google" or "mail"
-let mailOk = false;
-let isUpdate = false;   // すでに登録済みかどうか
 
-/* 連絡先の入力方法を切り替える */
-function switchAuth(mode){
-  authMode = mode;
-  const isG = (mode === "google");
-  $("#tabGoogle").classList.toggle("on", isG);
-  $("#tabMail").classList.toggle("on", !isG);
-  $("#authGoogle").style.display = isG ? "block" : "none";
-  $("#authMail").style.display   = isG ? "none" : "block";
-  updateLock();
-}
-
-/* メールアドレスの形をチェック */
-function checkMail(){
-  const v = $("#inMail").value.trim();
-  const hint = $("#mailHint");
-  mailOk = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v);
-  if(!v){
-    hint.textContent = "LINKのご登録に使っているアドレスがおすすめです";
-    hint.style.color = "#7A8A80";
-  }else if(mailOk){
-    hint.textContent = "✅ この形式で登録できます";
-    hint.style.color = "#2F7A5C";
-  }else{
-    hint.textContent = "メールアドレスの形をご確認ください(@が必要です)";
-    hint.style.color = "#B33";
-  }
-  updateLock();
-}
-
-/* 連絡先が入ったら下の欄をひらく */
-function updateLock(){
-  const ready = (authMode === "google") ? !!googleEmail : mailOk;
-  $("#fields").classList.toggle("locked", !ready);
-  $("#submitBtn").classList.toggle("locked", !ready);
-}
-
-/* 実際に登録する連絡先 */
-function contactEmail(){
-  return (authMode === "google") ? googleEmail : $("#inMail").value.trim().toLowerCase();
-}
-
-/* 系列セレクト */
-(function(){
-  const sel = $("#inKeiretsu");
-  sel.innerHTML = '<option value="">選択してください</option>'
-    + KEIRETSU.map(k=>`<option value="${k}">${k}</option>`).join("")
-    + '<option value="__other__">その他(自分で入力)</option>';
-  sel.addEventListener("change", ()=>{
-    $("#inKeiretsuOther").style.display = sel.value === "__other__" ? "block" : "none";
-  });
-})();
-
-/* ---------- Googleログイン ---------- */
+/* JWTを読んでメールアドレスを取り出す */
 
 /* ===== アプリ内ブラウザの検知(LINE・Instagram等ではGoogleログインが使えません) ===== */
 function isInAppBrowser(){
@@ -389,220 +242,377 @@ function decodeJwt(token){
 
 function onGoogleCredential(response){
   const info = decodeJwt(response.credential);
-  if(!info || !info.email){ show("Googleアカウントの確認に失敗しました。もう一度お試しください。","err"); return; }
+  // パスコード再設定の画面が開いているときは、そちらへ渡す
+  if(document.getElementById("pinModal").classList.contains("show")){
+    if(info && info.email) pinResetGoogleOk(info.email);
+    return;
+  }
+  if(!info || !info.email){
+    $("#err").textContent = "Googleアカウントの確認に失敗しました。もう一度お試しください。";
+    $("#err").style.display = "block";
+    return;
+  }
   googleEmail = info.email;
   $("#gBtnWrap").style.display = "none";
   $("#gDone").classList.add("show");
   $("#gMail").textContent = googleEmail;
-  updateLock();
+  $("#mainFields").classList.remove("locked");
+  $("#loginBtn").classList.remove("locked");
   if(info.name && !$("#inName").value) $("#inName").value = info.name;
-  // すでに登録済みなら内容を呼び出す
-  prefill(googleEmail);
+  fillFromEmail(info.email);
 }
 
-window.onload = function(){
-  // アプリ内ブラウザなら、はじめから「メールアドレス」タブを開く
-  if(showInAppWarning()) switchAuth("mail");
+/* Googleアカウントに紐づく会員情報を呼び出して自動入力する
+   (パスコードは自動で入りません。ご自身で入力していただきます) */
+async function fillFromEmail(email){
+  const hint = document.getElementById("welcomeBack");
   try{
-    google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: onGoogleCredential, auto_select:false });
-    google.accounts.id.renderButton(document.getElementById("gBtnWrap"),
-      { theme:"outline", size:"large", text:"signin_with", locale:"ja", width:320 });
+    const res = await fetch(`${gasUrlFor("")}?action=byEmail&email=${encodeURIComponent(email)}`);
+    const j = await res.json();
+    if(!j.ok || !j.members || j.members.length === 0) return;
+
+    if(j.members.length === 1){
+      applyMember(j.members[0]);
+      if(hint){
+        hint.style.display = "block";
+        hint.innerHTML = "おかえりなさい、<b>" + (j.members[0].name || j.members[0].id) +
+          "</b>さん!<br>パスコード(4桁)を入力して「ログイン」を押してください。";
+      }
+      $("#inPin").focus();
+    }else{
+      // 複数の会員番号が紐づいている場合は選んでもらう
+      if(hint){
+        hint.style.display = "block";
+        hint.innerHTML = "このGoogleアカウントには複数の会員番号があります。どちらでログインしますか?<br>"
+          + j.members.map((m,i)=>
+              `<button type="button" onclick="pickMember(${i})"
+                style="margin:6px 6px 0 0;background:var(--leaf);color:#fff;border:none;border-radius:999px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;">
+                ${m.name || m.id}(${m.keiretsu || "系列なし"})</button>`).join("");
+      }
+      window.__memberChoices = j.members;
+    }
+  }catch(e){ /* 取得できなくても手入力で進めます */ }
+}
+
+function pickMember(i){
+  const m = (window.__memberChoices || [])[i];
+  if(!m) return;
+  applyMember(m);
+  const hint = document.getElementById("welcomeBack");
+  if(hint) hint.innerHTML = "<b>" + (m.name || m.id) + "</b>さんでログインします。<br>パスコード(4桁)を入力してください。";
+  $("#inPin").focus();
+}
+
+function applyMember(m){
+  $("#inId").value = m.id || "";
+  if(m.name) $("#inName").value = m.name;
+  if(m.keiretsu){
+    const sel = $("#inKeiretsu");
+    const found = Array.from(sel.options).some(o=>o.value === m.keiretsu);
+    if(found){ sel.value = m.keiretsu; $("#inKeiretsuOther").style.display = "none"; }
+    else{
+      sel.value = "__other__";
+      $("#inKeiretsuOther").style.display = "block";
+      $("#inKeiretsuOther").value = m.keiretsu;
+    }
+  }
+}
+
+/* Googleを使わずに、会員番号+パスコードだけでログインする */
+function skipGoogle(){
+  googleEmail = "";
+  $("#gBtnWrap").style.display = "none";
+  $("#gDone").classList.remove("show");
+  $("#mainFields").classList.remove("locked");
+  $("#loginBtn").classList.remove("locked");
+  const link = document.getElementById("skipLink");
+  if(link) link.innerHTML = '<span style="color:#2F7A5C;">会員番号とパスコードでログインします</span>　<a href="#" onclick="backToGoogle();return false;" style="color:#8A9A90;">Googleに戻す</a>';
+  $("#inId").focus();
+}
+
+function backToGoogle(){
+  googleEmail = "";
+  $("#gBtnWrap").style.display = "flex";
+  $("#mainFields").classList.add("locked");
+  $("#loginBtn").classList.add("locked");
+  const link = document.getElementById("skipLink");
+  if(link) link.innerHTML = 'Googleアカウントをお持ちでない方はこちら';
+  link.onclick = function(){ skipGoogle(); return false; };
+}
+
+function resetGoogle(){
+  googleEmail = "";
+  $("#gDone").classList.remove("show");
+  $("#gBtnWrap").style.display = "flex";
+  $("#mainFields").classList.add("locked");
+  $("#loginBtn").classList.add("locked");
+  try{ google.accounts.id.disableAutoSelect(); }catch(e){}
+}
+
+/* Googleボタンを描画 */
+window.onload = function(){
+  showInAppWarning();
+  try{
+    google.accounts.id.initialize({
+      client_id: GOOGLE_CLIENT_ID,
+      callback: onGoogleCredential,
+      auto_select: false
+    });
+    google.accounts.id.renderButton(
+      document.getElementById("gBtnWrap"),
+      { theme:"outline", size:"large", text:"signin_with", locale:"ja", width:320 }
+    );
   }catch(e){
     document.getElementById("gBtnWrap").innerHTML =
       '<p style="font-size:12px;color:#B33;">Googleログインを読み込めませんでした。通信環境を確認して再読み込みしてください。</p>';
   }
-  document.getElementById("guideLink").href = GUIDE_URL;
-  drawKit();
 };
 
-/* すでに登録済みの内容を呼び出す */
-async function prefill(email){
+/* 系列セレクト生成 */
+(function(){
+  const sel = $("#inKeiretsu");
+  sel.innerHTML = '<option value="">選択してください</option>'
+    + KEIRETSU.map(k=>`<option value="${k}">${k}</option>`).join("")
+    + '<option value="__other__">その他(自分で入力)</option>';
+  sel.addEventListener("change", ()=>{
+    $("#inKeiretsuOther").style.display = sel.value === "__other__" ? "block" : "none";
+  });
+})();
+
+/* この端末に残っているログイン情報・進捗キャッシュを全部消す */
+function clearSkyLocal(){
   try{
-    const res = await fetch(`${GAS_URL}?action=byEmail&email=${encodeURIComponent(email)}`);
-    const j = await res.json();
-    if(j.ok && j.members && j.members.length >= 1){
-      const m = j.members[0];
-      isUpdate = true;
-      $("#inId").value = m.id || "";
-      if(m.name) $("#inName").value = m.name;
-      if(m.keiretsu){
-        const sel = $("#inKeiretsu");
-        if(Array.from(sel.options).some(o=>o.value === m.keiretsu)){
-          sel.value = m.keiretsu;
-        }else{
-          sel.value = "__other__";
-          $("#inKeiretsuOther").style.display = "block";
-          $("#inKeiretsuOther").value = m.keiretsu;
-        }
-      }
-      if(m.intro){ $("#inIntro").value = m.intro; lookup("inIntro","introFound"); }
-      if(m.upline){ $("#inUpline").value = m.upline; lookup("inUpline","upFound"); }
-      $("#submitBtn").textContent = "登録内容を更新する";
-      $("#inPin").placeholder = "変更する場合だけ入力";
-      $("#pinHint").textContent = "空欄のままなら、今のパスコードが続けて使えます";
-      show("すでにご登録いただいています。追加・変更したい項目があれば、書き直して下のボタンを押してください。","ok");
+    const keys = [];
+    for(let i=0;i<localStorage.length;i++){
+      const k = localStorage.key(i);
+      if(k && (k.indexOf("skyarc_")===0 || k.indexOf("piyo_")===0 || k.indexOf("gcon_")===0)) keys.push(k);
     }
+    keys.forEach(k=>localStorage.removeItem(k));
   }catch(e){}
 }
 
-/* 会員番号から名前を確認 */
-let lookupTimer = {};
-function lookup(inputId, outId){
-  const v = document.getElementById(inputId).value.trim();
-  const out = document.getElementById(outId);
-  if(!v){ out.textContent = ""; return; }
-  clearTimeout(lookupTimer[inputId]);
-  lookupTimer[inputId] = setTimeout(async ()=>{
-    try{
-      const res = await fetch(`${GAS_URL}?action=lookupName&id=${encodeURIComponent(v)}`);
-      const j = await res.json();
-      if(j.ok && j.found){
-        out.textContent = "→ " + (j.name || "(名前未登録)") + "さん" + (j.keiretsu ? "(" + j.keiretsu + ")" : "");
-        out.className = "found ok";
-      }else{
-        out.textContent = "→ まだ登録されていない番号です(そのままでOKです)";
-        out.className = "found ng";
-      }
-    }catch(e){ out.textContent = ""; }
-  }, 500);
+function goTo(member){
+  // サポーター未満の方には、まだ早い旨をご案内します
+  if(member.sup !== true && member.crie !== true){
+    location.href = "./member.html";
+    return;
+  }
+  const isCrie = member.crie === true || member.crie === "true";
+  $("#formArea").style.display = "none";
+  $("#loading").style.display = "block";
+  $("#loadMsg").textContent = (member.name ? member.name + "さん、" : "") + "ようこそ!";
+  $("#loadSub").textContent = isCrie
+    ? "クリエイターズのページをひらいています…"
+    : "サポーターのページをひらいています…";
+  setTimeout(()=>{ location.href = isCrie ? PAGE_CRIE : PAGE_SUPPORTER; }, 900);
 }
 
-function show(t, cls){
-  const m = $("#msg");
-  m.textContent = t; m.className = "msg " + cls;
-  m.scrollIntoView({behavior:"smooth", block:"center"});
-}
-
-async function submitForm(){
+async function login(){
   const id = $("#inId").value.trim();
   const pin = $("#inPin").value.trim();
   const name = $("#inName").value.trim();
   let keiretsu = $("#inKeiretsu").value;
   if(keiretsu === "__other__") keiretsu = $("#inKeiretsuOther").value.trim();
-  const intro = $("#inIntro").value.trim();
-  const upline = $("#inUpline").value.trim();
+  const err = $("#err");
+  err.style.display = "none";
 
-  const email = contactEmail();
-  if(authMode === "google" && !googleEmail){ show("Googleアカウントで本人確認をしてください","err"); return; }
-  if(authMode === "mail" && !mailOk){ show("メールアドレスをご確認ください","err"); return; }
-  if(!id){ show("会員番号を入力してください","err"); return; }
-  if(!isUpdate && !/^\d{4}$/.test(pin)){ show("パスコードは4桁の数字で入力してください","err"); return; }
-  if(isUpdate && pin && !/^\d{4}$/.test(pin)){ show("パスコードは4桁の数字で入力してください","err"); return; }
-  if(!name){ show("お名前を入力してください","err"); return; }
-  if(!keiretsu){ show("系列を選んでください","err"); return; }
+  if(!id || !/^\d{4}$/.test(pin)){
+    err.textContent = "会員番号と、4桁の数字のパスコードを入力してください";
+    err.style.display = "block"; return;
+  }
 
-
-  $("#submitBtn").disabled = true;
-  $("#submitBtn").textContent = "登録しています…";
+  $("#loginBtn").disabled = true;
+  $("#loginBtn").textContent = "確認中…";
   try{
-    const params = {
-      action:"register", id, email:email,
-      authType: (authMode === "google") ? "Google" : "メール",
-      name, keiretsu, intro, upline
+    const body = new URLSearchParams({action:"login", id, pin, email:googleEmail, name:name||"", keiretsu:keiretsu||""});
+    const res = await fetch(gasUrlFor(keiretsu), {method:"POST", body});
+    const j = await res.json();
+    if(j.ok === false){
+      if(j.error === "pin"){
+        err.textContent = "パスコードが一致しません。忘れた場合は担当コーチにご確認ください。";
+      }else if(j.error === "email"){
+        err.textContent = "この会員番号は別のGoogleアカウント(" + (j.savedHint||"***") + ")で登録されています。そちらでログインするか、担当コーチにご相談ください。";
+      }else{
+        err.textContent = "ログインできませんでした。もう一度お試しください。";
+      }
+      err.style.display = "block";
+      return;
+    }
+    const member = {
+      id, pin, email: googleEmail,
+      name: j.name || name,
+      keiretsu: j.keiretsu || keiretsu,
+      role: j.role || "",
+      sup: j.sup === true,
+      crie: j.crie === true,
+      badges: j.badges || [],
+      celebrate: j.celebrate || ""
     };
-    if(pin) params.pin = pin;
-    const res = await fetch(GAS_URL, {method:"POST", body:new URLSearchParams(params)});
+    // 別の会員番号でログインしたら、前の人のデータを消す
+    try{
+      const prev = JSON.parse(localStorage.getItem("skyarc_member")||"null");
+      if(prev && String(prev.id) !== String(id)) clearSkyLocal();
+    }catch(e){}
+    localStorage.setItem("skyarc_member", JSON.stringify(member));
+    goTo(member);
+  }catch(e){
+    err.textContent = "通信できませんでした。電波のよい場所でお試しください。";
+    err.style.display = "block";
+  }finally{
+    $("#loginBtn").disabled = false;
+    $("#loginBtn").textContent = "ログイン ▶";
+  }
+}
+
+/* Enterキーでログイン */
+["inId","inPin","inName"].forEach(idName=>{
+  document.getElementById(idName).addEventListener("keydown", e=>{
+    if(e.key === "Enter") login();
+  });
+});
+
+
+/* ================= パスコード再設定 ================= */
+let pmEmail = "";
+let pmInited = false;
+
+function openPinReset(){
+  document.getElementById("pinModal").classList.add("show");
+  const msg = document.getElementById("pmMsg");
+  msg.className = "pm-msg";
+  if(!pmInited){
+    pmInited = true;
+    try{
+      google.accounts.id.renderButton(document.getElementById("pmGoogleWrap"),
+        { theme:"outline", size:"large", text:"signin_with", locale:"ja", width:300 });
+    }catch(e){
+      document.getElementById("pmGoogleWrap").innerHTML =
+        '<p style="font-size:12px;color:#B33;">Googleログインを読み込めませんでした</p>';
+    }
+  }
+}
+
+function closePinReset(){
+  document.getElementById("pinModal").classList.remove("show");
+}
+
+/* Google確認が済んだら呼ばれる(共通のコールバックから) */
+function pinResetGoogleOk(email){
+  pmEmail = email;
+  document.getElementById("pmGoogleWrap").style.display = "none";
+  document.getElementById("pmDone").classList.add("show");
+  document.getElementById("pmMail").textContent = email;
+  document.getElementById("pmFields").classList.add("on");
+}
+
+async function submitPinReset(){
+  const msg = document.getElementById("pmMsg");
+  const id = document.getElementById("pmId").value.trim();
+  const p1 = document.getElementById("pmPin1").value.trim();
+  const p2 = document.getElementById("pmPin2").value.trim();
+  const show = (t, cls)=>{ msg.textContent = t; msg.className = "pm-msg " + cls; };
+
+  if(!pmEmail){ show("先にGoogleアカウントで本人確認をしてください","err"); return; }
+  if(!id){ show("会員番号を入力してください","err"); return; }
+  if(!/^\d{4}$/.test(p1)){ show("新しいパスコードは4桁の数字で入力してください","err"); return; }
+  if(p1 !== p2){ show("2つのパスコードが一致しません","err"); return; }
+
+  show("変更しています…","ok");
+  try{
+    const body = new URLSearchParams({action:"resetPin", id:id, email:pmEmail, newPin:p1});
+    const res = await fetch(PIN_RESET_URL, {method:"POST", body});
     const j = await res.json();
     if(j.ok === false){
       show({
-        email:"この会員番号は別の連絡先(" + (j.savedHint||"***") + ")で登録されています。お心当たりがない場合は担当の方にご相談ください。",
-        bademail:"メールアドレスの形をご確認ください",
-        badpin:"パスコードは4桁の数字で入力してください",
-        missing:"入力内容をご確認ください"
-      }[j.error] || "登録できませんでした。もう一度お試しください。", "err");
+        nomember:"その会員番号は登録されていません",
+        email:"この会員番号は別のGoogleアカウント(" + (j.savedHint||"***") + ")で登録されています。そちらでお試しいただくか、担当コーチにご相談ください。",
+        badpin:"パスコードは4桁の数字で入力してください"
+      }[j.error] || "変更できませんでした", "err");
       return;
     }
-    // 完了画面へ(新規と更新でメッセージを変えます)
-    const updated = isUpdate || j.updated === true;
-    $("#dEmoji").textContent = updated ? "✅" : "🎉";
-    $("#dTitle").textContent = updated ? "更新ありがとうございます!" : "登録できました!";
-    $("#dLead").innerHTML = updated
-      ? "この会員番号はすでに登録されています。<br>最新の内容に更新しました。"
-      : "この内容を、スクリーンショットなどで<br>控えておくと安心です。";
-    $("#dId").textContent = id;
-    $("#dName").textContent = name;
-    $("#dKei").textContent = keiretsu;
-    $("#dPin").textContent = pin || "(変更なし)";
-    $("#dMail").textContent = email;
-    $("#formView").style.display = "none";
-    $("#doneView").style.display = "block";
-    window.scrollTo(0,0);
-  }catch(e){
-    show("通信できませんでした。電波のよい場所でお試しください。","err");
-  }finally{
-    $("#submitBtn").disabled = false;
-    $("#submitBtn").textContent = "登録する";
-  }
+    show("✅ 変更しました!新しいパスコードでログインしてください。","ok");
+    setTimeout(()=>{ closePinReset(); }, 2200);
+  }catch(e){ show("通信できませんでした。電波のよい場所でお試しください。","err"); }
 }
 
+/* 前回の入力を呼び出して埋めておく(自動では移動しません) */
+(function(){
+  const saved = localStorage.getItem("skyarc_member");
+  if(!saved) return;
+  let m;
+  try{ m = JSON.parse(saved); }catch(e){ return; }
+  if(!m || !m.id) return;
 
-/* ================= ご案内キット(人に伝える) ================= */
-const PAGE_URL = location.href.split("?")[0].split("#")[0];
-let qrDrawn = false;
-
-function kitMessage(){
-  const myId = document.getElementById("kitId").value.trim();
-  let t = "ご入会おめでとうございます✨\n\n"
-        + "今後のサポートに必要な情報なので、こちらからご登録ください🙏\n\n"
-        + "▼会員情報登録はこちら\n"
-        + PAGE_URL;
-  if(myId){
-    t += "\n\n「紹介者の会員番号」には【" + myId + "】を入れてください😊";
-  }
-  return t;
-}
-
-function drawKit(){
-  const el = document.getElementById("kitText");
-  if(el) el.textContent = kitMessage();
-}
-
-async function copyKit(){
-  const text = kitMessage();
-  try{
-    await navigator.clipboard.writeText(text);
-    show("文章をコピーしました。そのまま貼り付けてお使いください📋","ok");
-  }catch(e){
-    // クリップボードが使えない環境向け
-    const ta = document.createElement("textarea");
-    ta.value = text;
-    ta.style.position = "fixed"; ta.style.opacity = "0";
-    document.body.appendChild(ta);
-    ta.select();
-    try{
-      document.execCommand("copy");
-      show("文章をコピーしました📋","ok");
-    }catch(e2){
-      show("コピーできませんでした。上の文章を長押しして選択してください。","err");
-    }
-    document.body.removeChild(ta);
-  }
-}
-
-function toggleQr(){
-  const area = document.getElementById("qrArea");
-  const opened = area.classList.toggle("show");
-  if(opened && !qrDrawn){
-    try{
-      if(typeof QRCode === "undefined") throw new Error("no lib");
-      new QRCode(document.getElementById("qrBox"), {
-        text: PAGE_URL,
-        width: 190, height: 190,
-        colorDark: "#3B3550", colorLight: "#ffffff",
-        correctLevel: QRCode.CorrectLevel.M
-      });
-      qrDrawn = true;
-    }catch(e){
-      // ライブラリが読み込めない場合は画像で表示
-      document.getElementById("qrBox").innerHTML =
-        '<img src="https://api.qrserver.com/v1/create-qr-code/?size=190x190&data='
-        + encodeURIComponent(PAGE_URL) + '" alt="QRコード" width="190" height="190">';
-      qrDrawn = true;
+  $("#inId").value = m.id;
+  if(m.name) $("#inName").value = m.name;
+  if(m.keiretsu){
+    const sel = $("#inKeiretsu");
+    const found = Array.from(sel.options).some(o=>o.value === m.keiretsu);
+    if(found){ sel.value = m.keiretsu; }
+    else{
+      sel.value = "__other__";
+      $("#inKeiretsuOther").style.display = "block";
+      $("#inKeiretsuOther").value = m.keiretsu;
     }
   }
-}
+  const hint = document.getElementById("welcomeBack");
+  if(hint){
+    hint.style.display = "block";
+    hint.textContent = "おかえりなさい" + (m.name ? "、"+m.name+"さん" : "") + "!Googleで本人確認をして、パスコードを入力してください。";
+  }
+})();
 
-window.addEventListener("pageshow", function(e){ if(e.persisted) location.reload(); });
+/* ブラウザの「戻る」で表示されたときは、状態を作り直す */
+window.addEventListener("pageshow", function(e){
+  if(e.persisted){
+    // メモリから復元された場合は、いったんログイン前の画面に戻す
+    googleEmail = "";
+    const gd = document.getElementById("gDone");
+    const gb = document.getElementById("gBtnWrap");
+    const mf = document.getElementById("mainFields");
+    const lb = document.getElementById("loginBtn");
+    if(gd) gd.classList.remove("show");
+    if(gb) gb.style.display = "flex";
+    if(mf) mf.classList.add("locked");
+    if(lb){ lb.classList.add("locked"); lb.disabled = false; lb.textContent = "ログイン ▶"; }
+    const fa = document.getElementById("formArea");
+    const ld = document.getElementById("loading");
+    if(fa) fa.style.display = "block";
+    if(ld) ld.style.display = "none";
+    const er = document.getElementById("err");
+    if(er) er.style.display = "none";
+    try{ google.accounts.id.disableAutoSelect(); }catch(err){}
+  }
+});
+
+if("serviceWorker" in navigator){ navigator.serviceWorker.register("./gcon-sw.js").catch(()=>{}); }
 </script>
+
+<div id="pinModal" onclick="if(event.target===this)closePinReset()">
+  <div class="pm-card">
+    <h3>🔑 パスコードの再設定</h3>
+    <p class="pm-lead">Googleアカウントで本人確認をして、<br>新しい4桁を決めてください。</p>
+    <div class="pm-msg" id="pmMsg"></div>
+
+    <div class="pm-sec">
+      <p class="pm-step">① Googleアカウントで本人確認</p>
+      <div id="pmGoogleWrap"></div>
+      <div class="pm-done" id="pmDone">✅ 確認できました<br><span id="pmMail"></span></div>
+    </div>
+
+    <div class="pm-sec pm-fields" id="pmFields">
+      <p class="pm-step">② 会員番号と新しいパスコード</p>
+      <input type="text" id="pmId" inputmode="numeric" placeholder="会員番号(例:00012345)">
+      <input type="password" id="pmPin1" inputmode="numeric" maxlength="4" placeholder="新しいパスコード(4桁)">
+      <input type="password" id="pmPin2" inputmode="numeric" maxlength="4" placeholder="もう一度入力">
+    </div>
+
+    <div class="pm-btns">
+      <button class="pm-cancel" onclick="closePinReset()">とじる</button>
+      <button class="pm-save" onclick="submitPinReset()">変更する</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
