@@ -9,7 +9,7 @@
    html要素に背景を敷き、body側は透明にしています。
 ================================================================ */
 html{
-  background-image:url("images/beta-bg.png") !important;
+  background-image:url("img/beta-bg.png") !important;
   background-repeat:repeat !important;
   background-size:340px auto !important;
   background-attachment:fixed !important;
