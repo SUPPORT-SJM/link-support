@@ -56,6 +56,13 @@
   .head .tools{display:flex;gap:7px;align-items:center;flex-wrap:wrap;}
   .head button{background:rgba(255,255,255,.16);color:#fff;font-size:12px;border-radius:999px;padding:7px 14px;font-weight:700;}
   .head button.on{background:var(--leaf);}
+  .head button#btnDummy.dummyOn{background:#F5C452;color:#5C4200;}
+  body.dummy-mode{box-shadow:inset 0 0 0 4px #F5C452;}
+  body.dummy-mode .head{background:#6B5A2E;}
+  .dummy-banner{display:none;background:#FFF3D6;border-bottom:2px solid #F0C86A;padding:8px 16px;font-size:12px;color:#7A5A00;text-align:center;font-weight:700;}
+  body.dummy-mode .dummy-banner{display:block;}
+  .dummy-banner button{background:#F0B429;color:#fff;border:none;border-radius:999px;padding:4px 12px;font-size:11px;font-weight:700;margin-left:6px;cursor:pointer;}
+  .dummy-banner button.del{background:#E8788A;}
   .head select{padding:7px 11px;border-radius:999px;border:none;font-size:12px;font-family:inherit;}
 
   .crumb{background:#fff;border-bottom:1px solid var(--line);padding:9px 0;font-size:12px;}
@@ -130,7 +137,7 @@
 <body>
 
 <!-- ===== LOGIN ===== -->
-<div id="loginView">
+<div id="loginView" style="display:none;">
   <div class="lcard">
     <h1>🗺 クリエマップ</h1>
     <p class="sub">クリエイターズの系統図です<br>アドバンス以上の方がご覧いただけます</p>
@@ -161,12 +168,12 @@
     <p style="text-align:center;margin-top:14px;">
       <a href="./kanri-x7k2m9.html" style="color:#8B889E;font-size:11.5px;">‹ 管理画面にもどる</a>
     </p>
-    <div class="verTag">v1.44 (2026/08/15)</div>
+    <div class="verTag">v1.50 (2026/08/15)</div>
   </div>
 </div>
 
 <!-- ===== APP ===== -->
-<div id="appView">
+<div id="appView" style="display:block;">
   <div class="head">
     <div class="wrap">
       <div>
@@ -183,9 +190,17 @@
           <option value="5" selected>5段まで</option>
           <option value="6">6段まで</option>
         </select>
-        <button onclick="location.href='./kanri-x7k2m9.html'">管理画面</button>
+        <button id="btnDummy" onclick="toggleDummy()" style="display:none;">🧪 テストモード</button>
+        <button onclick="backToPortal()">‹ ポータルへ</button>
+        <button onclick="location.href='./kanri-x7k2m9.html'">🔐 管理画面</button>
       </div>
     </div>
+  </div>
+
+  <div class="dummy-banner">
+    🧪 テストモードです(仮のデータを表示しています・本番データではありません)
+    <button onclick="makeDummy()">仮データを作り直す</button>
+    <button class="del" onclick="clearDummy()">仮データを消す</button>
   </div>
 
   <div class="crumb">
@@ -206,9 +221,22 @@
         ①🎓=ぴよぴよ卒業 ／ ②の数字=グルコンリーダー育成の先生の丸<br>
         カードをクリックすると、その方から下だけを表示します。会員名簿の「アップの会員番号」欄でつながりを設定してください。
       </div>
-      <div class="verTag">v1.44 (2026/08/15)</div>
+      <div class="verTag">v1.50 (2026/08/15)</div>
     </div>
   </main>
+</div>
+
+<div id="needLogin" style="display:none;position:fixed;inset:0;z-index:80;background:var(--deep);align-items:center;justify-content:center;padding:24px;">
+  <div style="background:#fff;border-radius:20px;padding:30px 24px;max-width:360px;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.3);">
+    <div style="font-size:40px;">🗺</div>
+    <h2 style="font-family:'Zen Maru Gothic',sans-serif;font-weight:900;color:var(--deep);font-size:18px;margin:8px 0 10px;">クリエマップ</h2>
+    <p style="font-size:13px;color:#77748A;line-height:1.9;margin-bottom:18px;">
+      ご覧いただくには、ログインが必要です。<br>
+      管理画面からお進みください。
+    </p>
+    <a href="./kanri-x7k2m9.html" style="display:block;padding:14px;border-radius:12px;background:var(--deep);color:#fff;text-decoration:none;font-family:'Zen Maru Gothic',sans-serif;font-weight:700;font-size:14px;">🔐 管理画面へ</a>
+    <a href="./index.html" style="display:block;margin-top:10px;font-size:12px;color:#8B889E;">‹ 育成プログラムにもどる</a>
+  </div>
 </div>
 
 <div id="toast"></div>
@@ -221,96 +249,51 @@ const $ = (s)=>document.querySelector(s);
 let admin = null, googleEmail = "";
 let members = [], byId = {}, children = {};
 let rootId = null, view = "chart", maxDepth = 5;
+let dummyMode = false;   // テストモード(仮データ表示)
 let crumbs = [];
 
-/* ---------- Googleログイン ---------- */
-
-/* ===== アプリ内ブラウザの検知(LINE・Instagram等ではGoogleログインが使えません) ===== */
-function isInAppBrowser(){
-  const ua = navigator.userAgent || "";
-  return /Line\//i.test(ua) || /FBAN|FBAV|Instagram/i.test(ua) || /Twitter/i.test(ua);
-}
-function showInAppWarning(){
-  if(!isInAppBrowser()) return false;
-  const el = document.getElementById("inappWarn");
-  if(el) el.classList.add("show");
-  const g = document.getElementById("gBtnWrap");
-  if(g) g.style.opacity = ".45";
-  return true;
-}
-
-function decodeJwt(token){
-  try{
-    const base = token.split(".")[1].replace(/-/g,"+").replace(/_/g,"/");
-    const json = decodeURIComponent(atob(base).split("").map(c=>
-      "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2)).join(""));
-    return JSON.parse(json);
-  }catch(e){ return null; }
-}
-function onGoogleCredential(response){
-  const info = decodeJwt(response.credential);
-  if(!info || !info.email){ showErr("Googleアカウントの確認に失敗しました"); return; }
-  googleEmail = info.email;
-  $("#gBtnWrap").style.display = "none";
-  $("#gDone").classList.add("show");
-  $("#gMail").textContent = googleEmail;
-  $("#mainFields").classList.remove("locked");
-  $("#loginBtn").classList.remove("locked");
-  fillFromEmail(googleEmail);
-}
-
-/* Googleアカウントに紐づく会員番号を自動で入れる(パスコードは手入力) */
-async function fillFromEmail(email){
-  try{
-    const res = await fetch(`${GAS_URL}?action=byEmail&email=${encodeURIComponent(email)}`);
-    const j = await res.json();
-    if(j.ok && j.members && j.members.length === 1){
-      document.getElementById("inId").value = j.members[0].id || "";
-      document.getElementById("inPin").focus();
-    }
-  }catch(e){}
-}
-window.onload = function(){
-  showInAppWarning();
-  try{
-    google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: onGoogleCredential, auto_select:false });
-    google.accounts.id.renderButton(document.getElementById("gBtnWrap"),
-      { theme:"outline", size:"large", text:"signin_with", locale:"ja", width:300 });
-  }catch(e){
-    document.getElementById("gBtnWrap").innerHTML = '<p style="font-size:12px;color:#B33;">Googleログインを読み込めませんでした</p>';
+/* ---------- 保存されたログイン情報で表示します ---------- */
+(function(){
+  let m = null;
+  try{ m = JSON.parse(localStorage.getItem("skyarc_member")||"null"); }catch(e){}
+  if(!m || !m.id || !m.pin){
+    document.getElementById("appView").style.display = "none";
+    document.getElementById("needLogin").style.display = "flex";
+    return;
   }
-};
-function showErr(t){ const e=$("#err"); e.textContent=t; e.style.display="block"; }
-
-async function login(){
-  const id = $("#inId").value.trim(), pin = $("#inPin").value.trim();
-  $("#err").style.display = "none";
-  if(!googleEmail){ showErr("先にGoogleで本人確認をしてください"); return; }
-  if(!id || !pin){ showErr("会員番号とパスコードを入力してください"); return; }
-  $("#loginBtn").disabled = true; $("#loginBtn").textContent = "確認中…";
-  admin = {id, pin, email:googleEmail};
-  const ok = await load(true);
-  if(ok){ $("#loginView").style.display="none"; $("#appView").style.display="block"; }
-  else admin = null;
-  $("#loginBtn").disabled = false; $("#loginBtn").textContent = "ログイン";
-}
+  admin = { id:m.id, pin:m.pin, email:m.email || "" };
+  load(false);
+})();
 
 async function load(isLogin){
   try{
-    const url = `${GAS_URL}?action=adminList&id=${encodeURIComponent(admin.id)}&pin=${encodeURIComponent(admin.pin)}&email=${encodeURIComponent(admin.email)}`;
+    const url = `${GAS_URL}?action=creaMap&id=${encodeURIComponent(admin.id)}&pin=${encodeURIComponent(admin.pin)}&dummy=${dummyMode?1:0}`;
     const res = await fetch(url);
     const j = await res.json();
-    if(j.ok === false || j.listDenied){
-      const msg = j.listDenied ? "この画面はアドバンス以上の方がご覧になれます" :
-        ({email:"登録されているGoogleアカウントと違います", pin:"パスコードが違います",
-          noperm:"この会員番号には権限がありません", nomember:"会員番号が見つかりません"}[j.error] || "読み込めませんでした");
-      if(isLogin) showErr(msg); else toast(msg);
+    if(j.ok === false){
+      const msg = {pin:"パスコードが違います",
+                   noperm:"クリエイターズ以上の方がご覧になれます",
+                   nomember:"会員番号が見つかりません"}[j.error] || "読み込めませんでした";
+      toast(msg);
+      if(j.error === "noperm" || j.error === "pin"){
+        document.getElementById("appView").style.display = "none";
+        document.getElementById("needLogin").style.display = "flex";
+      }
       return false;
     }
-    // クリエ以上だけを対象にする
-    members = (j.members||[]).filter(m => m.crie === true || String(m.role||"") !== "");
+    members = j.members || [];
     buildIndex();
-    $("#meLine").textContent = (j.adminName||"") + "さん｜" + (j.isFull ? "全体" : "担当系列");
+    $("#meLine").textContent = (j.viewerName||"") + "さん｜クリエイターズ全体図";
+
+    // ダミーボタンの表示
+    const bd = document.getElementById("btnDummy");
+    if(bd) bd.style.display = j.canDummy ? "inline-block" : "none";
+    // サーバー側で拒否されたら表示を戻します
+    if(dummyMode && j.dummy !== true){
+      dummyMode = false;
+      document.body.classList.remove("dummy-mode");
+      if(bd){ bd.classList.remove("dummyOn"); bd.textContent = "🧪 テストモード"; }
+    }
     buildRootSelect();
     render();
     return true;
@@ -493,6 +476,78 @@ function toggleTree(btn){
   if(!kids) return;
   const opened = kids.classList.toggle("open");
   btn.textContent = opened ? "−" : "+";
+}
+
+/* テストモードを切り替える */
+async function toggleDummy(){
+  dummyMode = !dummyMode;
+  document.body.classList.toggle("dummy-mode", dummyMode);
+  const bd = document.getElementById("btnDummy");
+  if(bd){ bd.classList.toggle("dummyOn", dummyMode); bd.textContent = dummyMode ? "🧪 テスト中" : "🧪 テストモード"; }
+  if(!dummyMode){ toast("本番データに戻しました"); changeRoot(); await load(false); return; }
+
+  toast("テストモードに切り替えました🧪");
+  crumbs = []; rootId = null;
+  await load(false);
+  if(dummyMode && members.length === 0){
+    if(confirm("仮データがまだありません。\n\n今すぐ作りますか?")) makeDummy();
+  }
+}
+
+/* 仮データを作る */
+async function makeDummy(){
+  const ans = prompt("何名分つくりますか?(10〜300)\n\n" +
+    "内訳の目安\n" +
+    "・チーム代表 1名\n・系列代表 約1%\n・アドバンス 約2%\n" +
+    "・クリエイターズ 約6%\n・サポーター 約10%\n・メンバー 残り\n\n" +
+    "※マップにはクリエイターズ以上が表示されます", "100");
+  if(ans === null) return;
+  const n = parseInt(String(ans).replace(/[^0-9]/g,""), 10) || 50;
+
+  toast("作成しています…(少しお待ちください)");
+  try{
+    const body = new URLSearchParams({ action:"makeDummy", id:admin.id, pin:admin.pin, count:String(n) });
+    const res = await fetch(GAS_URL, {method:"POST", body});
+    const j = await res.json();
+    if(j.ok === false){
+      toast({noperm:"この機能をお使いいただける権限がありません", pin:"パスコードが違います"}[j.error] || "作成できませんでした");
+      return;
+    }
+    alert("できました🧪\n\n" + j.count + "名分を作りました。\n" + (j.detail||""));
+    if(!dummyMode){
+      dummyMode = true;
+      document.body.classList.add("dummy-mode");
+      const bd = document.getElementById("btnDummy");
+      if(bd){ bd.classList.add("dummyOn"); bd.textContent = "🧪 テスト中"; }
+    }
+    crumbs = []; rootId = null;
+    load(false);
+  }catch(e){ toast("通信できませんでした"); }
+}
+
+/* 仮データを消す */
+async function clearDummy(){
+  if(!confirm("仮データをすべて消します。\n(本番データには影響しません)\n\nよろしいですか?")) return;
+  try{
+    const body = new URLSearchParams({ action:"clearDummy", id:admin.id, pin:admin.pin });
+    const res = await fetch(GAS_URL, {method:"POST", body});
+    const j = await res.json();
+    if(j.ok === false){ toast("削除できませんでした"); return; }
+    toast("仮データを消しました");
+    dummyMode = false;
+    document.body.classList.remove("dummy-mode");
+    const bd = document.getElementById("btnDummy");
+    if(bd){ bd.classList.remove("dummyOn"); bd.textContent = "🧪 テストモード"; }
+    crumbs = []; rootId = null;
+    load(false);
+  }catch(e){ toast("通信できませんでした"); }
+}
+
+function backToPortal(){
+  let m = null;
+  try{ m = JSON.parse(localStorage.getItem("skyarc_member")||"null"); }catch(e){}
+  if(!m || !m.id){ location.href = "./index.html"; return; }
+  location.href = (m.crie === true) ? "./portal-creators.html" : "./portal-supporter.html";
 }
 
 function toast(msg){

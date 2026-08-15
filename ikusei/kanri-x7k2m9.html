@@ -58,7 +58,7 @@
   .head .tools{display:flex;gap:8px;align-items:center;}
   .head button{background:rgba(255,255,255,.16);color:#fff;font-size:12px;border-radius:999px;padding:7px 14px;font-weight:700;}
 
-  /* ダミーモード(デバッグ表示) */
+  /* テストモード(仮データ表示) */
   .head button#btnDummy.dummyOn{background:#F5C452;color:#5C4200;}
   body.dummy-mode{box-shadow:inset 0 0 0 4px #F5C452;}
   body.dummy-mode .head{background:#6B5A2E;}
@@ -253,7 +253,7 @@
     <p style="text-align:center;margin-top:16px;">
       <a href="./index.html" style="color:#8B889E;font-size:12px;">‹ 育成プログラムにもどる</a>
     </p>
-    <div class="verTag">v1.44 (2026/08/15)</div>
+    <div class="verTag">v1.50 (2026/08/15)</div>
   </div>
 </div>
 
@@ -268,7 +268,7 @@
       <div class="tools">
         <input class="search" id="search" placeholder="名前・番号で検索" oninput="render()">
         <button class="btn-add" id="btnAdd" onclick="openMember(null)" style="display:none;">＋ 会員を追加</button>
-        <button id="btnDummy" onclick="toggleDummy()" style="display:none;">🧪 ダミー</button>
+        <button id="btnDummy" onclick="toggleDummy()" style="display:none;">🧪 テストモード</button>
         <button id="btnBackPortal" onclick="backToPortal()">‹ ポータルへ</button>
         <button onclick="location.href='./creamap-x7k2m9.html'">🗺 クリエマップ</button>
         <button onclick="load()">🔄 更新</button>
@@ -277,7 +277,12 @@
     </div>
   </div>
 
-  <div class="dummy-banner">🧪 ダミーデータを表示しています(テスト用・本番データではありません)</div>
+  <div class="dummy-banner">
+    🧪 テストモードです(仮のデータを表示しています・本番データではありません)
+    <span id="dummyBetaNote" style="display:none;font-weight:400;">／ベータ期間中の機能です</span>
+    <button onclick="makeDummy()" style="background:#F0B429;color:#fff;border:none;border-radius:999px;padding:4px 12px;font-size:11px;font-weight:700;margin-left:8px;cursor:pointer;">仮データを作り直す</button>
+    <button onclick="clearDummy()" style="background:#E8788A;color:#fff;border:none;border-radius:999px;padding:4px 12px;font-size:11px;font-weight:700;margin-left:4px;cursor:pointer;">仮データを消す</button>
+  </div>
 
   <div class="bar"><div class="wrap" id="scopeLine"></div></div>
 
@@ -326,13 +331,14 @@
         ・アドバンス:担当系列の閲覧、クリエの付与<br>
         ・クリエイターズ(役職なし):一覧は見られません(会員番号+系列で呼び出して、サポーター認定と①の丸つけ)<br>
         ※ 丸つけは系列に関係なく全会員が対象です<br>
+        ※ クリエマップは、クリエイターズ以上なら全体をご覧いただけます<br>
         <br>
         <b>会員の登録・編集</b>(管理者/チーム代表のみ)<br>
         ・右上「＋会員を追加」… 新しい会員を登録(代表陣の事前登録などに)<br>
         ・各行の「編集」… 名前・系列・パスコード・役職・担当系列の変更<br>
         ・名前をクリック → 詳細画面で先生の丸と本人チェックを修正できます
       </div>
-      <div class="verTag" style="margin-top:16px;">v1.44 (2026/08/15)</div>
+      <div class="verTag" style="margin-top:16px;">v1.50 (2026/08/15)</div>
     </div>
   </main>
 </div>
@@ -528,7 +534,7 @@ const KEIRETSU = [
 const $ = (s)=>document.querySelector(s);
 const PIN_RESET_URL = GAS_URL;
 let admin = null;       // {id,pin,email}
-let dummyMode = false;  // ダミーデータ表示(管理者のみ)
+let dummyMode = false;  // テストモード(仮データ表示)
 let googleEmail = "";
 
 
@@ -631,14 +637,68 @@ async function login(){
 }
 
 /* ログアウトせずにポータルへ戻る(役職で行き先を判定) */
-/* ダミーデータの表示を切り替える(管理者のみ) */
-function toggleDummy(){
+/* テストモードを切り替える(管理者のみ) */
+async function toggleDummy(){
   dummyMode = !dummyMode;
   document.body.classList.toggle("dummy-mode", dummyMode);
   document.getElementById("btnDummy").classList.toggle("dummyOn", dummyMode);
-  document.getElementById("btnDummy").textContent = dummyMode ? "🧪 ダミー中" : "🧪 ダミー";
-  toast(dummyMode ? "ダミーデータに切り替えました🧪" : "本番データに戻しました");
-  load();
+  document.getElementById("btnDummy").textContent = dummyMode ? "🧪 テスト中" : "🧪 テストモード";
+  if(!dummyMode){ toast("本番データに戻しました"); load(); return; }
+
+  toast("テストモードに切り替えました🧪");
+  await load();
+  // データがまだ無ければ、その場で作れるようにご案内します
+  if(dummyMode && data && (!data.members || data.members.length === 0)){
+    if(confirm("仮データがまだありません。\n\n今すぐ作りますか?")) makeDummy();
+  }
+}
+
+/* 仮データを作る(管理者のみ) */
+async function makeDummy(){
+  const ans = prompt("何名分つくりますか?(10〜300)\n\n" +
+    "内訳の目安\n" +
+    "・チーム代表 1名\n・系列代表 約1%\n・アドバンス 約2%\n" +
+    "・クリエイターズ 約6%\n・サポーター 約10%\n・メンバー 残り", "50");
+  if(ans === null) return;
+  const n = parseInt(String(ans).replace(/[^0-9]/g,""), 10) || 50;
+
+  toast("作成しています…(少しお待ちください)");
+  try{
+    const body = new URLSearchParams({
+      action:"makeDummy", id:admin.id, pin:admin.pin, count:String(n)
+    });
+    const res = await fetch(GAS_URL, {method:"POST", body});
+    const j = await res.json();
+    if(j.ok === false){
+      toast({noperm:"管理者のみご利用いただけます", pin:"パスコードが違います"}[j.error] || "作成できませんでした");
+      return;
+    }
+    alert("できました🧪\n\n" + j.count + "名分を作りました。\n" + (j.detail||""));
+    if(!dummyMode){
+      dummyMode = true;
+      document.body.classList.add("dummy-mode");
+      const bd = document.getElementById("btnDummy");
+      if(bd){ bd.classList.add("dummyOn"); bd.textContent = "🧪 テスト中"; }
+    }
+    load();
+  }catch(e){ toast("通信できませんでした"); }
+}
+
+/* 仮データを消す(管理者のみ) */
+async function clearDummy(){
+  if(!confirm("仮データをすべて消します。\n(本番データには影響しません)\n\nよろしいですか?")) return;
+  try{
+    const body = new URLSearchParams({ action:"clearDummy", id:admin.id, pin:admin.pin });
+    const res = await fetch(GAS_URL, {method:"POST", body});
+    const j = await res.json();
+    if(j.ok === false){ toast("削除できませんでした"); return; }
+    toast("仮データを消しました");
+    dummyMode = false;
+    document.body.classList.remove("dummy-mode");
+    const bd = document.getElementById("btnDummy");
+    if(bd){ bd.classList.remove("dummyOn"); bd.textContent = "🧪 テストモード"; }
+    load();
+  }catch(e){ toast("通信できませんでした"); }
 }
 
 function backToPortal(){
@@ -677,11 +737,18 @@ async function load(isLogin){
       dummyMode = false;
       document.body.classList.remove("dummy-mode");
       const bd = document.getElementById("btnDummy");
-      if(bd){ bd.classList.remove("dummyOn"); bd.textContent = "🧪 ダミー"; }
-      toast("ダミーモードは管理者のみご利用いただけます");
+      if(bd){ bd.classList.remove("dummyOn"); bd.textContent = "🧪 テストモード"; }
+      toast("テストモードは管理者のみご利用いただけます");
     }
     const bd2 = document.getElementById("btnDummy");
-    if(bd2) bd2.style.display = j.isAdmin ? "inline-block" : "none";
+    if(bd2){
+      bd2.style.display = j.canDummy ? "inline-block" : "none";
+      bd2.title = j.betaMode
+        ? "ベータテスト中のため、アドバンス以上の方がご利用いただけます"
+        : "管理者専用の機能です";
+    }
+    const bn = document.getElementById("dummyBetaNote");
+    if(bn) bn.style.display = (j.betaMode && !j.isAdmin) ? "inline" : "none";
 
     // クリエイターズ(役職なし)は一覧を見られないので、検索画面に切り替え
     if(j.listDenied){
