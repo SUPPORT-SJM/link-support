@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>学びのポータルサイト|クリエイターズ育成プログラム</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" sizes="64x64" href="../images/gcon-icon-64.png">
+<link rel="apple-touch-icon" href="../images/gcon-icon-180.png">
+<meta name="theme-color" content="#6E5FB5">
+<style>
+  :root{
+    --green-deep:#6E5FB5; --green-leaf:#4FB08C; --green-mist:#EDEAF9;
+    --blue:#5E8FD8; --blue-mist:#E9F1FC;
+    --purple:#9E7CD4; --purple-mist:#EEE9F8;
+    --paper:#FBF8FE; --ink:#22322A;
+    --amber:#F5C452; --amber-soft:#FDF3DC;
+    --white:#FFFFFF; --radius:20px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:"Zen Kaku Gothic New",sans-serif;background:var(--paper);color:var(--ink);line-height:1.8;font-size:15.5px;}
+  .wrap{max-width:560px;margin:0 auto;padding:0 20px;}
+
+  /* ===== hero ===== */
+  .hero{
+    background:linear-gradient(120deg,
+      #F49AC1 0%, #F5A97A 16%, #F5D06A 32%,
+      #8FD9A8 50%, #6FC7D9 66%, #7BA3E8 82%, #A88BE0 100%);
+    background-size:300% 300%;
+    animation:rainbowFlow 14s ease infinite;
+    color:var(--white);padding:46px 0 42px;text-align:center;
+    position:relative;overflow:hidden;
+  }
+  @keyframes rainbowFlow{
+    0%{background-position:0% 50%;}
+    50%{background-position:100% 50%;}
+    100%{background-position:0% 50%;}
+  }
+  @media (prefers-reduced-motion:reduce){ .hero{animation:none;} }
+  .hero::after{
+    content:"";position:absolute;inset:0;
+    background:radial-gradient(circle at 50% 0%, rgba(255,255,255,.35), transparent 60%);
+    pointer-events:none;
+  }
+  .hero .wrap{position:relative;z-index:1;}
+  .hero .eyebrow{display:inline-block;font-size:11.5px;letter-spacing:.14em;background:rgba(255,255,255,.3);border-radius:999px;padding:6px 14px;margin-bottom:16px;backdrop-filter:blur(4px);font-weight:700;}
+  .hero h1{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:clamp(24px,6.6vw,32px);line-height:1.45;margin-bottom:12px;text-shadow:0 2px 12px rgba(90,60,120,.35);}
+  .hero p{font-size:14px;text-shadow:0 1px 8px rgba(90,60,120,.3);}
+  .hero .steps123{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;margin-top:10px;font-size:15px;}
+  .hero .steps123 .n{display:inline-flex;width:26px;height:26px;border-radius:50%;align-items:center;justify-content:center;font-size:14px;margin:0 2px;vertical-align:-6px;}
+  .n1{background:#5BB98C;} .n2{background:#5E8FD8;} .n3{background:#B87BD4;}
+  .hero .steps123{text-shadow:0 1px 8px rgba(90,60,120,.3);}
+  .hero .steps123 .n{box-shadow:0 2px 8px rgba(0,0,0,.18);}
+
+  /* ===== who ===== */
+  .who{background:var(--white);padding:26px 0;}
+  .who h2{
+    font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:17px;
+    margin-bottom:12px;text-align:center;
+    background:linear-gradient(90deg,#E88BB4,#EFA07A,#5BB98C,#5E8FD8,#A587DC);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .who .chk{display:flex;gap:10px;align-items:flex-start;margin-bottom:8px;font-size:14px;}
+  .who .chk .c{color:var(--green-leaf);font-weight:900;flex-shrink:0;}
+
+  /* ===== tiles ===== */
+  section.tiles{padding:34px 0 10px;}
+  .sec-label{
+    font-family:"Zen Maru Gothic",sans-serif;font-weight:900;
+    font-size:clamp(19px,5.4vw,23px);text-align:center;margin-bottom:6px;
+    background:linear-gradient(90deg,#5BB98C,#5E8FD8,#B87BD4);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .sec-note{font-size:13px;color:#5A6B60;text-align:center;margin-bottom:22px;}
+  .tile{
+    background:var(--white);border-radius:var(--radius);
+    padding:22px 20px;box-shadow:0 3px 14px rgba(110,95,181,.10);
+    border-top:6px solid transparent;
+    background-image:linear-gradient(#fff,#fff),
+      linear-gradient(90deg,#5BB98C,#7FCF9C,#6BC0D4);
+    background-origin:border-box;background-clip:padding-box,border-box;
+  }
+  .tile.t2{background-image:linear-gradient(#fff,#fff),linear-gradient(90deg,#6BC0D4,#7B9FE0,#5E8FD8);}
+  .tile.t3{background-image:linear-gradient(#fff,#fff),linear-gradient(90deg,#A587DC,#C98BD4,#E88BB4);}
+  .tile .head{display:flex;gap:12px;align-items:center;margin-bottom:8px;}
+  .tile .num{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;color:var(--white);width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;background:var(--green-leaf);}
+  .tile.t2 .num{background:var(--blue);}
+  .tile.t3 .num{background:#B87BD4;}
+  .tile h3{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:18px;color:var(--green-deep);line-height:1.45;}
+  .tile.t2 h3{color:var(--blue);}
+  .tile.t3 h3{color:#9E63C4;}
+  .tile .em{font-size:38px;text-align:center;margin:8px 0 4px;}
+  .tile p{font-size:13.5px;color:#4A5A50;}
+  .tile .tag{margin-top:10px;border-top:1.5px dashed #D8E4DC;padding-top:10px;font-size:13px;font-weight:700;color:var(--green-leaf);text-align:center;}
+  .tile.t2 .tag{color:var(--blue);border-color:#D3E2F2;}
+  .tile.t3 .tag{color:#9E63C4;border-color:#EBDAF5;}
+  .tile .btns{display:flex;flex-direction:column;align-items:stretch;gap:8px;margin-top:14px;}
+  .tile.t3 .btns{align-items:center;}
+  .btn{
+    display:inline-block;text-decoration:none;text-align:center;
+    font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:13.5px;
+    border-radius:999px;padding:11px 20px;color:var(--white);background:var(--green-leaf);
+  }
+  .tile.t2 .btn{background:var(--blue);}
+  .btn.sub{background:var(--green-mist);color:var(--green-deep);}
+  .tile.t2 .btn.sub{background:var(--blue-mist);color:var(--blue);}
+  .badge-prep{
+    display:inline-block;font-size:11.5px;font-weight:700;color:#8A6D00;
+    background:var(--amber-soft);border-radius:999px;padding:4px 13px;
+  }
+  .prep-note{margin-top:12px;font-size:12.5px;color:#8A8A80;background:#F6F6F4;border:1.5px dashed #D8D8D0;border-radius:12px;padding:10px 14px;text-align:center;}
+  .tile-arrow{text-align:center;font-size:22px;font-weight:900;padding:6px 0;}
+  .tile-arrow.a1{color:#7FCF9C;}
+  .tile-arrow.a2{color:#7B9FE0;}
+
+  /* ===== goal ===== */
+  .wrap.goal{margin:26px auto;display:block;}
+  .goal-card{
+    background:linear-gradient(110deg,#F49AC1,#F5C06A,#8FD9A8,#6FC7D9,#9B8BE0);
+    background-size:250% 100%;animation:rainbowFlow 12s ease infinite;
+    color:var(--white);border-radius:var(--radius);padding:20px 22px;
+    display:flex;gap:14px;align-items:center;
+  }
+  .goal-card .st{font-size:26px;flex-shrink:0;}
+  .goal-card b{font-family:"Zen Maru Gothic",sans-serif;font-size:15.5px;line-height:1.7;}
+
+  /* ===== points ===== */
+  .points{background:var(--amber-soft);border-radius:var(--radius);padding:22px 20px;margin-bottom:40px;}
+  .points h2{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;color:#8A6D00;font-size:15.5px;text-align:center;margin-bottom:14px;}
+  .points .pt{display:flex;gap:10px;align-items:flex-start;margin-bottom:10px;font-size:13.5px;color:#5C4200;}
+  .points .pt .c{color:var(--green-leaf);font-weight:900;flex-shrink:0;}
+
+
+
+  #skyNav{
+    position:sticky;top:0;z-index:30;color:#fff;
+    background:linear-gradient(90deg,#E88BB4,#EFA07A,#EFC96A,#7FCF9C,#6BC0D4,#7B9FE0,#A587DC);
+    background-size:200% 100%;animation:rainbowFlow 14s ease infinite;
+  }
+  #skyNav .sky-inner{max-width:560px;margin:0 auto;padding:9px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px;}
+  #skyNav .sky-who{opacity:.9;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+
+
+  /* ===== 昇格おめでとう演出 ===== */
+  #celebrate{
+    display:none;position:fixed;inset:0;z-index:100;
+    background:rgba(40,28,70,.72);backdrop-filter:blur(3px);
+    align-items:center;justify-content:center;padding:20px;
+  }
+  #celebrate.show{display:flex;}
+  .celeb-card{
+    background:#fff;border-radius:26px;padding:36px 26px 30px;
+    width:100%;max-width:400px;text-align:center;position:relative;
+    box-shadow:0 20px 60px rgba(0,0,0,.35);
+    animation:celebPop .55s cubic-bezier(.22,1.4,.44,1) both;
+  }
+  @keyframes celebPop{
+    0%{opacity:0;transform:scale(.7) translateY(30px);}
+    100%{opacity:1;transform:scale(1) translateY(0);}
+  }
+  .celeb-card .crackers{font-size:52px;line-height:1;margin-bottom:6px;}
+  .celeb-card .crackers span{display:inline-block;}
+  .celeb-card .crackers .l{animation:shakeL 1.1s ease-in-out infinite;}
+  .celeb-card .crackers .r{animation:shakeR 1.1s ease-in-out infinite;}
+  @keyframes shakeL{0%,100%{transform:rotate(-14deg);}50%{transform:rotate(-30deg) translateY(-5px);}}
+  @keyframes shakeR{0%,100%{transform:rotate(14deg);}50%{transform:rotate(30deg) translateY(-5px);}}
+  .celeb-card h2{
+    font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:23px;line-height:1.5;margin-bottom:6px;
+    background:linear-gradient(90deg,#E88BB4,#EFA07A,#5BB98C,#5E8FD8,#A587DC);
+    background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;
+    animation:rainbowFlow 6s ease infinite;
+  }
+  .celeb-card .who{font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:15px;color:var(--green-deep);margin-bottom:14px;}
+  .celeb-card .msg{font-size:13.5px;color:#5A6B60;line-height:1.95;margin-bottom:20px;}
+  .celeb-card .newbadge{
+    display:inline-flex;align-items:center;gap:6px;
+    background:linear-gradient(110deg,#F49AC1,#F5C06A,#8FD9A8,#6FC7D9,#9B8BE0);
+    background-size:200% auto;animation:rainbowFlow 8s ease infinite;
+    color:#fff;border-radius:999px;padding:9px 20px;
+    font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:14px;
+    margin-bottom:20px;box-shadow:0 4px 14px rgba(0,0,0,.16);
+  }
+  .celeb-btn{
+    width:100%;padding:15px;border-radius:15px;
+    background:var(--green-deep);color:#fff;
+    font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:15.5px;
+  }
+  /* 紙吹雪 */
+  .confetti{position:fixed;inset:0;pointer-events:none;z-index:101;overflow:hidden;}
+  .confetti i{
+    position:absolute;top:-14px;width:9px;height:14px;opacity:.95;
+    animation:fall linear forwards;
+  }
+  @keyframes fall{
+    0%{transform:translateY(-20px) rotate(0deg);opacity:1;}
+    100%{transform:translateY(105vh) rotate(720deg);opacity:.9;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .celeb-card,.celeb-card h2,.celeb-card .crackers span,.confetti i{animation:none !important;}
+  }
+  .my-badges{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:16px;}
+  .my-badge{
+    display:inline-flex;align-items:center;gap:5px;
+    background:rgba(255,255,255,.92);border-radius:999px;
+    padding:7px 15px;font-family:"Zen Maru Gothic",sans-serif;
+    font-weight:700;font-size:12.5px;color:#5C4200;
+    box-shadow:0 3px 10px rgba(0,0,0,.14);
+  }
+  .my-badge .em{font-size:15px;}
+  #skyNav .sky-badges{display:inline-flex;gap:3px;margin-right:5px;flex-shrink:0;}
+  #skyNav .sky-badge{
+    background:rgba(255,255,255,.28);border-radius:999px;
+    padding:2px 8px;font-size:11px;white-space:nowrap;
+  }
+  #skyNav a.sky-admin{
+    background:rgba(255,255,255,.22);color:#fff;text-decoration:none;
+    font-size:11.5px;font-weight:700;border-radius:999px;padding:6px 13px;
+    white-space:nowrap;flex-shrink:0;
+  }
+  #skyNav button.sky-out{background:rgba(255,255,255,.18);color:#fff;border:none;font-family:inherit;font-size:11.5px;font-weight:700;border-radius:999px;padding:6px 13px;cursor:pointer;white-space:nowrap;}
+  footer{background:var(--green-deep);color:#E6E0F8;text-align:center;padding:28px 20px 36px;font-size:12px;line-height:2;}
+  footer .f-title{font-family:"Zen Maru Gothic",sans-serif;font-weight:700;color:var(--white);font-size:13.5px;}
+
+  .verTag{
+    display:block;text-align:center;
+    font-size:9.5px;color:#B4B0C4;letter-spacing:.05em;
+    padding:6px 0 10px;font-family:monospace;
+  }
+</style>
+<link rel="stylesheet" href="../beta.css">
+</head>
+<body>
+
+<div id="skyNav"><div class="sky-inner">
+  <span class="sky-badges" id="navBadges"></span><span class="sky-who" id="navWho"></span>
+  <a class="sky-admin" id="navAdmin" href="./kanri-x7k2m9.html" style="display:none;">🔐 管理画面</a>
+  <button class="sky-out" onclick="skyLogout()">ログアウト</button>
+</div></div>
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow">✨ CREATORS ✨</span>
+    <h1>🖥 学びのポータルサイト</h1>
+    <p>クリエイターズになったあなたへ。<br>ここから、学べることが一気に広がります。</p>
+    <div class="my-badges" id="myBadges"></div>
+    <div class="steps123"><span class="n n1">1</span> → <span class="n n2">2</span> → <span class="n n3">3</span> の順で、学びを広げていく仕組みです。</div>
+  </div>
+</header>
+
+<section class="who">
+  <div class="wrap">
+    <h2>👑 クリエイターズになった方へ</h2>
+    <div class="chk"><span class="c">✔</span><span>より多くの人をサポート・導ける力をつけたい</span></div>
+    <div class="chk"><span class="c">✔</span><span>グループを導くリーダー・戦略家を目指したい</span></div>
+    <p style="font-size:13px;color:#5A6B60;margin-top:8px;">クリエイターズになると、<b>1→2→3 すべてが学べます!</b></p>
+  </div>
+</section>
+
+<section class="tiles">
+  <div class="wrap">
+
+    <div class="tile">
+      <div class="head"><span class="num">1</span><h3>サポーター育成マニュアル</h3></div>
+      <div class="em">🐣</div>
+      <p>コミュニティをサポートする基本的な考え方やスキルを身につけるプログラム。まずは「ぴよぴよ脱出クイズ」7問から。</p>
+      <div class="tag">サポート力の基礎を固める</div>
+      <div class="btns">
+        <a class="btn" href="./piyo-quiz.html">🐣 始める</a>
+      </div>
+    </div>
+
+    <div class="tile-arrow a1">▼</div>
+
+    <div class="tile t2">
+      <div class="head"><span class="num">2</span><h3>グルコンリーダー育成マニュアル</h3></div>
+      <div class="em">🌱</div>
+      <p>人を導き、場をつくる力を育てる4週間プログラム。1日30分、コーチが伴走します。</p>
+      <div class="tag">人を導き、場をつくる力を育てる</div>
+      <div class="btns">
+        <a class="btn sub" href="./gcon-roadmap.html">🗺 4週間の地図</a>
+        <a class="btn" href="./gcon-mypage.html">🌱 始める</a>
+      </div>
+    </div>
+
+    <div class="tile-arrow a2">▼</div>
+
+    <div class="tile t3">
+      <div class="head"><span class="num">3</span><h3>戦略立案マニュアル</h3></div>
+      <div class="em">📈</div>
+      <p>戦略を立て、成果を創り出す力を身につけるプログラム。グループ全体を動かす視点を学びます。</p>
+      <div class="tag">戦略を立て、成果を創り出す</div>
+      <div class="btns"><span class="badge-prep">🛠 準備中</span></div>
+      <div class="prep-note">②を修了した方から順に案内予定です。おたのしみに!</div>
+    </div>
+
+  </div>
+</section>
+
+<div class="wrap goal">
+  <div class="goal-card">
+    <span class="st">🌟</span>
+    <b>リーダー・戦略家として、コミュニティを牽引し、より大きな価値を創造!</b>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="points">
+    <h2>💡 この仕組みのポイント 💡</h2>
+    <div class="pt"><span class="c">✔</span><span>やる気のある人が、無理なくステップアップできる</span></div>
+    <div class="pt"><span class="c">✔</span><span>段階的に学ぶことで、確実に成長できる</span></div>
+    <div class="pt"><span class="c">✔</span><span>それぞれの立場で活躍し、コミュニティ全体が発展していく</span></div>
+  </div>
+</div>
+
+<footer>
+  <div class="f-title">学びのポータルサイト(クリエイターズ用)</div>
+  交通整備課|クリエイターズ育成部門
+  <div class="verTag" style="margin-top:8px;color:rgba(255,255,255,.4);">v1.37 (2026/08/15)</div>
+</footer>
+
+
+
+<script>
+/* ===== 共通ナビ:ログイン確認・ログアウト ===== */
+(function(){
+  let m = null;
+  try{ m = JSON.parse(localStorage.getItem("skyarc_member")||"null"); }catch(e){}
+  if(!m || !m.id){ location.replace("./index.html"); return; }
+  const who = document.getElementById("navWho");
+  if(who) who.textContent = (m.name ? m.name+"さん" : "会員番号 "+m.id) + (m.keiretsu ? "｜"+m.keiretsu : "");
+  // クリエイターズ以上なら管理画面へのリンクを出す
+  const adminLink = document.getElementById("navAdmin");
+  if(adminLink && (m.crie === true || String(m.role||"") !== "")) adminLink.style.display = "inline-block";
+
+  // 修了バッジを表示
+  const bw = document.getElementById("navBadges");
+  if(bw && Array.isArray(m.badges) && m.badges.length){
+    bw.innerHTML = m.badges.map(b=>`<span class="sky-badge" title="${b.label}">${b.mark} ${b.label}</span>`).join("");
+  }
+
+  // 取得したバッジを大きく表示
+  const big = document.getElementById("myBadges");
+  if(big && Array.isArray(m.badges) && m.badges.length){
+    big.innerHTML = m.badges.map(b=>
+      `<span class="my-badge"><span class="em">${b.mark}</span>${b.label}</span>`).join("");
+  }
+})();
+
+/* ブラウザの「戻る」で表示されたときも、ログイン状態を確認し直す */
+window.addEventListener("pageshow", function(e){
+  if(!e.persisted) return;
+  let mm = null;
+  try{ mm = JSON.parse(localStorage.getItem("skyarc_member")||"null"); }catch(err){}
+  if(!mm || !mm.id){ location.replace("./index.html"); return; }
+  const who = document.getElementById("navWho");
+  if(who) who.textContent = (mm.name ? mm.name+"さん" : "会員番号 "+mm.id) + (mm.keiretsu ? "｜"+mm.keiretsu : "");
+  const adminLink = document.getElementById("navAdmin");
+  if(adminLink && (mm.crie === true || String(mm.role||"") !== "")) adminLink.style.display = "inline-block";
+
+  // 修了バッジを表示
+  const bw = document.getElementById("navBadges");
+  if(bw && Array.isArray(mm.badges) && mm.badges.length){
+    bw.innerHTML = mm.badges.map(b=>`<span class="sky-badge" title="${b.label}">${b.mark} ${b.label}</span>`).join("");
+  }
+});
+
+function skyLogout(){
+  if(!confirm("ログアウトしますか?\n(この端末に残った学習の記録も消えます)")) return;
+  clearSkyLocal();
+  location.href = "./index.html";
+}
+/* この端末に残っているログイン情報・進捗キャッシュを全部消す */
+function clearSkyLocal(){
+  try{
+    const keys = [];
+    for(let i=0;i<localStorage.length;i++){
+      const k = localStorage.key(i);
+      if(k && (k.indexOf("skyarc_")===0 || k.indexOf("piyo_")===0 || k.indexOf("gcon_")===0)) keys.push(k);
+    }
+    keys.forEach(k=>localStorage.removeItem(k));
+  }catch(e){}
+}
+</script>
+
+<div id="celebrate">
+  <div class="celeb-card">
+    <div class="crackers"><span class="l">🎉</span><span class="r">🎊</span></div>
+    <h2 id="celebTitle"></h2>
+    <p class="who" id="celebName"></p>
+    <div class="newbadge" id="celebBadge"></div>
+    <p class="msg" id="celebMsg"></p>
+    <button class="celeb-btn" onclick="closeCelebration()" id="celebBtn">ありがとう!はじめる ▶</button>
+  </div>
+</div>
+<div class="confetti" id="confetti" style="display:none;"></div>
+
+<script>
+/* ================================================================
+   昇格おめでとう演出(初回のみ)
+   ----------------------------------------------------------------
+   新しいお祝いを足すときは、CELEB にひとつ追加してください。
+   GAS側の CELEB_DEFS と key を合わせます。
+================================================================ */
+const CELEB = {
+  crie: {
+    title: "クリエイターズ<br>昇格おめでとうございます!",
+    badge: "🌈 CREATORS",
+    msg: "ここから、学べることが一気に広がります。<br>" +
+         "②グルコンリーダー育成、③戦略立案マニュアル…<br>" +
+         "どんどん進んでいきましょう🌱<br><br>" +
+         "これからのご活躍を、心から応援しています!",
+    btn: "ありがとう!はじめる ▶"
+  },
+  adv: {
+    title: "アドバンス<br>昇格おめでとうございます!",
+    badge: "⭐ ADVANCE",
+    msg: "100名を超えるチームを育てられました。<br>" +
+         "本当にすばらしいことです✨<br><br>" +
+         "これからは、あなたが誰かを引き上げる番。<br>" +
+         "管理画面から仲間の歩みを見守れます🌱",
+    btn: "ありがとう!つづける ▶"
+  },
+  keirep: {
+    title: "系列代表<br>就任おめでとうございます!",
+    badge: "👑 系列代表",
+    msg: "ひとつの系列を担う立場になられました。<br>" +
+         "ここまで築いてこられたご縁の積み重ねに、<br>" +
+         "心から敬意を表します✨<br><br>" +
+         "系列のみなさんの成長を、一緒に支えていきましょう🌱",
+    btn: "ありがとう!つづける ▶"
+  },
+  team: {
+    title: "チーム代表<br>就任おめでとうございます!",
+    badge: "🏆 チーム代表",
+    msg: "スカイアーク全体を導く立場になられました。<br>" +
+         "これまでの歩みが、たくさんの人の道をつくっています✨<br><br>" +
+         "これからも、ともに前へ進んでいきましょう🚀",
+    btn: "ありがとう!つづける ▶"
+  }
+};
+
+(function(){
+  let m = null;
+  try{ m = JSON.parse(localStorage.getItem("skyarc_member")||"null"); }catch(e){}
+  if(!m || !m.id) return;
+  const kind = m.celebrate;
+  if(!kind || !CELEB[kind]) return;
+
+  const c = CELEB[kind];
+  document.getElementById("celebTitle").innerHTML = c.title;
+  document.getElementById("celebBadge").textContent = c.badge;
+  document.getElementById("celebMsg").innerHTML = c.msg;
+  document.getElementById("celebBtn").textContent = c.btn;
+  document.getElementById("celebName").textContent = m.name ? m.name + "さん" : "";
+  document.getElementById("celebrate").dataset.kind = kind;
+  document.getElementById("celebrate").classList.add("show");
+  dropConfetti();
+})();
+
+function dropConfetti(){
+  const box = document.getElementById("confetti");
+  if(!box) return;
+  if(window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  box.style.display = "block";
+  const colors = ["#F49AC1","#F5A97A","#F5D06A","#8FD9A8","#6FC7D9","#7BA3E8","#A88BE0"];
+  for(let i=0;i<70;i++){
+    const p = document.createElement("i");
+    p.style.left = Math.random()*100 + "%";
+    p.style.background = colors[Math.floor(Math.random()*colors.length)];
+    p.style.animationDuration = (2.2 + Math.random()*1.8) + "s";
+    p.style.animationDelay = (Math.random()*1.2) + "s";
+    p.style.width = (6 + Math.random()*6) + "px";
+    p.style.height = (10 + Math.random()*10) + "px";
+    p.style.borderRadius = Math.random() > .5 ? "2px" : "50%";
+    box.appendChild(p);
+  }
+  setTimeout(()=>{ box.style.display = "none"; box.innerHTML = ""; }, 6000);
+}
+
+async function closeCelebration(){
+  document.getElementById("celebrate").classList.remove("show");
+  const box = document.getElementById("confetti");
+  if(box){ box.style.display = "none"; box.innerHTML = ""; }
+  // 「見ました」を記録して、次回から出ないようにする
+  let m = null;
+  try{ m = JSON.parse(localStorage.getItem("skyarc_member")||"null"); }catch(e){}
+  if(!m || !m.id) return;
+  const kind = document.getElementById("celebrate").dataset.kind || "crie";
+  m.celebrate = "";
+  localStorage.setItem("skyarc_member", JSON.stringify(m));
+  try{
+    await fetch(GAS_URL_CELEB, {method:"POST", body:new URLSearchParams({
+      action:"seenCelebration", id:m.id, pin:m.pin, kind:kind
+    })});
+  }catch(e){}
+}
+const GAS_URL_CELEB = "https://script.google.com/macros/s/AKfycbzY2l20zwGULjnKRUqvRpbH79fPkl5e-sWNVoXEIgBrDpqhjDAx2zLvJuqO3sZxAfHj/exec";
+</script>
+
+</body>
+</html>

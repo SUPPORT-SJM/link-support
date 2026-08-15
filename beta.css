@@ -1,0 +1,19 @@
+/* ================================================================
+   ベータテスト中の背景
+   ----------------------------------------------------------------
+   ベータテストが終わったら、各ページの
+   <link rel="stylesheet" href="beta.css"> の1行を消すだけで解除できます。
+   (育成フォルダ内のページは href="../beta.css" になっています)
+================================================================ */
+body{
+  background-image:url("images/beta-bg.png") !important;
+  background-repeat:repeat !important;
+  background-size:340px auto !important;
+  background-attachment:fixed !important;
+  background-position:center top !important;
+}
+
+/* 文字の読みやすさを保つため、カード類の背景は不透明のままにします */
+@media (max-width:480px){
+  body{ background-size:260px auto !important; }
+}
