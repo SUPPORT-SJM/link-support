@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>活用の1stステップ | LINK 初期サポート</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Noto Sans JP',sans-serif;background:#FFFBF7;padding:16px 14px 48px}
+  .wrap{max-width:390px;margin:0 auto}
+  button,a{font-family:inherit}
+
+  /* ベータ表記 */
+  .beta-bar{background:#FFF3D6;border:1.5px solid #F0C86A;border-radius:10px;padding:9px 12px;margin-bottom:14px;font-size:11.5px;color:#7A5A00;line-height:1.75}
+  .beta-bar b{display:inline-block;background:#F0B429;color:#fff;border-radius:20px;padding:1px 9px;font-size:10.5px;margin-right:5px}
+  .beta-foot{margin-top:20px;padding:12px;background:#FFF8E1;border-radius:10px;font-size:11px;color:#8D6E63;line-height:1.8;text-align:center}
+
+  /* ログイン状態 */
+  .login-bar{border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:12px;line-height:1.7;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .login-bar.on{background:#E8F5E9;border:1.5px solid #A5D6A7;color:#2E7D32}
+  .login-bar.off{background:#F5F5F5;border:1.5px solid #DDD;color:#757575}
+  .login-bar .who{font-weight:700;flex:1}
+  .login-bar a{color:#43A047;font-weight:700;text-decoration:underline;white-space:nowrap}
+  .login-bar.off a{color:#FF7043}
+  .sync-note{font-size:10.5px;opacity:.85;width:100%}
+
+  .back{display:inline-block;color:#FF9800;font-size:13px;font-weight:700;text-decoration:none;margin-bottom:14px}
+
+  .hero{background:linear-gradient(135deg,#FFE0B2,#FFCCBC);border-radius:18px;padding:24px 18px;text-align:center;margin-bottom:18px}
+  .hero .em{font-size:38px;line-height:1}
+  .hero h1{font-size:19px;font-weight:900;color:#E65100;margin:8px 0 8px;line-height:1.5}
+  .hero p{font-size:13px;color:#8D6E63;line-height:1.9}
+
+  .progress-box{background:#fff;border-radius:14px;padding:16px;margin-bottom:18px;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+  .progress-box .row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+  .progress-box b{font-size:14px;font-weight:900;color:#E65100}
+  .progress-box .cnt{font-size:18px;font-weight:900;color:#FF9800}
+  .bar{height:10px;background:#FFE0B2;border-radius:99px;overflow:hidden}
+  .bar i{display:block;height:100%;background:linear-gradient(90deg,#FFB74D,#FF9800);border-radius:99px;width:0%;transition:width .5s ease}
+
+  .phase{font-size:13px;font-weight:900;color:#fff;background:#FFB74D;border-radius:20px;padding:5px 16px;display:inline-block;margin:22px 0 10px}
+
+  .card{background:#fff;border-radius:14px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,.05);overflow:hidden;border:2px solid transparent}
+  .card.done{border-color:#A5D6A7;background:#F8FDF8}
+  .card-head{padding:14px;display:flex;align-items:flex-start;gap:10px;cursor:pointer}
+  .card-num{background:#FFE0B2;color:#E65100;font-size:12px;font-weight:900;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+  .card.done .card-num{background:#A5D6A7;color:#fff}
+  .card-ttl{font-size:14.5px;font-weight:700;color:#5D4037;line-height:1.6;flex:1}
+  .badge{font-size:10.5px;font-weight:700;border-radius:20px;padding:2px 9px;flex-shrink:0;margin-top:3px}
+  .badge-yet{background:#EEE;color:#9E9E9E}
+  .badge-done{background:#A5D6A7;color:#fff}
+  .card-arrow{color:#BCAAA4;font-size:11px;transition:transform .25s;flex-shrink:0;margin-top:5px}
+  .card-arrow.open{transform:rotate(180deg)}
+  .card-body{display:none;padding:0 14px 14px}
+  .card-body.open{display:block}
+  .card-body p{font-size:13.5px;color:#5D4037;line-height:1.9;margin-bottom:8px}
+  .tip{background:#FFF8E1;border-radius:10px;padding:10px 12px;font-size:12.5px;color:#8D6E63;line-height:1.8;margin-bottom:10px}
+  .link-btn{display:block;background:#FFF3E0;border:1.5px solid #FFCC80;border-radius:10px;padding:11px;text-align:center;color:#E65100;font-size:13px;font-weight:700;text-decoration:none;margin-bottom:8px}
+  .done-btn{width:100%;padding:12px;border-radius:10px;font-size:13.5px;font-weight:700;border:none;cursor:pointer}
+  .done-btn-pending{background:#FFE0B2;color:#E65100}
+  .done-btn-done{background:#A5D6A7;color:#fff}
+
+  .goal{background:linear-gradient(135deg,#C8E6C9,#DCEDC8);border-radius:16px;padding:20px 18px;text-align:center;margin-top:22px}
+  .goal .em{font-size:34px;line-height:1}
+  .goal h2{font-size:16px;font-weight:900;color:#2E7D32;margin:6px 0 8px}
+  .goal p{font-size:13px;color:#558B2F;line-height:1.9;margin-bottom:14px}
+  .goal a{display:block;background:#66BB6A;color:#fff;border-radius:12px;padding:13px;font-size:14px;font-weight:700;text-decoration:none}
+  .verTag{display:block;text-align:center;font-size:9.5px;color:#C4B8B0;font-family:monospace;padding:14px 0 20px}
+</style>
+<link rel="stylesheet" href="../beta.css">
+</head>
+<body>
+<div class="wrap">
+
+<div class="beta-bar">
+  <b>BETA</b>ベータテスト中です。<br>
+  内容は精査中のため、今後変更になる場合がございます🙇
+</div>
+
+<div class="login-bar off" id="loginBar">
+  <span class="who" id="loginWho">ログインしていません</span>
+  <a href="../index.html" id="loginLink">会員情報を登録する</a>
+  <span class="sync-note" id="syncNote">※ 進捗はこの端末にだけ記録されます。機種を変えると消えてしまいます。</span>
+</div>
+
+<a href="index.html" class="back">← 初期サポートトップに戻る</a>
+
+<div class="hero">
+  <div class="em">🚀</div>
+  <h1>活用の1stステップ</h1>
+  <p>LINKの場に実際に足を運んでみましょう。<br>
+  ここを通ると、見える景色が変わります✨</p>
+</div>
+
+<div class="progress-box">
+  <div class="row">
+    <b>🚀 ステップの進み具合</b>
+    <span class="cnt"><span id="doneN">0</span> / <span id="totalN">8</span></span>
+  </div>
+  <div class="bar"><i id="progBar"></i></div>
+</div>
+
+<div id="cards"></div>
+
+<div class="goal">
+  <div class="em">🐣</div>
+  <h2>ぜんぶ終わったら</h2>
+  <p>お仲間をご紹介されたら、担当の方にお伝えください。<br>
+  サポーターとして認定されると、<br>育成プログラムが開きます🌱</p>
+  <a href="../ikusei/">🌱 育成プログラムを見てみる</a>
+</div>
+
+<div class="beta-foot">
+  🧪 このページはベータテスト中です<br>
+  内容は精査中のため、今後変更になる場合がございます。<br>
+  お気づきの点があれば、担当の方までお知らせください🙇
+</div>
+
+<div class="verTag">v1.44 (2026/08/15)</div>
+</div>
+
+<script>
+/* ================================================================
+   育成システムとの連携(ログインしていれば進捗を保存します)
+================================================================ */
+const GAS_URL = "https://script.google.com/macros/s/AKfycbzY2l20zwGULjnKRUqvRpbH79fPkl5e-sWNVoXEIgBrDpqhjDAx2zLvJuqO3sZxAfHj/exec";
+const APP_ID  = "step1";
+
+/* ================================================================
+   ステップの内容 ※項目を足すときはここに追加してください
+     id … 記録用のID(一度使ったら変えないでください)
+================================================================ */
+const STEPS = [
+  { phase:"STEP 1　まずは覗いてみる", items:[
+    { id:"S1", ttl:"ユーザーサポート会に参加した",
+      body:"はじめての方が、いちばん最初に足を運ぶ場所です。分からないことをその場で聞けます。",
+      tip:"💡 週に何度も開かれています。都合のよい回に、気軽に覗いてみてください",
+      link:{t:"📅 スケジュールを見る", u:"schedule-tips.html"} },
+    { id:"S2", ttl:"グルコン(グループコンサル)に参加した",
+      body:"少人数で、自分の状況に合わせて相談できる場です。やりたいことが整理されていきます。",
+      tip:"💡 はじめての方も歓迎です。聞いているだけでも大丈夫ですよ" },
+  ]},
+  { phase:"STEP 2　学びを深める", items:[
+    { id:"S3", ttl:"LINKセミナーに参加した",
+      body:"LINKの完全攻略MAP。全会員に必要な基盤となる5種類のセミナーです。",
+      tip:"💡 『5ピースのパズル』と思って、ぜひ揃えてみてください✨",
+      link:{t:"📖 LINKセミナーについて", u:"link-seminar.html"} },
+    { id:"S4", ttl:"チーム交流会に参加した",
+      body:"同じチームの仲間と出会える場です。ここで生まれるご縁が、後々の支えになります。",
+      tip:"💡 顔を出すだけでも大丈夫。まずは雰囲気を感じてみてください",
+      link:{t:"🎪 交流会・サポート会情報", u:"skyarc-community.html"} },
+  ]},
+  { phase:"STEP 3　つながる", items:[
+    { id:"S5", ttl:"LINK全体のオープンチャットに入った",
+      body:"全体のお知らせや、みなさんの活動が流れてきます。",
+      link:{t:"💬 入るべきオープンチャット集", u:"openchat.html"} },
+    { id:"S6", ttl:"系列のオープンチャットに入った",
+      body:"自分の系列のチャットです。いちばん身近な相談先になります。",
+      tip:"💡 招待URLが分からないときは、ご紹介くださった方にお尋ねください" },
+  ]},
+  { phase:"STEP 4　自分の場所をつくる", items:[
+    { id:"S7", ttl:"LINK-BASEに掲載した",
+      body:"自分のことを知ってもらうページです。ご縁が広がるきっかけになります。",
+      link:{t:"🏠 LINK-BASE掲載ガイド", u:"linkbase.html"} },
+    { id:"S8", ttl:"SASAEAIのマッチング設定をした",
+      body:"支え合いのマッチング設定です。できること・してほしいことを登録します。",
+      link:{t:"🤝 SASAEAI設定ガイド", u:"sasaeai.html"} },
+  ]},
+];
+
+const ALL = STEPS.flatMap(p=>p.items);
+const ITEM_IDS = ALL.map(x=>x.id).join(",");
+
+let member = null;
+let progress = {};
+let saveTimer = null;
+
+/* ---------- 画面を作る ---------- */
+(function(){
+  const root = document.getElementById("cards");
+  document.getElementById("totalN").textContent = ALL.length;
+  root.innerHTML = STEPS.map(p=>{
+    const cards = p.items.map((it,i)=>`
+      <div class="card" id="card-${it.id}">
+        <div class="card-head" onclick="toggle(this)">
+          <span class="card-num">${ALL.indexOf(it)+1}</span>
+          <span class="card-ttl">${it.ttl}</span>
+          <span class="badge badge-yet" id="badge-${it.id}">未</span>
+          <span class="card-arrow">▼</span>
+        </div>
+        <div class="card-body">
+          <p>${it.body}</p>
+          ${it.tip ? `<div class="tip">${it.tip}</div>` : ""}
+          ${it.link ? `<a class="link-btn" href="${it.link.u}">${it.link.t}</a>` : ""}
+          <button class="done-btn done-btn-pending" id="btn-${it.id}" onclick="markDone('${it.id}')">☑️ 完了したらここを押してね!</button>
+        </div>
+      </div>`).join("");
+    return `<div class="phase">${p.phase}</div>${cards}`;
+  }).join("");
+})();
+
+/* ---------- ログイン状態 ---------- */
+(function(){
+  try{ member = JSON.parse(localStorage.getItem("skyarc_member")||"null"); }catch(e){}
+  const bar = document.getElementById("loginBar");
+  const who = document.getElementById("loginWho");
+  const link = document.getElementById("loginLink");
+  const note = document.getElementById("syncNote");
+
+  if(member && member.id){
+    bar.className = "login-bar on";
+    who.textContent = (member.name ? member.name + "さん" : "会員番号 " + member.id) + " でログイン中";
+    link.textContent = "育成プログラム";
+    link.href = "../ikusei/";
+    note.textContent = "✅ 進捗は保存されます。どの端末からでも続きが見られます。";
+    loadProgress();
+  }else{
+    bar.className = "login-bar off";
+    who.textContent = "ログインしていません";
+    link.textContent = "会員情報を登録する";
+    link.href = "../index.html";
+    note.textContent = "※ 進捗はこの端末にだけ記録されます。機種を変えると消えてしまいます。";
+  }
+})();
+
+async function loadProgress(){
+  try{
+    const url = `${GAS_URL}?action=load&app=${APP_ID}&id=${encodeURIComponent(member.id)}&pin=${encodeURIComponent(member.pin)}&items=${encodeURIComponent(ITEM_IDS)}`;
+    const res = await fetch(url);
+    const j = await res.json();
+    if(j.ok && j.data){
+      try{ progress = JSON.parse(j.data) || {}; }catch(e){}
+      ALL.forEach(it=>{
+        if(progress[it.id] === true){
+          localStorage.setItem('step1_done_'+it.id,'1');
+          applyState(it.id,true);
+        }
+      });
+      update();
+    }
+  }catch(e){}
+}
+
+function saveProgress(){
+  if(!member || !member.id) return;
+  const note = document.getElementById("syncNote");
+  if(note) note.textContent = "☁️ 保存しています…";
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async ()=>{
+    try{
+      const body = new URLSearchParams({
+        action:"save", app:APP_ID, id:member.id, pin:member.pin,
+        items:ITEM_IDS, data:JSON.stringify(progress)
+      });
+      const res = await fetch(GAS_URL, {method:"POST", body});
+      const j = await res.json();
+      if(note) note.textContent = (j && j.ok)
+        ? "✅ 保存しました。どの端末からでも続きが見られます。"
+        : "📱 この端末に保存しました。";
+    }catch(e){
+      if(note) note.textContent = "📱 この端末に保存しました(電波のよい場所で自動的に同期されます)。";
+    }
+  }, 700);
+}
+
+function toggle(head){
+  head.querySelector('.card-arrow').classList.toggle('open');
+  head.nextElementSibling.classList.toggle('open');
+}
+
+function markDone(id){
+  const done = localStorage.getItem('step1_done_'+id)==='1';
+  if(done){
+    localStorage.removeItem('step1_done_'+id);
+    delete progress[id];
+    applyState(id,false);
+  }else{
+    localStorage.setItem('step1_done_'+id,'1');
+    progress[id] = true;
+    applyState(id,true);
+  }
+  update();
+  saveProgress();
+}
+
+function applyState(id,done){
+  const card=document.getElementById('card-'+id);
+  const btn=document.getElementById('btn-'+id);
+  const badge=document.getElementById('badge-'+id);
+  if(!card||!btn||!badge) return;
+  if(done){
+    card.classList.add('done');
+    btn.textContent='✅ 完了!(もう一度押すと戻せます)';
+    btn.className='done-btn done-btn-done';
+    badge.textContent='完了✓';
+    badge.className='badge badge-done';
+  }else{
+    card.classList.remove('done');
+    btn.textContent='☑️ 完了したらここを押してね!';
+    btn.className='done-btn done-btn-pending';
+    badge.textContent='未';
+    badge.className='badge badge-yet';
+  }
+}
+
+function update(){
+  const n = ALL.filter(it=>progress[it.id]).length;
+  document.getElementById("doneN").textContent = n;
+  document.getElementById("progBar").style.width = (n/ALL.length*100) + "%";
+}
+
+/* 端末に残っている記録を反映 */
+ALL.forEach(it=>{
+  if(localStorage.getItem('step1_done_'+it.id)==='1'){
+    progress[it.id] = true;
+    applyState(it.id,true);
+  }
+});
+update();
+</script>
+</body>
+</html>
