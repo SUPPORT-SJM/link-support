@@ -15,7 +15,7 @@
     --deep:#3B3550; --leaf:#4FB08C; --mist:#EDEAF9;
     --paper:#F7F6FA; --ink:#22222A;
     --amber:#F5C452; --red:#E8788A; --blue:#5E8FD8; --purple:#9E7CD4;
-    --white:#fff; --line:#E2E0EA;
+    --white:#fff; --line:#E2E0EA; --linecolor:#A99FD4;
   }
   *{margin:0;padding:0;box-sizing:border-box;}
   body{font-family:"Zen Kaku Gothic New",sans-serif;background:var(--paper);color:var(--ink);line-height:1.7;font-size:14.5px;}
@@ -78,8 +78,15 @@
   /* ===== 組織図(横に広がる) ===== */
   #chartArea{overflow-x:auto;padding-bottom:20px;}
   .org{display:flex;flex-direction:column;align-items:center;min-width:max-content;padding:10px 20px;}
-  .org-row{display:flex;justify-content:center;align-items:flex-start;gap:14px;}
-  .org-node{display:flex;flex-direction:column;align-items:center;}
+
+  /* ===== つながりの線 ===== */
+  .org-row{display:flex;justify-content:center;align-items:flex-start;gap:20px;position:relative;margin-top:30px;}
+  .org-node{display:flex;flex-direction:column;align-items:center;position:relative;}
+
+  /* 親から各子へ、1本ずつ線を引きます(子同士は繋ぎません) */
+  .lines{position:absolute;left:0;top:-30px;width:100%;height:30px;pointer-events:none;overflow:visible;z-index:0;}
+  .lines line{stroke:var(--linecolor);stroke-width:4;stroke-linecap:round;}
+  .card{position:relative;z-index:1;}
   .card{
     background:#fff;border-radius:12px;padding:9px 13px;min-width:118px;max-width:150px;
     box-shadow:0 2px 7px rgba(0,0,0,.08);border-top:4px solid var(--leaf);
@@ -99,8 +106,7 @@
     display:inline-block;margin-top:5px;background:var(--mist);color:var(--deep);
     font-size:10px;font-weight:700;border-radius:999px;padding:2px 8px;
   }
-  .connector{width:2px;height:16px;background:var(--line);}
-  .hbar{height:2px;background:var(--line);}
+  .connector{width:4px;height:8px;background:var(--linecolor);border-radius:2px;}
   .more{
     background:var(--mist);color:var(--deep);border-radius:10px;padding:9px 13px;
     font-size:11.5px;font-weight:700;cursor:pointer;min-width:100px;text-align:center;
@@ -168,7 +174,7 @@
     <p style="text-align:center;margin-top:14px;">
       <a href="./kanri-x7k2m9.html" style="color:#8B889E;font-size:11.5px;">‹ 管理画面にもどる</a>
     </p>
-    <div class="verTag">v1.50 (2026/08/15)</div>
+    <div class="verTag">v1.52 (2026/08/15)</div>
   </div>
 </div>
 
@@ -221,7 +227,7 @@
         ①🎓=ぴよぴよ卒業 ／ ②の数字=グルコンリーダー育成の先生の丸<br>
         カードをクリックすると、その方から下だけを表示します。会員名簿の「アップの会員番号」欄でつながりを設定してください。
       </div>
-      <div class="verTag">v1.50 (2026/08/15)</div>
+      <div class="verTag">v1.52 (2026/08/15)</div>
     </div>
   </main>
 </div>
@@ -414,6 +420,34 @@ function renderChart(){
     return;
   }
   area.innerHTML = '<div class="org">' + list.map(m=>nodeHtml(m,1)).join("") + '</div>';
+  // 描画が終わってから線を引きます
+  requestAnimationFrame(()=>{ drawLines(); });
+}
+
+/* 親カードの下端から、各子カードの上端へ線を引きます */
+function drawLines(){
+  document.querySelectorAll(".org-row").forEach(row=>{
+    const svg = row.querySelector(":scope > .lines");
+    if(!svg) return;
+    const parentNode = row.parentElement;          // .org-node
+    const parentCard = parentNode.querySelector(":scope > .card");
+    if(!parentCard) return;
+
+    const rowRect = row.getBoundingClientRect();
+    const pRect = parentCard.getBoundingClientRect();
+    const startX = pRect.left + pRect.width/2 - rowRect.left;
+    const startY = 0;   // svgの上端 = 親カードの下端
+
+    const kids = Array.from(row.children).filter(el=>el !== svg);
+    svg.setAttribute("width", rowRect.width);
+    svg.setAttribute("height", 30);
+    svg.innerHTML = kids.map(k=>{
+      const target = k.querySelector(":scope > .card") || k;
+      const kRect = target.getBoundingClientRect();
+      const x2 = kRect.left + kRect.width/2 - rowRect.left;
+      return `<line x1="${startX}" y1="${startY}" x2="${x2}" y2="30"></line>`;
+    }).join("");
+  });
 }
 
 function nodeHtml(m, depth){
@@ -431,13 +465,13 @@ function nodeHtml(m, depth){
 
   if(depth >= maxDepth){
     return `<div class="org-node">${card}
-      <div class="connector"></div>
-      <div class="more" onclick="drill('${id}')">▼ この先 ${total} 名<br>クリックで表示</div>
+      <div class="org-row"><svg class="lines"></svg>
+        <div class="more" onclick="drill('${id}')">▼ この先 ${total} 名<br>クリックで表示</div>
+      </div>
     </div>`;
   }
   return `<div class="org-node">${card}
-    <div class="connector"></div>
-    <div class="org-row">${kids.map(k=>nodeHtml(k, depth+1)).join("")}</div>
+    <div class="org-row"><svg class="lines"></svg>${kids.map(k=>nodeHtml(k, depth+1)).join("")}</div>
   </div>`;
 }
 
@@ -557,6 +591,11 @@ function toast(msg){
 }
 ["inId","inPin"].forEach(k=>{
   document.getElementById(k).addEventListener("keydown", e=>{ if(e.key==="Enter") login(); });
+});
+let resizeTimer = null;
+window.addEventListener("resize", ()=>{
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(()=>{ if(view === "chart") drawLines(); }, 200);
 });
 window.addEventListener("pageshow", function(e){ if(e.persisted) location.reload(); });
 </script>
