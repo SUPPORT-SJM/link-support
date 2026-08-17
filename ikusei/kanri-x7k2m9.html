@@ -58,6 +58,33 @@
   .head .tools{display:flex;gap:8px;align-items:center;}
   .head button{background:rgba(255,255,255,.16);color:#fff;font-size:12px;border-radius:999px;padding:7px 14px;font-weight:700;}
 
+  /* アクセス解析 */
+  #statsModal{display:none;position:fixed;inset:0;z-index:78;background:rgba(30,26,50,.55);align-items:center;justify-content:center;padding:16px;}
+  #statsModal.show{display:flex;}
+  .st-card{background:#fff;border-radius:18px;width:100%;max-width:620px;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 14px 50px rgba(0,0,0,.3);}
+  .st-head{padding:20px 22px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;}
+  .st-head h3{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;color:var(--deep);font-size:17px;}
+  .st-head select{padding:6px 11px;border-radius:999px;border:1.5px solid var(--line);font-size:12px;font-family:inherit;}
+  .st-body{padding:16px 22px;overflow-y:auto;flex:1;}
+  .st-sum{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;}
+  .st-sum div{flex:1;min-width:110px;background:var(--paper);border-radius:12px;padding:12px;text-align:center;}
+  .st-sum .n{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:22px;color:var(--deep);line-height:1.2;}
+  .st-sum .l{font-size:11px;color:#77748A;margin-top:2px;}
+  .st-sec{margin-bottom:20px;}
+  .st-sec h4{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:13.5px;color:var(--deep);margin-bottom:8px;}
+  .st-row{display:flex;align-items:center;gap:8px;margin-bottom:5px;font-size:12.5px;}
+  .st-row .nm3{flex:1;color:#3E3A50;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .st-row .bar2{height:8px;background:var(--mist);border-radius:99px;overflow:hidden;width:120px;flex-shrink:0;}
+  .st-row .bar2 i{display:block;height:100%;background:linear-gradient(90deg,#9A86E0,#5E8FD8);border-radius:99px;}
+  .st-row .c{font-family:monospace;font-size:12px;color:var(--deep);font-weight:700;min-width:52px;text-align:right;flex-shrink:0;}
+  .st-row .u{font-size:10.5px;color:#8B889E;min-width:44px;text-align:right;flex-shrink:0;}
+  .st-daily{display:flex;align-items:flex-end;gap:3px;height:90px;padding:6px 0;overflow-x:auto;}
+  .st-daily > div{flex:1;min-width:12px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;}
+  .st-daily i{display:block;width:100%;background:linear-gradient(180deg,#9A86E0,#5E8FD8);border-radius:3px 3px 0 0;min-height:2px;}
+  .st-daily span{font-size:8.5px;color:#8B889E;margin-top:3px;white-space:nowrap;}
+  .st-note{font-size:11px;color:#8B889E;line-height:1.8;background:var(--paper);border-radius:10px;padding:10px 12px;}
+  .st-empty{text-align:center;padding:40px;color:#8B889E;font-size:13px;line-height:1.9;}
+
   /* テストモード(仮データ表示) */
   .head button#btnDummy.dummyOn{background:#F5C452;color:#5C4200;}
   body.dummy-mode{box-shadow:inset 0 0 0 4px #F5C452;}
@@ -253,7 +280,7 @@
     <p style="text-align:center;margin-top:16px;">
       <a href="./index.html" style="color:#8B889E;font-size:12px;">‹ 育成プログラムにもどる</a>
     </p>
-    <div class="verTag">v1.56 (2026/08/16)</div>
+    <div class="verTag">v1.59 (2026/08/16)</div>
   </div>
 </div>
 
@@ -268,6 +295,7 @@
       <div class="tools">
         <input class="search" id="search" placeholder="名前・番号で検索" oninput="render()">
         <button class="btn-add" id="btnAdd" onclick="openMember(null)" style="display:none;">＋ 会員を追加</button>
+        <button id="btnStats" onclick="openStats()" style="display:none;">📊 アクセス</button>
         <button id="btnDummy" onclick="toggleDummy()" style="display:none;">🧪 テストモード</button>
         <button id="btnBackPortal" onclick="backToPortal()">‹ ポータルへ</button>
         <button onclick="location.href='./creamap-x7k2m9.html'">🗺 クリエマップ</button>
@@ -338,9 +366,29 @@
         ・各行の「編集」… 名前・系列・パスコード・役職・担当系列の変更<br>
         ・名前をクリック → 詳細画面で先生の丸と本人チェックを修正できます
       </div>
-      <div class="verTag" style="margin-top:16px;">v1.56 (2026/08/16)</div>
+      <div class="verTag" style="margin-top:16px;">v1.59 (2026/08/16)</div>
     </div>
   </main>
+</div>
+
+<div id="statsModal" onclick="if(event.target===this)closeStats()">
+  <div class="st-card">
+    <div class="st-head">
+      <h3>📊 アクセス解析</h3>
+      <select id="statsDays" onchange="loadStats()">
+        <option value="7">直近7日</option>
+        <option value="30" selected>直近30日</option>
+        <option value="90">直近90日</option>
+        <option value="180">直近180日</option>
+      </select>
+    </div>
+    <div class="st-body" id="statsBody">
+      <div class="st-empty">読み込んでいます…</div>
+    </div>
+    <div class="mm-foot">
+      <button class="mm-cancel" onclick="closeStats()" style="flex:1;">とじる</button>
+    </div>
+  </div>
 </div>
 
 <div id="memModal" onclick="if(event.target===this)closeMember()">
@@ -635,6 +683,18 @@ async function login(){
   admin = {id, pin, email:googleEmail};
   const ok = await load(true);
   if(ok){
+    // クリエマップなど、この先のページに引き継げるようにしておきます
+    try{
+      let m = null;
+      try{ m = JSON.parse(localStorage.getItem("skyarc_member")||"null"); }catch(e){}
+      if(!m || String(m.id) !== String(admin.id)) m = {};
+      m.id = admin.id; m.pin = admin.pin; m.email = admin.email;
+      if(data){
+        if(data.adminName) m.name = data.adminName;
+        m.crie = true;
+      }
+      localStorage.setItem("skyarc_member", JSON.stringify(m));
+    }catch(e){}
     $("#loginView").style.display = "none";
     $("#appView").style.display = "block";
   }else{
@@ -645,6 +705,90 @@ async function login(){
 }
 
 /* ログアウトせずにポータルへ戻る(役職で行き先を判定) */
+
+/* ================= アクセス解析(管理者のみ) ================= */
+function openStats(){
+  document.getElementById("statsModal").classList.add("show");
+  loadStats();
+}
+function closeStats(){
+  document.getElementById("statsModal").classList.remove("show");
+}
+
+async function loadStats(){
+  const body = document.getElementById("statsBody");
+  const days = document.getElementById("statsDays").value;
+  body.innerHTML = '<div class="st-empty">読み込んでいます…</div>';
+  try{
+    const url = `${GAS_URL}?action=stats&id=${encodeURIComponent(admin.id)}&pin=${encodeURIComponent(admin.pin)}&days=${days}`;
+    const res = await fetch(url);
+    const j = await res.json();
+    if(j.ok === false){
+      body.innerHTML = `<div class="st-empty">${
+        {noperm:"この画面は管理者のみご覧いただけます", pin:"パスコードが違います"}[j.error] || "読み込めませんでした"
+      }</div>`;
+      return;
+    }
+    if(!j.total){
+      body.innerHTML = '<div class="st-empty">まだ記録がありません。<br>ページが閲覧されると、ここに集まっていきます📊</div>';
+      return;
+    }
+    renderStats(j);
+  }catch(e){
+    body.innerHTML = '<div class="st-empty">通信できませんでした</div>';
+  }
+}
+
+function renderStats(j){
+  const maxPage = Math.max(...j.pages.map(x=>x.count), 1);
+  const maxDay  = Math.max(...j.daily.map(x=>x.count), 1);
+
+  const bar = (name, count, max, users) => `
+    <div class="st-row">
+      <span class="nm3">${name}</span>
+      <span class="bar2"><i style="width:${Math.round(count/max*100)}%"></i></span>
+      <span class="c">${count.toLocaleString()}</span>
+      ${users !== undefined ? `<span class="u">${users}台</span>` : ""}
+    </div>`;
+
+  document.getElementById("statsBody").innerHTML = `
+    <div class="st-sum">
+      <div><div class="n">${j.total.toLocaleString()}</div><div class="l">表示された回数</div></div>
+      <div><div class="n">${j.uniqueUsers.toLocaleString()}</div><div class="l">端末の数</div></div>
+      <div><div class="n">${j.days}</div><div class="l">日分</div></div>
+    </div>
+
+    <div class="st-sec">
+      <h4>📅 日ごとの表示回数</h4>
+      <div class="st-daily">
+        ${j.daily.map(d=>`<div title="${d.name}：${d.count}回">
+          <i style="height:${Math.round(d.count/maxDay*100)}%"></i>
+          <span>${d.name}</span></div>`).join("")}
+      </div>
+    </div>
+
+    <div class="st-sec">
+      <h4>📄 よく見られているページ</h4>
+      ${j.pages.map(x=>bar(x.name, x.count, maxPage, x.users)).join("")}
+    </div>
+
+    <div class="st-sec">
+      <h4>📱 端末の種類</h4>
+      ${j.devices.map(x=>bar(x.name, x.count, Math.max(...j.devices.map(d=>d.count),1))).join("")}
+    </div>
+
+    <div class="st-sec">
+      <h4>🌐 ブラウザ</h4>
+      ${j.browsers.map(x=>bar(x.name, x.count, Math.max(...j.browsers.map(b=>b.count),1))).join("")}
+    </div>
+
+    <p class="st-note">
+      ※ どなたが見たかは記録していません。端末の種類とブラウザ、端末ごとの目印だけを数えています。<br>
+      ※ 「端末の数」は、おおよその閲覧者数の目安です(同じ方が複数の端末をお使いの場合もあります)。<br>
+      ※ 記録は180日分を保持し、それより古いものは自動で消えます。
+    </p>`;
+}
+
 /* テストモードを切り替える(管理者のみ) */
 async function toggleDummy(){
   dummyMode = !dummyMode;
@@ -748,6 +892,8 @@ async function load(isLogin){
       if(bd){ bd.classList.remove("dummyOn"); bd.textContent = "🧪 テストモード"; }
       toast("テストモードは管理者のみご利用いただけます");
     }
+    const bs = document.getElementById("btnStats");
+    if(bs) bs.style.display = j.isAdmin ? "inline-block" : "none";
     const bd2 = document.getElementById("btnDummy");
     if(bd2){
       bd2.style.display = j.canDummy ? "inline-block" : "none";
@@ -1336,5 +1482,6 @@ function toast(msg){
     </div>
   </div>
 </div>
+<script src="../track.js"></script>
 </body>
 </html>
