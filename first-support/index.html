@@ -178,23 +178,19 @@
 <div class="card" id="card-H3">
   <div class="card-head" onclick="toggle(this)">
     <span class="card-num">3</span>
-    <span class="card-ttl">紹介コードを発行して保存する</span>
+    <span class="card-ttl">紹介URLを発行して保存する</span>
     <span class="badge badge-yet" id="badge-H3">未</span>
     <span class="card-arrow">▼</span>
   </div>
   <div class="card-body">
-    <p>あなた専用の紹介コードです。お仲間をお誘いするときに使います。</p>
+    <p>あなた専用の紹介URLです。お仲間をお誘いするときに、このリンクをお送りします。</p>
 
     <div class="soon">🚧 発行の手順を準備中です<br>もうしばらくお待ちください</div>
 
     <p style="font-weight:700;color:#E65100;margin-top:12px;">発行できたら、ここに控えておきましょう</p>
     <div class="gen-box">
-      <label class="gen-label">🎫 あなたの紹介コード</label>
-      <input class="code-input" id="refCode" type="text" placeholder="発行されたコードを入れてください">
-
-      <label class="gen-label" style="margin-top:4px;">🔗 あなたの紹介URL</label>
+      <label class="gen-label">🔗 あなたの紹介URL</label>
       <input class="code-input" id="refUrl" type="url" inputmode="url" autocapitalize="off" spellcheck="false" placeholder="https://…">
-
       <button class="save-btn" onclick="saveRefCode()">💾 保存する</button>
       <div class="copy-hint" id="codeHint">保存すると、どの端末からでも見返せます</div>
 
@@ -222,7 +218,7 @@
   お気づきの点があれば、担当の方までお知らせください🙇
 </div>
 
-<div class="verTag">v1.68 (2026/08/17)</div>
+<div class="verTag">v1.70 (2026/08/17)</div>
 </div>
 
 <script>
@@ -281,7 +277,6 @@ function refreshLoginBar(){
     if(member.keiChat){
       document.getElementById("keiSelect").value = member.keiChat;
     }
-    if(member.refCode) document.getElementById("refCode").value = member.refCode;
     if(member.refUrl){
       document.getElementById("refUrl").value = member.refUrl;
       showRefUrl(member.refUrl);
@@ -432,17 +427,15 @@ document.getElementById("keiSelect").addEventListener("change", showKeiLinks);
 
 /* ---------- 紹介コードの保存 ---------- */
 function saveRefCode(){
-  const code = document.getElementById("refCode").value.trim();
   const url  = document.getElementById("refUrl").value.trim();
   const hint = document.getElementById("codeHint");
-  if(!code && !url){ hint.textContent = "⚠️ コードかURLを入れてください"; return; }
-  if(url && !/^https?:\/\//i.test(url)){
+  if(!url){ hint.textContent = "⚠️ 紹介URLを入れてください"; return; }
+  if(!/^https?:\/\//i.test(url)){
     hint.textContent = "⚠️ URLは https:// から始まる形で入れてください"; return;
   }
-  if(code) localStorage.setItem("hajime_refcode", code);
-  if(url)  localStorage.setItem("hajime_refurl", url);
+  localStorage.setItem("hajime_refurl", url);
   showRefUrl(url);
-  saveProfile({ refCode: code, refUrl: url }, "codeHint",
+  saveProfile({ refUrl: url }, "codeHint",
     "✅ 保存しました。どの端末からでも見返せます");
 }
 
@@ -462,7 +455,7 @@ async function copyRefUrl(){
   if(!url) return;
   try{
     await navigator.clipboard.writeText(url);
-    hint.textContent = "✅ URLをコピーしました!お誘いのときにお使いください";
+    hint.textContent = "✅ コピーしました!お誘いのときにお送りください";
   }catch(e){
     const ta = document.createElement("textarea");
     ta.value = url; ta.style.position="fixed"; ta.style.opacity="0";
@@ -532,8 +525,6 @@ KEYS.forEach(id=>{
     applyState(id,true);
   }
 });
-const savedCode = localStorage.getItem("hajime_refcode");
-if(savedCode) document.getElementById("refCode").value = savedCode;
 const savedUrl = localStorage.getItem("hajime_refurl");
 if(savedUrl){
   document.getElementById("refUrl").value = savedUrl;
