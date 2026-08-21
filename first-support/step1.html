@@ -72,6 +72,8 @@
   .verTag{display:block;text-align:center;font-size:9.5px;color:#C4B8B0;font-family:monospace;padding:14px 0 20px}
 </style>
 <link rel="stylesheet" href="../beta.css">
+<script src="../loading.js"></script>
+<script src="../login.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -120,7 +122,7 @@
   お気づきの点があれば、担当の方までお知らせください🙇
 </div>
 
-<div class="verTag">v1.59 (2026/08/16)</div>
+<div class="verTag">v1.66 (2026/08/16)</div>
 </div>
 
 <script>
@@ -223,9 +225,15 @@ let saveTimer = null;
   }else{
     bar.className = "login-bar off";
     who.textContent = "ログインしていません";
-    link.textContent = "会員情報を登録する";
-    link.href = "../index.html";
-    note.textContent = "※ 進捗はこの端末にだけ記録されます。機種を変えると消えてしまいます。";
+    link.textContent = "ログインする";
+    link.href = "#";
+    link.onclick = function(e){
+      e.preventDefault();
+      if(typeof skyLoginRequired === "function") skyLoginRequired(function(){ location.reload(); });
+      else location.href = "../index.html";
+    };
+    note.innerHTML = '※ いまは記録されません。ログインすると、どの端末からでも続きが見られます。'
+      + '<br>はじめての方は <a href="../index.html" style="color:#FF7043;">会員情報の登録</a> からどうぞ。';
   }
 })();
 
@@ -275,6 +283,10 @@ function toggle(head){
 }
 
 function markDone(id){
+  if((!member || !member.id) && typeof skyLoginRequired === "function"){
+    skyLoginRequired(function(m){ member = m; location.reload(); });
+    return;
+  }
   const done = localStorage.getItem('step1_done_'+id)==='1';
   if(done){
     localStorage.removeItem('step1_done_'+id);

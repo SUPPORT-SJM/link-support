@@ -124,6 +124,8 @@ body{font-family:'Noto Sans JP',sans-serif;background:#FFFBF7;padding:16px 14px 
 .footer-body p:last-child{margin-bottom:0}
 </style>
 <link rel="stylesheet" href="../beta.css">
+<script src="../loading.js"></script>
+<script src="../login.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -455,7 +457,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:#FFFBF7;padding:16px 14px 
   🧪 このページはベータテスト中です<br>
   内容は精査中のため、今後変更になる場合がございます。<br>
   お気づきの点があれば、担当の方までお知らせください🙇<br>
-  <span style="font-size:10px;color:#B0A79E;font-family:monospace;">guide v1.59 (2026/08/16)</span>
+  <span style="font-size:10px;color:#B0A79E;font-family:monospace;">guide v1.66 (2026/08/16)</span>
 </div>
 </div>
 
@@ -490,9 +492,15 @@ let saveTimer = null;
   }else{
     bar.className = "login-bar off";
     who.textContent = "ログインしていません";
-    link.textContent = "会員情報を登録する";
-    link.href = "./index.html";
-    note.textContent = "※ 進捗はこの端末にだけ記録されます。機種を変えると消えてしまいます。";
+    link.textContent = "ログインする";
+    link.href = "#";
+    link.onclick = function(e){
+      e.preventDefault();
+      if(typeof skyLoginRequired === "function") skyLoginRequired(function(){ location.reload(); });
+      else location.href = "../index.html";
+    };
+    note.innerHTML = '※ いまは記録されません。ログインすると、どの端末からでも続きが見られます。'
+      + '<br>はじめての方は <a href="../index.html" style="color:#FF7043;">会員情報の登録</a> からどうぞ。';
   }
 })();
 
@@ -543,6 +551,10 @@ function toggle(head){
 }
 
 function markDone(id){
+  if((!member || !member.id) && typeof skyLoginRequired === "function"){
+    skyLoginRequired(function(m){ member = m; location.reload(); });
+    return;
+  }
   const done=localStorage.getItem('link_done_'+id)==='1';
   if(done){
     localStorage.removeItem('link_done_'+id);

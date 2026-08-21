@@ -88,6 +88,8 @@
   .verTag{display:block;text-align:center;font-size:9.5px;color:#C4B8B0;font-family:monospace;padding:14px 0 20px}
 </style>
 <link rel="stylesheet" href="../beta.css">
+<script src="../loading.js"></script>
+<script src="../login.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -136,7 +138,7 @@
 
     <div class="gen-box">
       <label class="gen-label">👤 あなたのお名前</label>
-      <input class="gen-input" id="nameInput" type="text" placeholder="例：高山翔子">
+      <input class="gen-input" id="nameInput" type="text" name="name" autocomplete="name" placeholder="例：高山翔子">
       <label class="gen-label">🏷️ 系列を選ぶ</label>
       <select class="gen-select" id="seriesSelect"></select>
       <label class="gen-label">✅ あなたのニックネーム</label>
@@ -210,7 +212,7 @@
   お気づきの点があれば、担当の方までお知らせください🙇
 </div>
 
-<div class="verTag">v1.59 (2026/08/16)</div>
+<div class="verTag">v1.66 (2026/08/16)</div>
 </div>
 
 <script>
@@ -246,7 +248,7 @@ let saveTimer = null;
 })();
 
 /* ---------- ログイン状態 ---------- */
-(function(){
+function refreshLoginBar(){
   try{ member = JSON.parse(localStorage.getItem("skyarc_member")||"null"); }catch(e){}
   const bar = document.getElementById("loginBar");
   const who = document.getElementById("loginWho");
@@ -264,18 +266,30 @@ let saveTimer = null;
     if(member.keiretsu){
       document.getElementById("seriesSelect").value = member.keiretsu;
       document.getElementById("keiSelect").value = member.keiretsu;
-      showKeiLinks();
     }
+    // 前に保存した内容を呼び出します
+    if(member.keiChat){
+      document.getElementById("keiSelect").value = member.keiChat;
+    }
+    if(member.refCode) document.getElementById("refCode").value = member.refCode;
+    showKeiLinks();
     updateNick();
     loadProgress();
   }else{
     bar.className = "login-bar off";
     who.textContent = "ログインしていません";
-    link.textContent = "会員情報を登録する";
-    link.href = "../index.html";
-    note.textContent = "※ 進捗はこの端末にだけ記録されます。機種を変えると消えてしまいます。";
+    link.textContent = "ログインする";
+    link.href = "#";
+    link.onclick = function(e){
+      e.preventDefault();
+      if(typeof skyLoginRequired === "function") skyLoginRequired(function(m){ member = m; refreshLoginBar(); });
+      else location.href = "../index.html";
+    };
+    note.innerHTML = '※ いまは記録されません。ログインすると、どの端末からでも続きが見られます。'
+      + '<br>はじめての方は <a href="../index.html" style="color:#FF7043;">会員情報の登録</a> からどうぞ。';
   }
-})();
+}
+refreshLoginBar();
 
 async function loadProgress(){
   try{
@@ -292,8 +306,6 @@ async function loadProgress(){
           applyState(id,true);
         }
       });
-      // 保存されている紹介コードを表示します
-      if(d.refCode) document.getElementById("refCode").value = d.refCode;
       update();
     }
   }catch(e){}
@@ -321,6 +333,28 @@ function saveProgress(){
   }, 700);
 }
 
+/* ---------- 入力内容を会員名簿に保存します ---------- */
+async function saveProfile(fields, hintId, okMsg){
+  const hint = hintId ? document.getElementById(hintId) : null;
+  if(!member || !member.id){
+    if(typeof skyLoginRequired === "function"){
+      if(hint) hint.textContent = "ログインすると記録できます";
+      skyLoginRequired(function(m){ member = m; refreshLoginBar(); saveProfile(fields, hintId, okMsg); });
+    }
+    return;
+  }
+  if(hint) hint.textContent = "☁️ 保存しています…";
+  try{
+    const params = { action:"saveProfile", id:member.id, pin:member.pin };
+    Object.keys(fields).forEach(k=>{ if(fields[k]) params[k] = fields[k]; });
+    const res = await fetch(GAS_URL, {method:"POST", body:new URLSearchParams(params)});
+    const j = await res.json();
+    if(hint) hint.textContent = (j && j.ok) ? okMsg : "📱 この端末に保存しました";
+  }catch(e){
+    if(hint) hint.textContent = "📱 この端末に保存しました(電波のよい場所で自動的に記録されます)";
+  }
+}
+
 /* ---------- ニックネーム作成 ---------- */
 function updateNick(){
   const name = document.getElementById("nameInput").value.trim();
@@ -338,16 +372,23 @@ async function copyResult(){
   const hint = document.getElementById("copyHint");
   if(!name || !kei){ hint.textContent = "⚠️ 先にお名前と系列を入れてください"; return; }
   const text = document.getElementById("resultBox").textContent;
+  let copied = false;
   try{
     await navigator.clipboard.writeText(text);
-    hint.textContent = "✅ コピーしました!参加時に貼り付けてください";
+    copied = true;
   }catch(e){
     const ta = document.createElement("textarea");
     ta.value = text; ta.style.position="fixed"; ta.style.opacity="0";
     document.body.appendChild(ta); ta.select();
-    try{ document.execCommand("copy"); hint.textContent = "✅ コピーしました!"; }
+    try{ document.execCommand("copy"); copied = true; }
     catch(e2){ hint.textContent = "上の文字を長押しして選択してください"; }
     document.body.removeChild(ta);
+  }
+  if(copied){
+    hint.textContent = "✅ コピーしました!参加時に貼り付けてください";
+    localStorage.setItem("hajime_nick", text);
+    // 記録しておきます(あとから見返せます)
+    saveProfile({ nick: text }, "copyHint", "✅ コピーして記録しました!参加時に貼り付けてください");
   }
 }
 document.getElementById("nameInput").addEventListener("input", updateNick);
@@ -369,6 +410,9 @@ function showKeiLinks(){
       `<span style="font-size:12px;color:#8D6E63;">※ 系列によって、ある場合とない場合があります</span>`;
   }
   box.classList.add("show");
+  // 選んだ系列を記録します
+  localStorage.setItem("hajime_keichat", kei);
+  saveProfile({ keiChat: kei }, null, "");
 }
 document.getElementById("keiSelect").addEventListener("change", showKeiLinks);
 
@@ -377,10 +421,9 @@ function saveRefCode(){
   const code = document.getElementById("refCode").value.trim();
   const hint = document.getElementById("codeHint");
   if(!code){ hint.textContent = "⚠️ コードを入れてください"; return; }
-  progress.refCode = code;
   localStorage.setItem("hajime_refcode", code);
-  saveProgress();
-  hint.textContent = "✅ 保存しました";
+  saveProfile({ refCode: code }, "codeHint",
+    "✅ 保存しました。どの端末からでも見返せます");
 }
 
 /* ---------- 共通 ---------- */
@@ -390,6 +433,11 @@ function toggle(head){
 }
 
 function markDone(id){
+  // ログインしていなければ、その場でログインしてもらいます
+  if((!member || !member.id) && typeof skyLoginRequired === "function"){
+    skyLoginRequired(function(m){ member = m; refreshLoginBar(); markDone(id); });
+    return;
+  }
   const done = localStorage.getItem('hajime_done_'+id)==='1';
   if(done){
     localStorage.removeItem('hajime_done_'+id);
