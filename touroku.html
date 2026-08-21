@@ -190,7 +190,7 @@
 
     <div class="sec locked" id="fields">
       <p class="step">② あなたの情報</p>
-      <p class="tab-lead" style="margin-bottom:14px;">会員番号・パスコード・お名前・系列は必須です。<br>紹介者の情報は、分かる範囲で大丈夫です。</p>
+      <p class="tab-lead" style="margin-bottom:14px;">会員番号・パスコード・ニックネーム・系列は必須です。<br>紹介者の情報は、分かる範囲で大丈夫です。</p>
 
       <div class="f">
         <label>会員番号 <span class="req">必須</span></label>
@@ -205,8 +205,21 @@
       </div>
 
       <div class="f">
-        <label>お名前 <span class="req">必須</span></label>
-        <input type="text" id="inName" name="name" autocomplete="name" placeholder="例:高山翔子">
+        <label>ニックネーム <span class="req">必須</span></label>
+        <input type="text" id="inName" name="nickname" autocomplete="nickname" placeholder="例:しょうこ">
+        <p class="hint">画面やオープンチャットに出るお名前です</p>
+      </div>
+
+      <div class="f">
+        <label>本名 <span class="opt">任意</span></label>
+        <input type="text" id="inRealName" name="name" autocomplete="name" placeholder="例:高山翔子">
+        <p class="hint">名簿の管理にのみ使います。画面には出ません</p>
+      </div>
+
+      <div class="f">
+        <label>お住まいの地域 <span class="opt">任意</span></label>
+        <select id="inArea"></select>
+        <input type="text" id="inAreaOther" placeholder="国名を入力してください" style="display:none;margin-top:8px;">
       </div>
 
       <div class="f">
@@ -216,23 +229,40 @@
       </div>
 
       <p class="step" style="margin-top:22px;">③ 紹介してくださった方 <span style="font-weight:400;font-size:11.5px;color:#A8B4AC;">(分かる範囲でOK)</span></p>
+      <p class="tab-lead" style="margin-bottom:12px;text-align:left;">
+        会員番号が分からないときは、<b>お名前やニックネームでも大丈夫です</b>。<br>
+        あとで担当の方が正しい番号に直してくださいます😊
+      </p>
 
       <div class="f">
         <label>紹介者の会員番号 <span class="opt">任意・分かる方だけ</span></label>
-        <input type="text" id="inIntro" inputmode="numeric" placeholder="00012345" oninput="lookup('inIntro','introFound')">
+        <input type="text" id="inIntro" placeholder="00012345 または お名前" oninput="lookup('inIntro','introFound')">
         <p class="found ng" id="introFound"></p>
       </div>
 
       <div class="f">
         <label>アップのクリエイターズ会員番号 <span class="opt">任意・分かる方だけ</span></label>
-        <input type="text" id="inUpline" inputmode="numeric" placeholder="00012345" oninput="lookup('inUpline','upFound')">
+        <input type="text" id="inUpline" placeholder="00012345 または お名前" oninput="lookup('inUpline','upFound')">
         <p class="found ng" id="upFound"></p>
       </div>
 
       <div class="f">
         <label>サポート担当者の会員番号 <span class="opt">任意・分かる方だけ</span></label>
-        <input type="text" id="inHelper" inputmode="numeric" placeholder="00012345" oninput="lookup('inHelper','helperFound')">
+        <input type="text" id="inHelper" placeholder="00012345 または お名前" oninput="lookup('inHelper','helperFound')">
         <p class="found ng" id="helperFound"></p>
+      </div>
+
+      <p class="step" style="margin-top:22px;">④ ご入会のときに説明してくださった方 <span style="font-weight:400;font-size:11.5px;color:#A8B4AC;">(任意)</span></p>
+
+      <div class="f">
+        <label>お名前 <span class="opt">任意</span></label>
+        <input type="text" id="inAdvName" placeholder="例:高山翔子">
+      </div>
+
+      <div class="f">
+        <label>会員番号 <span class="opt">任意・分かる方だけ</span></label>
+        <input type="text" id="inAdvId" placeholder="00012345 または お名前" oninput="lookup('inAdvId','advFound')">
+        <p class="found ng" id="advFound"></p>
       </div>
     </div>
 
@@ -271,7 +301,7 @@
       <span style="color:#D8D4E4;">|</span>
       <a href="./ikusei/kanri-x7k2m9.html" style="color:#B8B4C8;font-size:10.5px;">管理画面</a>
     </p>
-    <div class="verTag">v1.70 (2026/08/17)</div>
+    <div class="verTag">v1.75 (2026/08/17)</div>
   </div>
 
   <!-- ===== 完了画面 ===== -->
@@ -282,7 +312,7 @@
 
     <div class="mycard">
       <div class="row"><span>会員番号</span><span id="dId"></span></div>
-      <div class="row"><span>お名前</span><span id="dName"></span></div>
+      <div class="row"><span>ニックネーム</span><span id="dName"></span></div>
       <div class="row"><span>系列</span><span id="dKei"></span></div>
       <div class="row"><span>パスコード</span><span id="dPin"></span></div>
       <div class="row"><span>連絡先</span><span id="dMail" style="font-size:11.5px;"></span></div>
@@ -291,7 +321,7 @@
     </div>
 
     <a class="btn-guide" id="guideLink" href="./first-support/">📘 初期サポートガイドへ進む</a>
-    <div class="verTag">v1.70 (2026/08/17)</div>
+    <div class="verTag">v1.75 (2026/08/17)</div>
   </div>
 </div>
 
@@ -357,6 +387,30 @@ function updateLock(){
 function contactEmail(){
   return (authMode === "google") ? googleEmail : $("#inMail").value.trim().toLowerCase();
 }
+
+const AREAS = [
+  "北海道","青森県","岩手県","宮城県","秋田県","山形県","福島県",
+  "茨城県","栃木県","群馬県","埼玉県","千葉県","東京都","神奈川県",
+  "新潟県","富山県","石川県","福井県","山梨県","長野県",
+  "岐阜県","静岡県","愛知県","三重県",
+  "滋賀県","京都府","大阪府","兵庫県","奈良県","和歌山県",
+  "鳥取県","島根県","岡山県","広島県","山口県",
+  "徳島県","香川県","愛媛県","高知県",
+  "福岡県","佐賀県","長崎県","熊本県","大分県","宮崎県","鹿児島県","沖縄県",
+];
+
+/* お住まいの地域 */
+(function(){
+  const sel = document.getElementById("inArea");
+  if(!sel) return;
+  sel.innerHTML = '<option value="">選択してください</option>'
+    + AREAS.map(a=>`<option value="${a}">${a}</option>`).join("")
+    + '<option value="__other__">海外(自分で入力)</option>';
+  sel.addEventListener("change", ()=>{
+    document.getElementById("inAreaOther").style.display =
+      sel.value === "__other__" ? "block" : "none";
+  });
+})();
 
 /* 系列セレクト */
 (function(){
@@ -445,6 +499,19 @@ async function prefill(email){
       if(m.intro){ $("#inIntro").value = m.intro; lookup("inIntro","introFound"); }
       if(m.upline){ $("#inUpline").value = m.upline; lookup("inUpline","upFound"); }
       if(m.helper){ $("#inHelper").value = m.helper; lookup("inHelper","helperFound"); }
+      if(m.realName) $("#inRealName").value = m.realName;
+      if(m.advName) $("#inAdvName").value = m.advName;
+      if(m.advId){ $("#inAdvId").value = m.advId; lookup("inAdvId","advFound"); }
+      if(m.area){
+        const asel = $("#inArea");
+        if(Array.from(asel.options).some(o=>o.value === m.area)){
+          asel.value = m.area;
+        }else{
+          asel.value = "__other__";
+          $("#inAreaOther").style.display = "block";
+          $("#inAreaOther").value = m.area;
+        }
+      }
       $("#submitBtn").textContent = "登録内容を更新する";
       $("#inPin").placeholder = "変更する場合だけ入力";
       $("#pinHint").textContent = "空欄のままなら、今のパスコードが続けて使えます";
@@ -459,6 +526,12 @@ function lookup(inputId, outId){
   const v = document.getElementById(inputId).value.trim();
   const out = document.getElementById(outId);
   if(!v){ out.textContent = ""; return; }
+  // 数字でなければ、お名前として受け取ります
+  if(!/^[0-9]+$/.test(v)){
+    out.textContent = "→ お名前として承ります(あとで担当の方が番号に直します)";
+    out.className = "found ok";
+    return;
+  }
   clearTimeout(lookupTimer[inputId]);
   lookupTimer[inputId] = setTimeout(async ()=>{
     try{
@@ -468,7 +541,7 @@ function lookup(inputId, outId){
         out.textContent = "→ " + (j.name || "(名前未登録)") + "さん" + (j.keiretsu ? "(" + j.keiretsu + ")" : "");
         out.className = "found ok";
       }else{
-        out.textContent = "→ まだ登録されていない番号です(そのままでOKです)";
+        out.textContent = "→ まだご登録のない番号です(そのままで大丈夫です)";
         out.className = "found ng";
       }
     }catch(e){ out.textContent = ""; }
@@ -490,6 +563,11 @@ async function submitForm(){
   const intro = $("#inIntro").value.trim();
   const upline = $("#inUpline").value.trim();
   const helper = $("#inHelper").value.trim();
+  const realName = $("#inRealName").value.trim();
+  const advName = $("#inAdvName").value.trim();
+  const advId = $("#inAdvId").value.trim();
+  let area = $("#inArea").value;
+  if(area === "__other__") area = $("#inAreaOther").value.trim();
 
   const email = contactEmail();
   if(authMode === "google" && !googleEmail){ show("Googleアカウントで本人確認をしてください","err"); return; }
@@ -497,7 +575,7 @@ async function submitForm(){
   if(!id){ show("会員番号を入力してください","err"); return; }
   if(!isUpdate && !/^\d{4}$/.test(pin)){ show("パスコードは4桁の数字で入力してください","err"); return; }
   if(isUpdate && pin && !/^\d{4}$/.test(pin)){ show("パスコードは4桁の数字で入力してください","err"); return; }
-  if(!name){ show("お名前を入力してください","err"); return; }
+  if(!name){ show("ニックネームを入力してください","err"); return; }
   if(!keiretsu){ show("系列を選んでください","err"); return; }
 
 
@@ -508,7 +586,7 @@ async function submitForm(){
     const params = {
       action:"register", id, email:email,
       authType: (authMode === "google") ? "Google" : "メール",
-      name, keiretsu, intro, upline, helper
+      name, realName, area, keiretsu, intro, upline, helper, advName, advId
     };
     if(pin) params.pin = pin;
     const res = await fetch(GAS_URL, {method:"POST", body:new URLSearchParams(params)});

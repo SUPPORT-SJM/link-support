@@ -107,7 +107,7 @@
       /* 保存して、この端末で使えるようにします */
       var m = {
         id: id, pin: pin,
-        name: j.name || "", keiretsu: j.keiretsu || "",
+        name: j.name || "", realName: j.realName || "", area: j.area || "", keiretsu: j.keiretsu || "",
         role: j.role || "", sup: j.sup === true, crie: j.crie === true,
         nick: j.nick || "", keiChat: j.keiChat || "", refUrl: j.refUrl || "",
         badges: j.badges || [], celebrate: j.celebrate || "",
