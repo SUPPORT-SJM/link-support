@@ -104,6 +104,12 @@
   tr:hover td{background:#FAFAFE;}
   .nm{font-weight:700;}
   .nm-link{color:var(--deep);text-decoration:underline;text-underline-offset:2px;}
+  .need-check{display:inline-block;background:#FFF3D6;color:#8A6D00;border:1.5px solid #F0C86A;
+    border-radius:999px;padding:1px 8px;font-size:10px;font-weight:700;margin-left:5px;white-space:nowrap;}
+  tr.row-check td{background:#FFFDF5;}
+  .auto-fill{display:inline-block;background:#E6F0FB;color:#2B5C93;border:1.5px solid #A9C9EA;
+    border-radius:999px;padding:1px 8px;font-size:10px;font-weight:700;margin-left:5px;white-space:nowrap;}
+  tr.row-auto td{background:#F7FAFE;}
   .nm-link:hover{color:var(--blue);}
   .id{font-size:11px;color:#8B889E;font-family:monospace;}
   .kei{font-size:11.5px;color:#66647A;}
@@ -281,7 +287,7 @@
     <p style="text-align:center;margin-top:16px;">
       <a href="./index.html" style="color:#8B889E;font-size:12px;">‹ 育成プログラムにもどる</a>
     </p>
-    <div class="verTag">v1.70 (2026/08/17)</div>
+    <div class="verTag">v1.75 (2026/08/17)</div>
   </div>
 </div>
 
@@ -361,13 +367,17 @@
         ・クリエイターズ(役職なし):一覧は見られません(会員番号+系列で呼び出して、サポーター認定と①の丸つけ)<br>
         ※ 丸つけは系列に関係なく全会員が対象です<br>
         ※ クリエマップは、クリエイターズ以上なら全体をご覧いただけます<br>
+        ※ <b>⚠️ 要確認</b> … 紹介者やアップの欄に、会員番号ではなくお名前が入っています。<br>
+        　 同じお名前の方が複数いるか、まだご登録のない方です。手で番号を入れてください<br>
+        ※ <b>🔎 確認待ち</b> … お名前から会員番号を見つけて、自動でうめました。<br>
+        　 合っているかご確認のうえ、編集画面から保存すると印が消えます<br>
         <br>
         <b>会員の登録・編集</b>(管理者/チーム代表のみ)<br>
         ・右上「＋会員を追加」… 新しい会員を登録(代表陣の事前登録などに)<br>
         ・各行の「編集」… 名前・系列・パスコード・役職・担当系列の変更<br>
         ・名前をクリック → 詳細画面で先生の丸と本人チェックを修正できます
       </div>
-      <div class="verTag" style="margin-top:16px;">v1.70 (2026/08/17)</div>
+      <div class="verTag" style="margin-top:16px;">v1.75 (2026/08/17)</div>
     </div>
   </main>
 </div>
@@ -408,13 +418,24 @@
       </div>
 
       <div class="mm-f">
-        <label>お名前</label>
-        <input type="text" id="mmName" placeholder="例:高山翔子">
+        <label>ニックネーム <span style="font-weight:400;font-size:11px;color:#77748A;">(画面に出るお名前)</span></label>
+        <input type="text" id="mmName" placeholder="例:しょうこ">
+      </div>
+
+      <div class="mm-f">
+        <label>本名 <span style="font-weight:400;font-size:11px;color:#77748A;">(名簿でのみ使います)</span></label>
+        <input type="text" id="mmRealName" placeholder="例:高山翔子">
       </div>
 
       <div class="mm-f">
         <label>系列</label>
         <select id="mmKeiretsu"></select>
+      </div>
+
+      <div class="mm-f">
+        <label>お住まいの地域</label>
+        <select id="mmArea"></select>
+        <input type="text" id="mmAreaOther" placeholder="国名を入力" style="display:none;margin-top:8px;">
       </div>
 
       <div class="mm-f">
@@ -448,6 +469,19 @@
       </div>
 
       <div class="mm-f">
+        <label>アドバイザー <span style="font-weight:400;font-size:11px;color:#77748A;">(入会時に説明された方)</span></label>
+        <input type="text" id="mmAdvName" placeholder="お名前" style="margin-bottom:8px;">
+        <input type="text" id="mmAdvId" inputmode="numeric" placeholder="会員番号">
+      </div>
+
+      <div class="mm-f" id="mmAutoWrap" style="display:none;">
+        <label>🔎 自動でうめた欄</label>
+        <div style="background:#E6F0FB;border:1.5px solid #A9C9EA;border-radius:9px;padding:11px 12px;font-size:12.5px;color:#2B5C93;line-height:1.8;" id="mmAutoFill"></div>
+        <p class="hint">お名前から会員番号を見つけてうめました。<br>
+        合っているかご確認のうえ、保存すると印が消えます。</p>
+      </div>
+
+      <div class="mm-f">
         <label>紹介者の会員番号</label>
         <input type="text" id="mmIntro" inputmode="numeric" placeholder="00012345">
         <p class="hint">本人が登録時に入力した「紹介してくれた方」です</p>
@@ -456,7 +490,8 @@
       <div class="mm-f">
         <label>アップのクリエ会員番号</label>
         <input type="text" id="mmUpline" inputmode="numeric" placeholder="00012345(クリエイターズ以上)">
-        <p class="hint">この方を紹介・育成したクリエイターズの会員番号です。クリエマップ(系統図)に使われます。</p>
+        <p class="hint">この方を紹介・育成したクリエイターズの会員番号です。クリエマップ(系統図)に使われます。<br>
+        <span style="color:#8A6D00;">※ お名前が入っている場合は、正しい会員番号に直してください</span></p>
       </div>
 
       <div class="mm-f">
@@ -592,6 +627,17 @@ const ITEM_MASTER = {
   }
 };
 const APPS = Object.keys(ITEM_MASTER).join(",");
+
+const AREAS = [
+  "北海道","青森県","岩手県","宮城県","秋田県","山形県","福島県",
+  "茨城県","栃木県","群馬県","埼玉県","千葉県","東京都","神奈川県",
+  "新潟県","富山県","石川県","福井県","山梨県","長野県",
+  "岐阜県","静岡県","愛知県","三重県",
+  "滋賀県","京都府","大阪府","兵庫県","奈良県","和歌山県",
+  "鳥取県","島根県","岡山県","広島県","山口県",
+  "徳島県","香川県","愛媛県","高知県",
+  "福岡県","佐賀県","長崎県","熊本県","大分県","宮崎県","鹿児島県","沖縄県",
+];
 
 /* 系列リスト ※育成サイト側と同じものに揃えてください */
 const KEIRETSU = [
@@ -937,9 +983,14 @@ async function load(isLogin){
 
     const lvl = j.isFull ? "全体管理" : (j.isKeiRep ? "系列代表(担当系列)" : "アドバンス(担当系列)");
     $("#meLine").textContent = (j.adminName||"") + "さん｜" + lvl;
-    $("#scopeLine").innerHTML = j.isFull
+    const needN = (j.members||[]).filter(x=>x.needCheck).length;
+    const autoN = (j.members||[]).filter(x=>x.autoFill).length;
+    const needTxt =
+      (needN ? ` <span class="chip" style="background:#FFF3D6;color:#8A6D00;">⚠️ 要確認 ${needN}名</span>` : "") +
+      (autoN ? ` <span class="chip" style="background:#E6F0FB;color:#2B5C93;">🔎 確認待ち ${autoN}名</span>` : "");
+    $("#scopeLine").innerHTML = (j.isFull
       ? `全 <b>${j.members.length}</b> 名を表示中`
-      : `担当系列:<b>${(j.scope||[]).join(" / ") || "未設定"}</b> <span class="chip">${j.members.length}名</span>`;
+      : `担当系列:<b>${(j.scope||[]).join(" / ") || "未設定"}</b> <span class="chip">${j.members.length}名</span>`) + needTxt;
     render();
     return true;
   }catch(e){
@@ -995,9 +1046,9 @@ function render(){
           : `<br><span class="scope-view">担当系列: ${m.scope || "未設定"}</span>`)
       : "";
 
-    return `<tr>
-      <td><a href="#" class="nm nm-link" onclick="openDetail('${m.id}');return false;">${m.name || "(名前未登録)"}</a><br><span class="id">${m.id}</span></td>
-      <td class="kei">${m.keiretsu || "–"}${hasSup(m) && !hasCrie(m) ? '<br><span style="font-size:10px;color:#B8860B;font-weight:700;">サポーター</span>' : ""}</td>
+    return `<tr class="${m.needCheck ? "row-check" : (m.autoFill ? "row-auto" : "")}">
+      <td><a href="#" class="nm nm-link" onclick="openDetail('${m.id}');return false;">${m.name || "(名前未登録)"}</a>${m.realName && m.realName !== m.name ? `<br><span style="font-size:10.5px;color:#A8A4BC;">(${m.realName})</span>` : ""}${m.needCheck ? '<span class="need-check" title="紹介者やアップの欄に、会員番号ではなくお名前が入っています">⚠️ 要確認</span>' : ""}${m.autoFill ? `<span class="auto-fill" title="お名前から自動でうめました：${m.autoFill}">🔎 確認待ち</span>` : ""}<br><span class="id">${m.id}</span></td>
+      <td class="kei">${m.keiretsu || "–"}${m.area ? `<br><span style="font-size:10px;color:#A8A4BC;">${m.area}</span>` : ""}${hasSup(m) && !hasCrie(m) ? '<br><span style="font-size:10px;color:#B8860B;font-weight:700;">サポーター</span>' : ""}</td>
       <td class="prog">${piyo}</td>
       <td class="prog">${gr}</td>
       <td><div class="flags">${fb("サポーター","sup")}${fb("クリエ","")}${fb("アドバンス","adv")}${fb("系列代表","kei")}${fb("チーム代表","rep")}${fb("管理者","adm")}</div>${scopeBtn}</td>
@@ -1167,6 +1218,23 @@ function openMember(m){
   document.getElementById("mmId").readOnly = !!m;
   document.getElementById("mmId").style.background = m ? "#EFEDF5" : "var(--paper)";
   document.getElementById("mmName").value = m ? (m.name||"") : "";
+  document.getElementById("mmRealName").value = m ? (m.realName||"") : "";
+  document.getElementById("mmAdvName").value = m ? (m.advName||"") : "";
+  document.getElementById("mmAdvId").value = m ? (m.advId||"") : "";
+
+  const asel = document.getElementById("mmArea");
+  asel.innerHTML = '<option value="">選択してください</option>'
+    + AREAS.map(a=>`<option value="${a}">${a}</option>`).join("")
+    + '<option value="__other__">海外(自分で入力)</option>';
+  const aOther = document.getElementById("mmAreaOther");
+  aOther.style.display = "none"; aOther.value = "";
+  if(m && m.area){
+    if(AREAS.indexOf(m.area) >= 0){ asel.value = m.area; }
+    else{ asel.value = "__other__"; aOther.style.display = "block"; aOther.value = m.area; }
+  }
+  asel.onchange = function(){
+    aOther.style.display = (asel.value === "__other__") ? "block" : "none";
+  };
   ksel.value = m ? (m.keiretsu||"") : "";
   document.getElementById("mmPin").value = "";
   document.getElementById("mmPinHint").textContent = m
@@ -1192,6 +1260,12 @@ function openMember(m){
   document.getElementById("mmIntro").value = m ? (m.intro||"") : "";
   document.getElementById("mmUpline").value = m ? (m.upline||"") : "";
   document.getElementById("mmHelper").value = m ? (m.helper||"") : "";
+  const aw = document.getElementById("mmAutoWrap");
+  const af = document.getElementById("mmAutoFill");
+  if(aw && af){
+    if(m && m.autoFill){ af.textContent = m.autoFill; aw.style.display = "block"; }
+    else aw.style.display = "none";
+  }
   document.getElementById("mmEmail").value = m ? (m.email||"") : "";
   const authEl = document.getElementById("mmAuth");
   if(authEl) authEl.textContent = m && m.authType ? "(" + m.authType + "認証)" : "";
@@ -1255,9 +1329,16 @@ async function saveMember(){
     const params = {
       action:"adminUpsertMember", id:admin.id, pin:admin.pin, email:admin.email,
       targetId:id, name:name, keiretsu:keiretsu,
+      realName:document.getElementById("mmRealName").value.trim(),
+      area:(document.getElementById("mmArea").value === "__other__"
+            ? document.getElementById("mmAreaOther").value.trim()
+            : document.getElementById("mmArea").value),
+      advName:document.getElementById("mmAdvName").value.trim(),
+      advId:document.getElementById("mmAdvId").value.trim(),
       intro:document.getElementById("mmIntro").value.trim(),
       upline:document.getElementById("mmUpline").value.trim(),
       helper:document.getElementById("mmHelper").value.trim(),
+      clearAutoFill: (memEditing && memEditing.autoFill) ? "1" : "0",
       sup:document.getElementById("mmSup").checked ? "1" : "0",
       crie:document.getElementById("mmCrie").checked ? "1" : "0",
       role:roles.join(","), scope:scope.join(","),
