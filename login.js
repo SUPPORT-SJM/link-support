@@ -99,6 +99,7 @@
           busy: "いま混み合っています。少しおいてお試しください",
           pin: "パスコードが違います",
           nomember: "その会員番号は登録されていません",
+          emailtaken: "このメールは別の会員番号で登録されています",
           email: "登録されている連絡先と異なります"
         }[j.error] || "ログインできませんでした", "err");
         return;
@@ -108,7 +109,7 @@
         id: id, pin: pin,
         name: j.name || "", keiretsu: j.keiretsu || "",
         role: j.role || "", sup: j.sup === true, crie: j.crie === true,
-        nick: j.nick || "", keiChat: j.keiChat || "", refCode: j.refCode || "",
+        nick: j.nick || "", keiChat: j.keiChat || "", refCode: j.refCode || "", refUrl: j.refUrl || "",
         badges: j.badges || [], celebrate: j.celebrate || "",
         email: j.email || ""
       };
