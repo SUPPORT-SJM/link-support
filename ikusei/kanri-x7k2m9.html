@@ -281,7 +281,7 @@
     <p style="text-align:center;margin-top:16px;">
       <a href="./index.html" style="color:#8B889E;font-size:12px;">‹ 育成プログラムにもどる</a>
     </p>
-    <div class="verTag">v1.66 (2026/08/16)</div>
+    <div class="verTag">v1.68 (2026/08/17)</div>
   </div>
 </div>
 
@@ -367,7 +367,7 @@
         ・各行の「編集」… 名前・系列・パスコード・役職・担当系列の変更<br>
         ・名前をクリック → 詳細画面で先生の丸と本人チェックを修正できます
       </div>
-      <div class="verTag" style="margin-top:16px;">v1.66 (2026/08/16)</div>
+      <div class="verTag" style="margin-top:16px;">v1.68 (2026/08/17)</div>
     </div>
   </main>
 </div>
@@ -1174,11 +1174,12 @@ function openMember(m){
   document.getElementById("mmCrieWrap").style.background = cb.checked ? "#EAF7F0" : "#fff";
   const hj = document.getElementById("mmHajime");
   if(hj){
-    if(m && (m.nick || m.keiChat || m.refCode)){
+    if(m && (m.nick || m.keiChat || m.refCode || m.refUrl)){
       hj.innerHTML =
         (m.nick    ? `📛 ${m.nick}<br>` : "") +
         (m.keiChat ? `🏷️ 系列オプチャ:${m.keiChat}<br>` : "") +
-        (m.refCode ? `🎫 紹介コード:<b>${m.refCode}</b>` : "");
+        (m.refCode ? `🎫 紹介コード:<b>${m.refCode}</b><br>` : "") +
+        (m.refUrl  ? `🔗 <a href="${m.refUrl}" target="_blank" style="color:#5E8FD8;word-break:break-all;">${m.refUrl}</a>` : "");
     }else{
       hj.textContent = "まだ登録されていません";
     }
