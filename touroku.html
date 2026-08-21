@@ -138,6 +138,7 @@
   .verTag{display:block;text-align:center;font-size:9.5px;color:#C3BFD4;letter-spacing:.05em;font-family:monospace;margin-top:14px;}
 </style>
 <link rel="stylesheet" href="beta.css">
+<script src="loading.js"></script>
 </head>
 <body>
 
@@ -181,7 +182,7 @@
       <div id="authMail" style="display:none;">
         <p class="tab-lead">Googleアカウントをお持ちでない方は、<br>ふだんお使いのメールアドレスをご登録ください。</p>
         <div class="f" style="margin-bottom:8px;">
-          <input type="email" id="inMail" placeholder="example@docomo.ne.jp" oninput="checkMail()">
+          <input type="email" id="inMail" name="email" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" placeholder="example@docomo.ne.jp" oninput="checkMail()">
           <p class="hint" id="mailHint">LINKのご登録に使っているアドレスがおすすめです</p>
         </div>
       </div>
@@ -193,19 +194,19 @@
 
       <div class="f">
         <label>会員番号 <span class="req">必須</span></label>
-        <input type="text" id="inId" inputmode="numeric" placeholder="00012345">
+        <input type="text" id="inId" name="member-id" autocomplete="on" inputmode="numeric" placeholder="00012345">
         <p class="hint">頭の「000」も含めて入力してください</p>
       </div>
 
       <div class="f">
         <label>パスコード(4桁の数字) <span class="req">必須</span></label>
-        <input type="password" id="inPin" inputmode="numeric" maxlength="4" placeholder="数字4桁">
+        <input type="password" id="inPin" name="new-pin" autocomplete="new-password" inputmode="numeric" maxlength="4" placeholder="数字4桁">
         <p class="hint" id="pinHint">スカイアークのサイト内で使うパスコードです</p>
       </div>
 
       <div class="f">
         <label>お名前 <span class="req">必須</span></label>
-        <input type="text" id="inName" placeholder="例:高山翔子">
+        <input type="text" id="inName" name="name" autocomplete="name" placeholder="例:高山翔子">
       </div>
 
       <div class="f">
@@ -264,7 +265,7 @@
       <span style="color:#D8D4E4;">|</span>
       <a href="./ikusei/kanri-x7k2m9.html" style="color:#B8B4C8;font-size:10.5px;">管理画面</a>
     </p>
-    <div class="verTag">v1.59 (2026/08/16)</div>
+    <div class="verTag">v1.66 (2026/08/16)</div>
   </div>
 
   <!-- ===== 完了画面 ===== -->
@@ -284,7 +285,7 @@
     </div>
 
     <a class="btn-guide" id="guideLink" href="./first-support/">📘 初期サポートガイドへ進む</a>
-    <div class="verTag">v1.59 (2026/08/16)</div>
+    <div class="verTag">v1.66 (2026/08/16)</div>
   </div>
 </div>
 
@@ -494,6 +495,7 @@ async function submitForm(){
 
   $("#submitBtn").disabled = true;
   $("#submitBtn").textContent = "登録しています…";
+  if(typeof skyLoading === "function") skyLoading("登録しています…");
   try{
     const params = {
       action:"register", id, email:email,
@@ -503,6 +505,7 @@ async function submitForm(){
     if(pin) params.pin = pin;
     const res = await fetch(GAS_URL, {method:"POST", body:new URLSearchParams(params)});
     const j = await res.json();
+    if(typeof skyLoadingDone === "function") skyLoadingDone();
     if(j.ok === false){
       show({
         email:"この会員番号は別の連絡先(" + (j.savedHint||"***") + ")で登録されています。お心当たりがない場合は担当の方にご相談ください。",
@@ -528,6 +531,7 @@ async function submitForm(){
     $("#doneView").style.display = "block";
     window.scrollTo(0,0);
   }catch(e){
+    if(typeof skyLoadingDone === "function") skyLoadingDone();
     show("通信できませんでした。電波のよい場所でお試しください。","err");
   }finally{
     $("#submitBtn").disabled = false;
