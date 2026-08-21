@@ -301,7 +301,7 @@
       <span style="color:#D8D4E4;">|</span>
       <a href="./ikusei/kanri-x7k2m9.html" style="color:#B8B4C8;font-size:10.5px;">管理画面</a>
     </p>
-    <div class="verTag">v1.75 (2026/08/17)</div>
+    <div class="verTag">v1.76 (2026/08/17)</div>
   </div>
 
   <!-- ===== 完了画面 ===== -->
@@ -321,7 +321,7 @@
     </div>
 
     <a class="btn-guide" id="guideLink" href="./first-support/">📘 初期サポートガイドへ進む</a>
-    <div class="verTag">v1.75 (2026/08/17)</div>
+    <div class="verTag">v1.76 (2026/08/17)</div>
   </div>
 </div>
 
@@ -602,6 +602,32 @@ async function submitForm(){
       }[j.error] || "登録できませんでした。もう一度お試しください。", "err");
       return;
     }
+    /* ご登録いただいた内容で、そのままログインした状態にします
+       (次のページで、もう一度入力していただかなくて済みます) */
+    try{
+      const m = {
+        id: id, pin: pin, email: email,
+        name: name, realName: realName, area: area, keiretsu: keiretsu,
+        role: "", sup: false, crie: false,
+        nick: "", keiChat: "", refUrl: "",
+        badges: [], celebrate: "", _extraPending: true
+      };
+      localStorage.setItem("skyarc_member", JSON.stringify(m));
+
+      /* 役職やバッジは、あとから静かに取りに行きます */
+      fetch(`${GAS_URL}?action=login&id=${encodeURIComponent(id)}&pin=${encodeURIComponent(pin)}`)
+        .then(r=>r.json())
+        .then(x=>{
+          if(x && x.ok){
+            m.role = x.role || ""; m.sup = x.sup === true; m.crie = x.crie === true;
+            m.nick = x.nick || ""; m.keiChat = x.keiChat || ""; m.refUrl = x.refUrl || "";
+            m.badges = x.badges || []; m.celebrate = x.celebrate || "";
+            m._extraPending = false;
+            localStorage.setItem("skyarc_member", JSON.stringify(m));
+          }
+        }).catch(()=>{});
+    }catch(e){}
+
     // 完了画面へ(新規と更新でメッセージを変えます)
     const updated = isUpdate || j.updated === true;
     $("#dEmoji").textContent = updated ? "✅" : "🎉";

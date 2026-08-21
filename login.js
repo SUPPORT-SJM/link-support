@@ -113,7 +113,16 @@
         badges: j.badges || [], celebrate: j.celebrate || "",
         email: j.email || ""
       };
-      localStorage.setItem("skyarc_member", JSON.stringify(m));
+      /* 保存できたかを確かめます(ブラウザの設定で保存できない場合があります) */
+      try {
+        localStorage.setItem("skyarc_member", JSON.stringify(m));
+        var check = localStorage.getItem("skyarc_member");
+        if (!check) throw new Error("saved but empty");
+      } catch (se) {
+        msg("この端末では、ログインの記録を残せない設定になっています。\n" +
+            "ブラウザの「プライベートモード」を解いてお試しください。", "err");
+        return;
+      }
       msg("✅ ログインしました", "ok");
 
       /* バッジは、あとから静かに取りに行きます */
