@@ -281,7 +281,7 @@
     <p style="text-align:center;margin-top:16px;">
       <a href="./index.html" style="color:#8B889E;font-size:12px;">‹ 育成プログラムにもどる</a>
     </p>
-    <div class="verTag">v1.68 (2026/08/17)</div>
+    <div class="verTag">v1.70 (2026/08/17)</div>
   </div>
 </div>
 
@@ -367,7 +367,7 @@
         ・各行の「編集」… 名前・系列・パスコード・役職・担当系列の変更<br>
         ・名前をクリック → 詳細画面で先生の丸と本人チェックを修正できます
       </div>
-      <div class="verTag" style="margin-top:16px;">v1.68 (2026/08/17)</div>
+      <div class="verTag" style="margin-top:16px;">v1.70 (2026/08/17)</div>
     </div>
   </main>
 </div>
@@ -459,6 +459,12 @@
         <p class="hint">この方を紹介・育成したクリエイターズの会員番号です。クリエマップ(系統図)に使われます。</p>
       </div>
 
+      <div class="mm-f">
+        <label>サポート担当者の会員番号</label>
+        <input type="text" id="mmHelper" inputmode="numeric" placeholder="00012345">
+        <p class="hint">実際にサポートを担当されている方です</p>
+      </div>
+
       <div class="mm-f" id="mmScopeWrap" style="display:none;">
         <label>担当系列</label>
         <div id="mmScopeList" style="display:grid;grid-template-columns:1fr 1fr;gap:5px;"></div>
@@ -530,7 +536,7 @@ const ITEM_MASTER = {
     items: [
       ["H1","Skyarcユーザーサポートに入る"],
       ["H2","系列のオープンチャットを確認"],
-      ["H3","紹介コードを発行して保存"],
+      ["H3","紹介URLを発行して保存"],
     ]
   },
   guide: {
@@ -1174,11 +1180,10 @@ function openMember(m){
   document.getElementById("mmCrieWrap").style.background = cb.checked ? "#EAF7F0" : "#fff";
   const hj = document.getElementById("mmHajime");
   if(hj){
-    if(m && (m.nick || m.keiChat || m.refCode || m.refUrl)){
+    if(m && (m.nick || m.keiChat || m.refUrl)){
       hj.innerHTML =
         (m.nick    ? `📛 ${m.nick}<br>` : "") +
         (m.keiChat ? `🏷️ 系列オプチャ:${m.keiChat}<br>` : "") +
-        (m.refCode ? `🎫 紹介コード:<b>${m.refCode}</b><br>` : "") +
         (m.refUrl  ? `🔗 <a href="${m.refUrl}" target="_blank" style="color:#5E8FD8;word-break:break-all;">${m.refUrl}</a>` : "");
     }else{
       hj.textContent = "まだ登録されていません";
@@ -1186,6 +1191,7 @@ function openMember(m){
   }
   document.getElementById("mmIntro").value = m ? (m.intro||"") : "";
   document.getElementById("mmUpline").value = m ? (m.upline||"") : "";
+  document.getElementById("mmHelper").value = m ? (m.helper||"") : "";
   document.getElementById("mmEmail").value = m ? (m.email||"") : "";
   const authEl = document.getElementById("mmAuth");
   if(authEl) authEl.textContent = m && m.authType ? "(" + m.authType + "認証)" : "";
@@ -1251,6 +1257,7 @@ async function saveMember(){
       targetId:id, name:name, keiretsu:keiretsu,
       intro:document.getElementById("mmIntro").value.trim(),
       upline:document.getElementById("mmUpline").value.trim(),
+      helper:document.getElementById("mmHelper").value.trim(),
       sup:document.getElementById("mmSup").checked ? "1" : "0",
       crie:document.getElementById("mmCrie").checked ? "1" : "0",
       role:roles.join(","), scope:scope.join(","),
