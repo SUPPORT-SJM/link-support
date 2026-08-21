@@ -124,7 +124,7 @@
       どちらも、管理画面から直していただけます。
     </p>
 
-    <div class="verTag">v1.75 (2026/08/17)</div>
+    <div class="verTag">v1.76 (2026/08/17)</div>
   </div>
 </main>
 
@@ -146,7 +146,11 @@ let filter = "all";
 
 /* ---------- 読み込み ---------- */
 (function(){
-  try{ member = JSON.parse(localStorage.getItem("skyarc_member")||"null"); }catch(e){}
+  try{
+    const raw = localStorage.getItem("skyarc_member");
+    if(raw && raw !== "null" && raw !== "undefined") member = JSON.parse(raw);
+  }catch(e){}
+  if(member && !member.id) member = null;
   if(!member || !member.id){
     document.getElementById("list").innerHTML =
       '<div class="empty">ご覧いただくには、ログインが必要です。<br><br>' +

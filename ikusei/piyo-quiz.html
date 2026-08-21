@@ -263,7 +263,7 @@
   <footer>
     クリエイターズ育成プログラム ①<br>
     交通整備課|クリエイターズ育成部門
-    <div class="verTag" style="margin-top:8px;color:rgba(255,255,255,.4);">v1.75 (2026/08/17)</div>
+    <div class="verTag" style="margin-top:8px;color:rgba(255,255,255,.4);">v1.76 (2026/08/17)</div>
 </footer>
 </div>
 
@@ -535,7 +535,11 @@ function toast(msg){
 /* ---------- 玄関(index.html)のログイン情報でそのまま入る ---------- */
 (function(){
   let m = null;
-  try{ m = JSON.parse(localStorage.getItem("skyarc_member")||"null"); }catch(e){}
+  try{
+    const raw = localStorage.getItem("skyarc_member");
+    if(raw && raw !== "null" && raw !== "undefined") m = JSON.parse(raw);
+  }catch(e){}
+  if(m && !m.id) m = null;
   if(!m || !m.id){
     // 未ログインなら玄関へ戻す
     location.replace("./index.html");
@@ -553,7 +557,11 @@ function toast(msg){
 /* ===== 共通ナビ:ログイン確認・戻り先の判定・ログアウト ===== */
 (function(){
   let m = null;
-  try{ m = JSON.parse(localStorage.getItem("skyarc_member")||"null"); }catch(e){}
+  try{
+    const raw = localStorage.getItem("skyarc_member");
+    if(raw && raw !== "null" && raw !== "undefined") m = JSON.parse(raw);
+  }catch(e){}
+  if(m && !m.id) m = null;
   if(!m || !m.id){ location.replace("./index.html"); return; }
 
   const isCrie = m.crie === true;
