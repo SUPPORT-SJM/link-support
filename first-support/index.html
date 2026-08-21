@@ -62,11 +62,43 @@
   .done-btn-pending{background:#FFE0B2;color:#E65100}
   .done-btn-done{background:#A5D6A7;color:#fff}
 
+  /* オープンチャットへの参加 */
+  .join-box{margin-bottom:12px;}
+  .join-btn{width:100%;padding:14px;border-radius:12px;border:none;cursor:pointer;
+    background:#06C755;color:#fff;font-size:15px;font-weight:700;}
+  .join-btn.locked{background:#CFD8DC;color:#78909C;}
+  .join-note{font-size:11.5px;color:#A1887F;text-align:center;margin-top:7px;line-height:1.7;}
+  .join-note.ready{color:#2E7D32;font-weight:700;}
+  .join-note.warn{color:#D84315;font-weight:700;}
+
+  /* 入れてほしい欄を、揺らしてお知らせします */
+  @keyframes shakeIt{
+    0%,100%{transform:translateX(0);}
+    12%{transform:translateX(-7px);} 28%{transform:translateX(7px);}
+    44%{transform:translateX(-5px);} 60%{transform:translateX(5px);}
+    76%{transform:translateX(-2px);} 88%{transform:translateX(2px);}
+  }
+  .shake{animation:shakeIt .55s ease;}
+  .need-input{
+    border-color:#E53935 !important;
+    background:#FFF5F5 !important;
+    box-shadow:0 0 0 3px rgba(229,57,53,.12);
+  }
+  .need-input::placeholder{color:#E53935;opacity:.85;}
+  .need-label{color:#E53935 !important;}
+  .need-msg{
+    display:none;font-size:11.5px;color:#E53935;font-weight:700;
+    margin:-6px 0 10px;line-height:1.7;
+  }
+  .need-msg.show{display:block;}
+  @media (prefers-reduced-motion:reduce){ .shake{animation:none;} }
+
   /* ニックネーム作成 */
   .gen-box{background:#FFF8F5;border:1px solid #FFD0B0;border-radius:12px;padding:14px;margin-bottom:10px}
   .gen-label{font-size:12px;font-weight:700;color:#FF7043;margin-bottom:6px;display:block}
   .gen-input,.gen-select{width:100%;border:1.5px solid #FFCCBC;border-radius:8px;padding:10px 12px;font-size:15px;font-family:inherit;color:#4E342E;background:#fff;margin-bottom:10px;outline:none}
   .gen-input:focus,.gen-select:focus{border-color:#FF7043}
+  .result-box.waiting{background:#FAFAFA;border-color:#DDD;color:#9E9E9E;font-weight:400;font-size:13px;}
   .result-box{background:#FFF0EB;border:2px solid #FF7043;border-radius:10px;padding:12px 14px;font-size:15px;font-weight:700;color:#BF360C;line-height:1.6;min-height:46px;margin-bottom:10px;word-break:break-all;text-align:center}
   .copy-btn{width:100%;padding:13px;border-radius:10px;background:#FF7043;color:#fff;border:none;cursor:pointer;font-size:15px;font-weight:700}
   .copy-hint{font-size:11.5px;color:#A1887F;text-align:center;margin-top:6px;line-height:1.7}
@@ -129,22 +161,29 @@
     <span class="card-arrow">▼</span>
   </div>
   <div class="card-body">
-    <p>Skyarcの仲間が集まるオープンチャットです。分からないことを気軽に聞ける場所なので、まずはここに入りましょう。</p>
+    <p>Skyarcの仲間が集まるオープンチャット「🌈ユーザーサポート」です。分からないことを気軽に聞ける場所なので、まずはここに入りましょう。</p>
 
-    <div class="soon">🚧 参加リンクを準備中です<br>ご紹介者か担当の方にお尋ねください</div>
-
-    <p style="font-weight:700;color:#E65100;margin-top:14px;">📛 まずはニックネームを整えましょう</p>
+    <p style="font-weight:700;color:#E65100;margin-top:14px;">📛 ① まずはニックネームを用意しましょう</p>
     <p>オープンチャットでは、お名前と系列がひと目で分かる形にします。下で作ってコピーしてください。</p>
 
     <div class="gen-box">
-      <label class="gen-label">👤 あなたのお名前</label>
-      <input class="gen-input" id="nameInput" type="text" name="name" autocomplete="name" placeholder="例：高山翔子">
-      <label class="gen-label">🏷️ 系列を選ぶ</label>
+      <label class="gen-label" id="nameLabel">👤 あなたのお名前</label>
+      <input class="gen-input" id="nameInput" type="text" name="nickname" autocomplete="nickname" placeholder="例：しょうこ">
+      <p class="need-msg" id="nameMsg">👆 お名前を入れてください</p>
+
+      <label class="gen-label" id="seriesLabel">🏷️ 系列を選ぶ</label>
       <select class="gen-select" id="seriesSelect"></select>
+      <p class="need-msg" id="seriesMsg">👆 系列を選んでください</p>
       <label class="gen-label">✅ あなたのニックネーム</label>
-      <div class="result-box" id="resultBox">👆 お名前と系列を入れてください</div>
+      <div class="result-box waiting" id="resultBox">👆 お名前と系列を入れてください</div>
       <button class="copy-btn" onclick="copyResult()">📋 タップしてコピー</button>
       <div class="copy-hint" id="copyHint">コピーして、オープンチャットの参加時に貼り付けてください</div>
+    </div>
+
+    <p style="font-weight:700;color:#E65100;margin-top:16px;">📲 ② 用意ができたら参加しましょう</p>
+    <div class="join-box" id="joinBox">
+      <button class="join-btn locked" onclick="goOpenChat()">📲 ユーザーサポートに参加する</button>
+      <p class="join-note" id="joinNote">先にニックネームをコピーしてから、参加してください</p>
     </div>
 
     <button class="done-btn done-btn-pending" id="btn-H1" onclick="markDone('H1')">☑️ 完了したらここを押してね!</button>
@@ -218,7 +257,7 @@
   お気づきの点があれば、担当の方までお知らせください🙇
 </div>
 
-<div class="verTag">v1.70 (2026/08/17)</div>
+<div class="verTag">v1.75 (2026/08/17)</div>
 </div>
 
 <script>
@@ -369,9 +408,13 @@ function updateNick(){
   const name = document.getElementById("nameInput").value.trim();
   const kei = document.getElementById("seriesSelect").value;
   const box = document.getElementById("resultBox");
-  if(!name && !kei){ box.textContent = "👆 お名前と系列を入れてください"; return; }
-  if(!name){ box.textContent = "👆 お名前を入れてください"; return; }
-  if(!kei){ box.textContent = "👆 系列を選んでください"; return; }
+  if(!name || !kei){
+    box.className = "result-box waiting";
+    box.textContent = !name && !kei ? "👆 お名前と系列を入れてください"
+                    : (!name ? "👆 お名前を入れてください" : "👆 系列を選んでください");
+    return;
+  }
+  box.className = "result-box";
   box.textContent = "🌈" + name + "/Skyarc/" + kei;
 }
 
@@ -379,7 +422,12 @@ async function copyResult(){
   const name = document.getElementById("nameInput").value.trim();
   const kei = document.getElementById("seriesSelect").value;
   const hint = document.getElementById("copyHint");
-  if(!name || !kei){ hint.textContent = "⚠️ 先にお名前と系列を入れてください"; return; }
+  if(!name || !kei){
+    hint.textContent = !name ? "⚠️ お名前を入れてください" : "⚠️ 系列を選んでください";
+    if(!name) markNeeded("nameInput", "nameLabel", "nameMsg");
+    else      markNeeded("seriesSelect", "seriesLabel", "seriesMsg");
+    return;
+  }
   const text = document.getElementById("resultBox").textContent;
   let copied = false;
   try{
@@ -394,14 +442,113 @@ async function copyResult(){
     document.body.removeChild(ta);
   }
   if(copied){
-    hint.textContent = "✅ コピーしました!参加時に貼り付けてください";
+    hint.textContent = "✅ コピーしました!下の参加ボタンから進んでください";
     localStorage.setItem("hajime_nick", text);
+    localStorage.setItem("hajime_nick_copied", "1");
+    nickCopied = true;
+    refreshJoinBtn();
     // 記録しておきます(あとから見返せます)
     saveProfile({ nick: text }, "copyHint", "✅ コピーして記録しました!参加時に貼り付けてください");
   }
 }
-document.getElementById("nameInput").addEventListener("input", updateNick);
-document.getElementById("seriesSelect").addEventListener("change", updateNick);
+document.getElementById("nameInput").addEventListener("input", function(){
+  updateNick();
+  if(this.value.trim()) clearNeeded("nameInput", "nameLabel", "nameMsg");
+});
+document.getElementById("seriesSelect").addEventListener("change", function(){
+  updateNick();
+  if(this.value) clearNeeded("seriesSelect", "seriesLabel", "seriesMsg");
+});
+
+/* ---------- 入れてほしい欄を、揺らしてお知らせします ---------- */
+function markNeeded(inputId, labelId, msgId){
+  const el = document.getElementById(inputId);
+  const label = document.getElementById(labelId);
+  const msg = document.getElementById(msgId);
+  const box = document.querySelector(".gen-box");
+  if(!el) return;
+
+  el.classList.add("need-input");
+  if(label) label.classList.add("need-label");
+  if(msg) msg.classList.add("show");
+
+  /* カードを揺らします */
+  if(box){
+    box.classList.remove("shake");
+    void box.offsetWidth;          // いったん止めて、もう一度animateさせます
+    box.classList.add("shake");
+    setTimeout(()=>box.classList.remove("shake"), 600);
+  }
+  el.scrollIntoView({behavior:"smooth", block:"center"});
+  setTimeout(()=>{ try{ el.focus(); }catch(e){} }, 350);
+}
+
+/* 入力されたら、赤い印を消します */
+function clearNeeded(inputId, labelId, msgId){
+  const el = document.getElementById(inputId);
+  const label = document.getElementById(labelId);
+  const msg = document.getElementById(msgId);
+  if(el) el.classList.remove("need-input");
+  if(label) label.classList.remove("need-label");
+  if(msg) msg.classList.remove("show");
+}
+
+/* ---------- オープンチャットへの参加 ---------- */
+const OPENCHAT_URL = "https://line.me/ti/g2/yBQmWy1jkxlyWsEQ6hpzwTEyKK6VVSdt4B5mhw?utm_source=invitation&utm_medium=link_copy&utm_campaign=default";
+
+let nickCopied = false;   // ニックネームをコピーしたかどうか
+
+function goOpenChat(){
+  const note = document.getElementById("joinNote");
+  const name = document.getElementById("nameInput").value.trim();
+  const kei  = document.getElementById("seriesSelect").value;
+
+  /* まだニックネームを用意していないとき */
+  if(!name || !kei){
+    note.textContent = !name
+      ? "⚠️ お名前を入れてください"
+      : "⚠️ 系列を選んでください";
+    note.className = "join-note warn";
+    if(!name) markNeeded("nameInput", "nameLabel", "nameMsg");
+    else      markNeeded("seriesSelect", "seriesLabel", "seriesMsg");
+    return;
+  }
+  if(!nickCopied){
+    note.innerHTML = "⚠️ 先に <b>「📋 タップしてコピー」</b> を押してから参加してください<br>" +
+      "<span style=\"font-weight:400;\">参加のときに、コピーしたお名前を貼り付けます</span>";
+    note.className = "join-note warn";
+    const btn = document.querySelector(".copy-btn");
+    if(btn){
+      btn.scrollIntoView({behavior:"smooth", block:"center"});
+      btn.classList.remove("shake");
+      void btn.offsetWidth;
+      btn.classList.add("shake");
+      setTimeout(()=>btn.classList.remove("shake"), 600);
+    }
+    return;
+  }
+
+  /* 準備ができているので、開きます */
+  note.textContent = "コピーしたお名前を、参加のときに貼り付けてください😊";
+  note.className = "join-note ready";
+  window.open(OPENCHAT_URL, "_blank");
+}
+
+/* ボタンの見た目を、準備の具合に合わせます */
+function refreshJoinBtn(){
+  const btn = document.querySelector(".join-btn");
+  const note = document.getElementById("joinNote");
+  if(!btn || !note) return;
+  if(nickCopied){
+    btn.classList.remove("locked");
+    note.textContent = "✅ 準備ができました。参加のときにお名前を貼り付けてください";
+    note.className = "join-note ready";
+  }else{
+    btn.classList.add("locked");
+    note.textContent = "先にニックネームをコピーしてから、参加してください";
+    note.className = "join-note";
+  }
+}
 
 /* ---------- 系列のオプチャ案内 ---------- */
 function showKeiLinks(){
@@ -525,6 +672,8 @@ KEYS.forEach(id=>{
     applyState(id,true);
   }
 });
+if(localStorage.getItem("hajime_nick_copied") === "1") nickCopied = true;
+refreshJoinBtn();
 const savedUrl = localStorage.getItem("hajime_refurl");
 if(savedUrl){
   document.getElementById("refUrl").value = savedUrl;
