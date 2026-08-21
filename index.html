@@ -228,6 +228,12 @@
         <input type="text" id="inUpline" inputmode="numeric" placeholder="00012345" oninput="lookup('inUpline','upFound')">
         <p class="found ng" id="upFound"></p>
       </div>
+
+      <div class="f">
+        <label>サポート担当者の会員番号 <span class="opt">任意・分かる方だけ</span></label>
+        <input type="text" id="inHelper" inputmode="numeric" placeholder="00012345" oninput="lookup('inHelper','helperFound')">
+        <p class="found ng" id="helperFound"></p>
+      </div>
     </div>
 
     <button class="btn-main locked" id="submitBtn" onclick="submitForm()">登録する</button>
@@ -265,7 +271,7 @@
       <span style="color:#D8D4E4;">|</span>
       <a href="./ikusei/kanri-x7k2m9.html" style="color:#B8B4C8;font-size:10.5px;">管理画面</a>
     </p>
-    <div class="verTag">v1.68 (2026/08/17)</div>
+    <div class="verTag">v1.70 (2026/08/17)</div>
   </div>
 
   <!-- ===== 完了画面 ===== -->
@@ -285,7 +291,7 @@
     </div>
 
     <a class="btn-guide" id="guideLink" href="./first-support/">📘 初期サポートガイドへ進む</a>
-    <div class="verTag">v1.68 (2026/08/17)</div>
+    <div class="verTag">v1.70 (2026/08/17)</div>
   </div>
 </div>
 
@@ -438,6 +444,7 @@ async function prefill(email){
       }
       if(m.intro){ $("#inIntro").value = m.intro; lookup("inIntro","introFound"); }
       if(m.upline){ $("#inUpline").value = m.upline; lookup("inUpline","upFound"); }
+      if(m.helper){ $("#inHelper").value = m.helper; lookup("inHelper","helperFound"); }
       $("#submitBtn").textContent = "登録内容を更新する";
       $("#inPin").placeholder = "変更する場合だけ入力";
       $("#pinHint").textContent = "空欄のままなら、今のパスコードが続けて使えます";
@@ -482,6 +489,7 @@ async function submitForm(){
   if(keiretsu === "__other__") keiretsu = $("#inKeiretsuOther").value.trim();
   const intro = $("#inIntro").value.trim();
   const upline = $("#inUpline").value.trim();
+  const helper = $("#inHelper").value.trim();
 
   const email = contactEmail();
   if(authMode === "google" && !googleEmail){ show("Googleアカウントで本人確認をしてください","err"); return; }
@@ -500,7 +508,7 @@ async function submitForm(){
     const params = {
       action:"register", id, email:email,
       authType: (authMode === "google") ? "Google" : "メール",
-      name, keiretsu, intro, upline
+      name, keiretsu, intro, upline, helper
     };
     if(pin) params.pin = pin;
     const res = await fetch(GAS_URL, {method:"POST", body:new URLSearchParams(params)});
