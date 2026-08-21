@@ -457,7 +457,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:#FFFBF7;padding:16px 14px 
   🧪 このページはベータテスト中です<br>
   内容は精査中のため、今後変更になる場合がございます。<br>
   お気づきの点があれば、担当の方までお知らせください🙇<br>
-  <span style="font-size:10px;color:#B0A79E;font-family:monospace;">guide v1.75 (2026/08/17)</span>
+  <span style="font-size:10px;color:#B0A79E;font-family:monospace;">guide v1.76 (2026/08/17)</span>
 </div>
 </div>
 
@@ -475,7 +475,11 @@ let progress = {};
 let saveTimer = null;
 
 (function(){
-  try{ member = JSON.parse(localStorage.getItem("skyarc_member")||"null"); }catch(e){}
+  try{
+    const raw = localStorage.getItem("skyarc_member");
+    if(raw && raw !== "null" && raw !== "undefined") member = JSON.parse(raw);
+  }catch(e){}
+  if(member && !member.id) member = null;
   const bar = document.getElementById("loginBar");
   const who = document.getElementById("loginWho");
   const link = document.getElementById("loginLink");

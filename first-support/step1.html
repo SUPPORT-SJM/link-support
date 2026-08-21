@@ -122,7 +122,7 @@
   お気づきの点があれば、担当の方までお知らせください🙇
 </div>
 
-<div class="verTag">v1.75 (2026/08/17)</div>
+<div class="verTag">v1.76 (2026/08/17)</div>
 </div>
 
 <script>
@@ -209,7 +209,11 @@ let saveTimer = null;
 
 /* ---------- ログイン状態 ---------- */
 (function(){
-  try{ member = JSON.parse(localStorage.getItem("skyarc_member")||"null"); }catch(e){}
+  try{
+    const raw = localStorage.getItem("skyarc_member");
+    if(raw && raw !== "null" && raw !== "undefined") member = JSON.parse(raw);
+  }catch(e){}
+  if(member && !member.id) member = null;
   const bar = document.getElementById("loginBar");
   const who = document.getElementById("loginWho");
   const link = document.getElementById("loginLink");
