@@ -191,8 +191,18 @@
     <div class="gen-box">
       <label class="gen-label">🎫 あなたの紹介コード</label>
       <input class="code-input" id="refCode" type="text" placeholder="発行されたコードを入れてください">
+
+      <label class="gen-label" style="margin-top:4px;">🔗 あなたの紹介URL</label>
+      <input class="code-input" id="refUrl" type="url" inputmode="url" autocapitalize="off" spellcheck="false" placeholder="https://…">
+
       <button class="save-btn" onclick="saveRefCode()">💾 保存する</button>
       <div class="copy-hint" id="codeHint">保存すると、どの端末からでも見返せます</div>
+
+      <div id="refUrlBox" style="display:none;margin-top:12px;padding-top:12px;border-top:1px dashed #FFCCBC;">
+        <div class="copy-hint" style="margin-top:0;margin-bottom:8px;">保存されている紹介URL</div>
+        <div style="background:#FFF0EB;border:1.5px solid #FFAB91;border-radius:9px;padding:10px 12px;font-size:12px;color:#BF360C;word-break:break-all;line-height:1.7;" id="refUrlShow"></div>
+        <button class="save-btn" style="background:#FF7043;margin-top:8px;" onclick="copyRefUrl()">📋 URLをコピー</button>
+      </div>
     </div>
 
     <button class="done-btn done-btn-pending" id="btn-H3" onclick="markDone('H3')">☑️ 完了したらここを押してね!</button>
@@ -212,7 +222,7 @@
   お気づきの点があれば、担当の方までお知らせください🙇
 </div>
 
-<div class="verTag">v1.66 (2026/08/16)</div>
+<div class="verTag">v1.68 (2026/08/17)</div>
 </div>
 
 <script>
@@ -272,6 +282,10 @@ function refreshLoginBar(){
       document.getElementById("keiSelect").value = member.keiChat;
     }
     if(member.refCode) document.getElementById("refCode").value = member.refCode;
+    if(member.refUrl){
+      document.getElementById("refUrl").value = member.refUrl;
+      showRefUrl(member.refUrl);
+    }
     showKeiLinks();
     updateNick();
     loadProgress();
@@ -419,11 +433,44 @@ document.getElementById("keiSelect").addEventListener("change", showKeiLinks);
 /* ---------- 紹介コードの保存 ---------- */
 function saveRefCode(){
   const code = document.getElementById("refCode").value.trim();
+  const url  = document.getElementById("refUrl").value.trim();
   const hint = document.getElementById("codeHint");
-  if(!code){ hint.textContent = "⚠️ コードを入れてください"; return; }
-  localStorage.setItem("hajime_refcode", code);
-  saveProfile({ refCode: code }, "codeHint",
+  if(!code && !url){ hint.textContent = "⚠️ コードかURLを入れてください"; return; }
+  if(url && !/^https?:\/\//i.test(url)){
+    hint.textContent = "⚠️ URLは https:// から始まる形で入れてください"; return;
+  }
+  if(code) localStorage.setItem("hajime_refcode", code);
+  if(url)  localStorage.setItem("hajime_refurl", url);
+  showRefUrl(url);
+  saveProfile({ refCode: code, refUrl: url }, "codeHint",
     "✅ 保存しました。どの端末からでも見返せます");
+}
+
+/* 保存されている紹介URLを表示します */
+function showRefUrl(url){
+  const box = document.getElementById("refUrlBox");
+  const show = document.getElementById("refUrlShow");
+  if(!box || !show) return;
+  if(url){ show.textContent = url; box.style.display = "block"; }
+  else{ box.style.display = "none"; }
+}
+
+/* 紹介URLをコピーします */
+async function copyRefUrl(){
+  const url = document.getElementById("refUrlShow").textContent;
+  const hint = document.getElementById("codeHint");
+  if(!url) return;
+  try{
+    await navigator.clipboard.writeText(url);
+    hint.textContent = "✅ URLをコピーしました!お誘いのときにお使いください";
+  }catch(e){
+    const ta = document.createElement("textarea");
+    ta.value = url; ta.style.position="fixed"; ta.style.opacity="0";
+    document.body.appendChild(ta); ta.select();
+    try{ document.execCommand("copy"); hint.textContent = "✅ URLをコピーしました!"; }
+    catch(e2){ hint.textContent = "上のURLを長押しして選択してください"; }
+    document.body.removeChild(ta);
+  }
 }
 
 /* ---------- 共通 ---------- */
@@ -487,6 +534,11 @@ KEYS.forEach(id=>{
 });
 const savedCode = localStorage.getItem("hajime_refcode");
 if(savedCode) document.getElementById("refCode").value = savedCode;
+const savedUrl = localStorage.getItem("hajime_refurl");
+if(savedUrl){
+  document.getElementById("refUrl").value = savedUrl;
+  showRefUrl(savedUrl);
+}
 update();
 </script>
 <script src="../track.js"></script>
