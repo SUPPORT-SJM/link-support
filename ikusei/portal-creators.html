@@ -234,6 +234,8 @@
   }
 </style>
 <link rel="stylesheet" href="../beta.css">
+<script src="../loading.js"></script>
+<script src="../login.js"></script>
 </head>
 <body>
 
@@ -320,7 +322,7 @@
 <footer>
   <div class="f-title">学びのポータルサイト(クリエイターズ用)</div>
   交通整備課|クリエイターズ育成部門
-  <div class="verTag" style="margin-top:8px;color:rgba(255,255,255,.4);">v1.59 (2026/08/16)</div>
+  <div class="verTag" style="margin-top:8px;color:rgba(255,255,255,.4);">v1.66 (2026/08/16)</div>
 </footer>
 
 
@@ -330,7 +332,15 @@
 (function(){
   let m = null;
   try{ m = JSON.parse(localStorage.getItem("skyarc_member")||"null"); }catch(e){}
-  if(!m || !m.id){ location.replace("./index.html"); return; }
+  if(!m || !m.id){
+    // その場でログインしていただきます(玄関へ戻さずに済みます)
+    if(typeof skyLoginRequired === "function"){
+      skyLoginRequired(function(){ location.reload(); });
+    }else{
+      location.replace("./index.html");
+    }
+    return;
+  }
   const who = document.getElementById("navWho");
   if(who) who.textContent = (m.name ? m.name+"さん" : "会員番号 "+m.id) + (m.keiretsu ? "｜"+m.keiretsu : "");
   // クリエイターズ以上なら管理画面へのリンクを出す
@@ -356,7 +366,14 @@ window.addEventListener("pageshow", function(e){
   if(!e.persisted) return;
   let mm = null;
   try{ mm = JSON.parse(localStorage.getItem("skyarc_member")||"null"); }catch(err){}
-  if(!mm || !mm.id){ location.replace("./index.html"); return; }
+  if(!mm || !mm.id){
+    if(typeof skyLoginRequired === "function"){
+      skyLoginRequired(function(){ location.reload(); });
+    }else{
+      location.replace("./index.html");
+    }
+    return;
+  }
   const who = document.getElementById("navWho");
   if(who) who.textContent = (mm.name ? mm.name+"さん" : "会員番号 "+mm.id) + (mm.keiretsu ? "｜"+mm.keiretsu : "");
   const adminLink = document.getElementById("navAdmin");

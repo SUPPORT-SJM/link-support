@@ -238,6 +238,7 @@
 </style>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <link rel="stylesheet" href="../beta.css">
+<script src="../loading.js"></script>
 </head>
 <body>
 
@@ -266,11 +267,11 @@
     <div id="mainFields" class="locked">
       <div class="field">
         <label>会員番号</label>
-        <input type="text" id="inId" inputmode="numeric" placeholder="00012345">
+        <input type="text" id="inId" name="member-id" autocomplete="username" inputmode="numeric" placeholder="00012345">
       </div>
       <div class="field">
         <label>パスコード(4桁)</label>
-        <input type="password" id="inPin" inputmode="numeric" maxlength="4">
+        <input type="password" id="inPin" name="pin" autocomplete="current-password" inputmode="numeric" maxlength="4">
         <p style="font-size:11px;margin-top:5px;">
           <a href="#" onclick="openPinReset();return false;" style="color:#4FB08C;font-weight:700;">パスコードを忘れた・変更したい方はこちら</a>
         </p>
@@ -280,7 +281,7 @@
     <p style="text-align:center;margin-top:16px;">
       <a href="./index.html" style="color:#8B889E;font-size:12px;">‹ 育成プログラムにもどる</a>
     </p>
-    <div class="verTag">v1.59 (2026/08/16)</div>
+    <div class="verTag">v1.66 (2026/08/16)</div>
   </div>
 </div>
 
@@ -366,7 +367,7 @@
         ・各行の「編集」… 名前・系列・パスコード・役職・担当系列の変更<br>
         ・名前をクリック → 詳細画面で先生の丸と本人チェックを修正できます
       </div>
-      <div class="verTag" style="margin-top:16px;">v1.59 (2026/08/16)</div>
+      <div class="verTag" style="margin-top:16px;">v1.66 (2026/08/16)</div>
     </div>
   </main>
 </div>
@@ -462,6 +463,11 @@
         <label>担当系列</label>
         <div id="mmScopeList" style="display:grid;grid-template-columns:1fr 1fr;gap:5px;"></div>
         <p class="hint">アドバンス以上の方が受け持つ系列です(所属系列は自動で含まれます)</p>
+      </div>
+
+      <div class="mm-f">
+        <label>はじめの一歩で登録された内容 <span style="font-weight:400;font-size:11px;color:#77748A;">(本人が入力)</span></label>
+        <div style="background:var(--paper);border-radius:9px;padding:11px 12px;font-size:12.5px;line-height:1.9;color:#3E3A50;" id="mmHajime">—</div>
       </div>
 
       <div class="mm-f" id="mmEmailWrap">
@@ -866,12 +872,15 @@ function logout(){
 }
 
 async function load(isLogin){
+  if(typeof skyLoading === "function") skyLoading(isLogin ? "ログインしています…" : "読み込んでいます…");
   try{
     const url = `${GAS_URL}?action=adminList&id=${encodeURIComponent(admin.id)}&pin=${encodeURIComponent(admin.pin)}&email=${encodeURIComponent(admin.email)}&dummy=${dummyMode?1:0}`;
     const res = await fetch(url);
     const j = await res.json();
+    if(typeof skyLoadingDone === "function") skyLoadingDone();
     if(j.ok === false){
       const msg = {
+        busy:"いま混み合っています。少しおいてお試しください",
         needgoogle:"Googleでの本人確認が必要です",
         email:"この会員番号は別のGoogleアカウント(" + (j.savedHint||"***") + ")で登録されています",
         pin:"パスコードが違います",
@@ -928,6 +937,7 @@ async function load(isLogin){
     render();
     return true;
   }catch(e){
+    if(typeof skyLoadingDone === "function") skyLoadingDone();
     const msg = "通信できませんでした";
     if(isLogin){ $("#err").textContent = msg; $("#err").style.display="block"; }
     else toast(msg);
@@ -1162,6 +1172,17 @@ function openMember(m){
   const cb = document.getElementById("mmCrie");
   cb.checked = m ? (m.crie === true) : false;
   document.getElementById("mmCrieWrap").style.background = cb.checked ? "#EAF7F0" : "#fff";
+  const hj = document.getElementById("mmHajime");
+  if(hj){
+    if(m && (m.nick || m.keiChat || m.refCode)){
+      hj.innerHTML =
+        (m.nick    ? `📛 ${m.nick}<br>` : "") +
+        (m.keiChat ? `🏷️ 系列オプチャ:${m.keiChat}<br>` : "") +
+        (m.refCode ? `🎫 紹介コード:<b>${m.refCode}</b>` : "");
+    }else{
+      hj.textContent = "まだ登録されていません";
+    }
+  }
   document.getElementById("mmIntro").value = m ? (m.intro||"") : "";
   document.getElementById("mmUpline").value = m ? (m.upline||"") : "";
   document.getElementById("mmEmail").value = m ? (m.email||"") : "";
@@ -1471,9 +1492,9 @@ function toast(msg){
 
     <div class="pm-sec pm-fields" id="pmFields">
       <p class="pm-step">② 会員番号と新しいパスコード</p>
-      <input type="text" id="pmId" inputmode="numeric" placeholder="会員番号(例:00012345)">
-      <input type="password" id="pmPin1" inputmode="numeric" maxlength="4" placeholder="新しいパスコード(4桁)">
-      <input type="password" id="pmPin2" inputmode="numeric" maxlength="4" placeholder="もう一度入力">
+      <input type="text" id="pmId" name="member-id" autocomplete="on" inputmode="numeric" placeholder="会員番号(例:00012345)">
+      <input type="password" id="pmPin1" name="new-pin" autocomplete="new-password" inputmode="numeric" maxlength="4" placeholder="新しいパスコード(4桁)">
+      <input type="password" id="pmPin2" name="new-pin2" autocomplete="new-password" inputmode="numeric" maxlength="4" placeholder="もう一度入力">
     </div>
 
     <div class="pm-btns">
