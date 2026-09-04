@@ -249,7 +249,7 @@
 <body>
 
 <!-- ===== LOGIN ===== -->
-<div id="loginView">
+<div id="loginView" style="display:none;">
   <div class="lcard">
     <h1>🔐 育成システム 管理画面</h1>
     <p class="sub">クリエイターズ以上の方がお使いいただけます<br>Googleアカウントで本人確認します</p>
@@ -287,12 +287,12 @@
     <p style="text-align:center;margin-top:16px;">
       <a href="./index.html" style="color:#8B889E;font-size:12px;">‹ 育成プログラムにもどる</a>
     </p>
-    <div class="verTag">v1.80 (2026/08/18)</div>
+    <div class="verTag">v1.81 (2026/08/18)</div>
   </div>
 </div>
 
 <!-- ===== APP ===== -->
-<div id="appView">
+<div id="appView" style="display:block;">
   <div class="head">
     <div class="wrap row">
       <div>
@@ -364,7 +364,8 @@
         ・チーム代表/管理者:全員の閲覧・全フラグ・担当系列の設定<br>
         ・系列代表:担当系列の閲覧、クリエ/アドバンスの付与<br>
         ・アドバンス:担当系列の閲覧、クリエの付与<br>
-        ・クリエイターズ(役職なし):一覧は見られません(会員番号+系列で呼び出して、サポーター認定と①の丸つけ)<br>
+        ・サポーター:あなたが担当・紹介された方が見えます(①②③の丸つけ)<br>
+        ・クリエイターズ:所属系列の方が見えます(＋🐣ぴよぴよの丸つけ)<br>
         ※ 丸つけは系列に関係なく全会員が対象です<br>
         ※ クリエマップは、クリエイターズ以上なら全体をご覧いただけます<br>
         ※ <b>⚠️ 要確認</b> … 紹介者やアップの欄に、会員番号ではなくお名前が入っています。<br>
@@ -377,7 +378,7 @@
         ・各行の「編集」… 名前・系列・パスコード・役職・担当系列の変更<br>
         ・名前をクリック → 詳細画面で先生の丸と本人チェックを修正できます
       </div>
-      <div class="verTag" style="margin-top:16px;">v1.80 (2026/08/18)</div>
+      <div class="verTag" style="margin-top:16px;">v1.81 (2026/08/18)</div>
     </div>
   </main>
 </div>
@@ -762,6 +763,27 @@ async function login(){
   $("#loginBtn").textContent = "ログイン";
 }
 
+/* ================================================================
+   保存されているログイン情報で、そのまま開きます
+   (ポータルから来た方に、もう一度入力していただかないためです)
+================================================================ */
+(async function(){
+  let m = null;
+  try{
+    const raw = localStorage.getItem("skyarc_member");
+    if(raw && raw !== "null") m = JSON.parse(raw);
+  }catch(e){}
+
+  if(m && m.id && m.pin){
+    admin = { id:m.id, pin:m.pin, email:m.email || "" };
+    const ok = await load(false);
+    if(ok) return;              // 入れました
+    admin = null;               // 入れなかったので、ログイン画面を出します
+  }
+  $("#loginView").style.display = "block";
+  $("#appView").style.display = "none";
+})();
+
 /* ログアウトせずにポータルへ戻る(役職で行き先を判定) */
 
 /* ================= アクセス解析(管理者のみ) ================= */
@@ -965,32 +987,30 @@ async function load(isLogin){
     const bn = document.getElementById("dummyBetaNote");
     if(bn) bn.style.display = (j.betaMode && !j.isAdmin) ? "inline" : "none";
 
-    // クリエイターズ(役職なし)は一覧を見られないので、検索画面に切り替え
-    if(j.listDenied){
-      $("#listArea").style.display = "none";
-      $("#findArea").style.display = "block";
-      $("#search").style.display = "none";
-      $("#btnAdd").style.display = "none";
-      $("#meLine").textContent = (j.adminName||"") + "さん｜クリエイターズ";
-      $("#scopeLine").innerHTML = "会員番号と系列を入力して、サポーター認定や①の丸つけができます";
-      buildFindKeiretsu();
-      return true;
-    }
-
+    /* どの段階の方にも、見える範囲の一覧をお出しします */
     $("#listArea").style.display = "block";
     $("#findArea").style.display = "none";
     $("#btnAdd").style.display = j.isFull ? "inline-block" : "none";
 
-    const lvl = j.isFull ? "全体管理" : (j.isKeiRep ? "系列代表(担当系列)" : "アドバンス(担当系列)");
+    const lvl = j.isFull ? "全体管理"
+              : j.isKeiRep ? "系列代表"
+              : j.isAdv ? "アドバンス"
+              : j.isCrie ? "クリエイターズ"
+              : "サポーター";
     $("#meLine").textContent = (j.adminName||"") + "さん｜" + lvl;
     const needN = (j.members||[]).filter(x=>x.needCheck).length;
     const autoN = (j.members||[]).filter(x=>x.autoFill).length;
     const needTxt =
       (needN ? ` <span class="chip" style="background:#FFF3D6;color:#8A6D00;">⚠️ 要確認 ${needN}名</span>` : "") +
       (autoN ? ` <span class="chip" style="background:#E6F0FB;color:#2B5C93;">🔎 確認待ち ${autoN}名</span>` : "");
-    $("#scopeLine").innerHTML = (j.isFull
-      ? `全 <b>${j.members.length}</b> 名を表示中`
-      : `担当系列:<b>${(j.scope||[]).join(" / ") || "未設定"}</b> <span class="chip">${j.members.length}名</span>`) + needTxt;
+    /* どの範囲が見えているかをお伝えします */
+    const where = {
+      all:    `全 <b>${j.members.length}</b> 名を表示中`,
+      scope:  `担当系列:<b>${(j.scope||[]).join(" / ") || "未設定"}</b> <span class="chip">${j.members.length}名</span>`,
+      kei:    `所属系列 <b>${j.myKei || "未設定"}</b> の方 <span class="chip">${j.members.length}名</span>`,
+      helper: `あなたが担当・紹介された方 <span class="chip">${j.members.length}名</span>`
+    }[j.viewMode] || `<span class="chip">${j.members.length}名</span>`;
+    $("#scopeLine").innerHTML = where + needTxt;
     render();
     return true;
   }catch(e){
@@ -1415,10 +1435,16 @@ function renderDetail(){
   document.getElementById("dmSub").textContent =
     m.id + "｜" + (m.keiretsu || "系列未設定") + (m.role ? "｜" + m.role : "");
 
-  // 自分が丸をつけられるプログラムだけ表示
-  const showApps = detailData.canMarkApps && detailData.canMarkApps.length
-    ? Object.keys(ITEM_MASTER).filter(a => detailData.canMarkApps.indexOf(a) >= 0)
-    : Object.keys(ITEM_MASTER);
+  /* ご覧いただける段階のプログラムだけをお出しします
+     （サポーターの方には、育成の内容はお見せしません） */
+  const showApps = Object.keys(ITEM_MASTER).filter(a=>{
+    const pg = detailData.progress[a];
+    if(pg && pg.hidden) return false;                    // 見られない段階
+    if(detailData.canMarkApps && detailData.canMarkApps.length){
+      return detailData.canMarkApps.indexOf(a) >= 0;     // 丸をつけられるもの
+    }
+    return true;
+  });
 
   const body = document.getElementById("dmBody");
   body.innerHTML = showApps.map(app=>{

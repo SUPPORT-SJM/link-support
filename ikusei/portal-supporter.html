@@ -240,7 +240,7 @@
 <footer>
   <div class="f-title">サポーター育成マニュアル(入口ページ)</div>
   Presented by Skyarc-team
-  <div class="verTag" style="margin-top:8px;color:rgba(255,255,255,.4);">v1.80 (2026/08/18)</div>
+  <div class="verTag" style="margin-top:8px;color:rgba(255,255,255,.4);">v1.81 (2026/08/18)</div>
 </footer>
 
 
@@ -267,7 +267,8 @@
   if(who) who.textContent = (m.name ? m.name+"さん" : "会員番号 "+m.id) + (m.keiretsu ? "｜"+m.keiretsu : "");
   // クリエイターズ以上なら管理画面へのリンクを出す
   const adminLink = document.getElementById("navAdmin");
-  if(adminLink && (m.crie === true || String(m.role||"") !== "")) adminLink.style.display = "inline-block";
+  /* サポーター以上の方に、管理画面をお出しします */
+  if(adminLink && (m.sup === true || m.crie === true || String(m.role||"") !== "")) adminLink.style.display = "inline-block";
 
   // 修了バッジを表示
   const bw = document.getElementById("navBadges");
@@ -299,7 +300,7 @@ window.addEventListener("pageshow", function(e){
   const who = document.getElementById("navWho");
   if(who) who.textContent = (mm.name ? mm.name+"さん" : "会員番号 "+mm.id) + (mm.keiretsu ? "｜"+mm.keiretsu : "");
   const adminLink = document.getElementById("navAdmin");
-  if(adminLink && (mm.crie === true || String(mm.role||"") !== "")) adminLink.style.display = "inline-block";
+  if(adminLink && (mm.sup === true || mm.crie === true || String(mm.role||"") !== "")) adminLink.style.display = "inline-block";
 
   // 修了バッジを表示
   const bw = document.getElementById("navBadges");
