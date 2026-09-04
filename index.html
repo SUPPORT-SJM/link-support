@@ -95,7 +95,7 @@
   .welcome button{margin-left:auto;background:none;color:#9A93B0;font-size:11px;
     text-decoration:underline;padding:4px;flex-shrink:0;}
 </style>
-<script src="./loading.js"></script>
+<script src="loading.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -165,7 +165,7 @@
 
   <div class="foot">
     Presented by Skyarc-team<br>
-    <span class="ver">v1.78 (2026/08/17)</span>
+    <span class="ver">v1.80 (2026/08/18)</span>
   </div>
 </div>
 
@@ -322,6 +322,8 @@ async function doLogin(){
     localStorage.setItem("skyarc_member", JSON.stringify(m));
 
     show("✅ ログインしました。ご案内しています…", "ok");
+    /* 行き先を調べる間も、そのままお待ちいただきます */
+    if(typeof skyLoading === "function") skyLoading("ご案内しています", "進んでいるところをお調べしています");
     goNext(id, pin, m);
 
   }catch(e){
@@ -351,14 +353,16 @@ async function goNext(id, pin, m){
     if(j.ok && j.key) where = j;
   }catch(e){}
 
-  if(where && ROUTE[where.key]){
-    show(`✅ ログインしました<br><b>${where.label}</b> へご案内します…`, "ok");
-    setTimeout(()=>{ location.href = ROUTE[where.key]; }, 900);
-    return;
-  }
+  const url = (where && ROUTE[where.key])
+    ? ROUTE[where.key]
+    : (m.crie ? ROUTE.crie : (m.sup ? ROUTE.sup : ROUTE.hajime));
+  const label = (where && where.label) ? where.label : "つぎのページ";
 
-  const fallback = m.crie ? ROUTE.crie : (m.sup ? ROUTE.sup : ROUTE.hajime);
-  setTimeout(()=>{ location.href = fallback; }, 700);
+  /* 行き先が決まったら、そのままページを開きます
+     （画面が切り替わるまで、ぐるぐるを出したままにします） */
+  show(`✅ ログインしました<br><b>${label}</b> へご案内します…`, "ok");
+  if(typeof skyGoTo === "function") skyGoTo(url, label + " をひらいています");
+  else location.href = url;
 }
 
 /* ---------- パスコードのお忘れ ---------- */
