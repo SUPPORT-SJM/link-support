@@ -124,7 +124,7 @@
       どちらも、管理画面から直していただけます。
     </p>
 
-    <div class="verTag">v1.81 (2026/08/18)</div>
+    <div class="verTag">v1.87 (2026/08/18)</div>
   </div>
 </main>
 
@@ -170,6 +170,7 @@ async function load(){
     const url = `${GAS_URL}?action=myTeam&id=${encodeURIComponent(member.id)}&pin=${encodeURIComponent(member.pin)}`;
     const res = await fetch(url);
     const j = await res.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
     if(typeof skyLoadingDone === "function") skyLoadingDone();
 
     if(j.ok === false){

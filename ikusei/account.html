@@ -164,7 +164,7 @@
     </a>
     <button class="btn btn-out" style="margin-top:9px;" onclick="doLogout()">ログアウト</button>
 
-    <div class="verTag">v1.81 (2026/08/18)</div>
+    <div class="verTag">v1.87 (2026/08/18)</div>
   </div>
 </main>
 
@@ -234,6 +234,7 @@ async function saveUrl(){
       action:"saveProfile", id:member.id, pin:member.pin, refUrl:url
     })});
     const j = await res.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
     if(typeof skyLoadingDone === "function") skyLoadingDone();
     if(j.ok === false){ show("保存できませんでした。", "err"); return; }
     member.refUrl = url;
@@ -271,6 +272,7 @@ async function changePin(){
       action:"resetPin", id:member.id, oldPin:now, newPin:p1
     })});
     const j = await res.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
     if(typeof skyLoadingDone === "function") skyLoadingDone();
     if(j.ok === false){
       show({pin:"いまのパスコードが違います", nomember:"会員番号が見つかりません"}[j.error]

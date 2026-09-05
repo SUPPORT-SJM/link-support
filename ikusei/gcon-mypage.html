@@ -344,7 +344,7 @@
     ① ぴよぴよ脱出クイズ|② グルコンリーダー育成(このページ)<br>
     Presented by Skyarc-team<br>
     <a href="#" onclick="showInstallHelp();return false;" style="color:var(--green-leaf);font-weight:700;">📲 ホーム画面に追加する方法</a>
-    <div class="verTag" style="margin-top:8px;color:rgba(255,255,255,.4);">v1.81 (2026/08/18)</div>
+    <div class="verTag" style="margin-top:8px;color:rgba(255,255,255,.4);">v1.87 (2026/08/18)</div>
 </footer>
 </div>
 
@@ -550,6 +550,7 @@ async function login(){
       await fetch(gasUrlFor(keiretsu), {method:"POST", body:new URLSearchParams({action:"login", app:APP_ID, id, pin, name:name||"", keiretsu:keiretsu||""})});
       const res = await fetch(`${gasUrlFor(keiretsu)}?action=load&app=${APP_ID}&id=${encodeURIComponent(id)}&pin=${encodeURIComponent(pin)}&items=${encodeURIComponent(ITEM_IDS)}`);
       const j = await res.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
       if(j.ok === false && j.error === "pin"){
         err.textContent = "パスコードが一致しません。忘れた場合は担当コーチにご確認ください。";
         err.style.display = "block";
@@ -673,6 +674,7 @@ function saveAll(){
       });
       const res = await fetch(gasUrlFor(member && member.keiretsu), {method:"POST", body});
       const j = await res.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
       if(j.ok===false && j.error==="pin"){ setSync("⚠️ パスコードが一致しません(コーチにご相談ください)"); return; }
       setSync("✅ 保存済み(どの端末からでも続きができます)");
     }catch(e){
@@ -754,9 +756,20 @@ if(!isStandalone && (isIOS || isLINE)){
   }catch(e){}
   if(m && !m.id) m = null;
   if(!m || !m.id){
-    // 未ログインなら玄関へ戻す
-    location.replace("./index.html");
+    // その場でログインしていただきます(玄関へ戻さずに済みます)
+    if(typeof skyLoginRequired === "function"){
+      skyLoginRequired(function(){ location.reload(); });
+    }else{
+      location.replace("../index.html");
+    }
     return;
+  }
+  /* 段階が足りない方には、ご案内をお出しして、お戻しします */
+  if(m.crie !== true && !String(m.role||"")){
+    if(typeof skyNotAllowed === "function"){
+      skyNotAllowed("この教材は、クリエイターズになってから始まります。");
+      return;
+    }
   }
   member = m;
   localStorage.setItem("gcon_member", JSON.stringify(m));
@@ -775,7 +788,11 @@ if(!isStandalone && (isIOS || isLINE)){
     if(raw && raw !== "null" && raw !== "undefined") m = JSON.parse(raw);
   }catch(e){}
   if(m && !m.id) m = null;
-  if(!m || !m.id){ location.replace("./index.html"); return; }
+  if(!m || !m.id){
+    if(typeof skyLoginRequired === "function") skyLoginRequired(function(){ location.reload(); });
+    else location.replace("../index.html");
+    return;
+  }
 
   const isCrie = m.crie === true;
   const back = document.getElementById("navBack");
@@ -798,7 +815,11 @@ window.addEventListener("pageshow", function(e){
   if(!e.persisted) return;
   let mm = null;
   try{ mm = JSON.parse(localStorage.getItem("skyarc_member")||"null"); }catch(err){}
-  if(!mm || !mm.id){ location.replace("./index.html"); return; }
+  if(!mm || !mm.id){
+    if(typeof skyLoginRequired === "function") skyLoginRequired(function(){ location.reload(); });
+    else location.replace("../index.html");
+    return;
+  }
   const who = document.getElementById("navWho");
   if(who) who.textContent = (mm.name ? mm.name+"さん" : "会員番号 "+mm.id) + (mm.keiretsu ? "｜"+mm.keiretsu : "");
   const adminLink = document.getElementById("navAdmin");

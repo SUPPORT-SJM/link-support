@@ -181,7 +181,7 @@
       Presented by Skyarc-team<br>
       <a href="./kanri-x7k2m9.html" style="color:#B8B4C8;font-size:10.5px;">管理画面(クリエイターズ以上)</a>
     </p>
-    <div class="verTag">v1.81 (2026/08/18)</div>
+    <div class="verTag">v1.87 (2026/08/18)</div>
   </div>
 
   <div id="loading">
@@ -275,6 +275,7 @@ async function fillFromEmail(email){
   try{
     const res = await fetch(`${gasUrlFor("")}?action=byEmail&email=${encodeURIComponent(email)}`);
     const j = await res.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
     if(!j.ok || !j.members || j.members.length === 0) return;
 
     if(j.members.length === 1){
@@ -403,6 +404,7 @@ async function fetchExtra(m){
     const url = `${gasUrlFor(m.keiretsu)}?action=extra&id=${encodeURIComponent(m.id)}&pin=${encodeURIComponent(m.pin)}`;
     const res = await fetch(url);
     const j = await res.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
     if(j.ok){
       m.badges = j.badges || [];
       m.celebrate = j.celebrate || "";
@@ -451,6 +453,7 @@ async function login(){
     const body = new URLSearchParams({action:"login", id, pin, email:googleEmail, name:name||"", keiretsu:keiretsu||""});
     const res = await fetch(gasUrlFor(keiretsu), {method:"POST", body});
     const j = await res.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
     if(typeof skyLoadingDone === "function") skyLoadingDone();
     if(j.ok === false){
       if(j.error === "pin"){
@@ -559,6 +562,7 @@ async function submitPinReset(){
     const body = new URLSearchParams({action:"resetPin", id:id, email:pmEmail, newPin:p1});
     const res = await fetch(PIN_RESET_URL, {method:"POST", body});
     const j = await res.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
     if(j.ok === false){
       show({
         nomember:"その会員番号は登録されていません",
@@ -651,6 +655,28 @@ if("serviceWorker" in navigator){ navigator.serviceWorker.register("./gcon-sw.js
   </div>
 </div>
 
+<script>
+/* ================================================================
+   すでにログインされている方は、そのまま進みます
+   （ここで改めて入力していただかないためです）
+================================================================ */
+(function(){
+  let m = null;
+  try{
+    const raw = localStorage.getItem("skyarc_member");
+    if(raw && raw !== "null" && raw !== "undefined") m = JSON.parse(raw);
+  }catch(e){}
+  if(!m || !m.id || !m.pin) return;
+
+  if(typeof skyLoading === "function") skyLoading("ご案内しています", "少々お待ちください");
+  if(typeof goTo === "function"){
+    try{ goTo(m); return; }catch(e){}
+  }
+  /* うまくいかないときは、その方に合う入口へ */
+  location.replace(m.crie === true ? "./portal-creators.html"
+                 : (m.sup === true ? "./portal-supporter.html" : "./member.html"));
+})();
+</script>
 <script src="../track.js"></script>
 </body>
 </html>

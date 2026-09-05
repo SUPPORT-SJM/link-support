@@ -197,7 +197,7 @@
     <p style="text-align:center;margin-top:14px;">
       <a href="./kanri-x7k2m9.html" style="color:#8B889E;font-size:11.5px;">‹ 管理画面にもどる</a>
     </p>
-    <div class="verTag">v1.81 (2026/08/18)</div>
+    <div class="verTag">v1.87 (2026/08/18)</div>
   </div>
 </div>
 
@@ -259,7 +259,7 @@
         ①🎓=ぴよぴよ卒業 ／ ②の数字=グルコンリーダー育成の先生の丸<br>
         カードをクリックすると、その方から下だけを表示します。会員名簿の「アップの会員番号」欄でつながりを設定してください。
       </div>
-      <div class="verTag">v1.81 (2026/08/18)</div>
+      <div class="verTag">v1.87 (2026/08/18)</div>
     </div>
   </main>
 </div>
@@ -310,7 +310,14 @@ async function load(isLogin){
     const url = `${GAS_URL}?action=creaMap&id=${encodeURIComponent(admin.id)}&pin=${encodeURIComponent(admin.pin)}&dummy=${dummyMode?1:0}`;
     const res = await fetch(url);
     const j = await res.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
     if(typeof skyLoadingDone === "function") skyLoadingDone();
+    if(j.ok === false && j.error === "noperm"){
+      if(typeof skyNotAllowed === "function"){
+        skyNotAllowed("この画面は、クリエイターズの方向けのものです。");
+        return false;
+      }
+    }
     if(j.ok === false){
       const msg = {pin:"パスコードが違います",
                    noperm:"クリエイターズ以上の方がご覧になれます",
@@ -589,6 +596,7 @@ async function makeDummy(){
     const body = new URLSearchParams({ action:"makeDummy", id:admin.id, pin:admin.pin, count:String(n) });
     const res = await fetch(GAS_URL, {method:"POST", body});
     const j = await res.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
     if(j.ok === false){
       toast({noperm:"この機能をお使いいただける権限がありません", pin:"パスコードが違います"}[j.error] || "作成できませんでした");
       return;
@@ -612,6 +620,7 @@ async function clearDummy(){
     const body = new URLSearchParams({ action:"clearDummy", id:admin.id, pin:admin.pin });
     const res = await fetch(GAS_URL, {method:"POST", body});
     const j = await res.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
     if(j.ok === false){ toast("削除できませんでした"); return; }
     toast("仮データを消しました");
     dummyMode = false;

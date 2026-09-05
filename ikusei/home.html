@@ -107,11 +107,12 @@
 </style>
 <link rel="stylesheet" href="../beta.css">
 <script src="../loading.js"></script>
+<script src="../login.js"></script>
 </head>
 <body>
 
 <!-- ========== LOGIN ========== -->
-<div id="loginView">
+<div id="loginView" style="display:none;">
   <div class="login-card">
     <div class="logo">🌱</div>
     <h1>スカイアーク<br>育成プログラム</h1>
@@ -166,7 +167,7 @@
 
   <footer>
     Presented by Skyarc-team
-    <div class="verTag" style="margin-top:8px;color:rgba(255,255,255,.4);">v1.81 (2026/08/18)</div>
+    <div class="verTag" style="margin-top:8px;color:rgba(255,255,255,.4);">v1.87 (2026/08/18)</div>
 </footer>
 </div>
 
@@ -397,13 +398,24 @@ function toast(msg){
   setTimeout(()=>t.classList.remove("show"), 1800);
 }
 
-/* 自動ログイン */
+/* 保存されているログイン情報で、そのまま開きます */
 (function(){
-  const saved = localStorage.getItem("skyarc_member");
-  if(saved){
-    member = JSON.parse(saved);
+  let m = null;
+  try{
+    const raw = localStorage.getItem("skyarc_member");
+    if(raw && raw !== "null" && raw !== "undefined") m = JSON.parse(raw);
+  }catch(e){}
+  if(m && !m.id) m = null;
+
+  if(m){
+    member = m;
     enterHome();
     loadHome(false);
+  }else{
+    /* その場でログインしていただきます */
+    if(typeof skyLoginRequired === "function"){
+      skyLoginRequired(function(){ location.reload(); });
+    }
   }
   if("serviceWorker" in navigator){ navigator.serviceWorker.register("./gcon-sw.js").catch(()=>{}); }
 })();

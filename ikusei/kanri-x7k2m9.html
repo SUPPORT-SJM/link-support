@@ -287,7 +287,7 @@
     <p style="text-align:center;margin-top:16px;">
       <a href="./index.html" style="color:#8B889E;font-size:12px;">‹ 育成プログラムにもどる</a>
     </p>
-    <div class="verTag">v1.81 (2026/08/18)</div>
+    <div class="verTag">v1.87 (2026/08/18)</div>
   </div>
 </div>
 
@@ -378,7 +378,7 @@
         ・各行の「編集」… 名前・系列・パスコード・役職・担当系列の変更<br>
         ・名前をクリック → 詳細画面で先生の丸と本人チェックを修正できます
       </div>
-      <div class="verTag" style="margin-top:16px;">v1.81 (2026/08/18)</div>
+      <div class="verTag" style="margin-top:16px;">v1.87 (2026/08/18)</div>
     </div>
   </main>
 </div>
@@ -699,6 +699,7 @@ async function fillFromEmail(email){
   try{
     const res = await fetch(`${GAS_URL}?action=byEmail&email=${encodeURIComponent(email)}`);
     const j = await res.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
     if(j.ok && j.members && j.members.length === 1){
       document.getElementById("inId").value = j.members[0].id || "";
       document.getElementById("inPin").focus();
@@ -803,6 +804,7 @@ async function loadStats(){
     const url = `${GAS_URL}?action=stats&id=${encodeURIComponent(admin.id)}&pin=${encodeURIComponent(admin.pin)}&days=${days}`;
     const res = await fetch(url);
     const j = await res.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
     if(j.ok === false){
       body.innerHTML = `<div class="st-empty">${
         {noperm:"この画面は管理者のみご覧いただけます", pin:"パスコードが違います"}[j.error] || "読み込めませんでした"
@@ -901,6 +903,7 @@ async function makeDummy(){
     });
     const res = await fetch(GAS_URL, {method:"POST", body});
     const j = await res.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
     if(j.ok === false){
       toast({noperm:"管理者のみご利用いただけます", pin:"パスコードが違います"}[j.error] || "作成できませんでした");
       return;
@@ -923,6 +926,7 @@ async function clearDummy(){
     const body = new URLSearchParams({ action:"clearDummy", id:admin.id, pin:admin.pin });
     const res = await fetch(GAS_URL, {method:"POST", body});
     const j = await res.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
     if(j.ok === false){ toast("削除できませんでした"); return; }
     toast("仮データを消しました");
     dummyMode = false;
@@ -951,7 +955,15 @@ async function load(isLogin){
     const url = `${GAS_URL}?action=adminList&id=${encodeURIComponent(admin.id)}&pin=${encodeURIComponent(admin.pin)}&email=${encodeURIComponent(admin.email)}&dummy=${dummyMode?1:0}`;
     const res = await fetch(url);
     const j = await res.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
     if(typeof skyLoadingDone === "function") skyLoadingDone();
+
+    /* お使いいただける方かを確かめます */
+    if(j.ok === false && j.error === "noperm" && typeof skyNotAllowed === "function"){
+      skyNotAllowed("この画面は、サポートに関わる方向けのものです。");
+      return false;
+    }
+
     if(j.ok === false){
       const msg = {
         busy:"いま混み合っています。少しおいてお試しください",
@@ -1086,6 +1098,7 @@ async function setFlag(target, flag, on){
     , dummy:dummyMode?"1":"0"});
     const res = await fetch(GAS_URL, {method:"POST", body});
     const j = await res.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
     if(j.ok === false){
       toast({outofscope:"担当系列外の方は操作できません",
              scopelimit:"自分の担当系列の範囲でのみ設定できます",
@@ -1136,6 +1149,7 @@ async function saveScope(){
     , dummy:dummyMode?"1":"0"});
     const res = await fetch(GAS_URL, {method:"POST", body});
     const j = await res.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
     if(j.ok === false){
       toast({outofscope:"担当系列外の方は操作できません",
              scopelimit:"自分の担当系列の範囲でのみ設定できます",
@@ -1200,6 +1214,7 @@ async function submitPinReset(){
     const body = new URLSearchParams({action:"resetPin", id:id, email:pmEmail, newPin:p1});
     const res = await fetch(PIN_RESET_URL, {method:"POST", body});
     const j = await res.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
     if(j.ok === false){
       show({
         nomember:"その会員番号は登録されていません",
@@ -1371,6 +1386,7 @@ async function saveMember(){
 
     const res = await fetch(GAS_URL, {method:"POST", body:new URLSearchParams(params)});
     const j = await res.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
     if(j.ok === false){
       show({noperm:"この操作の権限がありません",
             badpin:"パスコードは4桁の数字で入力してください",
@@ -1411,6 +1427,7 @@ async function openDetail(id, keiretsu){
     const url = `${GAS_URL}?action=adminDetail&id=${encodeURIComponent(admin.id)}&pin=${encodeURIComponent(admin.pin)}&email=${encodeURIComponent(admin.email)}&target=${encodeURIComponent(id)}&apps=${encodeURIComponent(APPS)}&keiretsu=${encodeURIComponent(findKeiretsu)}&dummy=${dummyMode?1:0}`;
     const res = await fetch(url);
     const j = await res.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
     if(j.ok === false){
       toast({
         outofscope:"担当系列外の方です",
@@ -1559,6 +1576,7 @@ async function saveMarks(){
       , dummy:dummyMode?"1":"0"});
       const res = await fetch(GAS_URL, {method:"POST", body});
       const j = await res.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
       if(j.ok === false){
         toast({outofscope:"担当系列外の方は操作できません",
                noperm_app:"このプログラムの丸をつける権限がありません",
