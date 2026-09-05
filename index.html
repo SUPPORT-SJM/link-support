@@ -165,7 +165,7 @@
 
   <div class="foot">
     Presented by Skyarc-team<br>
-    <span class="ver">v1.81 (2026/08/18)</span>
+    <span class="ver">v1.87 (2026/08/18)</span>
   </div>
 </div>
 
@@ -291,6 +291,7 @@ async function doLogin(){
                 (googleEmail ? `&email=${encodeURIComponent(googleEmail)}` : "");
     const res = await fetch(url);
     const j = await res.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
     if(typeof skyLoadingDone === "function") skyLoadingDone();
 
     if(j.ok === false){
@@ -350,6 +351,7 @@ async function goNext(id, pin, m){
   try{
     const r = await fetch(`${GAS_URL}?action=whereTo&id=${encodeURIComponent(id)}&pin=${encodeURIComponent(pin)}`);
     const j = await r.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
     if(j.ok && j.key) where = j;
   }catch(e){}
 

@@ -117,6 +117,40 @@
     if (box && showing) { box.classList.remove("show"); showing = false; }
   };
 
+  /* ================================================================
+     整理中のご案内
+     ----------------------------------------------------------------
+     GASから "maintenance" が返ってきたときに呼びます。
+     閉じられない画面をお出しして、しばらくお待ちいただきます。
+  ================================================================ */
+  window.skyMaintenance = function (message) {
+    clearTimeout(showTimer);
+    clearInterval(tick);
+    build();
+    showing = true;
+    var card = document.getElementById("sklCard");
+    card.className = "skl-card";
+    card.querySelector(".skl-ring").style.cssText =
+      "border-color:#FDF3DC;border-top-color:#F2B33D;";
+    document.getElementById("sklMsg").textContent = "ただいまデータの整理中です";
+    document.getElementById("sklDots").textContent = "";
+    document.getElementById("sklSub").innerHTML =
+      (message || "少しお時間をいただいております。") +
+      "<br>しばらくしてから、もう一度お試しください🙏";
+    document.getElementById("sklBtn").className = "skl-btn";
+    box.classList.add("show");
+  };
+
+  /* 返ってきた内容が整理中なら、ご案内を出します
+     （true が返ったら、その先の処理は止めてください） */
+  window.skyCheckMaintenance = function (j) {
+    if (j && j.error === "maintenance") {
+      window.skyMaintenance(j.message);
+      return true;
+    }
+    return false;
+  };
+
   window.skyLoadingError = function (message, subMessage) {
     clearTimeout(showTimer);
     clearInterval(tick);

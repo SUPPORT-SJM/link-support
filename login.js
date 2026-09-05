@@ -149,4 +149,55 @@
     }
   }
 
+
+  /* ================================================================
+     このページをお使いいただけない方へのご案内
+     ----------------------------------------------------------------
+     skyNotAllowed("この画面は…") と呼ぶと、
+     ご案内をお出ししてから、その方に合う入口へお戻しします。
+  ================================================================ */
+  window.skyNotAllowed = function (message) {
+    var d = document.createElement("div");
+    d.id = "skyMoveBox";
+    d.style.cssText = "position:fixed;inset:0;z-index:99999;background:rgba(42,36,56,.62);"
+      + "backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:22px;";
+    d.innerHTML = '<div style="background:#fff;border-radius:20px;padding:30px 26px;max-width:330px;'
+      + 'width:100%;text-align:center;box-shadow:0 14px 44px rgba(0,0,0,.3);">'
+      + '<div style="font-size:40px;line-height:1;">🌱</div>'
+      + '<p style="font-family:\'Zen Maru Gothic\',\'Noto Sans JP\',sans-serif;font-weight:700;'
+      + 'font-size:16px;color:#3E3A50;margin:12px 0 10px;line-height:1.6;">'
+      + 'いまの進み具合に合わせた<br>ページを読み込みます</p>'
+      + (message
+          ? '<p style="font-size:12.5px;color:#8B889E;line-height:1.9;margin-bottom:20px;">'
+            + message + '</p>'
+          : '<div style="height:8px;"></div>')
+      + '<button id="skyMoveOk" style="width:100%;padding:14px;border-radius:13px;border:none;'
+      + 'cursor:pointer;background:#6E5FB5;color:#fff;font-size:15px;font-weight:700;'
+      + 'font-family:inherit;">OK</button>'
+      + '</div>';
+    document.body.appendChild(d);
+    document.getElementById("skyMoveOk").addEventListener("click", function () {
+      /* 押していただいてから、読み込みのご案内を出して移ります */
+      var url = window.skyHomeFor();
+      if (typeof window.skyGoTo === "function") window.skyGoTo(url, "読み込んでいます");
+      else location.replace(url);
+    });
+  };
+
+  /* その方に合う入口をお返しします */
+  window.skyHomeFor = function (m) {
+    if (!m) {
+      try {
+        var raw = localStorage.getItem("skyarc_member");
+        if (raw && raw !== "null") m = JSON.parse(raw);
+      } catch (e) {}
+    }
+    var here = location.pathname;
+    var up = (here.indexOf("/ikusei/") >= 0 || here.indexOf("/first-support/") >= 0) ? "../" : "./";
+    if (!m || !m.id) return up + "index.html";
+    if (m.crie === true) return up + "ikusei/portal-creators.html";
+    if (m.sup === true)  return up + "ikusei/portal-supporter.html";
+    return up + "first-support/";
+  };
+
 })();

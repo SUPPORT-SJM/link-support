@@ -301,7 +301,7 @@
       <span style="color:#D8D4E4;">|</span>
       <a href="./ikusei/kanri-x7k2m9.html" style="color:#B8B4C8;font-size:10.5px;">管理画面</a>
     </p>
-    <div class="verTag">v1.81 (2026/08/18)</div>
+    <div class="verTag">v1.87 (2026/08/18)</div>
   </div>
 
   <!-- ===== 完了画面 ===== -->
@@ -321,7 +321,7 @@
     </div>
 
     <a class="btn-guide" id="guideLink" href="./first-support/">📘 初期サポートガイドへ進む</a>
-    <div class="verTag">v1.81 (2026/08/18)</div>
+    <div class="verTag">v1.87 (2026/08/18)</div>
   </div>
 </div>
 
@@ -481,6 +481,7 @@ async function prefill(email){
   try{
     const res = await fetch(`${GAS_URL}?action=byEmail&email=${encodeURIComponent(email)}`);
     const j = await res.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
     if(j.ok && j.members && j.members.length >= 1){
       const m = j.members[0];
       isUpdate = true;
@@ -537,6 +538,7 @@ function lookup(inputId, outId){
     try{
       const res = await fetch(`${GAS_URL}?action=lookupName&id=${encodeURIComponent(v)}`);
       const j = await res.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
       if(j.ok && j.found){
         out.textContent = "→ " + (j.name || "(名前未登録)") + "さん" + (j.keiretsu ? "(" + j.keiretsu + ")" : "");
         out.className = "found ok";
@@ -591,6 +593,7 @@ async function submitForm(){
     if(pin) params.pin = pin;
     const res = await fetch(GAS_URL, {method:"POST", body:new URLSearchParams(params)});
     const j = await res.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
     if(typeof skyLoadingDone === "function") skyLoadingDone();
     if(j.ok === false){
       show({
