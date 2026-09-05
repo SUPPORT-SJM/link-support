@@ -181,7 +181,7 @@
       Presented by Skyarc-team<br>
       <a href="./kanri-x7k2m9.html" style="color:#B8B4C8;font-size:10.5px;">管理画面(クリエイターズ以上)</a>
     </p>
-    <div class="verTag">v1.88 (2026/08/18)</div>
+    <div class="verTag">v1.92 (2026/08/18)</div>
   </div>
 
   <div id="loading">
@@ -415,8 +415,16 @@ async function fetchExtra(m){
 }
 
 function goTo(member){
-  // サポーター未満の方には、まだ早い旨をご案内します
-  if(member.sup !== true && member.crie !== true){
+  const role = String(member.role || "");
+
+  /* 役職をお持ちの方は、運営のページへご案内します */
+  if(role.indexOf("管理者") >= 0){
+    location.href = "./kanri-x7k2m9.html";
+    return;
+  }
+
+  // サポーター未満で、役職もない方には、まだ早い旨をご案内します
+  if(member.sup !== true && member.crie !== true && !role){
     location.href = "./member.html";
     return;
   }
@@ -673,10 +681,16 @@ if("serviceWorker" in navigator){ navigator.serviceWorker.register("./gcon-sw.js
     try{ goTo(m); return; }catch(e){}
   }
   /* うまくいかないときは、その方に合う入口へ */
-  location.replace(m.crie === true ? "./portal-creators.html"
-                 : (m.sup === true ? "./portal-supporter.html" : "./member.html"));
+  const role = String(m.role || "");
+  location.replace(
+      role.indexOf("管理者") >= 0 ? "./kanri-x7k2m9.html"
+    : role                        ? "./portal-creators.html"
+    : m.crie === true             ? "./portal-creators.html"
+    : m.sup === true              ? "./portal-supporter.html"
+    : "./member.html");
 })();
 </script>
 <script src="../track.js"></script>
+<script src="../adminlink.js"></script>
 </body>
 </html>
