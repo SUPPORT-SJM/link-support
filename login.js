@@ -195,6 +195,10 @@
     var here = location.pathname;
     var up = (here.indexOf("/ikusei/") >= 0 || here.indexOf("/first-support/") >= 0) ? "../" : "./";
     if (!m || !m.id) return up + "index.html";
+    /* 役職をお持ちの方は、運営のページへ */
+    var role = String(m.role || "");
+    if (role.indexOf("管理者") >= 0) return up + "ikusei/kanri-x7k2m9.html";
+    if (role) return up + "ikusei/portal-creators.html";
     if (m.crie === true) return up + "ikusei/portal-creators.html";
     if (m.sup === true)  return up + "ikusei/portal-supporter.html";
     return up + "first-support/";
