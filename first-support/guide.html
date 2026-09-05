@@ -457,7 +457,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:#FFFBF7;padding:16px 14px 
   🧪 このページはベータテスト中です<br>
   内容は精査中のため、今後変更になる場合がございます。<br>
   お気づきの点があれば、担当の方までお知らせください🙇<br>
-  <span style="font-size:10px;color:#B0A79E;font-family:monospace;">guide v1.88 (2026/08/18)</span>
+  <span style="font-size:10px;color:#B0A79E;font-family:monospace;">guide v1.92 (2026/08/18)</span>
 </div>
 </div>
 
@@ -490,7 +490,7 @@ let saveTimer = null;
     bar.className = "login-bar on";
     who.textContent = (member.name ? member.name + "さん" : "会員番号 " + member.id) + " でログイン中";
     link.textContent = "育成プログラム";
-    link.href = "./ikusei/";
+    link.href = "../ikusei/";
     note.textContent = "✅ 進捗は保存されます。どの端末からでも続きが見られます。";
     loadProgress();
   }else{
@@ -642,5 +642,6 @@ nameInput.addEventListener('input',update);
 seriesSelect.addEventListener('change',update);
 </script>
 <script src="../track.js"></script>
+<script src="../adminlink.js"></script>
 </body>
 </html>
