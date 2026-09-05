@@ -257,7 +257,7 @@
   お気づきの点があれば、担当の方までお知らせください🙇
 </div>
 
-<div class="verTag">v1.81 (2026/08/18)</div>
+<div class="verTag">v1.87 (2026/08/18)</div>
 </div>
 
 <script>
@@ -350,6 +350,7 @@ async function loadProgress(){
     const url = `${GAS_URL}?action=load&app=${APP_ID}&id=${encodeURIComponent(member.id)}&pin=${encodeURIComponent(member.pin)}&items=${encodeURIComponent(ITEM_IDS)}`;
     const res = await fetch(url);
     const j = await res.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
     if(j.ok && j.data){
       let d = {};
       try{ d = JSON.parse(j.data) || {}; }catch(e){}
@@ -378,6 +379,7 @@ function saveProgress(){
       });
       const res = await fetch(GAS_URL, {method:"POST", body});
       const j = await res.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
       if(note) note.textContent = (j && j.ok)
         ? "✅ 保存しました。どの端末からでも続きが見られます。"
         : "📱 この端末に保存しました。";
@@ -403,6 +405,7 @@ async function saveProfile(fields, hintId, okMsg){
     Object.keys(fields).forEach(k=>{ if(fields[k]) params[k] = fields[k]; });
     const res = await fetch(GAS_URL, {method:"POST", body:new URLSearchParams(params)});
     const j = await res.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
     if(hint) hint.textContent = (j && j.ok) ? okMsg : "📱 この端末に保存しました";
   }catch(e){
     if(hint) hint.textContent = "📱 この端末に保存しました(電波のよい場所で自動的に記録されます)";

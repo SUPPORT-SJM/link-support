@@ -457,7 +457,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:#FFFBF7;padding:16px 14px 
   🧪 このページはベータテスト中です<br>
   内容は精査中のため、今後変更になる場合がございます。<br>
   お気づきの点があれば、担当の方までお知らせください🙇<br>
-  <span style="font-size:10px;color:#B0A79E;font-family:monospace;">guide v1.81 (2026/08/18)</span>
+  <span style="font-size:10px;color:#B0A79E;font-family:monospace;">guide v1.87 (2026/08/18)</span>
 </div>
 </div>
 
@@ -513,6 +513,7 @@ async function loadProgress(){
     const url = `${GAS_URL}?action=load&app=${APP_ID}&id=${encodeURIComponent(member.id)}&pin=${encodeURIComponent(member.pin)}&items=${encodeURIComponent(ITEM_IDS)}`;
     const res = await fetch(url);
     const j = await res.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
     if(j.ok && j.data){
       try{ progress = JSON.parse(j.data) || {}; }catch(e){}
       KEYS.forEach(id=>{
@@ -538,6 +539,7 @@ function saveProgress(){
       });
       const res = await fetch(GAS_URL, {method:"POST", body});
       const j = await res.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
       if(note) note.textContent = (j && j.ok)
         ? "✅ 保存しました。どの端末からでも続きが見られます。"
         : "📱 この端末に保存しました。";
