@@ -245,6 +245,7 @@
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <link rel="stylesheet" href="../beta.css">
 <script src="../loading.js"></script>
+<script src="../config.js"></script>
 </head>
 <body>
 
@@ -568,7 +569,7 @@
 <div id="toast"></div>
 
 <script>
-const GAS_URL = "https://script.google.com/macros/s/AKfycbzY2l20zwGULjnKRUqvRpbH79fPkl5e-sWNVoXEIgBrDpqhjDAx2zLvJuqO3sZxAfHj/exec";
+const GAS_URL = window.SKY_GAS_URL;   /* 共通設定（config.js）から受け取ります */
 const GOOGLE_CLIENT_ID = "315827385958-ikdpkfhkr6nmrgql470aolt4pv27pak3.apps.googleusercontent.com";
 
 /* ================================================================

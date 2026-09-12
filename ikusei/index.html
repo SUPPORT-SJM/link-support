@@ -110,6 +110,7 @@
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <link rel="stylesheet" href="../beta.css">
 <script src="../loading.js"></script>
+<script src="../config.js"></script>
 </head>
 <body>
 
@@ -181,7 +182,7 @@
       Presented by Skyarc-team<br>
       <a href="./kanri-x7k2m9.html" style="color:#B8B4C8;font-size:10.5px;">管理画面(クリエイターズ以上)</a>
     </p>
-    <div class="verTag">v1.95 (2026/08/18)</div>
+    <div class="verTag">v1.96 (2026/08/18)</div>
   </div>
 
   <div id="loading">
@@ -199,7 +200,7 @@
    ★人数が増えて分けたくなったら、系列名をキーにURLを足すだけ。
 ================================================================ */
 const GAS_MAP = {
-  "default": "https://script.google.com/macros/s/AKfycbzY2l20zwGULjnKRUqvRpbH79fPkl5e-sWNVoXEIgBrDpqhjDAx2zLvJuqO3sZxAfHj/exec"
+  "default": window.SKY_GAS_URL   /* 共通設定（config.js）から受け取ります */
 };
 function gasUrlFor(keiretsu){
   try{ return GAS_MAP[keiretsu] || GAS_MAP["default"] || ""; }

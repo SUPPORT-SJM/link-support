@@ -80,6 +80,7 @@
 </style>
 <script src="../login.js"></script>
 <script src="../loading.js"></script>
+<script src="../config.js"></script>
 </head>
 <body>
 
@@ -124,12 +125,12 @@
       どちらも、管理画面から直していただけます。
     </p>
 
-    <div class="verTag">v1.95 (2026/08/18)</div>
+    <div class="verTag">v1.96 (2026/08/18)</div>
   </div>
 </main>
 
 <script>
-const GAS_URL = "https://script.google.com/macros/s/AKfycbzY2l20zwGULjnKRUqvRpbH79fPkl5e-sWNVoXEIgBrDpqhjDAx2zLvJuqO3sZxAfHj/exec";
+const GAS_URL = window.SKY_GAS_URL;   /* 共通設定（config.js）から受け取ります */
 
 /* 表示するプログラム(左から順に並びます) */
 const APPS = [

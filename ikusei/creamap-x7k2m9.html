@@ -162,6 +162,7 @@
 <link rel="stylesheet" href="../beta.css">
 <script src="../login.js"></script>
 <script src="../loading.js"></script>
+<script src="../config.js"></script>
 </head>
 <body>
 
@@ -197,7 +198,7 @@
     <p style="text-align:center;margin-top:14px;">
       <a href="./kanri-x7k2m9.html" style="color:#8B889E;font-size:11.5px;">‹ 管理画面にもどる</a>
     </p>
-    <div class="verTag">v1.95 (2026/08/18)</div>
+    <div class="verTag">v1.96 (2026/08/18)</div>
   </div>
 </div>
 
@@ -259,7 +260,7 @@
         ①🎓=ぴよぴよ卒業 ／ ②の数字=グルコンリーダー育成の先生の丸<br>
         カードをクリックすると、その方から下だけを表示します。会員名簿の「アップの会員番号」欄でつながりを設定してください。
       </div>
-      <div class="verTag">v1.95 (2026/08/18)</div>
+      <div class="verTag">v1.96 (2026/08/18)</div>
     </div>
   </main>
 </div>
@@ -281,7 +282,7 @@
 <div id="toast"></div>
 
 <script>
-const GAS_URL = "https://script.google.com/macros/s/AKfycbzY2l20zwGULjnKRUqvRpbH79fPkl5e-sWNVoXEIgBrDpqhjDAx2zLvJuqO3sZxAfHj/exec";
+const GAS_URL = window.SKY_GAS_URL;   /* 共通設定（config.js）から受け取ります */
 const GOOGLE_CLIENT_ID = "315827385958-ikdpkfhkr6nmrgql470aolt4pv27pak3.apps.googleusercontent.com";
 const $ = (s)=>document.querySelector(s);
 

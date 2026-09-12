@@ -108,6 +108,7 @@
 <link rel="stylesheet" href="../beta.css">
 <script src="../loading.js"></script>
 <script src="../login.js"></script>
+<script src="../config.js"></script>
 </head>
 <body>
 
@@ -167,7 +168,7 @@
 
   <footer>
     Presented by Skyarc-team
-    <div class="verTag" style="margin-top:8px;color:rgba(255,255,255,.4);">v1.95 (2026/08/18)</div>
+    <div class="verTag" style="margin-top:8px;color:rgba(255,255,255,.4);">v1.96 (2026/08/18)</div>
 </footer>
 </div>
 
@@ -188,11 +189,11 @@
        const GAS_MAP = {
          "🪽HERO":      "https://…HERO用のURL…/exec",
          "📚FairyTail": "https://…FairyTail用のURL…/exec",
-         "default":     "https://script.google.com/macros/s/AKfycbzY2l20zwGULjnKRUqvRpbH79fPkl5e-sWNVoXEIgBrDpqhjDAx2zLvJuqO3sZxAfHj/exec"
+         "default":     "https://…ふだんのURL…/exec"
        };
 ================================================================ */
 const GAS_MAP = {
-  "default": "https://script.google.com/macros/s/AKfycbzY2l20zwGULjnKRUqvRpbH79fPkl5e-sWNVoXEIgBrDpqhjDAx2zLvJuqO3sZxAfHj/exec"
+  "default": window.SKY_GAS_URL   /* 共通設定（config.js）から受け取ります */
 };
 
 /* 系列に応じた接続先を返す(見つからなければ default) */
