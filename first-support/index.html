@@ -95,6 +95,14 @@
   .need-msg.show{display:block;}
   @media (prefers-reduced-motion:reduce){ .shake{animation:none;} }
 
+  /* 発行のしかた */
+  .howto{margin:10px 0 12px;padding-left:1.4em;}
+  .howto li{font-size:13px;line-height:2;color:#5D4037;margin-bottom:3px;}
+  .howto li b{color:#E65100;}
+  .howto-link{display:block;padding:13px;border-radius:12px;background:#FF7043;color:#fff;
+    text-align:center;text-decoration:none;font-size:14px;font-weight:700;margin-bottom:7px;}
+  .howto-note{font-size:11px;color:#A1887F;text-align:center;line-height:1.8;margin-bottom:4px;}
+
   /* ニックネーム作成 */
   .gen-box{background:#FFF8F5;border:1px solid #FFD0B0;border-radius:12px;padding:14px;margin-bottom:10px}
   .gen-label{font-size:12px;font-weight:700;color:#FF7043;margin-bottom:6px;display:block}
@@ -227,7 +235,17 @@
   <div class="card-body">
     <p>あなた専用の紹介URLです。お仲間をお誘いするときに、このリンクをお送りします。</p>
 
-    <div class="soon">🚧 発行の手順を準備中です<br>もうしばらくお待ちください</div>
+    <p style="font-weight:700;color:#E65100;margin-top:14px;">📝 発行のしかた</p>
+    <ol class="howto">
+      <li><b>ビジネスマイページ</b>にログインします</li>
+      <li>右上の <b>メニュー（三本線）</b> をひらきます</li>
+      <li><b>「新規会員紹介」</b> をえらびます</li>
+      <li>そこに出ている <b>紹介用アドレスをコピー</b>します</li>
+      <li>下の欄に貼り付けて、保存してください</li>
+    </ol>
+    <a class="howto-link" href="https://member.link-platform.jp/mypage/introduction.php"
+       target="_blank" rel="noopener">🔗 新規会員紹介のページをひらく</a>
+    <p class="howto-note">※ ログインしていない場合は、ログイン画面が出ます</p>
 
     <p style="font-weight:700;color:#E65100;margin-top:12px;">発行できたら、ここに控えておきましょう</p>
     <div class="gen-box">
