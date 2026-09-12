@@ -6,6 +6,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <title>イベントの申込み｜スカイアーク</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../beta.css">
 <meta name="theme-color" content="#FF7043">
@@ -129,6 +131,11 @@
   .cal a{flex:1;text-align:center;padding:9px;border-radius:10px;background:var(--mist);
     color:#A0603A;font-size:11.5px;font-weight:700;text-decoration:none;}
   .cal a:active{background:#FFE4D3;}
+  .sheetlink{display:flex;align-items:center;justify-content:center;gap:6px;
+    margin-top:8px;padding:9px;border-radius:10px;background:#F2F7F2;
+    color:#3F7A4F;font-size:11.5px;font-weight:700;text-decoration:none;}
+  .sheetlink span{font-weight:400;color:#8AA890;font-size:10.5px;}
+  .sheetlink:active{background:#E4F0E6;}
 </style>
 </head>
 <body>
@@ -172,7 +179,7 @@
       取り消したいときは、担当の方にお伝えください。
     </div>
 
-    <div class="verTag">v1.100 (2026/08/18)</div>
+    <div class="verTag"></div>
   </div>
 </main>
 
@@ -251,10 +258,11 @@ async function load(){
   if(typeof skyLoading === "function") skyLoading("予定を読み込んでいます");
   try{
     const q = `id=${encodeURIComponent(member.id)}&pin=${encodeURIComponent(member.pin)}`;
-    const [r1, r2] = await Promise.all([
+    /* 45秒たっても返らないときは、いったんあきらめます */
+    const [r1, r2] = await withLimit(Promise.all([
       fetch(`${GAS_URL}?action=eventList&${q}`),
       fetch(`${GAS_URL}?action=myEvents&${q}`)
-    ]);
+    ]), 45000);
     const j1 = await r1.json();
     const j2 = await r2.json();
     if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j1)) return;
@@ -273,8 +281,14 @@ async function load(){
     renderCats();
   }catch(e){
     if(typeof skyLoadingDone === "function") skyLoadingDone();
-    $("#list").innerHTML =
-      '<div class="empty">通信できませんでした。<br>電波のよい場所でお試しください。</div>';
+    $("#firstLoad").style.display = "block";
+    $("#firstLoad").innerHTML = (String(e && e.message) === "timeout")
+      ? '<div class="empty">読み込みに時間がかかっています。<br>' +
+        '<span style="font-size:12px;">少し時間をおいて、もう一度お試しください。</span><br><br>' +
+        '<button onclick="location.reload()" style="background:#FF7043;color:#fff;' +
+        'border-radius:11px;padding:12px 26px;font-weight:700;font-size:14px;">' +
+        '🔄 もう一度読み込む</button></div>'
+      : '<div class="empty">通信できませんでした。<br>電波のよい場所でお試しください。</div>';
   }
 }
 
@@ -358,8 +372,10 @@ function render(){
              <a href="${gcalUrl(e)}" target="_blank">📅 Googleカレンダー</a>
              <a href="#" onclick="downloadIcs(${i});return false;">🍎 iPhone・その他</a>
            </div>
+           ${sheetLink(e)}
            ${e.zoom ? `<a class="zoom" href="${zoomUrl(e.zoom)}" target="_blank">${e.zoom}</a>` : ""}`
-        : `<button class="btn" onclick="pick(${i})">この予定に申し込む</button>`}
+        : `<button class="btn" onclick="pick(${i})">この予定に申し込む</button>
+           ${sheetLink(e)}`}
     </div>`;
   }).join("");
 }
@@ -436,6 +452,13 @@ function downloadIcs(i){
   a.download = "skyarc-" + fmtCal(t.st).slice(0,8) + ".ics";
   document.body.appendChild(a); a.click();
   setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+}
+
+/* 申込みシートの、その場所を開くリンクです（確かめたいときに） */
+function sheetLink(e){
+  if(!e.url) return "";
+  return `<a class="sheetlink" href="${e.url}" target="_blank" rel="noopener">`
+       + `📋 シートで確かめる<span>${e.sheet}タブ</span></a>`;
 }
 
 /* Zoomの案内から、リンクだけ取り出します */

@@ -2,75 +2,196 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<meta name="googlebot" content="noindex, nofollow">
-<title>交流会・サポート会情報 | Skyarc</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Noto Sans JP',sans-serif;background:#FFFBF7;padding:16px 14px 48px}
-.wrap{max-width:390px;margin:0 auto}
-.back-btn{display:flex;align-items:center;gap:6px;color:#FF7043;font-size:13px;font-weight:700;text-decoration:none;margin-bottom:16px}
-.hero{background:linear-gradient(135deg,#FFF8E1,#FFF0F0);border-radius:16px;padding:20px 16px;margin-bottom:20px;border:1px solid #FFD6A0;text-align:center}
-.hero h1{font-size:16px;font-weight:700;color:#E65100;line-height:1.6;margin-bottom:8px}
-.hero p{font-size:13px;color:#795548;line-height:1.8}
-.section{margin-bottom:20px}
-.section-ttl{font-size:15px;font-weight:700;color:#E65100;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #FFD6A0}
-.card{background:#fff;border:1px solid #F0E0D0;border-radius:12px;padding:14px;margin-bottom:10px}
-.card p{font-size:14px;color:#5D4037;line-height:1.9;margin-bottom:8px}
-.card p:last-child{margin-bottom:0}
-.note{background:#FFF8E1;border-radius:8px;padding:10px 12px;font-size:13px;color:#5D4037;line-height:1.85;border-left:3px solid #FFD54F;margin:10px 0}
-.coming{background:#fff;border:2px dashed #FFD6A0;border-radius:12px;padding:30px 20px;text-align:center;margin-bottom:12px}
-.coming p{font-size:13px;color:#A1887F;line-height:1.8}
-.lbtn{display:flex;align-items:center;gap:8px;padding:12px 14px;border-radius:10px;font-size:13px;font-weight:500;text-decoration:none;margin:8px 0}
-.lbtn-or{border:1px solid #FFCCBC;background:#FFF8F5;color:#BF360C}
-.back-btn2{display:block;padding:14px;border-radius:12px;background:#FF7043;color:#fff;text-align:center;font-size:15px;font-weight:700;text-decoration:none;margin-top:20px}
-</style>
+<title>サポート会・交流会のご案内｜スカイアーク</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../beta.css">
-<script src="../loading.js"></script>
+<meta name="theme-color" content="#FF7043">
 <script src="../config.js"></script>
-<script src="../login.js"></script>
+<style>
+  :root{
+    --ink:#3E2F28; --main:#FF7043; --deep:#E65100; --leaf:#3FA98A;
+    --mist:#FFF3EC; --paper:#FFFBF7; --line:#FFE0CC;
+    --shadow:0 3px 14px rgba(230,81,0,.10);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{font-family:"Zen Kaku Gothic New",sans-serif;color:var(--ink);line-height:1.9;font-size:15px;
+       background:var(--paper);}
+  a{color:inherit;}
+  .wrap{max-width:560px;margin:0 auto;padding:0 16px;}
+
+  .hero{background:linear-gradient(150deg,#FFB74D,#FF7043 55%,#E65100);color:#fff;
+    padding:30px 0 26px;text-align:center;}
+  .hero .em{font-size:36px;line-height:1;}
+  .hero h1{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:21px;
+    margin:8px 0 6px;line-height:1.5;}
+  .hero p{font-size:12.5px;opacity:.94;line-height:1.85;}
+
+  main{padding:20px 0 50px;}
+
+  .top-cta{background:#fff;border-radius:17px;padding:18px;box-shadow:var(--shadow);
+    text-align:center;margin-bottom:22px;border:2px solid var(--main);}
+  .top-cta p{font-size:13px;color:#8A6A57;line-height:1.85;margin-bottom:12px;}
+  .top-cta a{display:block;padding:15px;border-radius:13px;
+    background:linear-gradient(135deg,#FFB74D,#FF7043);color:#fff;text-decoration:none;
+    font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:16px;
+    box-shadow:0 4px 14px rgba(255,112,67,.36);}
+  .top-cta a:active{transform:scale(.99);}
+
+  .ev{background:#fff;border-radius:17px;padding:20px 18px;box-shadow:var(--shadow);
+    margin-bottom:14px;border-left:5px solid var(--main);}
+  .ev .ic{font-size:30px;line-height:1;}
+  .ev h2{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:17px;
+    color:var(--deep);margin:7px 0 3px;}
+  .ev .lead{font-size:12px;color:#B0866E;margin-bottom:12px;}
+  .ev p{font-size:13.5px;line-height:1.95;margin-bottom:10px;}
+  .ev p:last-of-type{margin-bottom:14px;}
+  .ev b{color:var(--deep);}
+  .ev .point{background:var(--mist);border-radius:11px;padding:12px 14px;
+    font-size:12.5px;line-height:1.9;color:#8A6A57;margin-bottom:14px;}
+  .ev .point b{color:var(--deep);}
+  .ev .go{display:block;padding:13px;border-radius:12px;background:var(--main);color:#fff;
+    text-align:center;text-decoration:none;
+    font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:14.5px;}
+  .ev .go:active{transform:scale(.99);}
+
+  .ev.on{border-left-color:#5E8FD8;}
+  .ev.on .go{background:#5E8FD8;}
+  .ev.on h2{color:#2B5C93;}
+  .ev.on b{color:#2B5C93;}
+  .ev.re{border-left-color:var(--leaf);}
+  .ev.re .go{background:var(--leaf);}
+  .ev.re h2{color:#2F7A5C;}
+  .ev.re b{color:#2F7A5C;}
+  .ev.dg{border-left-color:#9575CD;}
+  .ev.dg .go{background:#9575CD;}
+  .ev.dg h2{color:#5E42A6;}
+  .ev.dg b{color:#5E42A6;}
+
+  .note{background:var(--mist);border-radius:14px;padding:15px 17px;font-size:12.5px;
+    color:#8A6A57;line-height:1.95;margin-top:18px;}
+  .note b{color:var(--deep);}
+  .back{display:block;text-align:center;font-size:12.5px;color:#A9917F;
+    text-decoration:none;padding:16px;}
+  .verTag{display:block;text-align:center;font-size:9.5px;color:#C4B8B0;
+    font-family:monospace;padding:10px 0 26px;}
+</style>
 </head>
 <body>
-<div class="wrap">
 
-  <a href="skyarc.html" class="back-btn">← Skyarcトップに戻る</a>
-
-  <div class="hero">
-    <h1>🤝 交流会・サポート会情報</h1>
-    <p>チーム交流会・ユーザーサポート会の<br>情報・申し込みはこちら</p>
+<header class="hero">
+  <div class="wrap">
+    <div class="em">🤝</div>
+    <h1>サポート会・交流会の<br>ご案内</h1>
+    <p>Skyarcチームで開いている4つの集まりです<br>どれも何度でもご参加いただけます</p>
   </div>
+</header>
 
-  <div class="section">
-    <div class="section-ttl">🌈 チーム交流会</div>
-    <div class="card">
-      <p>Skyarcチームメンバーが集まる交流会の情報・申し込みはこちら👇</p>
+<main>
+  <div class="wrap">
+
+    <div class="top-cta">
+      <p>いま開かれる予定を見て、<br>そのままお申し込みいただけます。</p>
+      <a href="./events.html">📅 これからの予定を見る</a>
     </div>
-    <div class="coming">
-      <p>🚧 申し込みスプレッドシートへのリンクを準備中です</p>
+
+    <!-- ① ユーザーサポート会 -->
+    <div class="ev">
+      <div class="ic">🎧</div>
+      <h2>ユーザーサポート会</h2>
+      <p class="lead">2時間・オンライン・何度でも</p>
+
+      <p>入りたての方がこの会に出ると、<b>約2時間で大体のことが分かります</b>。</p>
+      <p>LINKの全体像、何から始めればいいか、つまずきやすいところ。
+        ひととおり知っている方が、その場で丁寧にお伝えします。</p>
+
+      <div class="point">
+        <b>こんな方に</b><br>
+        ・何から手をつければいいか分からない<br>
+        ・調べるより、聞いてしまいたい<br>
+        ・同じ時期に始めた方と知り合いたい
+      </div>
+
+      <p>担当の方が日替わりで開いているので、<b>ご都合のよい日を選べます</b>。
+        分からないことは、その場で聞いてしまいましょう。</p>
+
+      <a class="go" href="./events.html">🎧 開催日を見る・申し込む</a>
     </div>
+
+    <!-- ② チーム交流会（オンライン） -->
+    <div class="ev on">
+      <div class="ic">💻</div>
+      <h2>チーム交流会（オンライン）</h2>
+      <p class="lead">オンライン・お家から</p>
+
+      <p>Skyarcチームの仲間が集まる会です。<b>顔を出すだけでも大丈夫</b>。</p>
+      <p>どんな方がいるのか、みなさんが何をされているのか。
+        話を聞いているうちに、次にやりたいことが見えてくることがあります。</p>
+
+      <div class="point">
+        <b>ここで生まれるご縁が、後々の支えになります</b><br>
+        同じチームというだけで、相談しやすくなるものです。
+      </div>
+
+      <a class="go" href="./events.html">💻 開催日を見る・申し込む</a>
+    </div>
+
+    <!-- ③ チーム交流会（リアル） -->
+    <div class="ev re">
+      <div class="ic">🤝</div>
+      <h2>チーム交流会（リアル）</h2>
+      <p class="lead">実際に集まります</p>
+
+      <p>画面越しではなく、<b>実際にお会いできる会</b>です。</p>
+      <p>一度お会いしておくと、その後のやりとりがぐっと近くなります。
+        オンラインで見かけていた方と、はじめて握手する場でもあります。</p>
+
+      <div class="point">
+        <b>お近くで開かれるときに</b><br>
+        開催地はそのときどきで変わります。<br>
+        ご都合が合うときに、ぜひ足を運んでみてください。
+      </div>
+
+      <a class="go" href="./events.html">🤝 開催日を見る・申し込む</a>
+    </div>
+
+    <!-- ④ 動画視聴会 -->
+    <div class="ev dg">
+      <div class="ic">🎬</div>
+      <h2>動画視聴会</h2>
+      <p class="lead">みんなで一緒に見ます</p>
+
+      <p>大切な動画を、<b>みんなで一緒に見る会</b>です。</p>
+      <p>ひとりだと後回しになりがちなものも、時間を決めて集まれば見きれます。
+        見たあとに感想を交わせるので、頭にも残ります。</p>
+
+      <div class="point">
+        <b>「見よう見ようと思っていた」を終わらせる場です</b>
+      </div>
+
+      <a class="go" href="./events.html">🎬 開催日を見る・申し込む</a>
+    </div>
+
+    <div class="note">
+      <b>お申し込みについて</b><br>
+      ログインされていれば、お名前や系列はご登録の内容が入ります。
+      お選びいただくのは「はじめてかどうか」と「パソコン／スマホ」だけです。<br><br>
+      お申し込みのあとは、<b>Googleカレンダーやスマホのカレンダーに入れる</b>こともできます。<br><br>
+      分からない点は、<b>初期サポートグループLINE</b>でご質問ください❤️
+    </div>
+
+    <a class="back" href="./skyarc.html">← Skyarcトップにもどる</a>
+    <div class="verTag"></div>
   </div>
+</main>
 
-  <div class="section">
-    <div class="section-ttl">📚 ユーザーサポート会</div>
-    <div class="card">
-      <p>入りたての方がこの会に出ると<strong>約2時間で大体のことがわかる</strong>ユーザーサポート会です！まず参加してみましょう👇</p>
-    </div>
-    <div class="coming">
-      <p>🚧 申し込みスプレッドシートへのリンクを準備中です</p>
-    </div>
-  </div>
-
-  <div class="note">
-    📝 わからない点は<strong>初期サポートグループライン</strong>でご質問ください❤️
-  </div>
-
-  <a href="skyarc.html" class="back-btn2">← Skyarcトップに戻る</a>
-
-</div>
-<div style="text-align:center;font-size:9.5px;color:#C4B8B0;font-family:monospace;padding:14px 0 20px;">v1.100 (2026/08/18)</div>
-<script src="../track.js"></script>
+<script src="../loading.js"></script>
+<script src="../login.js"></script>
 <script src="../menu.js"></script>
+<script src="../track.js"></script>
 </body>
 </html>
