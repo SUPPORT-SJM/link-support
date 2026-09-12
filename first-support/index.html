@@ -257,7 +257,7 @@
   お気づきの点があれば、担当の方までお知らせください🙇
 </div>
 
-<div class="verTag">v1.92 (2026/08/18)</div>
+<div class="verTag">v1.95 (2026/08/18)</div>
 </div>
 
 <script>
@@ -391,6 +391,9 @@ function saveProgress(){
 
 /* ---------- 入力内容を会員名簿に保存します ---------- */
 async function saveProfile(fields, hintId, okMsg){
+  /* 同じ処理が重なって動かないようにします */
+  if(typeof skyBusy === "function" && skyBusy("saveProfile")) return;
+  try{
   const hint = hintId ? document.getElementById(hintId) : null;
   if(!member || !member.id){
     if(typeof skyLoginRequired === "function"){
@@ -409,6 +412,10 @@ async function saveProfile(fields, hintId, okMsg){
     if(hint) hint.textContent = (j && j.ok) ? okMsg : "📱 この端末に保存しました";
   }catch(e){
     if(hint) hint.textContent = "📱 この端末に保存しました(電波のよい場所で自動的に記録されます)";
+  }
+
+  }finally{
+    if(typeof skyBusyEnd === "function") skyBusyEnd("saveProfile");
   }
 }
 
