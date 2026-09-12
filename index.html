@@ -96,6 +96,7 @@
     text-decoration:underline;padding:4px;flex-shrink:0;}
 </style>
 <script src="loading.js"></script>
+<script src="config.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -165,12 +166,12 @@
 
   <div class="foot">
     Presented by Skyarc-team<br>
-    <span class="ver">v1.95 (2026/08/18)</span>
+    <span class="ver">v1.96 (2026/08/18)</span>
   </div>
 </div>
 
 <script>
-const GAS_URL = "https://script.google.com/macros/s/AKfycbzY2l20zwGULjnKRUqvRpbH79fPkl5e-sWNVoXEIgBrDpqhjDAx2zLvJuqO3sZxAfHj/exec";
+const GAS_URL = window.SKY_GAS_URL;   /* 共通設定（config.js）から受け取ります */
 const CLIENT_ID = "315827385958-ikdpkfhkr6nmrgql470aolt4pv27pak3.apps.googleusercontent.com";
 
 let tab = "google";

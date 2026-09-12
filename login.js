@@ -6,7 +6,7 @@
    ・LINE内ブラウザから外部ブラウザに移った直後でも、ここから入れます
 ================================================================ */
 (function () {
-  var GAS = "https://script.google.com/macros/s/AKfycbzY2l20zwGULjnKRUqvRpbH79fPkl5e-sWNVoXEIgBrDpqhjDAx2zLvJuqO3sZxAfHj/exec";
+  var GAS = window.SKY_GAS_URL;   /* 共通設定（config.js）から受け取ります */
 
   var ov = null, pending = null;
 

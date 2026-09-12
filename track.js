@@ -6,7 +6,7 @@
    ・止めたいときは、各ページの <script src="...track.js"> を消してください
 ================================================================ */
 (function () {
-  var GAS = "https://script.google.com/macros/s/AKfycbzY2l20zwGULjnKRUqvRpbH79fPkl5e-sWNVoXEIgBrDpqhjDAx2zLvJuqO3sZxAfHj/exec";
+  var GAS = window.SKY_GAS_URL;   /* 共通設定（config.js）から受け取ります */
 
   try {
     /* 端末ごとの目印(どなたかは分かりません。同じ端末かどうかを見るだけです) */
