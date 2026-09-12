@@ -37,7 +37,31 @@
           + "&uid=" + encodeURIComponent(uid)
           + "&width=" + encodeURIComponent(window.innerWidth || 0);
 
-    /* 表示を止めないよう、こっそり送ります */
-    fetch(GAS + q, { method: "GET", mode: "no-cors", keepalive: true }).catch(function () {});
+    /* ================================================================
+       ページが出そろってから、静かに送ります
+       ----------------------------------------------------------------
+       開いた直後に送ると、表示のための読み込みと取り合いになり、
+       ページが出るまで待たされてしまうためです。
+    ================================================================ */
+    var sent = false;
+    function send() {
+      if (sent) return;
+      sent = true;
+      /* 画像を1枚読みに行く形にします（応答を待ちません） */
+      try {
+        new Image().src = GAS + q + "&_=" + Date.now();
+      } catch (e) {
+        fetch(GAS + q, { method:"GET", mode:"no-cors", keepalive:true }).catch(function(){});
+      }
+    }
+
+    /* 表示が終わってから、さらに少し待って送ります */
+    function later() { setTimeout(send, 1200); }
+    if (document.readyState === "complete") later();
+    else window.addEventListener("load", later);
+
+    /* 開いてすぐ離れた場合にも、取りこぼさないようにします */
+    window.addEventListener("pagehide", send);
+
   } catch (e) { /* 記録できなくても、ページの表示には影響しません */ }
 })();

@@ -9,7 +9,7 @@
 ================================================================ */
 
 /* ---------------- ① バージョン ---------------- */
-window.SKY_VERSION = "v1.100";
+window.SKY_VERSION = "v1.102";
 window.SKY_VERSION_DATE = "2026/08/18";
 
 /* ---------------- ② GASのURL ----------------
@@ -41,12 +41,21 @@ window.SKY_AREAS = [
   function apply() {
     var txt = window.SKY_VERSION + " (" + window.SKY_VERSION_DATE + ")";
 
-    /* 決まった置き場所（.verTag / #verTag）に入れます */
-    document.querySelectorAll(".verTag, #verTag").forEach(function (el) {
-      el.textContent = txt;
-    });
+    /* ① 決まった置き場所（.verTag / #verTag）に入れます */
+    var slots = document.querySelectorAll(".verTag, #verTag");
+    slots.forEach(function (el) { el.textContent = txt; });
 
-    /* ページに直接書かれている古いバージョン表記も、ここで書き換えます */
+    /* ② 置き場所が無いページには、いちばん下にそっと足します */
+    if (!slots.length) {
+      var d = document.createElement("div");
+      d.className = "verTag";
+      d.style.cssText = "text-align:center;font-size:9.5px;color:#C4B8B0;"
+        + "font-family:monospace;padding:14px 0 22px;";
+      d.textContent = txt;
+      (document.querySelector("main") || document.body).appendChild(d);
+    }
+
+    /* ③ 古い書き方が残っていれば、それも書き換えます */
     var re = /v\d+\.\d+\s*\(\d{4}\/\d{2}\/\d{2}\)/g;
     var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null);
     var hits = [];
