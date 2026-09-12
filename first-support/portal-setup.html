@@ -95,8 +95,8 @@ body{font-family:'Noto Sans JP',sans-serif;background:#FFFBF7;padding:24px 16px 
   <div class="section-ttl">🏷️ オプチャ用ニックネームコピー</div>
 
   <div class="gen-box">
-    <label class="gen-label">👤 あなたの名前を入力</label>
-    <input class="gen-input" id="nameInput" type="text" placeholder="例：高山翔子">
+    <label class="gen-label">👤 あなたのニックネーム</label>
+    <input class="gen-input" id="nameInput" type="text" name="nickname" autocomplete="nickname" placeholder="例：しょうこ">
     <label class="gen-label">🏷️ チーム名/系列を選ぶ</label>
     <select class="gen-select" id="seriesSelect">
       <option value="">-- 系列を選んでください --</option>
@@ -165,9 +165,35 @@ function copyResult(){
 }
 nameInput.addEventListener('input',update);
 seriesSelect.addEventListener('change',update);
+
+/* ================================================================
+   ご登録いただいている内容を、先に入れておきます
+   ----------------------------------------------------------------
+   ログインされている方は、お名前と系列を入れ直さずに済みます
+================================================================ */
+(function(){
+  let m = null;
+  try{
+    const raw = localStorage.getItem("skyarc_member");
+    if(raw && raw !== "null" && raw !== "undefined") m = JSON.parse(raw);
+  }catch(e){}
+  if(!m || !m.id) return;
+
+  if(m.name && !nameInput.value) nameInput.value = m.name;
+  if(m.keiretsu){
+    const has = Array.from(seriesSelect.options).some(o => o.value === m.keiretsu);
+    if(has) seriesSelect.value = m.keiretsu;
+  }
+  if(typeof update === "function") update();
+
+  const hint = document.getElementById("copyHint");
+  if(hint && nameInput.value && seriesSelect.value){
+    hint.textContent = "ご登録の内容を入れておきました。このままコピーできます";
+  }
+})();
 </script>
-<div style="text-align:center;font-size:9.5px;color:#C4B8B0;font-family:monospace;padding:14px 0 20px;">v1.96 (2026/08/18)</div>
+<div style="text-align:center;font-size:9.5px;color:#C4B8B0;font-family:monospace;padding:14px 0 20px;">v1.100 (2026/08/18)</div>
 <script src="../track.js"></script>
-<script src="../adminlink.js"></script>
+<script src="../menu.js"></script>
 </body>
 </html>
