@@ -111,6 +111,23 @@
     setTimeout(function () { location.href = url; }, 60);
   };
 
+  /* ================================================================
+     同じ処理が重なって動かないようにします
+     ----------------------------------------------------------------
+     if (skyBusy("save")) return;        … すでに動いていれば、やめます
+     …処理…
+     skyBusyEnd("save");                 … 終わったら解きます
+  ================================================================ */
+  var busy = {};
+  window.skyBusy = function (key) {
+    if (busy[key]) return true;
+    busy[key] = true;
+    /* 万一そのままになっても、20秒で自動的に解きます */
+    setTimeout(function () { busy[key] = false; }, 20000);
+    return false;
+  };
+  window.skyBusyEnd = function (key) { busy[key] = false; };
+
   window.skyLoadingDone = function () {
     clearTimeout(showTimer);
     clearInterval(tick);

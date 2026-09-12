@@ -165,7 +165,7 @@
 
   <div class="foot">
     Presented by Skyarc-team<br>
-    <span class="ver">v1.92 (2026/08/18)</span>
+    <span class="ver">v1.95 (2026/08/18)</span>
   </div>
 </div>
 
@@ -278,13 +278,17 @@ async function doLogin(){
     if(!id && googleEmail){
       const r0 = await fetch(`${GAS_URL}?action=byEmail&email=${encodeURIComponent(googleEmail)}`);
       const j0 = await r0.json();
-      if(!j0.ok || !j0.found){
+      if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j0)) return;
+
+      /* 見つかった方を受け取ります(同じメールで複数ある場合もあります) */
+      const list = j0.members || [];
+      if(!j0.ok || !list.length){
         if(typeof skyLoadingDone === "function") skyLoadingDone();
         show("このGoogleアカウントでのご登録が見つかりません。<br>" +
              "「会員番号」のタブからお試しいただくか、はじめての方はご登録ください。", "err");
         return;
       }
-      id = j0.id;
+      id = list[0].id;
     }
 
     const url = `${GAS_URL}?action=login&id=${encodeURIComponent(id)}&pin=${encodeURIComponent(pin)}` +
