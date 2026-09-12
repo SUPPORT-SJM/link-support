@@ -88,11 +88,17 @@
       + '.skym-bg{position:fixed;inset:0;background:rgba(42,36,56,.5);backdrop-filter:blur(3px);'
       + 'opacity:0;pointer-events:none;transition:.28s;z-index:8001;}'
       + '.skym-bg.on{opacity:1;pointer-events:auto;}'
+      /* パソコンでは、押したボタンの近く（右側）にまとめます */
       + '.skym{position:fixed;left:0;right:0;bottom:0;background:#fff;border-radius:22px 22px 0 0;'
       + 'padding:8px 15px calc(env(safe-area-inset-bottom) + 22px);transform:translateY(100%);'
       + 'transition:.32s cubic-bezier(.4,0,.2,1);z-index:8002;max-height:86vh;overflow-y:auto;'
       + 'font-family:"Zen Kaku Gothic New","Noto Sans JP",sans-serif;}'
       + '.skym.on{transform:none;}'
+      /* 画面が広いときは、右側に寄せて読みやすい幅にします */
+      + '@media (min-width:560px){'
+      +   '.skym{left:auto;right:0;width:420px;max-width:92vw;'
+      +   'border-radius:22px 0 0 0;box-shadow:-8px 0 30px rgba(42,36,56,.18);}'
+      + '}'
       + '.skym .grip{width:38px;height:4px;background:#E4E0F0;border-radius:99px;margin:8px auto 13px;}'
       + '.skym .me{display:flex;align-items:center;gap:11px;background:#F0EDF9;border-radius:14px;'
       + 'padding:12px 14px;margin-bottom:6px;}'
