@@ -344,7 +344,7 @@
     ① ぴよぴよ脱出クイズ|② グルコンリーダー育成(このページ)<br>
     Presented by Skyarc-team<br>
     <a href="#" onclick="showInstallHelp();return false;" style="color:var(--green-leaf);font-weight:700;">📲 ホーム画面に追加する方法</a>
-    <div class="verTag" style="margin-top:8px;color:rgba(255,255,255,.4);">v1.92 (2026/08/18)</div>
+    <div class="verTag" style="margin-top:8px;color:rgba(255,255,255,.4);">v1.95 (2026/08/18)</div>
 </footer>
 </div>
 
@@ -523,6 +523,9 @@ const ITEM_IDS = availTasks.map(t=>t.id).join(",");
 
 /* ---------- login ---------- */
 async function login(){
+  /* 同じ処理が重なって動かないようにします */
+  if(typeof skyBusy === "function" && skyBusy("login")) return;
+  try{
   const id = $("#inId").value.trim();
   const pin = $("#inPin").value.trim();
   const name = $("#inName").value.trim();
@@ -570,6 +573,10 @@ async function login(){
   if(member.keiretsu) localStorage.setItem("gcon_keiretsu_"+id, member.keiretsu);
   enterApp();
   saveAll(); // 初回登録も兼ねて同期
+
+  }finally{
+    if(typeof skyBusyEnd === "function") skyBusyEnd("login");
+  }
 }
 
 function logout(){ skyLogout(); }

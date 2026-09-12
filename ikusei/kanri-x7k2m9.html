@@ -287,7 +287,7 @@
     <p style="text-align:center;margin-top:16px;">
       <a href="./index.html" style="color:#8B889E;font-size:12px;">‹ 育成プログラムにもどる</a>
     </p>
-    <div class="verTag">v1.92 (2026/08/18)</div>
+    <div class="verTag">v1.95 (2026/08/18)</div>
   </div>
 </div>
 
@@ -378,7 +378,7 @@
         ・各行の「編集」… 名前・系列・パスコード・役職・担当系列の変更<br>
         ・名前をクリック → 詳細画面で先生の丸と本人チェックを修正できます
       </div>
-      <div class="verTag" style="margin-top:16px;">v1.92 (2026/08/18)</div>
+      <div class="verTag" style="margin-top:16px;">v1.95 (2026/08/18)</div>
     </div>
   </main>
 </div>
@@ -1139,6 +1139,9 @@ function closeScope(){
 }
 
 async function saveScope(){
+  /* 同じ処理が重なって動かないようにします */
+  if(typeof skyBusy === "function" && skyBusy("saveScope")) return;
+  try{
   if(!scopeTarget) return;
   const checked = Array.from(document.querySelectorAll("#smList input:checked")).map(el=>el.value);
   const scope = checked.join(",");
@@ -1160,6 +1163,10 @@ async function saveScope(){
     closeScope();
     load();
   }catch(e){ toast("通信できませんでした"); }
+
+  }finally{
+    if(typeof skyBusyEnd === "function") skyBusyEnd("saveScope");
+  }
 }
 
 
@@ -1198,6 +1205,9 @@ function pinResetGoogleOk(email){
 }
 
 async function submitPinReset(){
+  /* 同じ処理が重なって動かないようにします */
+  if(typeof skyBusy === "function" && skyBusy("submitPinReset")) return;
+  try{
   const msg = document.getElementById("pmMsg");
   const id = document.getElementById("pmId").value.trim();
   const p1 = document.getElementById("pmPin1").value.trim();
@@ -1226,6 +1236,10 @@ async function submitPinReset(){
     show("✅ 変更しました!新しいパスコードでログインしてください。","ok");
     setTimeout(()=>{ closePinReset(); }, 2200);
   }catch(e){ show("通信できませんでした。電波のよい場所でお試しください。","err"); }
+
+  }finally{
+    if(typeof skyBusyEnd === "function") skyBusyEnd("submitPinReset");
+  }
 }
 
 
@@ -1347,6 +1361,9 @@ function closeMember(){
 }
 
 async function saveMember(){
+  /* 同じ処理が重なって動かないようにします */
+  if(typeof skyBusy === "function" && skyBusy("saveMember")) return;
+  try{
   const msg = document.getElementById("mmMsg");
   const show = (t,cls)=>{ msg.textContent = t; msg.className = "mm-msg " + cls; };
 
@@ -1397,6 +1414,10 @@ async function saveMember(){
     closeMember();
     load();
   }catch(e){ show("通信できませんでした","err"); }
+
+  }finally{
+    if(typeof skyBusyEnd === "function") skyBusyEnd("saveMember");
+  }
 }
 
 /* ================= クリエ用:会員をさがす ================= */
@@ -1545,6 +1566,9 @@ function copySelf(app){
 }
 
 async function saveMarks(){
+  /* 同じ処理が重なって動かないようにします */
+  if(typeof skyBusy === "function" && skyBusy("saveMarks")) return;
+  try{
   if(!detailData) return;
   const target = detailData.member.id;
   try{
@@ -1588,6 +1612,10 @@ async function saveMarks(){
     closeDetail();
     if(!data.listDenied) load();
   }catch(e){ toast("通信できませんでした"); }
+
+  }finally{
+    if(typeof skyBusyEnd === "function") skyBusyEnd("saveMarks");
+  }
 }
 
 function closeDetail(){

@@ -164,7 +164,7 @@
     </a>
     <button class="btn btn-out" style="margin-top:9px;" onclick="doLogout()">ログアウト</button>
 
-    <div class="verTag">v1.92 (2026/08/18)</div>
+    <div class="verTag">v1.95 (2026/08/18)</div>
   </div>
 </main>
 
@@ -223,6 +223,9 @@ function fill(){
 
 /* ---------- 紹介URL ---------- */
 async function saveUrl(){
+  /* 同じ処理が重なって動かないようにします */
+  if(typeof skyBusy === "function" && skyBusy("saveUrl")) return;
+  try{
   const url = $("#inUrl").value.trim();
   if(!url){ show("紹介URLを入れてください。", "err"); return; }
   if(!/^https?:\/\//i.test(url)){
@@ -245,6 +248,10 @@ async function saveUrl(){
   }catch(e){
     if(typeof skyLoadingDone === "function") skyLoadingDone();
     show("通信できませんでした。", "err");
+  }
+
+  }finally{
+    if(typeof skyBusyEnd === "function") skyBusyEnd("saveUrl");
   }
 }
 
