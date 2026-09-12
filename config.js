@@ -9,7 +9,7 @@
 ================================================================ */
 
 /* ---------------- ① バージョン ---------------- */
-window.SKY_VERSION = "v1.98";
+window.SKY_VERSION = "v1.100";
 window.SKY_VERSION_DATE = "2026/08/18";
 
 /* ---------------- ② GASのURL ----------------
@@ -46,7 +46,7 @@ window.SKY_AREAS = [
       el.textContent = txt;
     });
 
-    /* 古い書き方（v1.95 (2026/08/18) と直に書いてある箇所）も直します */
+    /* ページに直接書かれている古いバージョン表記も、ここで書き換えます */
     var re = /v\d+\.\d+\s*\(\d{4}\/\d{2}\/\d{2}\)/g;
     var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null);
     var hits = [];
