@@ -287,7 +287,7 @@
     <p style="text-align:center;margin-top:16px;">
       <a href="./index.html" style="color:#8B889E;font-size:12px;">‹ 育成プログラムにもどる</a>
     </p>
-    <div class="verTag">v1.95 (2026/08/18)</div>
+    <div class="verTag">v1.96 (2026/08/18)</div>
   </div>
 </div>
 
@@ -378,7 +378,7 @@
         ・各行の「編集」… 名前・系列・パスコード・役職・担当系列の変更<br>
         ・名前をクリック → 詳細画面で先生の丸と本人チェックを修正できます
       </div>
-      <div class="verTag" style="margin-top:16px;">v1.95 (2026/08/18)</div>
+      <div class="verTag" style="margin-top:16px;">v1.96 (2026/08/18)</div>
     </div>
   </main>
 </div>
@@ -469,12 +469,6 @@
         <p class="hint">管理画面に入るには「アドバンス」以上が必要です(クリエは①の丸つけのみ)</p>
       </div>
 
-      <div class="mm-f">
-        <label>アドバイザー <span style="font-weight:400;font-size:11px;color:#77748A;">(入会時に説明された方)</span></label>
-        <input type="text" id="mmAdvName" placeholder="お名前" style="margin-bottom:8px;">
-        <input type="text" id="mmAdvId" inputmode="numeric" placeholder="会員番号">
-      </div>
-
       <div class="mm-f" id="mmAutoWrap" style="display:none;">
         <label>🔎 自動でうめた欄</label>
         <div style="background:#E6F0FB;border:1.5px solid #A9C9EA;border-radius:9px;padding:11px 12px;font-size:12.5px;color:#2B5C93;line-height:1.8;" id="mmAutoFill"></div>
@@ -501,6 +495,12 @@
         <p class="hint">実際にサポートを担当されている方です</p>
       </div>
 
+      <div class="mm-f">
+        <label>アドバイザー <span style="font-weight:400;font-size:11px;color:#77748A;">(入会時に説明された方)</span></label>
+        <input type="text" id="mmAdvName" placeholder="お名前" style="margin-bottom:8px;">
+        <input type="text" id="mmAdvId" inputmode="numeric" placeholder="会員番号">
+      </div>
+
       <div class="mm-f" id="mmScopeWrap" style="display:none;">
         <label>担当系列</label>
         <div id="mmScopeList" style="display:grid;grid-template-columns:1fr 1fr;gap:5px;"></div>
@@ -508,8 +508,18 @@
       </div>
 
       <div class="mm-f">
-        <label>はじめの一歩で登録された内容 <span style="font-weight:400;font-size:11px;color:#77748A;">(本人が入力)</span></label>
-        <div style="background:var(--paper);border-radius:9px;padding:11px 12px;font-size:12.5px;line-height:1.9;color:#3E3A50;" id="mmHajime">—</div>
+        <label>紹介URL <span style="font-weight:400;font-size:11px;color:#77748A;">(本人が入力)</span></label>
+        <div style="background:var(--paper);border-radius:9px;padding:11px 12px;font-size:12.5px;line-height:1.9;color:#3E3A50;word-break:break-all;" id="mmRefUrl">まだ登録されていません</div>
+      </div>
+
+      <div class="mm-f">
+        <label>オプチャ用ニックネーム <span style="font-weight:400;font-size:11px;color:#77748A;">(本人が入力)</span></label>
+        <div style="background:var(--paper);border-radius:9px;padding:11px 12px;font-size:12.5px;line-height:1.9;color:#3E3A50;" id="mmOpNick">まだ登録されていません</div>
+      </div>
+
+      <div class="mm-f">
+        <label>系列オプチャ <span style="font-weight:400;font-size:11px;color:#77748A;">(本人が選択)</span></label>
+        <div style="background:var(--paper);border-radius:9px;padding:11px 12px;font-size:12.5px;line-height:1.9;color:#3E3A50;" id="mmKeiChat">まだ登録されていません</div>
       </div>
 
       <div class="mm-f" id="mmEmailWrap">
@@ -1297,17 +1307,23 @@ function openMember(m){
   const cb = document.getElementById("mmCrie");
   cb.checked = m ? (m.crie === true) : false;
   document.getElementById("mmCrieWrap").style.background = cb.checked ? "#EAF7F0" : "#fff";
-  const hj = document.getElementById("mmHajime");
-  if(hj){
-    if(m && (m.nick || m.keiChat || m.refUrl)){
-      hj.innerHTML =
-        (m.nick    ? `📛 ${m.nick}<br>` : "") +
-        (m.keiChat ? `🏷️ 系列オプチャ:${m.keiChat}<br>` : "") +
-        (m.refUrl  ? `🔗 <a href="${m.refUrl}" target="_blank" style="color:#5E8FD8;word-break:break-all;">${m.refUrl}</a>` : "");
+  /* 本人が入力した内容を、それぞれ分けてお見せします */
+  const setInfo = (id, val, isLink) => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    if(val){
+      el.innerHTML = isLink
+        ? `<a href="${val}" target="_blank" style="color:#5E8FD8;word-break:break-all;">${val}</a>`
+        : val;
+      el.style.color = "#3E3A50";
     }else{
-      hj.textContent = "まだ登録されていません";
+      el.textContent = "まだ登録されていません";
+      el.style.color = "#A8A4BC";
     }
-  }
+  };
+  setInfo("mmRefUrl",  m ? m.refUrl : "", true);
+  setInfo("mmOpNick",  m ? m.nick : "", false);
+  setInfo("mmKeiChat", m ? m.keiChat : "", false);
   document.getElementById("mmIntro").value = m ? (m.intro||"") : "";
   document.getElementById("mmUpline").value = m ? (m.upline||"") : "";
   document.getElementById("mmHelper").value = m ? (m.helper||"") : "";
