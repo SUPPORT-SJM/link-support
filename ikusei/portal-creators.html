@@ -348,6 +348,11 @@
     }
     return;
   }
+  /* この段階の方がご覧になるページです */
+  if(m.crie !== true && !String(m.role||"")){
+    if(typeof skyNotAllowed === "function"){ skyNotAllowed(); return; }
+  }
+
   const who = document.getElementById("navWho");
   if(who) who.textContent = (m.name ? m.name+"さん" : "会員番号 "+m.id) + (m.keiretsu ? "｜"+m.keiretsu : "");
   // クリエイターズ以上なら管理画面へのリンクを出す

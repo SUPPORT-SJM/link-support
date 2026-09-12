@@ -419,12 +419,6 @@ async function fetchExtra(m){
 function goTo(member){
   const role = String(member.role || "");
 
-  /* 役職をお持ちの方は、運営のページへご案内します */
-  if(role.indexOf("管理者") >= 0){
-    location.href = "./kanri-x7k2m9.html";
-    return;
-  }
-
   // サポーター未満で、役職もない方には、まだ早い旨をご案内します
   if(member.sup !== true && member.crie !== true && !role){
     location.href = "./member.html";
@@ -690,12 +684,12 @@ if("serviceWorker" in navigator){ navigator.serviceWorker.register("./gcon-sw.js
     try{ goTo(m); return; }catch(e){}
   }
   /* うまくいかないときは、その方に合う入口へ */
+  /* 育成プログラムの入口なので、ご自身のポータルへご案内します
+     （管理画面は、メニューや各ページのボタンからお進みください） */
   const role = String(m.role || "");
   location.replace(
-      role.indexOf("管理者") >= 0 ? "./kanri-x7k2m9.html"
-    : role                        ? "./portal-creators.html"
-    : m.crie === true             ? "./portal-creators.html"
-    : m.sup === true              ? "./portal-supporter.html"
+      (role || m.crie === true) ? "./portal-creators.html"
+    : m.sup === true            ? "./portal-supporter.html"
     : "./member.html");
 })();
 </script>

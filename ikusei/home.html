@@ -289,7 +289,9 @@ function logout(){
     const keys = [];
     for(let i=0;i<localStorage.length;i++){
       const k = localStorage.key(i);
-      if(k && (k.indexOf("skyarc_")===0 || k.indexOf("piyo_")===0 || k.indexOf("gcon_")===0)) keys.push(k);
+      if(k && (k.indexOf("skyarc_")===0 || k.indexOf("piyo_")===0 || k.indexOf("gcon_")===0
+            || k.indexOf("hajime_")===0 || k.indexOf("link_done_")===0
+            || k.indexOf("step1_")===0)) keys.push(k);
     }
     keys.forEach(k=>localStorage.removeItem(k));
   }catch(e){}

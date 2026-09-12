@@ -311,7 +311,8 @@
         <button id="btnBackPortal" onclick="backToPortal()">‹ ポータルへ</button>
         <button onclick="location.href='./creamap-x7k2m9.html'">🗺 クリエマップ</button>
         <button onclick="load()">🔄 更新</button>
-        <button onclick="logout()">ログアウトして育成へ戻る</button>
+        <button onclick="backToPortal()">‹ 育成プログラムへ戻る</button>
+        <button onclick="logout()" style="background:#FDEBEB;color:#B3352F;">ログアウト</button>
       </div>
     </div>
   </div>
@@ -959,9 +960,35 @@ function backToPortal(){
   location.href = (m.crie === true) ? "./portal-creators.html" : "./portal-supporter.html";
 }
 
+/* ログインしたまま、育成プログラムへ戻ります */
+function backToPortal(){
+  let m = null;
+  try{
+    const raw = localStorage.getItem("skyarc_member");
+    if(raw && raw !== "null") m = JSON.parse(raw);
+  }catch(e){}
+  const url = (!m || !m.id) ? "../index.html"
+            : (String(m.role||"") || m.crie === true) ? "./portal-creators.html"
+            : (m.sup === true) ? "./portal-supporter.html"
+            : "./member.html";
+  if(typeof skyGoTo === "function") skyGoTo(url, "ひらいています");
+  else location.href = url;
+}
+
+/* ログアウトします（この端末の記録も消します） */
 function logout(){
+  if(!confirm("ログアウトしますか?\n(この端末に残った学習の記録も消えます)")) return;
   try{ google.accounts.id.disableAutoSelect(); }catch(e){}
-  location.href = "./index.html";
+  try{
+    const keys = [];
+    for(let i=0;i<localStorage.length;i++){
+      const k = localStorage.key(i);
+      if(k && (k.indexOf("skyarc_")===0 || k.indexOf("piyo_")===0 || k.indexOf("gcon_")===0
+            || k.indexOf("hajime_")===0 || k.indexOf("link_done_")===0 || k.indexOf("step1_")===0)) keys.push(k);
+    }
+    keys.forEach(k=>localStorage.removeItem(k));
+  }catch(e){}
+  location.href = "../index.html";
 }
 
 async function load(isLogin){
