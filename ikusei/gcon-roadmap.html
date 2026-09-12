@@ -526,6 +526,11 @@
     return;
   }
 
+  /* クリエイターズになってから始まる教材です */
+  if(m.crie !== true && !String(m.role||"")){
+    if(typeof skyNotAllowed === "function"){ skyNotAllowed(); return; }
+  }
+
   const isCrie = m.crie === true;
   const back = document.getElementById("navBack");
   if(back) back.href = isCrie ? "./portal-creators.html" : "./portal-supporter.html";
@@ -553,11 +558,8 @@ window.addEventListener("pageshow", function(e){
     return;
   }
   /* クリエイターズになってから始まる教材です */
-  if(m.crie !== true && !String(m.role||"")){
-    if(typeof skyNotAllowed === "function"){
-      skyNotAllowed();
-      return;
-    }
+  if(mm.crie !== true && !String(mm.role||"")){
+    if(typeof skyNotAllowed === "function"){ skyNotAllowed(); return; }
   }
   const who = document.getElementById("navWho");
   if(who) who.textContent = (mm.name ? mm.name+"さん" : "会員番号 "+mm.id) + (mm.keiretsu ? "｜"+mm.keiretsu : "");

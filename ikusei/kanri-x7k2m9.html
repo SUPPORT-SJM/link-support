@@ -246,6 +246,7 @@
 <link rel="stylesheet" href="../beta.css">
 <script src="../loading.js"></script>
 <script src="../config.js"></script>
+<script src="../login.js"></script>
 </head>
 <body>
 
@@ -788,9 +789,10 @@ async function login(){
 
   if(m && m.id && m.pin){
     admin = { id:m.id, pin:m.pin, email:m.email || "" };
-    const ok = await load(false);
-    if(ok) return;              // 入れました
-    admin = null;               // 入れなかったので、ログイン画面を出します
+    const r = await load(false);
+    if(r === true) return;              // 入れました
+    if(r === "notallowed") return;      // ご案内をお出ししたので、そのままにします
+    admin = null;                       // 入れなかったので、ログイン画面を出します
   }
   $("#loginView").style.display = "block";
   $("#appView").style.display = "none";
@@ -969,10 +971,13 @@ async function load(isLogin){
     if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
     if(typeof skyLoadingDone === "function") skyLoadingDone();
 
-    /* お使いいただける方かを確かめます */
-    if(j.ok === false && j.error === "noperm" && typeof skyNotAllowed === "function"){
-      skyNotAllowed();
-      return false;
+    /* お使いいただける方かを確かめます
+       （ご案内をお出しして移るので、ログイン画面は出しません） */
+    if(j.ok === false && j.error === "noperm"){
+      if(typeof skyNotAllowed === "function"){
+        skyNotAllowed();
+        return "notallowed";
+      }
     }
 
     if(j.ok === false){
