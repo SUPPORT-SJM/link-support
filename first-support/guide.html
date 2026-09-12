@@ -126,6 +126,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:#FFFBF7;padding:16px 14px 
 <link rel="stylesheet" href="../beta.css">
 <script src="../login.js"></script>
 <script src="../loading.js"></script>
+<script src="../config.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -457,7 +458,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:#FFFBF7;padding:16px 14px 
   🧪 このページはベータテスト中です<br>
   内容は精査中のため、今後変更になる場合がございます。<br>
   お気づきの点があれば、担当の方までお知らせください🙇<br>
-  <span style="font-size:10px;color:#B0A79E;font-family:monospace;">guide v1.95 (2026/08/18)</span>
+  <span style="font-size:10px;color:#B0A79E;font-family:monospace;">guide v1.96 (2026/08/18)</span>
 </div>
 </div>
 
@@ -465,7 +466,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:#FFFBF7;padding:16px 14px 
 /* ================================================================
    育成システムとの連携(ログインしていれば進捗を保存します)
 ================================================================ */
-const GAS_URL = "https://script.google.com/macros/s/AKfycbzY2l20zwGULjnKRUqvRpbH79fPkl5e-sWNVoXEIgBrDpqhjDAx2zLvJuqO3sZxAfHj/exec";
+const GAS_URL = window.SKY_GAS_URL;   /* 共通設定（config.js）から受け取ります */
 const APP_ID  = "guide";
 const KEYS=['1','2','s','3','4','5'];
 const ITEM_IDS = KEYS.map(k=>"G"+k).join(",");
