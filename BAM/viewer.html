@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>BAM</title>
+<style>
+  :root{ --bg:#7494C0; --bubble:#fff; --text:#333; --bar:rgba(0,0,0,.28); }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg);
+    font-family:"Helvetica Neue",Arial,"Hiragino Kaku Gothic ProN","Hiragino Sans",Meiryo,sans-serif;
+    min-height:100vh;color:var(--text);overscroll-behavior-y:contain;
+  }
+  #bar{
+    position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:8px;
+    padding:calc(env(safe-area-inset-top,0px) + 10px) 12px 10px;
+    background:var(--bar);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+    color:#fff;font-size:14px;
+  }
+  #bar a,#bar button{
+    color:#fff;background:rgba(255,255,255,.15);border:0;border-radius:8px;
+    padding:6px 10px;font-size:13px;text-decoration:none;cursor:pointer;
+    line-height:1;font-family:inherit;
+  }
+  #daytitle{flex:1;text-align:center;font-weight:600;font-size:14px}
+
+  #chat{max-width:600px;margin:0 auto;padding:18px 12px 160px}
+  .date-header{text-align:center;margin:6px 0 18px}
+  .date-header span{background:rgba(0,0,0,.2);color:#fff;font-size:12px;padding:5px 12px;border-radius:20px}
+  .msg{display:none;margin-bottom:14px;justify-content:flex-start}
+  .msg.shown{display:flex;animation:popup .28s cubic-bezier(.175,.885,.32,1.1) both}
+  @keyframes popup{from{opacity:0;transform:translateY(14px) scale(.94)}to{opacity:1;transform:none}}
+  .bubble{
+    max-width:82%;padding:10px 14px;border-radius:18px;border-top-left-radius:3px;
+    font-size:15px;line-height:1.65;word-break:break-word;background:var(--bubble);
+    box-shadow:0 1px 2px rgba(0,0,0,.12);
+  }
+  .bubble a{color:#1a6fd4}
+  /* 画像・動画は中央に置く。横に広がりすぎないよう上限を付ける */
+  .msg.center{justify-content:center}
+  .bare{padding:0;background:transparent;box-shadow:none;border-radius:12px;
+        max-width:min(100%,460px)}
+  .bare img,.bubble img{max-width:100%;height:auto;border-radius:12px;display:block;cursor:zoom-in}
+  .bare video{max-width:100%;border-radius:12px;display:block;background:#000}
+  /* Googleドライブの埋め込み */
+  .gdrive{width:100%;aspect-ratio:16/9;border:0;border-radius:12px;display:block;background:#000}
+  /* チェックボタン（リアクション） */
+  .msg{align-items:flex-end;gap:7px}
+  .check{
+    flex:0 0 auto;width:27px;height:27px;padding:0;margin-bottom:2px;
+    border-radius:50%;border:1px solid rgba(255,255,255,.5);
+    background:rgba(255,255,255,.16);color:rgba(255,255,255,.85);
+    font-size:13px;line-height:1;cursor:pointer;font-family:inherit;
+    display:flex;align-items:center;justify-content:center;
+    transition:background .15s,border-color .15s,transform .12s;
+  }
+  .check:hover{background:rgba(255,255,255,.3)}
+  /* 中央寄せの行でチェックボタンの幅を打ち消し、画像を本当の中央に保つ */
+  .spacer{flex:0 0 27px}
+  .check.on{background:#41a05e;border-color:#41a05e;color:#fff;transform:scale(1.06)}
+
+  /* 動画の視聴状況 */
+  .vwrap{display:flex;flex-direction:column;gap:5px}
+  .vprog{
+    font-size:11px;line-height:1.5;color:rgba(255,255,255,.85);
+    background:rgba(0,0,0,.22);border-radius:20px;padding:3px 10px;
+    align-self:center;white-space:nowrap;
+  }
+  .vprog.done{background:#41a05e;color:#fff}
+
+  .pagenote{
+    margin:28px auto 0;max-width:460px;text-align:center;
+    background:rgba(0,0,0,.2);border-left:3px solid #ffd66b;
+    color:rgba(255,255,255,.9);font-size:11.5px;line-height:1.7;
+    padding:9px 12px;border-radius:8px;
+  }
+  .note{justify-content:center}
+  .note .pill{background:rgba(0,0,0,.22);color:#fff;font-size:12px;padding:6px 14px;border-radius:20px;max-width:90%;text-align:center;line-height:1.5}
+
+  /* 読み込めなかったファイルの表示 */
+  .broken{
+    background:#ffe9e9;border:1px dashed #d15;border-radius:10px;
+    padding:10px 12px;font-size:12px;color:#b00;line-height:1.6;
+    word-break:break-all;max-width:100%;
+  }
+  .broken b{display:block;margin-bottom:4px}
+
+  #tap-guide{
+    position:fixed;left:50%;transform:translateX(-50%);
+    bottom:calc(env(safe-area-inset-bottom,0px) + 74px);
+    background:rgba(0,0,0,.5);color:#fff;padding:8px 16px;border-radius:20px;
+    font-size:13px;pointer-events:none;animation:pulse 1.6s infinite;z-index:20;
+  }
+  @keyframes pulse{0%,100%{opacity:.45}50%{opacity:1}}
+  #footer{
+    position:fixed;left:0;right:0;bottom:0;z-index:25;display:flex;gap:10px;justify-content:center;
+    padding:12px 12px calc(env(safe-area-inset-bottom,0px) + 12px);
+    background:linear-gradient(to top,rgba(0,0,0,.35),rgba(0,0,0,0));
+  }
+  #footer button,#footer a{
+    background:#fff;color:#33517a;border:0;border-radius:22px;padding:11px 20px;
+    font-size:14px;font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,.2);
+    cursor:pointer;text-decoration:none;font-family:inherit;
+  }
+  #footer .ghost{background:rgba(255,255,255,.22);color:#fff;box-shadow:none}
+  .hide{display:none !important}
+
+  #lightbox{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;padding:16px;cursor:zoom-out}
+  #lightbox.on{display:flex}
+  #lightbox img{max-width:100%;max-height:100%;object-fit:contain}
+
+  #resume{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:24px}
+  #resume.on{display:flex}
+  #resume .card{background:#fff;border-radius:16px;padding:24px 22px;max-width:320px;width:100%;text-align:center}
+  #resume p{margin:0 0 18px;font-size:15px;line-height:1.6}
+  #resume button{display:block;width:100%;margin-top:8px;padding:12px;border:0;border-radius:10px;font-size:15px;font-family:inherit;cursor:pointer}
+  #resume .primary{background:#33517a;color:#fff}
+  #resume .second{background:#eef1f6;color:#33517a}
+
+  /* 診断パネル */
+  #diag{
+    max-width:600px;margin:0 auto 16px;background:#fffbe6;border:1px solid #e0c060;
+    border-radius:12px;padding:14px 16px;font-size:12.5px;line-height:1.75;color:#5c4600;
+    word-break:break-all;
+  }
+  #diag h3{margin:0 0 8px;font-size:13px}
+  #diag code{background:rgba(0,0,0,.07);padding:1px 5px;border-radius:4px}
+  #diag .ok{color:#0a7a3d}
+  #diag .ng{color:#c00;font-weight:700}
+  #diag button{margin-top:12px;background:#5c4600;color:#fff;border:0;border-radius:8px;padding:8px 14px;font-size:12px;font-family:inherit;cursor:pointer}
+  #diag hr{border:0;border-top:1px solid #e0c060;margin:12px 0}
+  #diag b{color:#8a3b00}
+</style>
+</head>
+<body>
+
+<header id="bar">
+  <a href="index.html">≡ 目次</a>
+  <span id="daytitle">読み込み中…</span>
+  <button id="sound-btn" title="効果音">🔔</button>
+</header>
+
+<div id="chat"></div>
+
+<div id="tap-guide">画面をタップして次へ ▼</div>
+
+<div id="footer">
+  <button id="all-btn" class="ghost">全部表示</button>
+  <a id="next-btn" class="hide" href="#">次の日へ →</a>
+</div>
+
+<div id="lightbox"><img alt=""></div>
+
+<div id="resume">
+  <div class="card">
+    <p>前回の続きから読みますか？</p>
+    <button class="primary" id="r-continue">続きから</button>
+    <button class="second" id="r-restart">最初から</button>
+  </div>
+</div>
+
+<audio id="pop" src="assets/pop.mp3" preload="auto"></audio>
+
+<!-- ===========================================================
+     データ読み込み。
+     動的読み込みは file:// でブロックされることがあるので、
+     ここに静的に並べる。存在しない日は黙って無視される。
+     Day9以降を足すときは、この行を1本コピーして増やす。
+     =========================================================== -->
+<script src="data/manifest.js"></script>
+<script src="data/day0.js"></script>
+<script src="data/day1.js"></script>
+<script src="data/day2.js"></script>
+<script src="data/day3.js"></script>
+<script src="data/day4.js"></script>
+<script src="data/day5.js"></script>
+<script src="data/day6.js"></script>
+<script src="data/day7.js"></script>
+<script src="data/day8.js"></script>
+<script src="data/day9.js"></script>
+
+<script>
+(function(){
+  "use strict";
+
+  var store = {
+    get:function(k,d){ try{ var v=localStorage.getItem(k); return v===null?d:v; }catch(e){ return d; } },
+    set:function(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+  };
+
+  var sigSeen={};
+  var dayNum = new URLSearchParams(location.search).get('day');
+  if(dayNum===null) dayNum = '0';
+
+  var manifest = window.BAM_MANIFEST || null;
+  var days     = window.BAM_DAYS || null;
+  var data     = days ? days[dayNum] : null;
+
+  var chat=document.getElementById('chat'), guide=document.getElementById('tap-guide'),
+      allBtn=document.getElementById('all-btn'), nextBtn=document.getElementById('next-btn'),
+      soundBtn=document.getElementById('sound-btn'), pop=document.getElementById('pop'),
+      lightbox=document.getElementById('lightbox'), lbImg=lightbox.querySelector('img'),
+      resume=document.getElementById('resume');
+
+  /* ---------- データが読めていない場合は診断を出して終了 ---------- */
+  if(!manifest || !data){
+    guide.classList.add('hide');
+    document.getElementById('footer').classList.add('hide');
+
+    var made = days ? Object.keys(days).sort(function(a,b){return a-b;}) : [];
+    var d = document.createElement('div');
+    d.id = 'diag';
+    var h = '';
+
+    if(!manifest){
+      /* --- data フォルダ自体が読めていない --- */
+      document.getElementById('daytitle').textContent = '読み込みエラー';
+      h = '<h3>data フォルダが見つかりません</h3>'
+        + '<div>今いる場所： <code>' + esc(decodeURIComponent(location.href)) + '</code></div>'
+        + '<div>data/manifest.js … <span class="ng">読めていない</span></div>'
+        + '<hr>'
+        + (/Temp|Tmp|AppData/i.test(location.href)
+            ? '<b>zipを展開せずに開いています。</b>zipファイルを右クリック →「すべて展開」してから、'
+              + '展開先の index.html を開いてください。'
+            : '<code>viewer.html</code> と同じ階層に <code>data</code> フォルダがあり、'
+              + 'その中に <code>manifest.js</code> があるか確認してください。');
+
+    } else {
+      /* --- data は読めている。その日の中身が無いだけ --- */
+      document.getElementById('daytitle').textContent = dayNum + '日目：準備中';
+      h = '<h3>' + esc(dayNum) + '日目の中身は、まだ作られていません</h3>'
+        + '<div>data/manifest.js … <span class="ok">読めた</span></div>'
+        + '<div>いま中身があるのは … <b>'
+        + (made.length ? made.map(function(k){return k+'日目';}).join('、') : 'なし')
+        + '</b></div>'
+        + '<hr>'
+        + 'エラーではありません。<code>data/day' + esc(dayNum) + '.js</code> を作れば表示されます。'
+        + '<br><br>作り方は <code>day0.js</code> をコピーして、'
+        + '<code>window.BAM_DAYS[0]</code> の <b>0</b> を <b>' + esc(dayNum) + '</b> に変えるだけです。'
+        + '<br><span style="opacity:.75">※ この番号を変え忘れると、0日目の中身を上書きしてしまうので注意してください。</span>';
+    }
+
+    d.innerHTML = h + '<button onclick="location.href=\'index.html\'">目次に戻る</button>';
+    chat.appendChild(d);
+    return;
+  }
+
+  var nodes=[], idx=0, soundOn = store.get('bam-sound','on')==='on',
+      PKEY = 'bam-progress-' + dayNum;
+  soundBtn.textContent = soundOn ? '🔔' : '🔕';
+
+  document.title = data.title || ('BAM ' + dayNum + '日目');
+  document.getElementById('daytitle').textContent = data.title || '';
+
+  var head=document.createElement('div');
+  head.className='date-header';
+  head.innerHTML='<span></span>';
+  head.firstChild.textContent = data.title || '';
+  chat.appendChild(head);
+
+  (data.messages||[]).forEach(function(m){
+    var el=render(m); chat.appendChild(el); nodes.push(el);
+  });
+
+  /* 各ページ下部の注意書き。文面はここを直接書き換えてください */
+  var pagenote=document.createElement('div');
+  pagenote.className='pagenote';
+  pagenote.textContent='⚠️ 2026年9月BAM（AKI CEO）の記録です。Skyarc内限定。外部への共有はしないでください。';
+  chat.appendChild(pagenote);
+
+  var hasNext=false;
+  if(manifest){
+    var pos = manifest.map(function(m){return String(m.day);}).indexOf(String(dayNum));
+    if(pos>-1 && manifest[pos+1]){
+      nextBtn.href='viewer.html?day='+manifest[pos+1].day;
+      nextBtn.textContent=(manifest[pos+1].title||'次の日')+' →';
+      hasNext=true;
+    }
+  }
+
+  var saved = parseInt(store.get(PKEY,'0'),10)||0;
+  if(saved>0 && saved<nodes.length){
+    resume.classList.add('on');
+    document.getElementById('r-continue').onclick=function(){ resume.classList.remove('on'); reveal(saved,false); };
+    document.getElementById('r-restart').onclick =function(){ resume.classList.remove('on'); store.set(PKEY,'0'); reveal(1,false); };
+  } else {
+    reveal(1,false);
+  }
+
+  /* ---------- 1件を DOM に ---------- */
+  function render(m){
+    var wrap=document.createElement('div');
+    wrap.className='msg';
+    var chk=null, msig=sig(m);
+
+    if(m.type==='note'){
+      wrap.className+=' note';
+      var pill=document.createElement('div');
+      pill.className='pill'; pill.textContent=m.text||'';
+      wrap.appendChild(pill); return wrap;
+    }
+
+    var b=document.createElement('div');
+    b.className='bubble';
+
+    if(m.type==='image'||m.type==='sticker'){
+      wrap.className+=' center';
+      b.className+=' bare';
+      var img=document.createElement('img');
+      img.src=m.src; img.alt=m.alt||''; img.loading='lazy';
+      img.addEventListener('click',function(e){ e.stopPropagation(); lbImg.src=m.src; lightbox.classList.add('on'); });
+      img.addEventListener('load', bottom);
+      img.addEventListener('error', function(){
+        b.className='bubble';
+        b.innerHTML='';
+        var w=document.createElement('div');
+        w.className='broken';
+        w.innerHTML='<b>画像が見つかりません</b>';
+        var p=document.createElement('div'); p.textContent=m.src;
+        w.appendChild(p);
+        var h=document.createElement('div');
+        h.style.marginTop='6px'; h.style.opacity='.8';
+        h.textContent='この場所にこの名前のファイルがあるか確認してください。';
+        w.appendChild(h);
+        b.appendChild(w);
+      });
+      b.appendChild(img);
+
+    } else if(m.type==='video' && /drive\.google\.com/.test(m.src||'')){
+      /* Googleドライブの動画は iframe で埋め込む。
+         別サイト扱いになるため、何%まで見たかは取得できない。 */
+      wrap.className+=' center';
+      b.className+=' bare';
+      var fr=document.createElement('iframe');
+      fr.className='gdrive';
+      fr.src=m.src;
+      fr.loading='lazy';
+      fr.allowFullscreen=true;
+      fr.setAttribute('allow','autoplay; fullscreen');
+      b.appendChild(fr);
+
+    } else if(m.type==='video'){
+      wrap.className+=' center';
+      b.className+=' bare vwrap';
+      var v=document.createElement('video');
+      v.src=m.src; v.controls=true; v.playsInline=true; v.preload='metadata';
+      if(m.poster) v.poster=m.poster;
+      v.addEventListener('click',function(e){ e.stopPropagation(); });
+
+      /* --- 視聴状況の記録 --- */
+      var VKEY='bam-vid-'+dayNum+'-'+msig;
+      var badge=document.createElement('div');
+      badge.className='vprog';
+      var seen=parseFloat(store.get(VKEY,'0'))||0;
+      paintBadge();
+      function paintBadge(){
+        if(seen>=0.95){ badge.className='vprog done'; badge.textContent='✓ 最後まで視聴しました'; }
+        else if(seen>0){ badge.className='vprog'; badge.textContent='▶ '+Math.round(seen*100)+'% まで視聴'; }
+        else { badge.className='vprog'; badge.textContent='未視聴'; }
+      }
+      var lastSave=0;
+      v.addEventListener('timeupdate',function(){
+        if(!v.duration || !isFinite(v.duration)) return;
+        var r=v.currentTime/v.duration;
+        if(r>seen) seen=r;
+        var now=Date.now();
+        if(now-lastSave>2000){ lastSave=now; store.set(VKEY,String(seen)); paintBadge(); }
+      });
+      v.addEventListener('ended',function(){
+        seen=1; store.set(VKEY,'1'); paintBadge();
+        if(chk && !chk.classList.contains('on')) chk.click();   // 見終わったら自動でチェック
+      });
+      v.addEventListener('error', function(){
+        b.className='bubble';
+        b.innerHTML='';
+        var w=document.createElement('div'); w.className='broken';
+        w.innerHTML='<b>動画が見つかりません／再生できません</b>';
+        var p=document.createElement('div'); p.textContent=m.src;
+        w.appendChild(p); b.appendChild(w);
+      });
+      b.appendChild(v);
+      b.appendChild(badge);
+
+    } else {
+      b.innerHTML=linkify(m.text||'');
+      Array.prototype.forEach.call(b.querySelectorAll('a'),function(a){
+        a.addEventListener('click',function(e){ e.stopPropagation(); });
+      });
+    }
+
+    wrap.appendChild(b);
+
+    /* --- チェックボタン（この端末にだけ残る） --- */
+    if(m.type!=='note'){
+      var CKEY='bam-chk-'+dayNum+'-'+msig;
+      chk=document.createElement('button');
+      chk.className='check';
+      chk.type='button';
+      chk.title='確認したらチェック';
+      var on=store.get(CKEY,'')==='1';
+      chk.textContent=on?'✓':'';
+      if(on) chk.classList.add('on');
+      chk.addEventListener('click',function(e){
+        e.stopPropagation();
+        var nowOn=!chk.classList.contains('on');
+        chk.classList.toggle('on',nowOn);
+        chk.textContent=nowOn?'✓':'';
+        store.set(CKEY, nowOn?'1':'0');
+      });
+      if(wrap.classList.contains('center')){
+        var sp=document.createElement('span');
+        sp.className='spacer';
+        wrap.insertBefore(sp, wrap.firstChild);
+      }
+      wrap.appendChild(chk);
+    }
+    return wrap;
+  }
+
+  /* メッセージの識別子。
+     内容から作るのでデータを作り直しても鍵が変わらない。
+     同じ内容が複数ある場合は出てきた順に枝番を付けて衝突を避ける。 */
+  function sig(m){
+    var base=(m.type||'')+'|'+(m.src||(m.text||'').slice(0,60));
+    var h=5381;
+    for(var i=0;i<base.length;i++){ h=((h*33)^base.charCodeAt(i))>>>0; }
+    var k=h.toString(36);
+    var n=sigSeen[k]||0;
+    sigSeen[k]=n+1;
+    return n? k+'.'+n : k;
+  }
+
+  function esc(t){ return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function linkify(t){
+    return esc(t)
+      .replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>')
+      .replace(/\n/g,'<br>');
+  }
+
+  function reveal(upTo,withSound){
+    for(var i=idx;i<upTo&&i<nodes.length;i++) nodes[i].classList.add('shown');
+    idx=Math.min(upTo,nodes.length);
+    store.set(PKEY,String(idx));
+    if(withSound&&soundOn){ try{ pop.currentTime=0; pop.play().catch(function(){}); }catch(e){} }
+    setTimeout(bottom,60);
+    if(idx>=nodes.length){
+      guide.classList.add('hide'); allBtn.classList.add('hide');
+      if(hasNext) nextBtn.classList.remove('hide');
+    }
+  }
+  function bottom(){ window.scrollTo({top:document.documentElement.scrollHeight,behavior:'smooth'}); }
+
+  document.addEventListener('click',function(e){
+    if(e.target.closest('#bar,#footer,#lightbox,#resume,a,button,video,iframe')) return;
+    if(idx<nodes.length) reveal(idx+1,true);
+  });
+  document.addEventListener('keydown',function(e){
+    if(e.key===' '||e.key==='ArrowDown'||e.key==='Enter'){ if(idx<nodes.length){ e.preventDefault(); reveal(idx+1,true); } }
+    if(e.key==='Escape') lightbox.classList.remove('on');
+  });
+  allBtn.addEventListener('click',function(e){ e.stopPropagation(); reveal(nodes.length,false); });
+  soundBtn.addEventListener('click',function(e){
+    e.stopPropagation(); soundOn=!soundOn;
+    soundBtn.textContent=soundOn?'🔔':'🔕';
+    store.set('bam-sound',soundOn?'on':'off');
+  });
+  lightbox.addEventListener('click',function(){ lightbox.classList.remove('on'); });
+})();
+</script>
+
+</body>
+</html>

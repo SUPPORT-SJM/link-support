@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>BAM｜8日間でアポイントが簡単になるベストマニュアル</title>
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{
+    margin:0;background:#7494C0;min-height:100vh;
+    font-family:"Helvetica Neue",Arial,"Hiragino Kaku Gothic ProN","Hiragino Sans",Meiryo,sans-serif;
+    color:#fff;
+    padding:calc(env(safe-area-inset-top,0px) + 32px) 16px calc(env(safe-area-inset-bottom,0px) + 40px);
+  }
+  .wrap{max-width:560px;margin:0 auto}
+  h1{font-size:20px;line-height:1.5;margin:0 0 6px;font-weight:700}
+  .sub{font-size:13px;opacity:.85;margin:0 0 26px;line-height:1.6}
+  ul{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+  .card{
+    display:flex;align-items:center;gap:14px;background:#fff;color:#33517a;
+    text-decoration:none;border-radius:14px;padding:16px 18px;
+    box-shadow:0 2px 8px rgba(0,0,0,.16);
+  }
+  .num{flex:0 0 40px;height:40px;border-radius:50%;background:#eef1f6;
+    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px}
+  .body{flex:1;min-width:0}
+  .ttl{font-weight:700;font-size:15px}
+  .state{font-size:12px;color:#7b8ba6;margin-top:3px}
+  .done .num{background:#33517a;color:#fff}
+  .card.soon{background:rgba(255,255,255,.28);color:rgba(255,255,255,.75);box-shadow:none;cursor:default}
+  .card.soon .num{background:rgba(255,255,255,.2);color:rgba(255,255,255,.8)}
+  .card.soon .state{color:rgba(255,255,255,.65)}
+  .reset{display:block;margin:26px auto 0;background:rgba(255,255,255,.18);color:#fff;
+    border:0;border-radius:20px;padding:9px 18px;font-size:13px;font-family:inherit;cursor:pointer}
+
+  /* 前提説明 */
+  .about{
+    background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.28);
+    border-radius:14px;padding:16px 18px;margin:0 0 24px;
+    font-size:13px;line-height:1.85;color:rgba(255,255,255,.94);
+  }
+  .about h2{margin:0 0 10px;font-size:14px;font-weight:700;letter-spacing:.02em}
+  .about p{margin:0 0 10px}
+  .about ul{list-style:none;margin:0 0 12px;padding:0;display:block}
+  .about li{position:relative;padding-left:14px;margin-bottom:4px}
+  .about li::before{content:"・";position:absolute;left:0;opacity:.7}
+  .about b{font-weight:700}
+  .about .warn{
+    margin:0;padding:12px 14px;border-radius:10px;
+    background:rgba(0,0,0,.22);border-left:3px solid #ffd66b;
+  }
+  .about .warn span{opacity:.8;font-size:12.5px}
+
+  /* 診断パネル */
+  #diag{
+    background:#fffbe6;border:1px solid #e0c060;border-radius:12px;
+    padding:16px 18px;font-size:13px;line-height:1.8;color:#5c4600;word-break:break-all;
+  }
+  #diag h2{margin:0 0 10px;font-size:15px;color:#8a3b00}
+  #diag code{background:rgba(0,0,0,.07);padding:2px 6px;border-radius:4px;font-size:12px}
+  #diag .ng{color:#c00;font-weight:700}
+  #diag ol{margin:10px 0 0;padding-left:20px}
+  #diag li{margin-bottom:6px}
+  #diag hr{border:0;border-top:1px solid #e0c060;margin:14px 0}
+  #diag .path{
+    background:#fff;border:1px solid #e0c060;border-radius:6px;
+    padding:8px 10px;margin:8px 0;font-size:11.5px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>8日間でアポイントが簡単になる<br>ベストマニュアル</h1>
+  <p class="sub">上から順番に進めてください。途中でやめても、次に開いたとき続きから読めます。</p>
+
+  <!-- ===== 前提説明。文面はここを直接書き換えてください ===== -->
+  <section class="about">
+    <h2>このページについて</h2>
+    <p>
+      <b>2026年9月</b>に行われた BAM（8日間でアポイントが簡単になるベストマニュアル）の記録です。
+      <b>LINK会員育成トレーナー／AKI CEO</b> が会員向けに実施されたもので、
+      その投稿内容を <b>さかいあたる</b> が記録・再構成しました。
+    </p>
+    <ul>
+      <li>収録しているのは AKI CEO の投稿のみです。参加者のやりとりは含みません</li>
+      <li>LINEの装飾文字や一部の絵文字は、読みやすさのために変換・省略しています</li>
+      <li>オープンチャットの運用ルールに関する投稿など、収録していない部分があります</li>
+      <li><b>当時の記録です。現在の内容・ルール・数字とは異なる場合があります</b></li>
+    </ul>
+    <p class="warn">
+      このページは Skyarc 内の限られたメンバーにだけ共有しています。<br>
+      URL・スクリーンショット・動画のいずれも、外部には出さないでください。<br>
+      <span>大切なものを預かれる仲間同士で守り合うための、お願いです。</span>
+    </p>
+  </section>
+
+  <div id="mount"></div>
+</div>
+
+<script src="data/manifest.js"></script>
+<script>
+(function(){
+  var store={
+    get:function(k,d){try{var v=localStorage.getItem(k);return v===null?d:v;}catch(e){return d;}},
+    del:function(k){try{localStorage.removeItem(k);}catch(e){}}
+  };
+  var mount=document.getElementById('mount');
+  var mf=window.BAM_MANIFEST;
+
+  /* ---- manifest.js が読めていない場合は原因を表示 ---- */
+  if(!mf || !mf.length){
+    var here = decodeURIComponent(location.href);
+    var isTemp = /Temp|TEMP|Tmp|AppData/i.test(here);
+    var isFile = location.protocol === 'file:';
+    var d=document.createElement('div');
+    d.id='diag';
+    var html =
+      '<h2>data フォルダが見つかりません</h2>'
+      + '<div>いま開いているファイルの場所：</div>'
+      + '<div class="path">' + here.replace(/&/g,'&amp;').replace(/</g,'&lt;') + '</div>'
+      + '<div><code>data/manifest.js</code> … <span class="ng">読み込めていません</span></div>'
+      + '<hr>';
+
+    if(isTemp){
+      html += '<b>原因が分かりました。</b><br>'
+        + 'いま開いているのは、Windowsが一時的に取り出した場所（Temp / AppData）です。'
+        + '<b>zipを展開せずに、中身をダブルクリックして開いています。</b>'
+        + 'この開き方だと、HTMLファイル1個だけが取り出されるので、隣にあるはずの data フォルダが存在しません。'
+        + '<ol>'
+        + '<li>いま開いているブラウザのタブを閉じる</li>'
+        + '<li>zipファイルを<b>右クリック →「すべて展開」</b></li>'
+        + '<li>展開先にできたフォルダの中の <code>index.html</code> を開く</li>'
+        + '</ol>';
+    } else if(isFile){
+      html += '<b>確認してください。</b>'
+        + '<code>index.html</code> と同じ階層に <code>data</code> フォルダがあり、'
+        + 'その中に <code>manifest.js</code> があるか見てください。'
+        + '<div class="path">'
+        + 'site/<br>'
+        + '　├─ index.html　← いま開いているファイル<br>'
+        + '　├─ viewer.html<br>'
+        + '　└─ data/<br>'
+        + '　　　├─ manifest.js　← これが必要<br>'
+        + '　　　└─ day0.js'
+        + '</div>'
+        + 'zipをダブルクリックしただけだと展開されていません。'
+        + '<b>右クリック →「すべて展開」</b>をしてから開いてください。';
+    } else {
+      html += 'サーバー上に <code>data/manifest.js</code> が置かれているか確認してください。';
+    }
+
+    d.innerHTML = html;
+    mount.appendChild(d);
+    return;
+  }
+
+  /* ---- 正常時 ---- */
+  var ul=document.createElement('ul');
+  mf.forEach(function(m){
+    var ready = (m.ready !== false);
+    var read  = parseInt(store.get('bam-progress-'+m.day,'0'),10)||0;
+    var li=document.createElement('li');
+    var a=document.createElement(ready ? 'a' : 'div');
+    a.className='card'+(ready&&read>0?' done':'')+(ready?'':' soon');
+    if(ready) a.href='viewer.html?day='+m.day;
+    a.innerHTML='<div class="num">'+m.day+'</div>'
+      +'<div class="body"><div class="ttl"></div>'
+      +'<div class="state">'
+      + (!ready ? '準備中' : (read>0 ? read+'件まで読了' : '未読'))
+      +'</div></div>';
+    a.querySelector('.ttl').textContent=m.title||('Day '+m.day);
+    li.appendChild(a);ul.appendChild(li);
+  });
+  mount.appendChild(ul);
+
+  var btn=document.createElement('button');
+  btn.className='reset';btn.textContent='読んだ記録をリセット';
+  btn.onclick=function(){
+    // どこまでタップしたか・チェック・動画の視聴記録を、まとめて消す
+    try{
+      Object.keys(localStorage)
+        .filter(function(k){
+          return k.indexOf('bam-progress-')===0
+              || k.indexOf('bam-chk-')===0
+              || k.indexOf('bam-vid-')===0;
+        })
+        .forEach(function(k){ localStorage.removeItem(k); });
+    }catch(e){
+      mf.forEach(function(m){store.del('bam-progress-'+m.day);});
+    }
+    location.reload();
+  };
+  mount.appendChild(btn);
+})();
+</script>
+</body>
+</html>
