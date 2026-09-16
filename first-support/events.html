@@ -49,7 +49,15 @@
     color:var(--deep);text-align:center;margin:6px 0 14px;}
   .cats{display:flex;flex-direction:column;gap:10px;}
   .cats button{background:#fff;border-radius:15px;padding:16px 18px;box-shadow:var(--shadow);
-    border-left:5px solid var(--main);display:flex;align-items:center;gap:13px;text-align:left;}
+    border-left:6px solid var(--main);display:flex;align-items:center;gap:13px;text-align:left;}
+  .cats button[data-k="support"]  {border-left-color:#FF7043;}
+  .cats button[data-k="kouryu-on"]{border-left-color:#5E8FD8;}
+  .cats button[data-k="kouryu-re"]{border-left-color:#5E8FD8;}
+  .cats button[data-k="douga"]    {border-left-color:#9575CD;}
+  .cats button[data-k="support"]   .cnt{color:#FF7043;}
+  .cats button[data-k="kouryu-on"] .cnt,
+  .cats button[data-k="kouryu-re"] .cnt{color:#5E8FD8;}
+  .cats button[data-k="douga"]     .cnt{color:#9575CD;}
   .cats button:active{transform:scale(.99);}
   .cats .ic{font-size:26px;line-height:1;flex-shrink:0;}
   .cats .tx{flex:1;}
@@ -67,13 +75,37 @@
   .nowcat{font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:14.5px;
     color:var(--deep);margin-bottom:12px;}
 
-  .ev{background:#fff;border-radius:15px;padding:15px 16px;box-shadow:var(--shadow);
-    margin-bottom:10px;border-left:4px solid var(--main);}
-  .ev.done{border-left-color:var(--leaf);background:#F6FCFA;}
-  .ev .top{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:3px;}
-  .ev .when{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:16px;color:var(--deep);}
-  .ev .kind{font-size:10.5px;font-weight:700;background:var(--mist);color:#B0603A;
-    border-radius:999px;padding:2px 9px;margin-left:auto;}
+  .ev{background:#fff;border-radius:15px;box-shadow:var(--shadow);
+    margin-bottom:12px;overflow:hidden;}
+  /* 種類の帯（何の会かを、はっきりお伝えします） */
+  .ev .kindbar{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:15px;
+    color:#fff;padding:11px 16px;letter-spacing:.02em;}
+  .ev > *:not(.kindbar){margin-left:16px;margin-right:16px;}
+  .ev .top{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-top:13px;margin-bottom:3px;}
+  .ev .when{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:17px;color:#3E2F28;}
+  .ev .detail{font-size:12px;line-height:1.95;color:#4A4038;background:#F7F4F1;
+    border-radius:10px;padding:11px 13px;margin-bottom:10px;word-break:break-word;}
+  .ev .detail b{color:#3E2F28;}
+  .ev .caution{font-size:11px;line-height:1.85;color:#8A6A57;background:#FFF8F4;
+    border-radius:9px;padding:9px 11px;margin-bottom:11px;}
+  .ev .caution b{color:#C2410C;}
+  .ev > *:last-child{margin-bottom:15px;}
+
+  /* ユーザーサポート会 … オレンジ */
+  .ev.k-support   .kindbar{background:#FF7043;}
+  .ev.k-support   .btn{background:#FF7043;}
+  .ev.k-support   .cal a{background:#FFF0EB;color:#B0603A;}
+  /* チーム交流会（オンライン・リアル）… 青 */
+  .ev.k-kouryu-on .kindbar,
+  .ev.k-kouryu-re .kindbar{background:#5E8FD8;}
+  .ev.k-kouryu-on .btn,
+  .ev.k-kouryu-re .btn{background:#5E8FD8;}
+  .ev.k-kouryu-on .cal a,
+  .ev.k-kouryu-re .cal a{background:#EDF3FB;color:#2B5C93;}
+  /* 動画視聴会 … むらさき */
+  .ev.k-douga     .kindbar{background:#9575CD;}
+  .ev.k-douga     .btn{background:#9575CD;}
+  .ev.k-douga     .cal a{background:#F2EFF9;color:#5E42A6;}
   .ev .raw{font-size:11.5px;color:#A9917F;margin-bottom:9px;word-break:break-all;}
   .ev .meta{display:flex;align-items:center;gap:10px;font-size:11.5px;color:#A9917F;margin-bottom:10px;}
   .ev .zoomtag{color:#2B5C93;}
@@ -125,6 +157,14 @@
   .ov .opts button{flex:1;min-width:70px;padding:9px 6px;border-radius:10px;
     background:#fff;border:1.5px solid var(--line);color:#A97B62;font-size:12px;font-weight:700;}
   .ov .opts button.on{background:var(--main);border-color:var(--main);color:#fff;}
+  .ov .guide-note{font-size:12px;color:#8A6A57;line-height:1.85;
+    background:var(--mist);border-radius:10px;padding:11px 13px;margin-top:14px;}
+  .ov .guide-note b{color:var(--deep);}
+  .ov .copy-name{display:flex;align-items:center;gap:8px;margin-top:10px;
+    background:#fff;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;}
+  .ov .copy-name span{flex:1;font-size:13.5px;font-weight:700;}
+  .ov .copy-name button{background:var(--sun,#F2B33D);color:#4A3400;border-radius:999px;
+    padding:6px 13px;font-size:11.5px;font-weight:700;flex-shrink:0;}
 
   /* カレンダーに入れるところ */
   .cal{display:flex;gap:6px;margin-top:8px;}
@@ -174,9 +214,10 @@
 
     <div class="note" id="noteBox" style="display:none;">
       <b>お申し込みについて</b><br>
-      ボタンを押すと、申込みシートのお名前欄にご登録のお名前が入ります。<br>
-      系列やアップのクリエイターズも、分かる範囲で一緒に入ります。<br><br>
-      取り消したいときは、担当の方にお伝えください。
+      ボタンを押すと、<b>申込みシートのその場所が開きます</b>。<br>
+      空いている行に、お名前と系列をご記入ください。<br><br>
+      お名前はコピーできるので、貼り付けるだけで済みます。<br>
+      取り消したいときは、シートのご自身の行を消してください。
     </div>
 
     <div class="verTag"></div>
@@ -186,11 +227,19 @@
 <!-- 確かめの画面 -->
 <div class="ov" id="ov">
   <div class="card">
-    <h3>この内容でお申し込みしますか</h3>
+    <h3>この内容でお申し込みください</h3>
     <div class="line"><span>イベント</span><span id="cKind"></span></div>
     <div class="line"><span>開催日時</span><span id="cWhen"></span></div>
     <div class="line"><span>お名前</span><span id="cName"></span></div>
     <div class="line"><span>系列</span><span id="cTeam"></span></div>
+
+    <p class="guide-note">
+      シートを開いたら、<b>空いている行</b>に下の内容をご記入ください。
+    </p>
+    <div class="copy-name">
+      <span id="cCopyName"></span>
+      <button onclick="copyMyName()">📋 コピー</button>
+    </div>
 
     <div class="pick" id="markWrap">
       <label>ご参加のしかた</label>
@@ -210,8 +259,8 @@
       </div>
     </div>
 
-    <button class="go" onclick="doApply()">申し込む</button>
-    <button class="cancel" onclick="closeOv()">やめておく</button>
+    <button class="go" onclick="openSheet()">📋 申込みシートを開く</button>
+    <button class="cancel" onclick="closeOv()">とじる</button>
   </div>
 </div>
 
@@ -220,6 +269,21 @@ const GAS_URL = window.SKY_GAS_URL;
 
 let member = null, events = [], filter = null, picked = null;
 let myMark = "", myDevice = "パソコン";
+
+/* ================================================================
+   種類ごとの、しるしと注意書き
+================================================================ */
+const KIND = {
+  "support":   { ic:"🎧", note:
+      "⚠️ <b>オープンチャットのお名前と、お申し込みのお名前をそろえてください。</b><br>" +
+      "⚠️ ご自身の<b>会員番号とパスワード</b>がすぐ分かる状態で、<b>LINKポータルにご登録ずみ</b>でご参加ください。" },
+  "kouryu-on": { ic:"💻", note:
+      "⚠️ <b>オープンチャットのお名前と、お申し込みのお名前をそろえてください。</b>" },
+  "kouryu-re": { ic:"🤝", note:
+      "⚠️ <b>オープンチャットのお名前と、お申し込みのお名前をそろえてください。</b>" },
+  "douga":     { ic:"🎬", note:
+      "⚠️ <b>オープンチャットのお名前と、お申し込みのお名前をそろえてください。</b>" },
+};
 
 /* 予定の種類 */
 const CATS = [
@@ -297,7 +361,7 @@ function renderMine(list){
   const box = $("#mineBox");
   if(!list.length){ box.innerHTML = ""; return; }
   box.innerHTML = `<div class="mine">
-    <h2>🔔 お申し込みずみの予定</h2>
+    <h2>🔔 シートを開いた予定</h2>
     ${list.map(e => `<div class="row"><b>${e.md}</b><span>${e.label}</span></div>`).join("")}
   </div>`;
 }
@@ -319,7 +383,7 @@ function renderCats(){
   $("#cats").innerHTML = CATS.map(c=>{
     const n = c.key === "all" ? events.length
             : events.filter(e => e.book === c.key).length;
-    return `<button class="${c.key==="all"?"all":""} ${n?"":"zero"}" onclick="setF('${c.key}')">
+    return `<button data-k="${c.key}" class="${c.key==="all"?"all":""} ${n?"":"zero"}" onclick="setF('${c.key}')">
       <span class="ic">${c.ic}</span>
       <span class="tx"><span class="nm">${c.nm}</span><br><span class="sub">${c.sub}</span></span>
       <span class="cnt">${n}<small>件</small></span>
@@ -356,26 +420,24 @@ function render(){
   list.innerHTML = shown.map(e => {
     const i = events.indexOf(e);
     return `
-    <div class="ev ${e.joined ? "done" : ""}">
+    <div class="ev k-${e.book}">
+      <div class="kindbar">${KIND[e.book] ? KIND[e.book].ic : "📅"} ${e.label}</div>
       <div class="top">
         <span class="when">${e.md}</span>
-        <span class="kind">${e.label}</span>
       </div>
       <div class="raw">${e.dateText}</div>
       <div class="meta">
-        <span>お申し込み ${e.taken}名</span>
+        <span>いま ${e.taken}名</span>
         ${e.zoom ? '<span class="zoomtag">Zoomあり</span>' : ""}
       </div>
-      ${e.joined
-        ? `<button class="btn joined" disabled>✅ お申し込みずみ</button>
-           <div class="cal">
-             <a href="${gcalUrl(e)}" target="_blank">📅 Googleカレンダー</a>
-             <a href="#" onclick="downloadIcs(${i});return false;">🍎 iPhone・その他</a>
-           </div>
-           ${sheetLink(e)}
-           ${e.zoom ? `<a class="zoom" href="${zoomUrl(e.zoom)}" target="_blank">${e.zoom}</a>` : ""}`
-        : `<button class="btn" onclick="pick(${i})">この予定に申し込む</button>
-           ${sheetLink(e)}`}
+      ${e.detail ? `<div class="detail">${fmtDetail(e.detail)}</div>` : ""}
+      <div class="caution">${KIND[e.book] ? KIND[e.book].note : ""}</div>
+      <button class="btn" onclick="pick(${i})">📋 申込みシートを開く</button>
+      <div class="cal">
+        <a href="${gcalUrl(e)}" target="_blank">📅 Googleカレンダー</a>
+        <a href="#" onclick="downloadIcs(${i});return false;">🍎 iPhone・その他</a>
+      </div>
+      ${e.zoom ? `<a class="zoom" href="${zoomUrl(e.zoom)}" target="_blank">${e.zoom}</a>` : ""}
     </div>`;
   }).join("");
 }
@@ -454,11 +516,17 @@ function downloadIcs(i){
   setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
 }
 
-/* 申込みシートの、その場所を開くリンクです（確かめたいときに） */
-function sheetLink(e){
-  if(!e.url) return "";
-  return `<a class="sheetlink" href="${e.url}" target="_blank" rel="noopener">`
-       + `📋 シートで確かめる<span>${e.sheet}タブ</span></a>`;
+/* 場所・住所・会費などの案内を、読みやすく並べます */
+function fmtDetail(text){
+  let t = String(text || "").replace(/\s+/g, " ").trim();
+  /* 項目のあたまで改行します */
+  t = t.replace(/(場所|住所|最寄り駅|最寄駅|お店URL|会費|集合|受付|持ち物)\s*[：:]/g, "<br><b>$1：</b>");
+  /* ※ のあたまでも改行します */
+  t = t.replace(/\s*※/g, "<br>※");
+  /* リンクは押せるようにします */
+  t = t.replace(/(https?:\/\/[^\s<]+)/g,
+    '<a href="$1" target="_blank" rel="noopener" style="color:#2B5C93;word-break:break-all;">$1</a>');
+  return t.replace(/^(<br>)+/, "");
 }
 
 /* Zoomの案内から、リンクだけ取り出します */
@@ -479,6 +547,17 @@ function setDev(b){
   myDevice = b.dataset.v;
 }
 
+/* お名前をコピーします（シートに貼り付けやすいように） */
+async function copyMyName(){
+  const t = (member.name || "") + (member.keiretsu ? "\t" + member.keiretsu : "");
+  try{
+    await navigator.clipboard.writeText(t);
+    alert("✅ コピーしました\n\nシートのお名前の欄に貼り付けてください。\n（系列も一緒にコピーしています）");
+  }catch(e){
+    alert("コピーできませんでした。\nお手数ですが、手で入力してください。");
+  }
+}
+
 function pick(i){
   picked = events[i];
   if(!picked) return;
@@ -486,6 +565,7 @@ function pick(i){
   $("#cWhen").textContent = picked.dateText;
   $("#cName").textContent = member.name || "(お名前未登録)";
   $("#cTeam").textContent = member.keiretsu || "(未設定)";
+  $("#cCopyName").textContent = (member.name || "") + (member.keiretsu ? "　" + member.keiretsu : "");
 
   /* そのシートに欄があるときだけ、お選びいただきます */
   $("#markWrap").style.display = (picked.hasMark === false) ? "none" : "block";
@@ -495,48 +575,32 @@ function pick(i){
 }
 function closeOv(){ $("#ov").classList.remove("show"); picked = null; }
 
-async function doApply(){
+/* ================================================================
+   申込みシートを開きます
+   ----------------------------------------------------------------
+   こちらから書き込むことはしません。
+   ご自身で、空いている行にご記入いただきます。
+================================================================ */
+function openSheet(){
   if(!picked) return;
-  if(typeof skyBusy === "function" && skyBusy("apply")) return;
-  /* 画面を閉じる前に、申込みの内容を控えておきます
-     （閉じる処理で picked が空になるためです） */
   const ev = picked;
-  try{
-    closeOv();
-    if(typeof skyLoading === "function") skyLoading("お申し込みしています");
+  closeOv();
 
-    const body = new URLSearchParams({
-      action:"eventApply", id:member.id, pin:member.pin,
-      book:ev.book, sheet:ev.sheet,
-      nameCol:String(ev.nameCol), dateText:ev.dateText,
-      mark:myMark, device:myDevice
-    });
-    const res = await fetch(GAS_URL, { method:"POST", body:body });
-    const j = await res.json();
-    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
-    if(typeof skyLoadingDone === "function") skyLoadingDone();
-
-    if(j.ok === false){
-      alert({
-        changed:"予定の内容が変わったようです。読み込み直してお試しください。",
-        nosheet:"申込みシートが見つかりませんでした。",
-        noname:"お名前がご登録されていません。会員情報をご確認ください。",
-        busy:"いま混み合っています。少しおいてお試しください。"
-      }[j.error] || "お申し込みできませんでした。");
-      return;
-    }
-    if(j.already){
-      alert("すでにお申し込みずみでした。");
-    }else{
-      alert("✅ お申し込みしました。\n\n" + ev.label + "\n" + ev.dateText);
-    }
-    load();
-  }catch(e){
-    if(typeof skyLoadingDone === "function") skyLoadingDone();
-    alert("通信できませんでした。電波のよい場所でお試しください。");
-  }finally{
-    if(typeof skyBusyEnd === "function") skyBusyEnd("apply");
+  if(!ev.url){
+    alert("シートの場所が分かりませんでした。\n読み込み直してお試しください。");
+    return;
   }
+
+  /* 開いたことを控えておきます（あとで見返せるように） */
+  try{
+    const q = `id=${encodeURIComponent(member.id)}&pin=${encodeURIComponent(member.pin)}`
+            + `&book=${encodeURIComponent(ev.book)}&sheet=${encodeURIComponent(ev.sheet)}`
+            + `&dateText=${encodeURIComponent(ev.dateText)}`
+            + `&mark=${encodeURIComponent(myMark)}&device=${encodeURIComponent(myDevice)}`;
+    new Image().src = `${GAS_URL}?action=eventOpened&${q}&_=${Date.now()}`;
+  }catch(e){}
+
+  window.open(ev.url, "_blank", "noopener");
 }
 
 $("#ov").addEventListener("click", e => { if(e.target.id === "ov") closeOv(); });
