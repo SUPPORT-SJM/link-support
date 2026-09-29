@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+<script src="../config.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
@@ -8,10 +9,10 @@
 <title>LINK 初期サポートの流れ</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Noto Sans JP',sans-serif;background:#FFFBF7;padding:16px 14px 48px}
+body{font-family:"Zen Kaku Gothic New",sans-serif;background:#FFFBF7;padding:16px 14px 48px}
 .wrap{max-width:390px;margin:0 auto}
 
 /* ベータテスト表記 */
@@ -29,16 +30,22 @@ body{font-family:'Noto Sans JP',sans-serif;background:#FFFBF7;padding:16px 14px 
 .sync-note{font-size:10.5px;opacity:.85;width:100%}
 
 .welcome{background:linear-gradient(135deg,#FFF8E1,#FFF0F0);border-radius:16px;padding:20px 16px;margin-bottom:16px;border:1px solid #FFD6A0;text-align:center}
-.welcome h1{font-size:17px;font-weight:700;color:#E65100;line-height:1.7;margin:8px 0}
+.welcome h1{font-size:17px;font-family:"Zen Maru Gothic",sans-serif;font-weight:700;color:#E65100;line-height:1.7;margin:8px 0}
 .welcome p{font-size:13px;color:#795548;line-height:1.9}
 
-.hero{background:#FFF0F0;border-radius:16px;padding:20px 16px;margin-bottom:20px;border:1px solid #FFD6D6}
+.hero{background:linear-gradient(135deg,#FFE0B2,#FFCCBC);border-radius:18px;
+  padding:26px 18px;text-align:center;margin-bottom:18px}
+.hero .em{font-size:38px;line-height:1;margin-bottom:6px}
+.hero h1{font-size:21px;font-family:"Zen Maru Gothic",sans-serif;font-weight:900;
+  color:#E65100;margin-bottom:8px}
+.hero p{font-size:13px;color:#795548;line-height:1.9}
+.note-box{background:#FFF0F0;border-radius:16px;padding:20px 16px;margin-bottom:20px;border:1px solid #FFD6D6}
 .hero h2{font-size:18px;font-weight:700;color:#C62828;margin-bottom:12px;line-height:1.6;text-align:center}
 .hero-body{font-size:14px;color:#5D4037;line-height:2.1}
 .hero-body p{margin-bottom:4px}
 .hero-em{background:#FFECB3;border-radius:8px;padding:10px 12px;font-size:14px;color:#5D4037;line-height:1.85;margin-top:10px;border-left:3px solid #FFB300}
 
-.phase{font-size:15px;font-weight:700;color:#2E7D32;margin:24px 0 10px;padding-bottom:6px;border-bottom:2px solid #A5D6A7}
+.phase{font-size:15px;font-family:"Zen Maru Gothic",sans-serif;font-weight:700;color:#2E7D32;margin:24px 0 10px;padding-bottom:6px;border-bottom:2px solid #A5D6A7}
 .phase-b{color:#1B5E20;border-bottom-color:#81C784}
 .emoji-row{font-size:18px;letter-spacing:2px;margin:4px 0 10px}
 .hint{font-size:15px;font-weight:700;color:#FF7043;text-align:center;margin-bottom:14px;background:#FFF0EB;border:2px solid #FFAB76;border-radius:10px;padding:10px 12px}
@@ -48,7 +55,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:#FFFBF7;padding:16px 14px 
 .card-head{display:flex;align-items:stretch;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
 .card-num{background:#43A047;color:#fff;font-size:16px;font-weight:700;padding:8px 14px;display:flex;align-items:center;justify-content:center;min-width:44px;flex-shrink:0;transition:background 0.3s}
 .card.done .card-num{background:#FF7043}
-.card-ttl{background:#E8F5E9;color:#1B5E20;font-size:14px;font-weight:700;padding:8px 12px;flex:1;display:flex;align-items:center;line-height:1.5;transition:background 0.3s,color 0.3s;gap:6px}
+.card-ttl{background:#E8F5E9;color:#1B5E20;font-size:14px;font-family:"Zen Maru Gothic",sans-serif;font-weight:700;padding:8px 12px;flex:1;display:flex;align-items:center;line-height:1.5;transition:background 0.3s,color 0.3s;gap:6px}
 .card.done .card-ttl{background:#FFF0EB;color:#BF360C}
 .card-arrow{background:#E8F5E9;color:#43A047;font-size:18px;padding:8px 12px;display:flex;align-items:center;transition:transform 0.3s,background 0.3s;flex-shrink:0}
 .card.done .card-arrow{background:#FFF0EB;color:#FF7043}
@@ -60,10 +67,17 @@ body{font-family:'Noto Sans JP',sans-serif;background:#FFFBF7;padding:16px 14px 
 .card-inner p:last-child{margin-bottom:0}
 
 .badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 7px;border-radius:20px;flex-shrink:0}
+.progress-box{background:#fff;border-radius:14px;padding:16px;margin-bottom:18px;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.progress-box .row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.progress-box b{font-size:14px;font-weight:900;color:#E65100}
+.progress-box .cnt{font-size:18px;font-weight:900;color:#FF9800}
+.progress-box .bar{height:10px;background:#FFE0B2;border-radius:999px;overflow:hidden}
+.progress-box .bar i{display:block;height:100%;width:0;border-radius:999px;
+  background:linear-gradient(90deg,#FFB74D,#A5D6A7);transition:width .45s ease}
 .badge-yet{background:#EEE;color:#9E9E9E}
 .badge-done{background:#A5D6A7;color:#fff}
 
-.done-btn{display:block;width:100%;margin-top:12px;padding:12px;border-radius:10px;font-size:15px;font-weight:700;text-align:center;cursor:pointer;border:none;font-family:'Noto Sans JP',sans-serif;transition:background 0.3s}
+.done-btn{display:block;width:100%;margin-top:12px;padding:12px;border-radius:10px;font-size:15px;font-weight:700;text-align:center;cursor:pointer;border:none;font-family:"Zen Kaku Gothic New",sans-serif;transition:background 0.3s}
 .done-btn-pending{background:#FFE0B2;color:#E65100}
 .done-btn-done{background:#A5D6A7;color:#fff}
 
@@ -111,12 +125,12 @@ body{font-family:'Noto Sans JP',sans-serif;background:#FFFBF7;padding:16px 14px 
 
 .gen-box{background:#FFF8F5;border:1px solid #FFD0B0;border-radius:12px;padding:14px;margin-bottom:20px}
 .gen-label{font-size:12px;font-weight:700;color:#FF7043;margin-bottom:6px;display:block}
-.gen-input{width:100%;border:1px solid #FFCCBC;border-radius:8px;padding:10px 12px;font-size:14px;font-family:'Noto Sans JP',sans-serif;color:#4E342E;background:#fff;margin-bottom:12px;outline:none}
+.gen-input{width:100%;border:1px solid #FFCCBC;border-radius:8px;padding:10px 12px;font-size:14px;font-family:"Zen Kaku Gothic New",sans-serif;color:#4E342E;background:#fff;margin-bottom:12px;outline:none}
 .gen-input:focus{border-color:#FF7043}
-.gen-select{width:100%;border:1px solid #FFCCBC;border-radius:8px;padding:10px 12px;font-size:14px;font-family:'Noto Sans JP',sans-serif;color:#4E342E;background:#fff;margin-bottom:12px;outline:none}
+.gen-select{width:100%;border:1px solid #FFCCBC;border-radius:8px;padding:10px 12px;font-size:14px;font-family:"Zen Kaku Gothic New",sans-serif;color:#4E342E;background:#fff;margin-bottom:12px;outline:none}
 .result-label{font-size:12px;font-weight:700;color:#888;margin-bottom:6px}
 .result-box{background:#FFF0EB;border:2px solid #FF7043;border-radius:10px;padding:12px 14px;font-size:16px;font-weight:700;color:#BF360C;line-height:1.6;min-height:48px;margin-bottom:14px;word-break:break-all;text-align:center}
-#copyBtn{display:block !important;width:100% !important;padding:16px !important;border-radius:12px !important;background:#FF7043 !important;background-color:#FF7043 !important;border:none !important;cursor:pointer !important;font-family:'Noto Sans JP',sans-serif !important;font-size:18px !important;font-weight:700 !important;color:#ffffff !important;-webkit-text-fill-color:#ffffff !important;text-align:center !important;letter-spacing:0.05em !important}
+#copyBtn{display:block !important;width:100% !important;padding:16px !important;border-radius:12px !important;background:#FF7043 !important;background-color:#FF7043 !important;border:none !important;cursor:pointer !important;font-family:"Zen Kaku Gothic New",sans-serif !important;font-size:18px !important;font-weight:700 !important;color:#ffffff !important;-webkit-text-fill-color:#ffffff !important;text-align:center !important;letter-spacing:0.05em !important}
 .copy-hint{font-size:12px;color:#A1887F;text-align:center;margin-top:8px}
 
 .footer{background:#FFF0F0;border-radius:16px;padding:18px 16px;margin-top:8px;border:1px solid #FFD6D6}
@@ -128,7 +142,6 @@ body{font-family:'Noto Sans JP',sans-serif;background:#FFFBF7;padding:16px 14px 
 <link rel="stylesheet" href="../beta.css">
 <script src="../login.js"></script>
 <script src="../loading.js"></script>
-<script src="../config.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -147,13 +160,22 @@ body{font-family:'Noto Sans JP',sans-serif;background:#FFFBF7;padding:16px 14px 
 </div>
 
 
-<div class="welcome">
-  <div style="font-size:32px;margin-bottom:8px">🎉</div>
-  <h1>LINKへようこそ！<br>これからLINKを最大限活用する<br>準備を始めましょう✨️</h1>
-  <p>あなたの"やりたい"が加速していきます💡<br>まずはこの流れに沿って進めてみてください！</p>
+<div class="hero">
+  <div class="em">📘</div>
+
+<div class="progress-box">
+  <div class="row">
+    <b>📘 初期サポートガイド</b>
+    <span class="cnt"><span id="doneN">0</span> / <span id="totalN">6</span></span>
+  </div>
+  <div class="bar"><i id="progBar"></i></div>
+</div>
+  <h1>初期サポートガイド</h1>
+  <p>LINKを最大限活用する準備を始めましょう✨<br>
+  この流れに沿って進めてみてください！</p>
 </div>
 
-<div class="hero">
+<div class="note-box">
   <h2>🌸 初期サポートの流れ 🌸</h2>
   <div class="hero-body">
     <p>LINKは完全フリービジネスですが、</p>
@@ -161,6 +183,7 @@ body{font-family:'Noto Sans JP',sans-serif;background:#FFFBF7;padding:16px 14px 
     <p>これは皆さんがスムーズに、</p>
     <p>LINKを活用出来るようにする為です⚡</p>
   </div>
+
   <div class="hero-em">『 入ったけど、LINKを使えてない😢』<br>を無くすためです✨</div>
 </div>
 
@@ -471,6 +494,20 @@ body{font-family:'Noto Sans JP',sans-serif;background:#FFFBF7;padding:16px 14px 
 const GAS_URL = window.SKY_GAS_URL;   /* 共通設定（config.js）から受け取ります */
 const APP_ID  = "guide";
 const KEYS=['1','2','s','3','4','5'];
+
+/* 進み具合の帯を書き直します */
+function refreshProgress(){
+  let n = 0;
+  KEYS.forEach(function(k){
+    if(localStorage.getItem('link_done_'+k) === '1') n++;
+  });
+  const dn = document.getElementById("doneN");
+  const tn = document.getElementById("totalN");
+  const bar = document.getElementById("progBar");
+  if(dn) dn.textContent = n;
+  if(tn) tn.textContent = KEYS.length;
+  if(bar) bar.style.width = (n / KEYS.length * 100) + "%";
+}
 const ITEM_IDS = KEYS.map(k=>"G"+k).join(",");
 
 let member = null;
@@ -483,6 +520,7 @@ let saveTimer = null;
     if(raw && raw !== "null" && raw !== "undefined") member = JSON.parse(raw);
   }catch(e){}
   if(member && !member.id) member = null;
+  setTimeout(refreshProgress, 50);   /* 開いたときの進み具合を出します */
   const bar = document.getElementById("loginBar");
   const who = document.getElementById("loginWho");
   const link = document.getElementById("loginLink");
@@ -565,6 +603,7 @@ function markDone(id){
     return;
   }
   const done=localStorage.getItem('link_done_'+id)==='1';
+  setTimeout(refreshProgress, 30);
   if(done){
     localStorage.removeItem('link_done_'+id);
     delete progress["G"+id];
