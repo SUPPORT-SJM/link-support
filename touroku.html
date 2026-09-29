@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+<script src="config.js"></script>
 <meta charset="UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -129,7 +130,7 @@
     display:block;width:100%;padding:16px;border-radius:14px;text-decoration:none;
     background:var(--deep);color:var(--white);
     font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:16px;margin-bottom:10px;
-  }
+  max-width:380px;margin-left:auto;margin-right:auto;}
   .btn-sub{
     display:block;width:100%;padding:13px;border-radius:12px;text-decoration:none;
     background:var(--mist);color:var(--deep);
@@ -139,7 +140,6 @@
 </style>
 <link rel="stylesheet" href="beta.css">
 <script src="loading.js"></script>
-<script src="config.js"></script>
 <script src="login.js"></script>
 </head>
 <body>
@@ -727,5 +727,6 @@ function toggleQr(){
 window.addEventListener("pageshow", function(e){ if(e.persisted) location.reload(); });
 </script>
 <script src="track.js"></script>
+<script src="menu.js"></script>
 </body>
 </html>

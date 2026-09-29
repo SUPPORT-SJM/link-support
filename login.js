@@ -6,7 +6,15 @@
    ・LINE内ブラウザから外部ブラウザに移った直後でも、ここから入れます
 ================================================================ */
 (function () {
-  var GAS = window.SKY_GAS_URL;   /* 共通設定（config.js）から受け取ります */
+  /* ================================================================
+     共通設定（config.js）から受け取ります
+     ----------------------------------------------------------------
+     読み込みの順番が前後しても困らないよう、
+     「使うとき」に受け取る形にしています。
+  ================================================================ */
+  function gasUrl() {
+    return window.SKY_GAS_URL || "";
+  }
 
   var ov = null, pending = null;
 
@@ -90,7 +98,7 @@
     msg("確認しています…", "ok");
     if (typeof skyLoading === "function") skyLoading("ログインしています…");
     try {
-      var url = GAS + "?action=login&id=" + encodeURIComponent(id) + "&pin=" + encodeURIComponent(pin);
+      var url = gasUrl() + "?action=login&id=" + encodeURIComponent(id) + "&pin=" + encodeURIComponent(pin);
       var res = await fetch(url);
       var j = await res.json();
       if (typeof skyLoadingDone === "function") skyLoadingDone();
@@ -126,7 +134,7 @@
       msg("✅ ログインしました", "ok");
 
       /* バッジは、あとから静かに取りに行きます */
-      fetch(GAS + "?action=extra&id=" + encodeURIComponent(id) + "&pin=" + encodeURIComponent(pin))
+      fetch(gasUrl() + "?action=extra&id=" + encodeURIComponent(id) + "&pin=" + encodeURIComponent(pin))
         .then(function (r) { return r.json(); })
         .then(function (e2) {
           if (e2 && e2.ok) {
