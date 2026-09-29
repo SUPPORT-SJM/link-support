@@ -44,6 +44,7 @@
   .gdone.show{display:block;}
   .gdone b{display:block;font-size:13px;}
   .locked{opacity:.4;pointer-events:none;}
+  .back-btn{pointer-events:auto !important;opacity:1 !important;}
 
 
   .inapp-warn{
@@ -164,6 +165,9 @@
     </div>
     <div class="msg" id="msg"></div>
 
+    <div class="stepbar" id="stepBar"><i class="on"></i><i></i></div>
+
+    <div id="step1">
     <div class="sec">
       <p class="step">① 連絡先の登録</p>
 
@@ -186,13 +190,12 @@
         <div class="f" style="margin-bottom:8px;">
           <input type="email" id="inMail" name="email" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" placeholder="example@docomo.ne.jp" oninput="checkMail()">
           <p class="hint" id="mailHint">LINKのご登録に使っているアドレスがおすすめです</p>
-        </div>
       </div>
     </div>
 
     <div class="sec locked" id="fields">
       <p class="step">② あなたの情報</p>
-      <p class="tab-lead" style="margin-bottom:14px;">会員番号・パスコード・ニックネーム・系列は必須です。<br>紹介者の情報は、分かる範囲で大丈夫です。</p>
+      <p class="tab-lead" style="margin-bottom:14px;">まずは、この4つだけお願いします。<br>くわしい情報は、つぎの画面で分かる範囲でどうぞ😊</p>
 
       <div class="f">
         <label>会員番号 <span class="req">必須</span></label>
@@ -213,62 +216,77 @@
       </div>
 
       <div class="f">
-        <label>本名 <span class="opt">任意</span></label>
-        <input type="text" id="inRealName" name="name" autocomplete="name" placeholder="例:高山翔子">
-        <p class="hint">名簿の管理にのみ使います。画面には出ません</p>
-      </div>
-
-      <div class="f">
-        <label>お住まいの地域 <span class="opt">任意</span></label>
-        <select id="inArea"></select>
-        <input type="text" id="inAreaOther" placeholder="国名を入力してください" style="display:none;margin-top:8px;">
-      </div>
-
-      <div class="f">
         <label>系列 <span class="req">必須</span></label>
         <select id="inKeiretsu"></select>
         <input type="text" id="inKeiretsuOther" placeholder="系列名を入力してください" style="display:none;margin-top:8px;">
       </div>
 
-      <p class="step" style="margin-top:22px;">③ 紹介してくださった方 <span style="font-weight:400;font-size:11.5px;color:#A8B4AC;">(分かる範囲でOK)</span></p>
+    </div>
+    <button class="next-btn locked" id="nextBtn" onclick="goStep2()">つぎへすすむ ›</button>
+    </div>
+    </div><!-- /step1 -->
+
+    <!-- ===== 2ページ目：会員情報の登録 ===== -->
+    <div id="step2" style="display:none;">
+      <div class="sec">
+        <p class="step">会員情報の登録</p>
+        <div class="soft-note">
+          <b>分かるところだけで大丈夫です😊</b><br>
+          ここは<b>あとからでも直せます</b>。<br>
+          分からない欄は、そのまま空けて進んでください。<br>
+          担当の方が確認して、うめてくださることもあります。
+        </div>
+      <div class="f">
+        <label>本名 <span class="opt">分かれば</span></label>
+        <input type="text" id="inRealName" name="name" autocomplete="name" placeholder="例:高山翔子">
+        <p class="hint">名簿の管理にのみ使います。画面には出ません</p>
+      </div>
+      <div class="f">
+        <label>お住まいの地域 <span class="opt">分かれば</span></label>
+        <select id="inArea"></select>
+        <input type="text" id="inAreaOther" placeholder="国名を入力してください" style="display:none;margin-top:8px;">
+      </div>
+      <p class="step" style="margin-top:22px;">紹介してくださった方</p>
       <p class="tab-lead" style="margin-bottom:12px;text-align:left;">
         会員番号が分からないときは、<b>お名前やニックネームでも大丈夫です</b>。<br>
         あとで担当の方が正しい番号に直してくださいます😊
       </p>
 
       <div class="f">
-        <label>紹介者の会員番号 <span class="opt">任意・分かる方だけ</span></label>
+        <label>紹介者の会員番号 <span class="opt">分かれば</span></label>
         <input type="text" id="inIntro" placeholder="00012345 または お名前" oninput="lookup('inIntro','introFound')">
         <p class="found ng" id="introFound"></p>
       </div>
 
       <div class="f">
-        <label>アップのクリエイターズ会員番号 <span class="opt">任意・分かる方だけ</span></label>
+        <label>アップのクリエイターズ会員番号 <span class="opt">分かれば</span></label>
         <input type="text" id="inUpline" placeholder="00012345 または お名前" oninput="lookup('inUpline','upFound')">
         <p class="found ng" id="upFound"></p>
       </div>
 
       <div class="f">
-        <label>サポート担当者の会員番号 <span class="opt">任意・分かる方だけ</span></label>
+        <label>サポート担当者の会員番号 <span class="opt">分かれば</span></label>
         <input type="text" id="inHelper" placeholder="00012345 または お名前" oninput="lookup('inHelper','helperFound')">
         <p class="found ng" id="helperFound"></p>
       </div>
 
-      <p class="step" style="margin-top:22px;">④ ご入会のときに説明してくださった方 <span style="font-weight:400;font-size:11.5px;color:#A8B4AC;">(任意)</span></p>
+      <p class="step" style="margin-top:22px;">ご入会のときに説明してくださった方</p>
 
       <div class="f">
-        <label>お名前 <span class="opt">任意</span></label>
+        <label>お名前 <span class="opt">分かれば</span></label>
         <input type="text" id="inAdvName" placeholder="例:高山翔子">
       </div>
 
       <div class="f">
-        <label>会員番号 <span class="opt">任意・分かる方だけ</span></label>
+        <label>会員番号 <span class="opt">分かれば</span></label>
         <input type="text" id="inAdvId" placeholder="00012345 または お名前" oninput="lookup('inAdvId','advFound')">
         <p class="found ng" id="advFound"></p>
       </div>
+        </div>
+      </div>
+      <button class="btn-main locked" id="submitBtn" onclick="submitForm()">登録する</button>
+      <button class="back-btn" onclick="backStep1()">‹ もどる</button>
     </div>
-
-    <button class="btn-main locked" id="submitBtn" onclick="submitForm()">登録する</button>
     <div class="kit" id="kit">
       <button class="kit-toggle" onclick="document.getElementById('kit').classList.toggle('open');drawKit();">
         <span>📣 このページを人に伝える</span>
@@ -383,6 +401,8 @@ function updateLock(){
   const ready = (authMode === "google") ? !!googleEmail : mailOk;
   $("#fields").classList.toggle("locked", !ready);
   $("#submitBtn").classList.toggle("locked", !ready);
+  const nb = document.getElementById("nextBtn");
+  if(nb) nb.classList.toggle("locked", !ready);
 }
 
 /* 実際に登録する連絡先 */
@@ -556,6 +576,46 @@ function show(t, cls){
   const m = $("#msg");
   m.textContent = t; m.className = "msg " + cls;
   m.scrollIntoView({behavior:"smooth", block:"center"});
+}
+
+
+/* ================================================================
+   登録は2つの画面に分かれています
+   ----------------------------------------------------------------
+   1ページ目 … かならず必要な4つ
+   2ページ目 … 会員情報（分かるところだけで大丈夫です）
+================================================================ */
+function stepBar(n){
+  const b = document.getElementById("stepBar");
+  if(!b) return;
+  b.innerHTML = '<i class="on"></i><i class="' + (n >= 2 ? "on" : "") + '"></i>';
+}
+
+function goStep2(){
+  /* かならず必要な4つが入っているか確かめます */
+  const v = (id) => (document.getElementById(id) ? (document.getElementById(id).value || "").trim() : "");
+  const id = v("inId"), pin = v("inPin"), name = v("inName"), kei = v("inKeiretsu");
+
+  if(!id){ show("会員番号をご入力ください", "err"); document.getElementById("inId").focus(); return; }
+  if(!/^\d{4}$/.test(pin)){ show("パスコードは4桁の数字でご入力ください", "err");
+    document.getElementById("inPin").focus(); return; }
+  if(!name){ show("ニックネームをご入力ください", "err"); document.getElementById("inName").focus(); return; }
+  if(!kei){ show("系列をおえらびください", "err"); document.getElementById("inKeiretsu").focus(); return; }
+
+  document.getElementById("step1").style.display = "none";
+  document.getElementById("step2").style.display = "block";
+  /* ここまで来られた方は、そのまま登録できます */
+  document.getElementById("submitBtn").classList.remove("locked");
+  stepBar(2);
+  show("", "");
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+function backStep1(){
+  document.getElementById("step2").style.display = "none";
+  document.getElementById("step1").style.display = "block";
+  stepBar(1);
+  window.scrollTo({top:0, behavior:"smooth"});
 }
 
 async function submitForm(){

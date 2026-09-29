@@ -98,7 +98,8 @@
     msg("確認しています…", "ok");
     if (typeof skyLoading === "function") skyLoading("ログインしています…");
     try {
-      var url = gasUrl() + "?action=login&id=" + encodeURIComponent(id) + "&pin=" + encodeURIComponent(pin);
+      /* 1回の通信でまとめて受け取ります（速くするためです） */
+      var url = gasUrl() + "?action=loginFast&id=" + encodeURIComponent(id) + "&pin=" + encodeURIComponent(pin);
       var res = await fetch(url);
       var j = await res.json();
       if (typeof skyLoadingDone === "function") skyLoadingDone();
@@ -119,7 +120,7 @@
         role: j.role || "", sup: j.sup === true, crie: j.crie === true,
         nick: j.nick || "", keiChat: j.keiChat || "", refUrl: j.refUrl || "",
         badges: j.badges || [], celebrate: j.celebrate || "",
-        email: j.email || ""
+        email: j.email || "", helper: j.helper || ""
       };
       /* 保存できたかを確かめます(ブラウザの設定で保存できない場合があります) */
       try {
@@ -190,6 +191,28 @@
       if (typeof window.skyGoTo === "function") window.skyGoTo(url, "読み込んでいます");
       else location.replace(url);
     });
+  };
+
+  /* ================================================================
+     育成プログラムのポータルへ戻ります
+     ----------------------------------------------------------------
+     玄関（ikusei/index.html）は転送するだけなので、
+     その方のポータルへ直接ご案内します。
+  ================================================================ */
+  window.skyBackToPortal = function () {
+    var m = null;
+    try {
+      var raw = localStorage.getItem("skyarc_member");
+      if (raw && raw !== "null") m = JSON.parse(raw);
+    } catch (e) {}
+    var here = location.pathname;
+    var up = (here.indexOf("/ikusei/") >= 0) ? "./"
+           : (here.indexOf("/first-support/") >= 0 ? "../ikusei/" : "./ikusei/");
+    if (!m || !m.id) return (here.indexOf("/ikusei/") >= 0 ? "../" : "./") + "index.html";
+    var role = String(m.role || "");
+    if (role || m.crie === true) return up + "portal-creators.html";
+    if (m.sup === true) return up + "portal-supporter.html";
+    return up + "member.html";
   };
 
   /* その方に合う入口をお返しします */

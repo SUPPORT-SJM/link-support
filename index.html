@@ -295,7 +295,8 @@ async function doLogin(){
       id = list[0].id;
     }
 
-    const url = `${GAS_URL}?action=login&id=${encodeURIComponent(id)}&pin=${encodeURIComponent(pin)}` +
+    /* 1回の通信で、会員情報と行き先をまとめて受け取ります */
+    const url = `${GAS_URL}?action=loginFast&id=${encodeURIComponent(id)}&pin=${encodeURIComponent(pin)}` +
                 (googleEmail ? `&email=${encodeURIComponent(googleEmail)}` : "");
     const res = await fetch(url);
     const j = await res.json();
@@ -326,14 +327,13 @@ async function doLogin(){
       keiretsu: j.keiretsu || "", role: j.role || "",
       sup: j.sup === true, crie: j.crie === true,
       nick: j.nick || "", keiChat: j.keiChat || "", refUrl: j.refUrl || "",
-      badges: j.badges || [], celebrate: j.celebrate || ""
+      badges: j.badges || [], celebrate: j.celebrate || "", helper: j.helper || ""
     };
+    /* 端末に残すのは会員情報だけにします（行き先は毎回お調べします） */
     localStorage.setItem("skyarc_member", JSON.stringify(m));
 
     show("✅ ログインしました。ご案内しています…", "ok");
-    /* 行き先を調べる間も、そのままお待ちいただきます */
-    if(typeof skyLoading === "function") skyLoading("ご案内しています", "進んでいるところをお調べしています");
-    goNext(id, pin, m);
+    goNext(id, pin, Object.assign({}, m, { where: j.where }));
 
   }catch(e){
     if(typeof skyLoadingDone === "function") skyLoadingDone();
@@ -356,21 +356,26 @@ const ROUTE = {
 };
 
 async function goNext(id, pin, m){
-  let where = null;
-  try{
-    const r = await fetch(`${GAS_URL}?action=whereTo&id=${encodeURIComponent(id)}&pin=${encodeURIComponent(pin)}`);
-    const j = await r.json();
-    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
-    if(j.ok && j.key) where = j;
-  }catch(e){}
+  /* ================================================================
+     行き先は、ログインの応答に入っています
+     ----------------------------------------------------------------
+     以前は、ここでもう1回通信していました。
+     いまは1回で済むので、そのぶん速くなります。
+  ================================================================ */
+  let url, label;
 
-  const url = (where && ROUTE[where.key])
-    ? ROUTE[where.key]
-    : (m.crie ? ROUTE.crie : (m.sup ? ROUTE.sup : ROUTE.hajime));
-  const label = (where && where.label) ? where.label : "つぎのページ";
+  if(m && m.where && ROUTE[m.where.key]){
+    url = ROUTE[m.where.key];
+    label = m.where.label || "つぎのページ";
+  }else{
+    /* 万一、行き先が入っていないときの備え */
+    const role = String(m.role || "");
+    url = role.indexOf("管理者") >= 0 ? ROUTE.kanri
+        : (role || m.crie) ? ROUTE.crie
+        : (m.sup ? ROUTE.sup : ROUTE.hajime);
+    label = "つぎのページ";
+  }
 
-  /* 行き先が決まったら、そのままページを開きます
-     （画面が切り替わるまで、ぐるぐるを出したままにします） */
   show(`✅ ログインしました<br><b>${label}</b> へご案内します…`, "ok");
   if(typeof skyGoTo === "function") skyGoTo(url, label + " をひらいています");
   else location.href = url;
