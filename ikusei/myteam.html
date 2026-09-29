@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+<script src="../config.js"></script>
 <meta charset="UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -82,7 +83,6 @@
 </style>
 <script src="../login.js"></script>
 <script src="../loading.js"></script>
-<script src="../config.js"></script>
 </head>
 <body>
 
@@ -162,6 +162,11 @@ let filter = "all";
       '🌱 ログインする</button></div>';
     return;
   }
+  /* サポートに関わる方がご覧になるページです */
+  if(member.sup !== true && member.crie !== true && !String(member.role||"")){
+    if(typeof skyNotAllowed === "function"){ skyNotAllowed(); return; }
+  }
+
   document.getElementById("navWho").textContent =
     (member.name ? member.name+"さん" : "会員番号 "+member.id) + (member.keiretsu ? "｜"+member.keiretsu : "");
   load();
