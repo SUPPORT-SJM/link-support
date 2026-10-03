@@ -76,6 +76,18 @@
     color:rgba(255,255,255,.9);font-size:11.5px;line-height:1.7;
     padding:9px 12px;border-radius:8px;
   }
+  /* リンク先の記事（Evernote）の保存版を、新しいタブで開くカード */
+  .bubble a.art{
+    display:flex;align-items:center;gap:9px;margin:10px 0 0;
+    border:1px solid #d9e0ea;border-radius:10px;background:#eef3fa;
+    padding:10px 12px;font-size:13.5px;line-height:1.5;
+    color:#33517a;text-decoration:none;
+  }
+  .bubble a.art + a.art{margin-top:8px}
+  a.art .ico{flex:0 0 auto;font-size:14px}
+  a.art .tt{flex:1;min-width:0;font-weight:700;word-break:break-word}
+  a.art .cv{flex:0 0 auto;font-size:11px;color:#7b8ba6;white-space:nowrap}
+
   .note{justify-content:center}
   .note .pill{background:rgba(0,0,0,.22);color:#fff;font-size:12px;padding:6px 14px;border-radius:20px;max-width:90%;text-align:center;line-height:1.5}
 
@@ -170,6 +182,7 @@
      Day9以降を足すときは、この行を1本コピーして増やす。
      =========================================================== -->
 <script src="data/manifest.js"></script>
+<script src="data/notes.js"></script>
 <script src="data/day0.js"></script>
 <script src="data/day1.js"></script>
 <script src="data/day2.js"></script>
@@ -388,6 +401,7 @@
       Array.prototype.forEach.call(b.querySelectorAll('a'),function(a){
         a.addEventListener('click',function(e){ e.stopPropagation(); });
       });
+      attachArticles(b, m.text||'');
     }
 
     wrap.appendChild(b);
@@ -437,6 +451,61 @@
     return esc(t)
       .replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>')
       .replace(/\n/g,'<br>');
+  }
+
+  /* ---------- リンク先の記事（Evernote）を保存版につなぐ ----------
+     data/notes.js に載っているURLが本文に出てきたら、
+       1) 本文中のそのURLを押したとき
+       2) 吹き出しの下に出す「📄 記事名」のカードを押したとき
+     のどちらでも、evernote_archive/ に保存してある記事を新しいタブで開く。
+     タブを閉じれば、この画面の読んでいた場所にそのまま戻る。
+     （本文に見えているURLの文字は、当時のまま変えていない） */
+  function archBase(){
+    /* 画像を ../day3/ のように一つ上から読んでいる置き方（PCでの確認用）なら、
+       保存版も一つ上にある。そうでなければ、このページと同じ場所にある。 */
+    var up=false;
+    try{
+      var ms=(window.BAM_DAYS[dayNum]||{}).messages||[];
+      for(var i=0;i<ms.length;i++){
+        if(ms[i].src && /^(\.\.\/)?day\d+\//.test(ms[i].src)){ up=(ms[i].src.indexOf('../')===0); break; }
+      }
+    }catch(e){}
+    return (up?'../':'')+'evernote_archive/';
+  }
+
+  function attachArticles(b, text){
+    var db=window.BAM_NOTES;
+    if(!db) return;
+    var base=archBase();
+
+    /* 1) 本文中のURL */
+    var hit=[];
+    Array.prototype.forEach.call(b.querySelectorAll('a'),function(a){
+      var key=a.getAttribute('href');
+      var n=db[key];
+      if(!n || !n.a) return;
+      a.setAttribute('href', base+n.a);
+      a.setAttribute('target','_blank');
+      a.setAttribute('rel','noopener');
+      a.title=(n.t||'')+'（保存版を新しいタブで開きます）';
+      if(hit.indexOf(key)<0) hit.push(key);
+    });
+
+    /* 2) 記事名のカード（本文に出てきた順） */
+    for(var i=0;i<hit.length;i++){
+      var n=db[hit[i]];
+      var card=document.createElement('a');
+      card.className='art';
+      card.href=base+n.a;
+      card.target='_blank';
+      card.rel='noopener';
+      var ico=document.createElement('span'); ico.className='ico'; ico.textContent='📄';
+      var tt=document.createElement('span');  tt.className='tt';  tt.textContent=n.t||'記事';
+      var cv=document.createElement('span');  cv.className='cv';  cv.textContent='開く ↗';
+      card.appendChild(ico); card.appendChild(tt); card.appendChild(cv);
+      card.addEventListener('click',function(e){ e.stopPropagation(); });
+      b.appendChild(card);
+    }
   }
 
   function reveal(upTo,withSound){
