@@ -119,6 +119,24 @@
   #footer .ghost{background:rgba(255,255,255,.22);color:#fff;box-shadow:none}
   .hide{display:none !important}
 
+  /* 記事の保存版を、この画面の上に重ねて開く */
+  #artview{position:fixed;inset:0;z-index:95;background:#fff;display:none;flex-direction:column}
+  #artview.on{display:flex}
+  #artbar{
+    flex:0 0 auto;display:flex;align-items:center;gap:8px;
+    padding:calc(env(safe-area-inset-top,0px) + 8px) 10px 8px;
+    background:#fff;border-bottom:1px solid #e3e7ee;
+  }
+  #artbar button{
+    flex:0 0 auto;font-family:inherit;font-size:13.5px;font-weight:700;color:#33517a;
+    background:#eef3fa;border:0;border-radius:18px;padding:8px 14px;cursor:pointer;
+  }
+  #artbar button.hide{display:none}
+  #arttitle{flex:1;min-width:0;font-size:12.5px;color:#556;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #artframe{flex:1 1 auto;min-height:0;position:relative;background:#fff}
+  #artframe iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#fff}
+  #artload{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;color:#889}
+
   #lightbox{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;padding:16px;cursor:zoom-out}
   #lightbox.on{display:flex}
   #lightbox img{max-width:100%;max-height:100%;object-fit:contain}
@@ -163,6 +181,14 @@
   <a id="next-btn" class="hide" href="#">次の日へ →</a>
 </div>
 
+<div id="artview" aria-hidden="true">
+  <div id="artbar">
+    <button type="button" id="artclose">✕ 閉じる</button>
+    <button type="button" id="artback" class="hide">← 前の記事</button>
+    <div id="arttitle"></div>
+  </div>
+  <div id="artframe"><div id="artload">読み込み中…</div></div>
+</div>
 <div id="lightbox"><img alt=""></div>
 
 <div id="resume">
@@ -457,9 +483,104 @@
      data/notes.js に載っているURLが本文に出てきたら、
        1) 本文中のそのURLを押したとき
        2) 吹き出しの下に出す「📄 記事名」のカードを押したとき
-     のどちらでも、evernote_archive/ に保存してある記事を新しいタブで開く。
-     タブを閉じれば、この画面の読んでいた場所にそのまま戻る。
+     のどちらでも、evernote_archive/ に保存してある記事を、この画面の上に重ねて開く。
+     「✕ 閉じる」で、読んでいた場所にそのまま戻る（別のタブは使わない）。
      （本文に見えているURLの文字は、当時のまま変えていない） */
+  /* 記事を重ねて開く／閉じる
+     ・別タブを使わないので、閉じたときに必ずこの画面の読んでいた場所に戻る
+     ・記事の中から別の記事へのリンクは、同じ重ね画面の中で切り替える（「← 前の記事」で戻れる）
+     ・スマホの「戻る」でも閉じられる */
+  var artview=document.getElementById('artview'),
+      artframe=document.getElementById('artframe'),
+      arttitle=document.getElementById('arttitle'),
+      artback=document.getElementById('artback'),
+      artStack=[], artIframe=null, artTimer=null, artPushed=false;
+
+  function hookArticle(a, title){
+    a.addEventListener('click',function(e){
+      e.stopPropagation();
+      /* Ctrl・Shift・中クリックなどで「別タブで開く」を選んだときは、ブラウザに任せる */
+      if(e.ctrlKey||e.metaKey||e.shiftKey||e.altKey||e.button===1) return;
+      e.preventDefault();
+      openArt(a.href, title||'');
+    });
+  }
+
+  function openArt(url, title){
+    artStack=[{u:url,t:title}];
+    artview.classList.add('on');
+    artview.setAttribute('aria-hidden','false');
+    loadArt();
+    if(!artPushed){ try{ history.pushState({bamArt:true},''); artPushed=true; }catch(e){} }
+  }
+
+  function loadArt(){
+    var cur=artStack[artStack.length-1];
+    arttitle.textContent=cur.t||'';
+    artback.classList.toggle('hide', artStack.length<2);
+    if(artTimer){ clearInterval(artTimer); artTimer=null; }
+    if(artIframe){ artIframe.remove(); artIframe=null; }
+    /* 毎回あたらしい枠を作る（枠の中の移動がブラウザの「戻る」の履歴に積まれないようにするため） */
+    var fr=document.createElement('iframe');
+    fr.title=cur.t||'記事';
+    fr.src=cur.u;
+    artframe.appendChild(fr);
+    artIframe=fr;
+    var n=0;
+    artTimer=setInterval(function(){
+      n++;
+      if(prepArt(fr) || n>600){ clearInterval(artTimer); artTimer=null; }
+    },100);
+    fr.addEventListener('load',function(){ prepArt(fr); });
+  }
+
+  /* 開いた記事の側を整える：記事自身の「閉じて戻る」バーは隠し、記事内リンクをこの重ね画面の中で扱う */
+  function prepArt(fr){
+    var d;
+    try{ d=fr.contentDocument; }catch(e){ return true; }   /* 中を触れない環境ではそのまま表示する */
+    if(!d || !d.head || !d.body) return false;
+    if(d.documentElement.getAttribute('data-bam-prep')) return true;
+    if(d.location.href==='about:blank') return false;
+    d.documentElement.setAttribute('data-bam-prep','1');
+    var st=d.createElement('style');
+    st.textContent='.bam-bar{display:none !important} html{overscroll-behavior:contain}';
+    d.head.appendChild(st);
+    if(!arttitle.textContent && d.title) arttitle.textContent=d.title;
+    d.addEventListener('click',function(e){
+      var t=e.target, a=t && t.closest ? t.closest('a[href]') : null;
+      if(t && t.closest && t.closest('#bamClose')){ e.preventDefault(); e.stopImmediatePropagation(); closeArt(false); return; }
+      if(!a) return;
+      var h=a.getAttribute('href')||'';
+      if(/^\d\d_[A-Za-z0-9_-]+\.html$/.test(h)){
+        /* 保存してある別の記事へのリンク */
+        e.preventDefault(); e.stopImmediatePropagation();
+        artStack.push({u:a.href, t:''});   /* 見出しは開いた記事のタイトルから取る */
+        loadArt();
+      }
+    },true);
+    d.addEventListener('keydown',function(e){ if(e.key==='Escape') closeArt(false); });
+    return true;
+  }
+
+  function closeArt(fromPop){
+    if(!artview.classList.contains('on')) return;
+    artview.classList.remove('on');
+    artview.setAttribute('aria-hidden','true');
+    if(artTimer){ clearInterval(artTimer); artTimer=null; }
+    if(artIframe){ artIframe.remove(); artIframe=null; }
+    artStack=[];
+    if(artPushed){
+      artPushed=false;
+      if(!fromPop){ try{ history.back(); }catch(e){} }
+    }
+  }
+  document.getElementById('artclose').addEventListener('click',function(e){ e.stopPropagation(); closeArt(false); });
+  artback.addEventListener('click',function(e){
+    e.stopPropagation();
+    if(artStack.length>1){ artStack.pop(); loadArt(); }
+  });
+  window.addEventListener('popstate',function(){ if(artview.classList.contains('on')){ closeArt(true); } });
+
   function archBase(){
     /* 画像を ../day3/ のように一つ上から読んでいる置き方（PCでの確認用）なら、
        保存版も一つ上にある。そうでなければ、このページと同じ場所にある。 */
@@ -487,7 +608,8 @@
       a.setAttribute('href', base+n.a);
       a.setAttribute('target','_blank');
       a.setAttribute('rel','noopener');
-      a.title=(n.t||'')+'（保存版を新しいタブで開きます）';
+      a.title=(n.t||'')+'（保存版を開きます）';
+      hookArticle(a, n.t);
       if(hit.indexOf(key)<0) hit.push(key);
     });
 
@@ -501,9 +623,9 @@
       card.rel='noopener';
       var ico=document.createElement('span'); ico.className='ico'; ico.textContent='📄';
       var tt=document.createElement('span');  tt.className='tt';  tt.textContent=n.t||'記事';
-      var cv=document.createElement('span');  cv.className='cv';  cv.textContent='開く ↗';
+      var cv=document.createElement('span');  cv.className='cv';  cv.textContent='開く';
       card.appendChild(ico); card.appendChild(tt); card.appendChild(cv);
-      card.addEventListener('click',function(e){ e.stopPropagation(); });
+      hookArticle(card, n.t);
       b.appendChild(card);
     }
   }
@@ -522,10 +644,11 @@
   function bottom(){ window.scrollTo({top:document.documentElement.scrollHeight,behavior:'smooth'}); }
 
   document.addEventListener('click',function(e){
-    if(e.target.closest('#bar,#footer,#lightbox,#resume,a,button,video,iframe')) return;
+    if(e.target.closest('#bar,#footer,#lightbox,#resume,#artview,a,button,video,iframe')) return;
     if(idx<nodes.length) reveal(idx+1,true);
   });
   document.addEventListener('keydown',function(e){
+    if(artview.classList.contains('on')){ if(e.key==='Escape') closeArt(false); return; }
     if(e.key===' '||e.key==='ArrowDown'||e.key==='Enter'){ if(idx<nodes.length){ e.preventDefault(); reveal(idx+1,true); } }
     if(e.key==='Escape') lightbox.classList.remove('on');
   });
