@@ -34,6 +34,9 @@
       sub:"LINK全体の講座・セミナーはこちら",
       url:"https://link-event-x.com/", ext:true, need:"" },
     { ic:"🤝", nm:"サポートメンバー状況",  url: up+"ikusei/myteam.html",        need:"sup" },
+    { ic:"📝", nm:"新規登録の依頼",
+      sub:"新しく入られた方の登録をお願いする",
+      url: up+"ikusei/shinki-irai.html", need:"" },
 
     { sec: "チーム運営" },
     { ic:"🔐", nm:"管理ページ",          url: up+"ikusei/kanri-x7k2m9.html",  need:"sup" },
@@ -218,9 +221,50 @@
     bg.addEventListener("click", toggle);
   }
 
+  /* ================================================================
+     パスコードが初めのまま（1111）の方へのお知らせ
+     ----------------------------------------------------------------
+     クリエイターズが代わりに登録した方は、1111 で始まります。
+     ほかの方に入られないよう、変更をおすすめします。
+     （とじれば、その日は出しません）
+  ================================================================ */
+  function pinNotice() {
+    var m = member();
+    if (!m || m.needPin !== true) return;
+    if (here.indexOf("account.html") >= 0) return;
+    var today = new Date().toDateString();
+    try { if (localStorage.getItem("skyarc_pin_notice") === today) return; } catch (e) {}
+
+    var acc = (here.indexOf("/ikusei/") >= 0 ? "./" : (here.indexOf("/first-support/") >= 0 ? "../ikusei/" : "./ikusei/"))
+            + "account.html";
+    var d = document.createElement("div");
+    d.id = "skyPinNotice";
+    d.style.cssText = "position:fixed;left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom) + 14px);"
+      + "z-index:7900;max-width:440px;margin:0 auto;background:#fff;border-radius:16px;"
+      + "box-shadow:0 8px 28px rgba(42,36,56,.22);padding:15px 16px;border:2px solid #F2B33D;"
+      + "font-family:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;";
+    d.innerHTML = '<div style="font-size:14px;font-weight:700;color:#8A5A00;margin-bottom:5px;">'
+      + '🔑 パスコードを変えておきましょう</div>'
+      + '<div style="font-size:12.5px;color:#6A5A3A;line-height:1.85;margin-bottom:11px;">'
+      + 'いまは初めのパスコード（1111）のままです。<br>ご自身だけの4桁に変えておくと安心です。</div>'
+      + '<div style="display:flex;gap:7px;">'
+      + '<a href="' + acc + '" style="flex:1;text-align:center;padding:11px;border-radius:10px;'
+      + 'background:#F2B33D;color:#4A3400;font-size:13px;font-weight:700;text-decoration:none;">変更する</a>'
+      + '<button id="skyPinLater" style="padding:11px 15px;border-radius:10px;border:1.5px solid #E8DCC4;'
+      + 'background:#fff;color:#9A8A6A;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">あとで</button>'
+      + '</div>';
+    document.body.appendChild(d);
+    document.getElementById("skyPinLater").addEventListener("click", function () {
+      try { localStorage.setItem("skyarc_pin_notice", today); } catch (e) {}
+      d.remove();
+    });
+  }
+
+  function start() { build(); pinNotice(); }
+
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", build);
+    document.addEventListener("DOMContentLoaded", start);
   } else {
-    build();
+    start();
   }
 })();

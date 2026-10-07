@@ -327,7 +327,8 @@ async function doLogin(){
       keiretsu: j.keiretsu || "", role: j.role || "",
       sup: j.sup === true, crie: j.crie === true,
       nick: j.nick || "", keiChat: j.keiChat || "", refUrl: j.refUrl || "",
-      badges: j.badges || [], celebrate: j.celebrate || "", helper: j.helper || ""
+      badges: j.badges || [], celebrate: j.celebrate || "", helper: j.helper || "",
+      needPin: j.needPin === true
     };
     /* 端末に残すのは会員情報だけにします（行き先は毎回お調べします） */
     localStorage.setItem("skyarc_member", JSON.stringify(m));

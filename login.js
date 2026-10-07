@@ -120,7 +120,8 @@
         role: j.role || "", sup: j.sup === true, crie: j.crie === true,
         nick: j.nick || "", keiChat: j.keiChat || "", refUrl: j.refUrl || "",
         badges: j.badges || [], celebrate: j.celebrate || "",
-        email: j.email || "", helper: j.helper || ""
+        email: j.email || "", helper: j.helper || "",
+        needPin: j.needPin === true
       };
       /* 保存できたかを確かめます(ブラウザの設定で保存できない場合があります) */
       try {
