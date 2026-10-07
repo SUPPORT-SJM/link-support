@@ -58,7 +58,9 @@
   .head .row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;}
   .head h1{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:17px;}
   .head .me{font-size:11.5px;opacity:.85;}
-  .head .tools{display:flex;gap:8px;align-items:center;}
+  .head .tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+  .head .tools button{white-space:nowrap;}
+  .head .tools .search{flex:1 1 160px;min-width:0;}
   .head button{background:rgba(255,255,255,.16);color:#fff;font-size:12px;border-radius:999px;padding:7px 14px;font-weight:700;}
 
   /* アクセス解析 */
@@ -244,6 +246,43 @@
   .pm-msg{display:none;border-radius:9px;padding:9px 12px;font-size:12px;margin-bottom:12px;line-height:1.6;}
   .pm-msg.err{display:block;background:#FDEBEB;color:#B33;}
   .pm-msg.ok{display:block;background:#EAF7F0;color:#2F7A5C;}
+
+/* ===== 新規登録の依頼（一覧） ===== */
+#reqModal{display:none;position:fixed;inset:0;z-index:76;background:rgba(30,26,50,.55);
+  align-items:center;justify-content:center;padding:16px;}
+#reqModal.show{display:flex;}
+#reqModal .sheet{background:#fff;border-radius:18px;width:100%;max-width:460px;max-height:88vh;
+  overflow-y:auto;padding:20px 18px 16px;box-shadow:0 14px 50px rgba(0,0,0,.3);}
+#reqModal h3{font-size:17px;font-weight:900;color:#4A3F7A;margin-bottom:6px;}
+#reqModal .mm-lead{font-size:12.5px;color:#6A6480;line-height:1.9;margin-bottom:14px;}
+#reqModal .mm-close{display:block;width:100%;margin-top:6px;padding:12px;border-radius:11px;
+  border:1.5px solid #E4E0F0;background:#fff;color:#6A6480;font-size:13px;font-weight:700;
+  cursor:pointer;font-family:inherit;}
+.req-card{background:#FFFBF2;border:1.5px solid #F0D9A8;border-radius:13px;
+  padding:14px 15px;margin-bottom:11px;}
+.req-top{display:flex;align-items:baseline;gap:9px;margin-bottom:3px;flex-wrap:wrap;}
+.req-top b{font-size:15px;color:#3E3A50;}
+.req-id{font-family:monospace;font-size:12px;color:#8A7A5A;}
+.req-from{font-size:11.5px;color:#9A8A6A;margin-bottom:7px;}
+.req-url{font-size:11.5px;word-break:break-all;margin-bottom:6px;}
+.req-url a{color:#2B5C93;}
+.req-note{font-size:12px;color:#6A5A3A;background:#fff;border-radius:8px;
+  padding:8px 10px;margin-bottom:9px;line-height:1.8;}
+.req-btns{display:flex;gap:7px;}
+.req-ok{flex:1;padding:11px;border-radius:10px;border:none;cursor:pointer;
+  background:#4CAF85;color:#fff;font-size:13px;font-weight:700;font-family:inherit;}
+.req-ng{padding:11px 15px;border-radius:10px;border:1.5px solid #E0D5CE;cursor:pointer;
+  background:#fff;color:#9A8A7A;font-size:13px;font-weight:700;font-family:inherit;}
+
+/* ===== 会員を追加：まず会員番号だけ ===== */
+#memModal.step1 .mm-body > *:not(.mm-msg):not(.mm-idf){display:none !important;}
+#memModal.step1 .mm-save{display:none !important;}
+.mm-next{display:none;width:100%;margin-top:10px;padding:12px;border-radius:11px;border:none;
+  cursor:pointer;background:#6E5FB5;color:#fff;font-size:14px;font-weight:700;font-family:inherit;}
+#memModal.step1 .mm-next{display:block;}
+.mm-found{display:none;border-radius:11px;padding:11px 13px;font-size:12.5px;line-height:1.9;margin-top:10px;}
+.mm-found.exist{display:block;background:#FFF6E0;border:1.5px solid #F2D58A;color:#7A5A00;}
+.mm-found.fresh{display:block;background:#EAF6EF;border:1.5px solid #BFE3CE;color:#2F7A5C;}
 </style>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <link rel="stylesheet" href="../beta.css">
@@ -431,10 +470,13 @@
     <div class="mm-body">
       <div class="mm-msg" id="mmMsg"></div>
 
-      <div class="mm-f">
+      <div class="mm-f mm-idf">
         <label>会員番号 <span style="color:#B33;">*</span></label>
-        <input type="text" id="mmId" inputmode="numeric" placeholder="00012345">
-        <p class="hint">頭の000も含めて入力してください</p>
+        <input type="text" id="mmId" inputmode="numeric" placeholder="00012345"
+               onkeydown="if(event.key==='Enter' && document.getElementById('memModal').classList.contains('step1')){event.preventDefault();memPeek();}">
+        <p class="hint" id="mmIdHint">頭の000も含めて入力してください</p>
+        <button type="button" class="mm-next" id="mmNext" onclick="memPeek()">つぎへ ›</button>
+        <div class="mm-found" id="mmFound"></div>
       </div>
 
       <div class="mm-f">
@@ -865,22 +907,49 @@ function openReqList(){
 function closeReq(){ document.getElementById("reqModal").classList.remove("show"); }
 
 /* 内容を確かめて、補足を入れてから登録します */
-function openApprove(i){
+async function openApprove(i){
   const it = reqItems[i];
   if(!it) return;
   closeReq();
-  openMember(null);
-  /* 依頼の内容を入れておきます */
-  document.getElementById("mmId").value = it.newId;
-  document.getElementById("mmId").readOnly = true;
-  document.getElementById("mmName").value = it.newName || "";
-  document.getElementById("mmIntro").value = it.fromId || "";
-  document.getElementById("mmTitle").textContent = "依頼を受けて登録する";
 
-  /* 保存ボタンを、依頼の登録に切り替えます */
+  let existing = null;
+  if(it.exists){
+    try{
+      const j = await peekMember(it.newId);
+      if(j.ok && j.exists && j.allowed === false){
+        alert(j.message || "その番号の方は、ご担当の範囲外の方です。");
+        return;
+      }
+      if(j.ok && j.exists && j.member) existing = j.member;
+    }catch(e){}
+    if(!existing){ toast("いまのデータを読み込めませんでした。少しおいてお試しください"); return; }
+  }
+
+  if(existing){
+    /* 登録ずみの方：いまのデータに、依頼の内容を重ねて開きます */
+    openMember(existing);
+    if(it.newName) document.getElementById("mmName").value = it.newName;
+    document.getElementById("mmTitle").textContent = "登録ずみの方の修正（依頼）";
+    const fd = document.getElementById("mmFound");
+    fd.className = "mm-found exist";
+    fd.innerHTML = "<b>すでに登録されていたため、現状のデータを記入してあります。</b><br>"
+                 + "依頼の内容を見て、修正したいところだけ直してください。"
+                 + (it.refUrl ? "<br>依頼の紹介URL：" + it.refUrl : "");
+  }else{
+    openMember(null);
+    document.getElementById("memModal").classList.remove("step1");
+    document.getElementById("mmId").value = it.newId;
+    document.getElementById("mmName").value = it.newName || "";
+    document.getElementById("mmIntro").value = it.fromId || "";
+    document.getElementById("mmTitle").textContent = "依頼を受けて登録する";
+  }
+  const idf = document.getElementById("mmId");
+  idf.readOnly = true; idf.style.background = "#EFEDF5";
+
+  /* 保存ボタンを、依頼の処理に切り替えます */
   const btn = document.getElementById("mmSave");
   btn.dataset.req = String(it.row);
-  btn.textContent = "この内容で登録する";
+  btn.textContent = existing ? "この内容で修正する" : "この内容で登録する";
 }
 
 async function rejectReq(i){
@@ -898,6 +967,60 @@ async function rejectReq(i){
     else toast("できませんでした");
   }catch(e){ toast("通信できませんでした"); }
   finally{ if(typeof skyBusyEnd === "function") skyBusyEnd("req"); }
+}
+
+/* ================================================================
+   会員番号で、登録ずみかどうかを調べます
+   ----------------------------------------------------------------
+   ・登録ずみ → いまのデータを入れて「編集」の形で開きなおします
+   ・まだ    → 番号はそのままで、残りの欄をお出しします
+================================================================ */
+async function peekMember(id){
+  const r = await fetch(`${GAS_URL}?action=memberPeek&id=${encodeURIComponent(admin.id)}`
+                      + `&pin=${encodeURIComponent(admin.pin)}&target=${encodeURIComponent(id)}`);
+  return await r.json();
+}
+
+async function memPeek(){
+  const msg = document.getElementById("mmMsg");
+  const show = (t,cls)=>{ msg.textContent = t; msg.className = "mm-msg " + cls; };
+  const id = document.getElementById("mmId").value.trim();
+  if(!id){ show("会員番号を入力してください","err"); return; }
+  if(!/^\d+$/.test(id)){ show("会員番号は数字で入力してください","err"); return; }
+  if(typeof skyBusy === "function" && skyBusy("memPeek")) return;
+  const nb = document.getElementById("mmNext");
+  try{
+    nb.disabled = true; nb.textContent = "確かめています…";
+    const j = await peekMember(id);
+    msg.className = "mm-msg";
+    if(j.ok === false){ show("確かめられませんでした","err"); return; }
+
+    if(j.exists && j.allowed === false){
+      show(j.message || "その番号の方は、ご担当の範囲外の方です。正しい会員番号をご入力ください。","err");
+      return;
+    }
+
+    if(j.exists && j.member){
+      /* いまのデータを入れて、編集の形で開きなおします */
+      openMember(j.member);
+      const fd = document.getElementById("mmFound");
+      fd.className = "mm-found exist";
+      fd.innerHTML = "<b>すでに登録されていたため、現状のデータを記入してあります。</b><br>"
+                   + "修正したいところだけ直して、保存してください。";
+    }else{
+      document.getElementById("memModal").classList.remove("step1");
+      const idf = document.getElementById("mmId");
+      idf.readOnly = true; idf.style.background = "#EFEDF5";
+      const fd = document.getElementById("mmFound");
+      fd.className = "mm-found fresh";
+      fd.innerHTML = "<b>まだ登録されていない会員番号です。</b><br>新しく登録します。分かる範囲でご記入ください。";
+    }
+  }catch(e){
+    show("通信できませんでした","err");
+  }finally{
+    nb.disabled = false; nb.textContent = "つぎへ ›";
+    if(typeof skyBusyEnd === "function") skyBusyEnd("memPeek");
+  }
 }
 
 /* 依頼を受けて、新しい会員さんを登録します */
@@ -918,7 +1041,9 @@ async function approveReq(row, show){
     const j = await r.json();
     if(j.ok){
       closeMember();
-      toast(`✅ ${j.name || j.id} さんを登録しました（パスコードは 1111 です）`);
+      toast(j.updated
+        ? `✅ ${j.name || j.id} さんの情報を直しました`
+        : `✅ ${j.name || j.id} さんを登録しました（パスコードは 1111 です）`);
       document.getElementById("mmSave").dataset.req = "";
       document.getElementById("mmId").readOnly = false;
       await checkReq();
@@ -926,6 +1051,7 @@ async function approveReq(row, show){
     }else{
       show({
         exists:"その会員番号は、すでに登録されています",
+        notyours: j.message || "その番号の方は、ご担当の範囲外の方です",
         done:"この依頼は、すでに処理ずみです",
         noperm:"この操作はクリエイターズ以上の方がお使いいただけます",
         busy:"いま混み合っています。少しおいてお試しください"
@@ -1430,6 +1556,10 @@ let memClearEmail = false;
 
 function openMember(m){
   memEditing = m;
+  /* 追加のときは、まず会員番号だけをお聞きします */
+  document.getElementById("memModal").classList.toggle("step1", !m);
+  const fd = document.getElementById("mmFound");
+  if(fd){ fd.className = "mm-found"; fd.innerHTML = ""; }
   memClearEmail = false;
   const msg = document.getElementById("mmMsg");
   msg.className = "mm-msg";
@@ -1437,7 +1567,7 @@ function openMember(m){
   document.getElementById("mmTitle").textContent = m ? "会員情報の編集" : "会員を追加";
   document.getElementById("mmSub").textContent = m
     ? "変更したい項目だけ入力してください"
-    : "会員番号とパスコードは必須です";
+    : "まず会員番号を入れて「つぎへ」を押してください";
 
   // 系列セレクト
   const ksel = document.getElementById("mmKeiretsu");

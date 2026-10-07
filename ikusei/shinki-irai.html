@@ -73,6 +73,12 @@
   .send:active{transform:scale(.99);}
   .send:disabled{background:#CFC9E0;box-shadow:none;}
 
+  .relink{display:block;width:100%;background:none;border:none;cursor:pointer;
+    color:#8A82A6;font-size:12.5px;padding:8px;margin-bottom:6px;font-family:inherit;}
+  .found{border-radius:12px;padding:13px 15px;font-size:12.5px;line-height:1.95;margin:6px 0 16px;}
+  .found.exist{background:#FFF6E0;border:1.5px solid #F2D58A;color:#7A5A00;}
+  .found.exist b{color:#6A4A00;}
+  .found.fresh{background:#EAF6EF;border:1.5px solid #BFE3CE;color:#2F7A5C;}
   .msg{border-radius:12px;padding:13px 15px;font-size:13px;line-height:1.9;
     margin-bottom:16px;display:none;}
   .msg.show{display:block;}
@@ -120,10 +126,16 @@
         </div>
 
         <div class="f">
-          <label>新しい方の会員番号 <span class="req">必須</span></label>
-          <input type="text" id="newId" inputmode="numeric" placeholder="00012345">
-          <p class="hint">頭の「000」も含めてご入力ください</p>
+          <label>会員番号 <span class="req">必須</span></label>
+          <input type="text" id="newId" inputmode="numeric" placeholder="00012345"
+                 onkeydown="if(event.key==='Enter'){event.preventDefault();peek();}">
+          <p class="hint">まず会員番号だけ入れて「つぎへ」を押してください</p>
         </div>
+        <button class="send" id="peekBtn" onclick="peek()" style="margin-bottom:4px;">つぎへ ›</button>
+        <button class="relink" id="reBtn" onclick="resetId()" style="display:none;">‹ 会員番号を入れなおす</button>
+
+        <div id="rest" style="display:none;">
+        <div class="found" id="found"></div>
 
         <div class="f">
           <label>お名前（ニックネーム） <span class="opt">分かれば</span></label>
@@ -141,9 +153,10 @@
           <label>ひとこと <span class="opt">分かれば</span></label>
           <textarea id="note" placeholder="例:9/16のサポート会でお会いしました"></textarea>
         </div>
+        </div>
       </div>
 
-      <div class="card">
+      <div class="card" id="toCard" style="display:none;">
         <div class="f" style="margin-bottom:0;">
           <label>どなたにお願いしますか <span class="req">必須</span></label>
           <div class="to-opts" id="toOpts">
@@ -166,7 +179,7 @@
         </div>
       </div>
 
-      <button class="send" id="sendBtn" onclick="send()">この内容でお願いする</button>
+      <button class="send" id="sendBtn" onclick="send()" style="display:none;">この内容でお願いする</button>
     </div>
 
     <div class="card done" id="doneArea" style="display:none;">
@@ -217,6 +230,85 @@ function show(t, cls){
     + (member.keiretsu ? "｜" + member.keiretsu : "");
 })();
 
+/* ================================================================
+   まず会員番号で、登録ずみかどうかを調べます
+================================================================ */
+let isEdit = false;
+
+async function peek(){
+  const id = $("#newId").value.trim();
+  if(!id){ show("会員番号をご入力ください", "err"); $("#newId").focus(); return; }
+  if(!/^\d+$/.test(id)){ show("会員番号は数字でご入力ください", "err"); $("#newId").focus(); return; }
+  if(typeof skyBusy === "function" && skyBusy("peek")) return;
+  try{
+    $("#peekBtn").disabled = true;
+    if(typeof skyLoading === "function") skyLoading("会員番号を確かめています");
+    const r = await fetch(`${GAS_URL}?action=memberPeek&id=${encodeURIComponent(member.id)}`
+                        + `&pin=${encodeURIComponent(member.pin)}&target=${encodeURIComponent(id)}`);
+    const j = await r.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
+    if(typeof skyLoadingDone === "function") skyLoadingDone();
+    if(j.ok === false){
+      show({badid:"会員番号は数字でご入力ください"}[j.error] || "確かめられませんでした", "err");
+      return;
+    }
+    show("", "");
+    const f = $("#found");
+
+    /* さわってよい方でなければ、ここで止めます */
+    if(j.exists && j.allowed === false){
+      show(j.message || "その番号の方は、ほかの方のサポート対象です。正しい会員番号をご入力ください。", "err");
+      $("#newId").focus(); $("#newId").select();
+      return;
+    }
+
+    if(j.exists){
+      isEdit = true;
+      const m = j.member || {};
+      $("#newName").value = m.name || "";
+      $("#refUrl").value = m.refUrl || "";
+      f.className = "found exist";
+      f.innerHTML = "<b>すでに登録されていたため、現状のデータを記入してあります。</b><br>"
+        + "修正したいところを直して、お願いしてください。"
+        + (m.keiretsu ? "<br>系列：" + m.keiretsu : "");
+      $("#sendBtn").textContent = "この内容で修正をお願いする";
+    }else{
+      isEdit = false;
+      $("#newName").value = ""; $("#refUrl").value = "";
+      f.className = "found fresh";
+      f.innerHTML = "<b>まだ登録されていない会員番号です。</b><br>分かる範囲でご記入ください。";
+      $("#sendBtn").textContent = "この内容で登録をお願いする";
+    }
+    $("#newId").readOnly = true;
+    $("#newId").style.background = "#F0EDF9";
+    $("#peekBtn").style.display = "none";
+    $("#reBtn").style.display = "block";
+    $("#rest").style.display = "block";
+    $("#toCard").style.display = "block";
+    $("#sendBtn").style.display = "block";
+  }catch(e){
+    if(typeof skyLoadingDone === "function") skyLoadingDone();
+    show("通信できませんでした。電波のよい場所でお試しください。", "err");
+  }finally{
+    $("#peekBtn").disabled = false;
+    if(typeof skyBusyEnd === "function") skyBusyEnd("peek");
+  }
+}
+
+/* 会員番号を入れなおします */
+function resetId(){
+  isEdit = false;
+  $("#newId").readOnly = false;
+  $("#newId").style.background = "";
+  $("#peekBtn").style.display = "block";
+  $("#reBtn").style.display = "none";
+  $("#rest").style.display = "none";
+  $("#toCard").style.display = "none";
+  $("#sendBtn").style.display = "none";
+  show("", "");
+  $("#newId").focus();
+}
+
 function setTo(b){
   document.querySelectorAll("#toOpts button").forEach(x => x.classList.remove("on"));
   b.classList.add("on");
@@ -228,6 +320,7 @@ async function send(){
   try{
     const newId = $("#newId").value.trim();
     if(!newId){ show("新しい方の会員番号をご入力ください", "err"); $("#newId").focus(); return; }
+    if(!$("#newId").readOnly){ show("先に「つぎへ」で会員番号を確かめてください", "err"); return; }
     if(!/^\d+$/.test(newId)){ show("会員番号は数字でご入力ください", "err"); $("#newId").focus(); return; }
 
     $("#sendBtn").disabled = true;
@@ -249,14 +342,16 @@ async function send(){
     if(j.ok){
       $("#formArea").style.display = "none";
       $("#doneArea").style.display = "block";
-      $("#doneTo").innerHTML = "<b>" + (j.to || "担当の方") + "</b> にお届けしました。";
+      $("#doneTo").innerHTML = "<b>" + (j.to || "担当の方") + "</b> に"
+        + (j.edit ? "修正のお願いを" : "") + "お届けしました。";
       show("", "");
       window.scrollTo({top:0, behavior:"smooth"});
       return;
     }
 
     show({
-      exists:"その会員番号は、すでに登録されています。",
+      exists:"その会員番号は、すでに登録されています。「会員番号を入れなおす」からお試しください。",
+      notyours: j.message || "その番号の方は、ほかの方のサポート対象です。正しい会員番号をご入力ください。",
       already:"その方の依頼は、すでにお届けずみです。",
       badid:"会員番号は数字でご入力ください。",
       noreceiver: {
