@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<script src="../config.js"></script>
+<title>新規登録の依頼｜スカイアーク</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../beta.css">
+<meta name="theme-color" content="#6E5FB5">
+<style>
+  :root{ --ink:#2A2438; --main:#6E5FB5; --deep:#574A91; --leaf:#3FA98A;
+    --mist:#F0EDF9; --paper:#FBFAFE; --line:#E4E0F0;
+    --shadow:0 3px 14px rgba(110,95,181,.10); }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{font-family:"Zen Kaku Gothic New",sans-serif;color:var(--ink);line-height:1.9;
+    font-size:15px;background:var(--paper);}
+  button,input,select,textarea{font-family:inherit;}
+  .wrap{max-width:520px;margin:0 auto;padding:0 16px;}
+
+  #skyNav{position:sticky;top:0;z-index:30;background:rgba(87,74,145,.96);
+    backdrop-filter:blur(6px);color:#fff;}
+  #skyNav .inner{max-width:520px;margin:0 auto;padding:10px 16px;
+    display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px;}
+  #skyNav .who{opacity:.92;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  #skyNav a{background:rgba(255,255,255,.2);color:#fff;font-size:11.5px;font-weight:700;
+    border-radius:999px;padding:6px 13px;text-decoration:none;flex-shrink:0;}
+
+  .hero{background:linear-gradient(150deg,#9A86E0,#6E5FB5 60%,#5E8FD8);color:#fff;
+    padding:28px 0 24px;text-align:center;}
+  .hero .em{font-size:34px;line-height:1;}
+  .hero h1{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:20px;margin:7px 0 5px;}
+  .hero p{font-size:12.5px;opacity:.94;line-height:1.85;}
+
+  main{padding:20px 0 60px;}
+
+  .card{background:#fff;border-radius:16px;padding:20px 18px;box-shadow:var(--shadow);
+    margin-bottom:16px;}
+  .lead{background:var(--mist);border-radius:12px;padding:13px 15px;font-size:12.5px;
+    color:#5A5470;line-height:2;margin-bottom:18px;}
+  .lead b{color:var(--deep);}
+
+  .f{margin-bottom:17px;}
+  .f label{display:block;font-size:13px;font-weight:700;color:var(--deep);margin-bottom:6px;}
+  .f .req{background:#E8788A;color:#fff;font-size:10px;font-weight:700;
+    border-radius:999px;padding:1px 8px;margin-left:5px;}
+  .f .opt{background:#DCE8E0;color:#5A7A66;font-size:10px;font-weight:700;
+    border-radius:999px;padding:1px 8px;margin-left:5px;}
+  .f input, .f select, .f textarea{width:100%;padding:12px 13px;border-radius:11px;
+    border:1.5px solid var(--line);font-size:15px;background:#fff;color:var(--ink);}
+  .f input:focus, .f select:focus, .f textarea:focus{outline:none;border-color:var(--main);}
+  .f textarea{min-height:76px;resize:vertical;line-height:1.8;}
+  .f .hint{font-size:11px;color:#9A93B0;line-height:1.8;margin-top:5px;}
+
+  .to-opts{display:flex;flex-direction:column;gap:8px;}
+  .to-opts button{display:flex;align-items:center;gap:11px;padding:13px 14px;
+    border-radius:12px;border:1.5px solid var(--line);background:#fff;cursor:pointer;text-align:left;}
+  .to-opts button.on{border-color:var(--main);background:var(--mist);}
+  .to-opts .ic{font-size:20px;flex-shrink:0;}
+  .to-opts .tx{flex:1;}
+  .to-opts .nm{font-size:14px;font-weight:700;color:var(--ink);}
+  .to-opts .sb{font-size:11px;color:#9A93B0;line-height:1.7;}
+  .to-opts button.on .nm{color:var(--deep);}
+
+  .send{width:100%;padding:15px;border-radius:13px;border:none;cursor:pointer;
+    background:linear-gradient(135deg,#9A86E0,#6E5FB5);color:#fff;
+    font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:16px;
+    box-shadow:0 4px 14px rgba(110,95,181,.3);margin-top:4px;}
+  .send:active{transform:scale(.99);}
+  .send:disabled{background:#CFC9E0;box-shadow:none;}
+
+  .msg{border-radius:12px;padding:13px 15px;font-size:13px;line-height:1.9;
+    margin-bottom:16px;display:none;}
+  .msg.show{display:block;}
+  .msg.ok{background:#E8F6EF;color:#2F7A5C;}
+  .msg.err{background:#FDEBEB;color:#B3352F;}
+  .msg.warn{background:#FFF6E0;color:#8A6D00;}
+
+  .done{text-align:center;padding:24px 18px;}
+  .done .em{font-size:44px;line-height:1;}
+  .done h2{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:18px;
+    color:var(--deep);margin:12px 0 8px;}
+  .done p{font-size:13px;color:#5A5470;line-height:2;}
+  .done .again{margin-top:20px;padding:13px 26px;border-radius:12px;border:1.5px solid var(--line);
+    background:#fff;color:var(--deep);font-size:14px;font-weight:700;cursor:pointer;}
+
+  .verTag{display:block;text-align:center;font-size:9.5px;color:#C4BFD4;
+    font-family:monospace;padding:16px 0 24px;}
+</style>
+</head>
+<body>
+
+<div id="skyNav"><div class="inner">
+  <span class="who" id="navWho"></span>
+  <a href="#" onclick="location.href=skyBackToPortal();return false;">‹ もどる</a>
+</div></div>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="em">📝</div>
+    <h1>新規登録の依頼</h1>
+    <p>新しく入られた方の登録を、クリエイターズにお願いします</p>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <div class="msg" id="msg"></div>
+
+    <div id="formArea">
+      <div class="card">
+        <div class="lead">
+          <b>新しく入られた方の情報をお送りください。</b><br>
+          受け取った方が内容を確かめて登録します。<br>
+          登録が済むと、その方は<b>会員番号とパスコード 1111</b> でログインできます。
+        </div>
+
+        <div class="f">
+          <label>新しい方の会員番号 <span class="req">必須</span></label>
+          <input type="text" id="newId" inputmode="numeric" placeholder="00012345">
+          <p class="hint">頭の「000」も含めてご入力ください</p>
+        </div>
+
+        <div class="f">
+          <label>お名前（ニックネーム） <span class="opt">分かれば</span></label>
+          <input type="text" id="newName" placeholder="例:しょうこ">
+        </div>
+
+        <div class="f">
+          <label>紹介URL <span class="opt">分かれば</span></label>
+          <input type="url" id="refUrl" inputmode="url" autocapitalize="off"
+                 spellcheck="false" placeholder="https://…">
+          <p class="hint">ご紹介のときに使ったURLです</p>
+        </div>
+
+        <div class="f">
+          <label>ひとこと <span class="opt">分かれば</span></label>
+          <textarea id="note" placeholder="例:9/16のサポート会でお会いしました"></textarea>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="f" style="margin-bottom:0;">
+          <label>どなたにお願いしますか <span class="req">必須</span></label>
+          <div class="to-opts" id="toOpts">
+            <button class="on" data-k="upline" onclick="setTo(this)">
+              <span class="ic">🌱</span>
+              <span class="tx"><span class="nm">アップのクリエイターズ</span>
+              <span class="sb">ご自身を育ててくださっている方</span></span>
+            </button>
+            <button data-k="helper" onclick="setTo(this)">
+              <span class="ic">🤝</span>
+              <span class="tx"><span class="nm">サポート担当の方</span>
+              <span class="sb">ふだんサポートしてくださる方</span></span>
+            </button>
+            <button data-k="keirep" onclick="setTo(this)">
+              <span class="ic">🪽</span>
+              <span class="tx"><span class="nm">系列の代表</span>
+              <span class="sb">ご自身の系列の代表の方</span></span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <button class="send" id="sendBtn" onclick="send()">この内容でお願いする</button>
+    </div>
+
+    <div class="card done" id="doneArea" style="display:none;">
+      <div class="em">🕊️</div>
+      <h2>お届けしました</h2>
+      <p id="doneTo"></p>
+      <p style="margin-top:12px;font-size:12px;color:#9A93B0;">
+        受け取った方が内容を確かめて登録します。<br>
+        しばらくお待ちください。
+      </p>
+      <button class="again" onclick="location.reload()">もう1件お願いする</button>
+    </div>
+
+    <div class="verTag"></div>
+  </div>
+</main>
+
+<script>
+const GAS_URL = window.SKY_GAS_URL;
+let member = null, toKind = "upline";
+
+function $(q){ return document.querySelector(q); }
+function show(t, cls){
+  const m = $("#msg");
+  m.innerHTML = t;
+  m.className = "msg show " + (cls || "");
+  if(!t) m.className = "msg";
+}
+
+/* ---------- 読み込み ---------- */
+(function(){
+  try{
+    const raw = localStorage.getItem("skyarc_member");
+    if(raw && raw !== "null" && raw !== "undefined") member = JSON.parse(raw);
+  }catch(e){}
+  if(member && !member.id) member = null;
+
+  if(!member){
+    if(typeof skyLoginRequired === "function"){
+      skyLoginRequired(function(){ location.reload(); });
+    }else{
+      location.replace("../index.html");
+    }
+    return;
+  }
+  $("#navWho").textContent =
+    (member.name ? member.name + "さん" : "会員番号 " + member.id)
+    + (member.keiretsu ? "｜" + member.keiretsu : "");
+})();
+
+function setTo(b){
+  document.querySelectorAll("#toOpts button").forEach(x => x.classList.remove("on"));
+  b.classList.add("on");
+  toKind = b.dataset.k;
+}
+
+async function send(){
+  if(typeof skyBusy === "function" && skyBusy("req")) return;
+  try{
+    const newId = $("#newId").value.trim();
+    if(!newId){ show("新しい方の会員番号をご入力ください", "err"); $("#newId").focus(); return; }
+    if(!/^\d+$/.test(newId)){ show("会員番号は数字でご入力ください", "err"); $("#newId").focus(); return; }
+
+    $("#sendBtn").disabled = true;
+    if(typeof skyLoading === "function") skyLoading("お届けしています");
+
+    const body = new URLSearchParams({
+      action:"reqCreate", id:member.id, pin:member.pin,
+      newId: newId,
+      newName: $("#newName").value.trim(),
+      refUrl: $("#refUrl").value.trim(),
+      note: $("#note").value.trim(),
+      toKind: toKind
+    });
+    const r = await fetch(GAS_URL, {method:"POST", body});
+    const j = await r.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
+    if(typeof skyLoadingDone === "function") skyLoadingDone();
+
+    if(j.ok){
+      $("#formArea").style.display = "none";
+      $("#doneArea").style.display = "block";
+      $("#doneTo").innerHTML = "<b>" + (j.to || "担当の方") + "</b> にお届けしました。";
+      show("", "");
+      window.scrollTo({top:0, behavior:"smooth"});
+      return;
+    }
+
+    show({
+      exists:"その会員番号は、すでに登録されています。",
+      already:"その方の依頼は、すでにお届けずみです。",
+      badid:"会員番号は数字でご入力ください。",
+      noreceiver: {
+        upline:"アップのクリエイターズが登録されていません。<br>ほかの届け先をおえらびいただくか、アカウント設定でご登録ください。",
+        helper:"サポート担当の方が登録されていません。<br>ほかの届け先をおえらびください。",
+        keirep:"ご自身の系列に、代表の方が見つかりませんでした。<br>ほかの届け先をおえらびください。"
+      }[j.kind] || "お届け先が見つかりませんでした。",
+      busy:"いま混み合っています。少しおいてお試しください。"
+    }[j.error] || "お届けできませんでした。", "err");
+
+  }catch(e){
+    if(typeof skyLoadingDone === "function") skyLoadingDone();
+    show("通信できませんでした。電波のよい場所でお試しください。", "err");
+  }finally{
+    $("#sendBtn").disabled = false;
+    if(typeof skyBusyEnd === "function") skyBusyEnd("req");
+  }
+}
+</script>
+<script src="../loading.js"></script>
+<script src="../login.js"></script>
+<script src="../menu.js"></script>
+<script src="../track.js"></script>
+</body>
+</html>

@@ -306,6 +306,8 @@
       <div class="tools">
         <input class="search" id="search" placeholder="名前・番号で検索" oninput="render()">
         <button class="btn-add" id="btnAdd" onclick="openMember(null)" style="display:none;">＋ 会員を追加</button>
+        <button class="btn-add" id="btnReq" onclick="openReqList()" style="display:none;background:#F2B33D;">
+          🔔 新規登録の依頼 <span id="reqCount">0</span></button>
         <button id="btnStats" onclick="openStats()" style="display:none;">📊 アクセス</button>
         <button id="btnDummy" onclick="toggleDummy()" style="display:none;">🧪 テストモード</button>
         <button id="btnBackPortal" onclick="backToPortal()">‹ ポータルへ</button>
@@ -380,6 +382,7 @@
         <br>
         <b>会員の登録・編集</b>(管理者/チーム代表のみ)<br>
         ・右上「＋会員を追加」… 新しい会員を登録(代表陣の事前登録などに)<br>
+        ・右上「🔔 新規登録の依頼」… 届いている依頼を見て、登録できます(クリエイターズ以上)<br>
         ・各行の「編集」… 名前・系列・パスコード・役職・担当系列の変更<br>
         ・名前をクリック → 詳細画面で先生の丸と本人チェックを修正できます
       </div>
@@ -405,6 +408,17 @@
     <div class="mm-foot">
       <button class="mm-cancel" onclick="closeStats()" style="flex:1;">とじる</button>
     </div>
+  </div>
+</div>
+
+<!-- 新規登録の依頼 -->
+<div id="reqModal" onclick="if(event.target===this)closeReq()">
+  <div class="sheet">
+    <h3>🔔 新規登録の依頼</h3>
+    <p class="mm-lead">内容をお確かめのうえ、登録してください。<br>
+      登録すると、その方は<b>会員番号とパスコード 1111</b> でログインできます。</p>
+    <div id="reqBody"></div>
+    <button class="mm-close" onclick="closeReq()">とじる</button>
   </div>
 </div>
 
@@ -538,7 +552,7 @@
     </div>
     <div class="mm-foot">
       <button class="mm-cancel" onclick="closeMember()">とじる</button>
-      <button class="mm-save" onclick="saveMember()">保存する</button>
+      <button class="mm-save" id="mmSave" onclick="saveMember()">保存する</button>
     </div>
   </div>
 </div>
@@ -803,6 +817,123 @@ async function login(){
 
 /* ログアウトせずにポータルへ戻る(役職で行き先を判定) */
 
+
+/* ================================================================
+   新規登録の依頼
+================================================================ */
+let reqItems = [];
+
+/* 依頼が来ていないか、そっと確かめます */
+async function checkReq(){
+  if(!admin) return;
+  try{
+    const r = await fetch(`${GAS_URL}?action=reqList&id=${encodeURIComponent(admin.id)}&pin=${encodeURIComponent(admin.pin)}`);
+    const j = await r.json();
+    if(!j.ok || !j.canApprove) return;
+    reqItems = j.items || [];
+    const btn = document.getElementById("btnReq");
+    const cnt = document.getElementById("reqCount");
+    if(btn){
+      btn.style.display = reqItems.length ? "inline-block" : "none";
+      if(cnt) cnt.textContent = reqItems.length;
+    }
+  }catch(e){}
+}
+
+function openReqList(){
+  const box = document.getElementById("reqBody");
+  if(!reqItems.length){
+    box.innerHTML = '<p class="mm-lead">いま届いている依頼はありません。</p>';
+  }else{
+    box.innerHTML = reqItems.map((it, i) => `
+      <div class="req-card">
+        <div class="req-top">
+          <b>${it.newName || "(お名前未記入)"}</b>
+          <span class="req-id">${it.newId}</span>
+        </div>
+        <p class="req-from">${it.fromName || it.fromId} さんからの依頼${it.made ? "（" + it.made + "）" : ""}</p>
+        ${it.refUrl ? `<p class="req-url">🔗 <a href="${it.refUrl}" target="_blank" rel="noopener">${it.refUrl}</a></p>` : ""}
+        ${it.note ? `<p class="req-note">${it.note}</p>` : ""}
+        <div class="req-btns">
+          <button class="req-ok" onclick="openApprove(${i})">内容を見て登録する</button>
+          <button class="req-ng" onclick="rejectReq(${i})">見送る</button>
+        </div>
+      </div>`).join("");
+  }
+  document.getElementById("reqModal").classList.add("show");
+}
+function closeReq(){ document.getElementById("reqModal").classList.remove("show"); }
+
+/* 内容を確かめて、補足を入れてから登録します */
+function openApprove(i){
+  const it = reqItems[i];
+  if(!it) return;
+  closeReq();
+  openMember(null);
+  /* 依頼の内容を入れておきます */
+  document.getElementById("mmId").value = it.newId;
+  document.getElementById("mmId").readOnly = true;
+  document.getElementById("mmName").value = it.newName || "";
+  document.getElementById("mmIntro").value = it.fromId || "";
+  document.getElementById("mmTitle").textContent = "依頼を受けて登録する";
+
+  /* 保存ボタンを、依頼の登録に切り替えます */
+  const btn = document.getElementById("mmSave");
+  btn.dataset.req = String(it.row);
+  btn.textContent = "この内容で登録する";
+}
+
+async function rejectReq(i){
+  const it = reqItems[i];
+  if(!it) return;
+  if(!confirm(`${it.newName || it.newId} さんの依頼を見送りますか?`)) return;
+  if(typeof skyBusy === "function" && skyBusy("req")) return;
+  try{
+    const body = new URLSearchParams({
+      action:"reqReject", id:admin.id, pin:admin.pin, row:String(it.row)
+    });
+    const r = await fetch(GAS_URL, {method:"POST", body});
+    const j = await r.json();
+    if(j.ok){ toast("見送りました"); await checkReq(); openReqList(); }
+    else toast("できませんでした");
+  }catch(e){ toast("通信できませんでした"); }
+  finally{ if(typeof skyBusyEnd === "function") skyBusyEnd("req"); }
+}
+
+/* 依頼を受けて、新しい会員さんを登録します */
+async function approveReq(row, show){
+  const g = (id) => { const e = document.getElementById(id); return e ? e.value.trim() : ""; };
+  try{
+    show("登録しています…", "ok");
+    const body = new URLSearchParams({
+      action:"reqApprove", id:admin.id, pin:admin.pin, row:String(row),
+      name: g("mmName"), realName: g("mmRealName"), keiretsu: g("mmKeiretsu"),
+      area: (g("mmArea") === "その他" || g("mmArea") === "海外") && g("mmAreaOther")
+              ? g("mmAreaOther") : g("mmArea"),
+      email: g("mmEmail"),
+      intro: g("mmIntro"), upline: g("mmUpline"), helper: g("mmHelper"),
+      advName: g("mmAdvName"), advId: g("mmAdvId")
+    });
+    const r = await fetch(GAS_URL, {method:"POST", body});
+    const j = await r.json();
+    if(j.ok){
+      closeMember();
+      toast(`✅ ${j.name || j.id} さんを登録しました（パスコードは 1111 です）`);
+      document.getElementById("mmSave").dataset.req = "";
+      document.getElementById("mmId").readOnly = false;
+      await checkReq();
+      load();
+    }else{
+      show({
+        exists:"その会員番号は、すでに登録されています",
+        done:"この依頼は、すでに処理ずみです",
+        noperm:"この操作はクリエイターズ以上の方がお使いいただけます",
+        busy:"いま混み合っています。少しおいてお試しください"
+      }[j.error] || "登録できませんでした", "err");
+    }
+  }catch(e){ show("通信できませんでした", "err"); }
+}
+
 /* ================= アクセス解析(管理者のみ) ================= */
 function openStats(){
   document.getElementById("statsModal").classList.add("show");
@@ -1043,6 +1174,9 @@ async function load(isLogin){
     }
     const bn = document.getElementById("dummyBetaNote");
     if(bn) bn.style.display = (j.betaMode && !j.isAdmin) ? "inline" : "none";
+
+    /* 届いている依頼がないか、あわせて確かめます */
+    checkReq();
 
     /* どの段階の方にも、見える範囲の一覧をお出しします */
     $("#listArea").style.display = "block";
@@ -1407,6 +1541,10 @@ function clearMemberEmail(){
 }
 
 function closeMember(){
+  const sv = document.getElementById("mmSave");
+  if(sv){ sv.dataset.req = ""; sv.textContent = "保存する"; }
+  const idf = document.getElementById("mmId");
+  if(idf) idf.readOnly = false;
   document.getElementById("memModal").classList.remove("show");
   memEditing = null;
 }
@@ -1426,6 +1564,14 @@ async function saveMember(){
   const scope = Array.from(document.querySelectorAll("#mmScopeList input:checked")).map(b=>b.value);
 
   if(!id){ show("会員番号を入力してください","err"); return; }
+
+  /* 依頼を受けての登録のときは、そちらの処理にお任せします */
+  const reqRow = document.getElementById("mmSave").dataset.req;
+  if(reqRow){
+    await approveReq(Number(reqRow), show);
+    return;
+  }
+
   if(!memEditing && !/^\d{4}$/.test(pin)){ show("新規登録にはパスコード(4桁)が必要です","err"); return; }
   if(pin && !/^\d{4}$/.test(pin)){ show("パスコードは4桁の数字で入力してください","err"); return; }
 

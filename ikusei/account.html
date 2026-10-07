@@ -275,6 +275,7 @@ async function changePin(){
   if(!/^\d{4}$/.test(p1)){ show("新しいパスコードは4桁の数字で入れてください。", "err"); return; }
   if(p1 !== p2){ show("2つのパスコードが揃っていません。", "err"); return; }
   if(p1 === now){ show("いまと同じパスコードです。", "warn"); return; }
+  if(p1 === "1111"){ show("1111 は初めのパスコードです。ほかの4桁をお選びください。", "warn"); return; }
 
   if(typeof skyLoading === "function") skyLoading("変えています…");
   try{
@@ -290,6 +291,7 @@ async function changePin(){
       return;
     }
     member.pin = p1;
+    member.needPin = (p1 === "1111");   /* 変えたら、お知らせは出しません */
     localStorage.setItem("skyarc_member", JSON.stringify(member));
     $("#pinNow").value = ""; $("#pin1").value = ""; $("#pin2").value = "";
     show("✅ パスコードを変えました。<br>次からは新しいパスコードでログインしてください。", "ok");
