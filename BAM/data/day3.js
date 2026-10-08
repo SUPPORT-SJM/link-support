@@ -5,7 +5,7 @@
    =========================================================== */
 window.BAM_DAYS = window.BAM_DAYS || {};
 window.BAM_DAYS[3] = {
-  title: "3日目",
+  title: "2026年 9月 3日目",
   messages: [
     { type:"video", src:"https://drive.google.com/file/d/1_iz9KLg6fuidVhQ5bIfm3zR2wlfEVWOY/preview" },
     { type:"text", text:"それでは{{w:boxl:#fef198|3}}日目です。\n\n僕が成功できた理由③\n{{r:brk:#61b668:【|『}}取り組むビジネスを知り、確信を持つ{{r:brk:#9a6aaa:】|』}}\n知り、体験し、自分ごとにする。\n『自分の人生をかけた事業』という自覚を持つ。\nをやります{{r:emo::✨|✨}}\n\n{{g:1|}}これはビジネス、恋愛、投資\nスポーツ、事業、お勤め\n\nなんでも{{r:brk:#64ba66:【|『}}学ぶ事は必須{{r:brk:#9b68b5:】|』}}だと感じます。\n\n{{g:1|}}特に、今回{{w:pop:#d11c36|1}}日目に\n皆さんが学び\nフィードバックフォームに書いた\n{{r:brk:#7c4e5f:『|『}}自身のBIG whyやVISION{{r:brk:#7f4d5c:』|』}}\nが、\n\n{{g:1|}}例えばもし\n{{u:wavy:#5080ec|LINKで叶えられるなら？？}}\n\n{{u:double:#ba5758|LINKを真剣に学びませんか？？}}" },
