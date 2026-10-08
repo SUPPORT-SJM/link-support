@@ -5,7 +5,7 @@
    =========================================================== */
 window.BAM_DAYS = window.BAM_DAYS || {};
 window.BAM_DAYS[4] = {
-  title: "4日目",
+  title: "2026年 9月 4日目",
   messages: [
     { type:"video", src:"https://drive.google.com/file/d/1nUyGDYVv6cKHgVhOe1H9InhIhWXA-bq_/preview" },
     { type:"text", text:"それでは{{w:boxl:#fdf297|4}}日目です。\n\n僕が成功できた理由④\n{{r:brk:#66b765:【|『}}目標(ゴール)設定を明確にする{{r:brk:#9e67b5:】|』}}\n本当にやりたいvisionに繋がる目標は、\n貴方の最高の原動力となる。\nをやります{{r:emo::✨|✨}}\n\n{{g:2|}}その前に、{{w:boxl:#fdf197|3}}日目の続編。\n本日の4日目の内容にも繋がる、\n\n②LINKの伝えやすさ/広げやすさ{{r:txt::(ビジネス)|💼}}\n③LINKを広げる事で得られるもの{{r:txt::(ビジネス)|💼}}\nをお伝えしておきます😊\n\n{{g:1|}}昨日\n①LINK自体の魅力/価値/可能性(サービス)\nは、伝わりましたよね{{r:qq:#d0508a:???|?}}\n\nでは、\n{{r:brk:#7d4f5f:『|『}}LINKでグループを作ると、\n何が得られるでしょう{{r:qq:#d0508a:???|?}}{{r:brk:#7c4d5f:』|』}}" },
