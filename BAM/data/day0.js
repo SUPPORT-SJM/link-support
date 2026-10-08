@@ -5,7 +5,7 @@
    =========================================================== */
 window.BAM_DAYS = window.BAM_DAYS || {};
 window.BAM_DAYS[0] = {
-  title: "0日目：ルールなど説明",
+  title: "2026年 9月 0日目：ルールなど説明",
   messages: [
     { type:"video", src:"https://drive.google.com/file/d/1LEjw_KxoKHAnlFxIIRbRW7qDEnOUcUUg/preview" },
     { type:"image", src:"day0/S__64135173.jpg" },
