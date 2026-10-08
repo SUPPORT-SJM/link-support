@@ -5,7 +5,7 @@
    =========================================================== */
 window.BAM_DAYS = window.BAM_DAYS || {};
 window.BAM_DAYS[2] = {
-  title: "2日目",
+  title: "2026年 9月 2日目",
   messages: [
     { type:"video", src:"https://drive.google.com/file/d/1L2KRFcwsjuCdbNFCuZiXsPxKPwQUjLMR/preview" },
     { type:"text", text:"それでは{{w:pop:|2}}日目です。\n\n僕が成功できた理由❷\n{{r:brk:#65b768:【|『}}成功者のマインドをインストールする{{r:brk:#9e68bb:】|』}}\n-偉人や成功者の在り方、マインドを\n自分にトレースする-\nをやります{{r:emo::✨|✨}}\n\n{{g:1|}}まず昨日を\nおさらいしておくと、\n\n{{u:double:#e48a96|成功する為に大切な事}}\n\n昨日オープニングの中では\n{{r:brk:#7b4e5e:『|『}}ルールを守る事のメリット{{r:brk:#7c4e5e:』|』}}を\n\n{{g:1|}}1日目では\n{{r:brk:#794f5e:『|『}}全力でやる必要性{{r:brk:#7c4f5e:』|』}}を\nやりましたね{{r:emo::✨|✨}}\n無茶苦茶大切でしたね{{r:emo::💡|⚡}}\n\n{{g:1|}}{{u:double:#9a9a9a|そして全力でやる為に}}\n{{t:note:#222222:ココ　超!! 重要}}\n{{r:brk:#7d4f5e:『|『}}本気で叶えたい明確な目的{{r:brk:#7d4e61:』|』}}が\n大切でしたね{{r:emo::✨|✨}}" },
