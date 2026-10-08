@@ -5,7 +5,7 @@
    =========================================================== */
 window.BAM_DAYS = window.BAM_DAYS || {};
 window.BAM_DAYS[8] = {
-  title: "8日目",
+  title: "2026年 9月 8日目",
   messages: [
     { type:"video", src:"https://drive.google.com/file/d/12g0rfVtTcbB6GBdXlkbRhmgujIZ-UyPJ/preview" },
     { type:"image", src:"day8/S__64520195.jpg" },
