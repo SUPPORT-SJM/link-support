@@ -5,7 +5,7 @@
    =========================================================== */
 window.BAM_DAYS = window.BAM_DAYS || {};
 window.BAM_DAYS[5] = {
-  title: "5日目",
+  title: "2026年 9月 5日目",
   messages: [
     { type:"video", src:"https://drive.google.com/file/d/1we6To4qcQjzJvprDp_omu36NM7ygEx5o/preview" },
     { type:"text", text:"僕が成功できた理由⑤\n{{r:brk:#60b563:【|『}}リミットブレイクして固定概念を外す{{r:brk:#9967ae:】|』}}\n-自分の中の『出来ない』を\n『出来る、やれる』マインドに変える-\nをやります{{r:emo::✨|✨}}\n\n{{g:1|}}18事業で成功し{{w:pop:#9c45ae|222}}億\n売上る事が出来ました。\n\n{{g:1|}}それは{{w:pop:#df3e9d|8}}日間のうち\nここまでやってきた内容が\n{{u:wavy:#c22e40|超大切なのです}}{{r:emo::🐭|😲}}{{r:emo::🐭|😲}}{{r:emo::🐭|😲}}\n\nスタートでやった\n{{u:double:#759cd3|成功のルールを守る事}}\n\n✖︎\n{{w:boxl:#b877f6|1}}日目にやった\n{{u:thin:#5e85c0|全力になれる目的を持つ事}}\n\n✖︎\n{{w:boxl:#b877f6|2}}日目にやった\n{{u:double:#6f97cb|環境設定、自己管理をする事}}\n\n{{u:double:#779fd4|成功マインドを持つ事}}\n\n✖︎\n{{w:boxl:#b978f3|3}}日目にやった\n{{u:double:#739cd5|手段に確信を持つ事}}\n\n✖︎\n{{w:boxl:#b877f6|4}}日目にやった\n目的を達成する為の\n{{u:thin:#759fd7|目標を明確にする事}}\n\nをやる事で、成功しました{{r:emo::✨|✨}}{{r:emo::✨|✨}}" },
