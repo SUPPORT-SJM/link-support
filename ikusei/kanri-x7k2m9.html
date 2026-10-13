@@ -283,6 +283,16 @@
 .mm-found{display:none;border-radius:11px;padding:11px 13px;font-size:12.5px;line-height:1.9;margin-top:10px;}
 .mm-found.exist{display:block;background:#FFF6E0;border:1.5px solid #F2D58A;color:#7A5A00;}
 .mm-found.fresh{display:block;background:#EAF6EF;border:1.5px solid #BFE3CE;color:#2F7A5C;}
+
+/* ===== 要確認：一覧のマーク位置と、編集画面の枠 ===== */
+.edit-row{display:flex;align-items:center;justify-content:flex-end;gap:5px;flex-wrap:wrap;margin-top:4px;}
+.edit-row .need-check,.edit-row .auto-fill{cursor:pointer;margin:0;}
+.mm-checknote{display:none;color:#C0392B;font-size:11.5px;line-height:1.85;
+  background:#FFF5F7;border-radius:9px;padding:9px 11px;margin-bottom:12px;}
+.mm-checknote b{color:#A93226;}
+.mm-f.ck-ng{background:#FFF1F4;border:1.5px solid #F3B6C4;border-radius:11px;padding:10px 11px;}
+.mm-f.ck-ng input{border-color:#EFA3B5;}
+.ck-hint{color:#C0392B;font-size:11px;line-height:1.7;margin-top:5px;}
 </style>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <link rel="stylesheet" href="../beta.css">
@@ -469,6 +479,7 @@
     </div>
     <div class="mm-body">
       <div class="mm-msg" id="mmMsg"></div>
+      <div class="mm-checknote" id="mmCheckNote"></div>
 
       <div class="mm-f mm-idf">
         <label>会員番号 <span style="color:#B33;">*</span></label>
@@ -1384,12 +1395,21 @@ function render(){
       : "";
 
     return `<tr class="${m.needCheck ? "row-check" : (m.autoFill ? "row-auto" : "")}">
-      <td><a href="#" class="nm nm-link" onclick="openDetail('${m.id}');return false;">${m.name || "(名前未登録)"}</a>${m.realName && m.realName !== m.name ? `<br><span style="font-size:10.5px;color:#A8A4BC;">(${m.realName})</span>` : ""}${m.needCheck ? '<span class="need-check" title="紹介者やアップの欄に、会員番号ではなくお名前が入っています">⚠️ 要確認</span>' : ""}${m.autoFill ? `<span class="auto-fill" title="お名前から自動でうめました：${m.autoFill}">🔎 確認待ち</span>` : ""}<br><span class="id">${m.id}</span></td>
+      <td><a href="#" class="nm nm-link" onclick="openDetail('${m.id}');return false;">${m.name || "(名前未登録)"}</a>${m.realName && m.realName !== m.name ? `<br><span style="font-size:10.5px;color:#A8A4BC;">(${m.realName})</span>` : ""}<br><span class="id">${m.id}</span></td>
       <td class="kei">${m.keiretsu || "–"}${m.area ? `<br><span style="font-size:10px;color:#A8A4BC;">${m.area}</span>` : ""}${hasSup(m) && !hasCrie(m) ? '<br><span style="font-size:10px;color:#B8860B;font-weight:700;">サポーター</span>' : ""}</td>
       <td class="prog">${piyo}</td>
       <td class="prog">${gr}</td>
       <td><div class="flags">${fb("サポーター","sup")}${fb("クリエ","")}${fb("アドバンス","adv")}${fb("系列代表","kei")}${fb("チーム代表","rep")}${fb("管理者","adm")}</div>${scopeBtn}</td>
-      <td class="kei">${m.lastSeen || "–"}${canFull ? `<br><button class="scope-btn" onclick='openMember(${JSON.stringify(m).replace(/'/g,"&#39;")})'>編集</button>` : ""}</td>
+      <td class="kei">${m.lastSeen || "–"}${(() => {
+        /* 要確認・確認待ちのマークは、名前ではなく「編集」の左に置きます
+           （名前を押すと進捗の画面なので、取り違えないようにするためです） */
+        const open = `onclick='openMember(${JSON.stringify(m).replace(/'/g,"&#39;")})'`;
+        const marks =
+            (m.needCheck ? `<span class="need-check" ${canFull ? open : ""} title="会員番号の欄にお名前が入っています。編集で直してください">⚠️ 要確認</span>` : "")
+          + (m.autoFill ? `<span class="auto-fill" ${canFull ? open : ""} title="お名前から自動でうめました：${m.autoFill}">🔎 確認待ち</span>` : "");
+        const btn = canFull ? `<button class="scope-btn" ${open}>編集</button>` : "";
+        return (marks || btn) ? `<div class="edit-row">${marks}${btn}</div>` : "";
+      })()}</td>
     </tr>`;
   }).join("");
 }
@@ -1654,8 +1674,54 @@ function openMember(m){
       <span>${k}</span></label>`;
   }).join("");
   updateScopeVisibility();
+  markChecks();
 
   document.getElementById("memModal").classList.add("show");
+}
+
+/* ================================================================
+   要確認の欄に、ピンクの枠をつけます
+   ----------------------------------------------------------------
+   会員番号を入れる欄に、お名前などの数字以外が入っていると要確認です。
+   直して数字だけになったら、その場で枠を外します。
+================================================================ */
+const CHECK_FIELDS = [
+  ["mmIntro",  "紹介者の会員番号"],
+  ["mmUpline", "アップのクリエ会員番号"],
+  ["mmHelper", "サポート担当者の会員番号"],
+  ["mmAdvId",  "アドバイザーの会員番号"],
+];
+function markChecks(){
+  const bad = [];
+  CHECK_FIELDS.forEach(([id, label]) => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    const box = el.closest(".mm-f");
+    const v = (el.value || "").trim();
+    const ng = v !== "" && !/^[0-9]+$/.test(v);
+    if(box) box.classList.toggle("ck-ng", ng);
+    let h = box ? box.querySelector(".ck-hint[data-for='" + id + "']") : null;
+    if(ng){
+      bad.push(label);
+      if(box && !h){
+        h = document.createElement("p");
+        h.className = "ck-hint"; h.dataset.for = id;
+        el.insertAdjacentElement("afterend", h);
+      }
+      if(h) h.textContent = "「" + v + "」が入っています。会員番号（数字）に直してください。";
+    }else if(h){ h.remove(); }
+    el.oninput = markChecks;   /* 直したらすぐ枠を外します */
+  });
+  const note = document.getElementById("mmCheckNote");
+  if(note){
+    if(bad.length){
+      note.innerHTML = "⚠️ 要確認の項目：<b>" + bad.join("・") + "</b><br>"
+        + "お名前が入っています。ピンクの枠の欄を、会員番号に直して保存してください。";
+      note.style.display = "block";
+    }else{
+      note.innerHTML = ""; note.style.display = "none";
+    }
+  }
 }
 
 function updateScopeVisibility(){
