@@ -326,6 +326,12 @@ function ok(it){
   return true;
 }
 const JOIN = {ic:"", nm:"登録", g:"join", join:true};
+/* この端末で一度でも登録・ログインしたことがあれば、まん中は「ログイン」になります
+   （ログアウトしても残ります） */
+const RETURN_KEY = "lsapp_returning";
+function isReturning(){ try{ return localStorage.getItem(RETURN_KEY) === "1"; }catch(e){ return false; } }
+function markReturning(){ try{ localStorage.setItem(RETURN_KEY, "1"); }catch(e){} }
+if(me) markReturning();
 function setHello(t){ document.getElementById("hello").textContent = t || (me && me.name ? me.name + "さん、おかえりなさい" : "ようこそ"); }
 setHello();
 
@@ -345,7 +351,7 @@ function homes(n, centered){
   W = Math.min(stage.clientWidth || 360, 440);
   const cx = W/2;
   let pts = [], rx, ry;
-  if(n === 1){ ry = 0; pts.push([0,0]); }
+  if(n === 1){ ry = centered ? Math.max(W*.39, 132) * .94 : 0; pts.push([0,0]); }
   else if(n === 2 && !centered){ rx = W*.26; ry = 0; pts.push([-rx,0],[rx,0]); }
   else{
     const ring = centered ? n-1 : n;
@@ -363,26 +369,52 @@ function homes(n, centered){
   return pts.map((p,i)=>[cx + p[0] + WOBBLE[i%10][0]*k, H/2 + p[1] + WOBBLE[i%10][1]*k]);
 }
 
+/* ---------- アイコンをひとつ作る ---------- */
+function makeNode(it, i, home, fromX, fromY){
+  const el = document.createElement("button");
+  el.type = "button";
+  el.className = "bub" + (it.join ? " join" : "");
+  el.style.setProperty("--c", C[it.g]);
+  el.innerHTML = `<span class="ball">${it.ic}</span><span class="nm">${it.nm}</span>`;
+  stage.appendChild(el);
+  const n = { el, it, hx:home[0], hy:home[1],
+    x: fromX ?? home[0], y: fromY ?? home[1], vx:0, vy:0,
+    s: fromX == null ? 1 : .3, ts:1, o: fromX == null ? 1 : 0, to:1,
+    ph: i*1.7, delay: i*45, born: performance.now() };
+  hook(n);
+  return n;
+}
+
+/* ---------- 解放されたアイコンだけを、パッと足します ----------
+   いま出ているアイコンはそのまま、新しい置き場所へすっと動きます */
+function reflow(){
+  if(path.length !== 0) return;
+  const items = TREE.filter(ok);
+  const hs = homes(items.length, true);
+  const keep = [];
+  nodes.forEach(n=>{
+    if(items.indexOf(n.it) >= 0) keep.push(n);
+    else{ n.to = 0; n.ts = .4; n.hx = null; n.dying = performance.now(); leaving.push(n); }
+  });
+  nodes = items.map((it,i)=>{
+    let n = keep.find(k=>k.it === it);
+    if(!n){
+      n = makeNode(it, i, hs[i], hs[i][0], hs[i][1]);
+      n.delay = 0; n.s = .2; n.ts = 1.25;
+      setTimeout(()=>{ n.ts = 1; }, 320);
+    }
+    n.hx = hs[i][0]; n.hy = hs[i][1];
+    return n;
+  });
+}
+
 /* ---------- アイコンを並べる ---------- */
 function build(fromX, fromY){
   const last = path[path.length-1];
   let items = last ? (last.kids || []).filter(ok) : TREE.filter(ok);
-  if(!last && !me) items = [JOIN].concat(items.slice(1));     /* はじめての方は、まん中が「登録」 */
+  if(!last && !me) items = [Object.assign({}, JOIN, { nm: isReturning() ? "ログイン" : "登録" })];  /* まだの方は、まん中のひとつだけ */
   const hs = homes(items.length, path.length === 0 ? true : undefined);  /* いちばん上は、まん中がアカウント */
-  nodes = items.map((it,i)=>{
-    const el = document.createElement("button");
-    el.type = "button";
-    el.className = "bub" + (it.join ? " join" : "");
-    el.style.setProperty("--c", C[it.g]);
-    el.innerHTML = `<span class="ball">${it.ic}</span><span class="nm">${it.nm}</span>`;
-    stage.appendChild(el);
-    const n = { el, it, hx:hs[i][0], hy:hs[i][1],
-      x: fromX ?? hs[i][0], y: fromY ?? hs[i][1], vx:0, vy:0,
-      s: fromX == null ? 1 : .3, ts:1, o: fromX == null ? 1 : 0, to:1,
-      ph: i*1.7, delay: i*45, born: performance.now() };
-    hook(n);
-    return n;
-  });
+  nodes = items.map((it,i)=> makeNode(it, i, hs[i], fromX, fromY));
   document.getElementById("crumb").hidden = path.length === 0;
   document.getElementById("crumbTitle").textContent = (last ? last.nm.replace(/\n/g,"") : "");
   const info = document.getElementById("info");
@@ -532,6 +564,7 @@ let loginTab = "google";       /* google / id / mail */
 let gMail = "", gName = "", gFor = "";
 
 function openJoin(n){
+  joinMode = isReturning() ? "login" : "new";
   const r = n.el.querySelector(".ball").getBoundingClientRect();
   const sp = $("#spread");
   sp.style.setProperty("--c", "var(--g-join)");
@@ -643,6 +676,7 @@ function saveMe(j, pin, fallbackId){
   localStorage.setItem("skyarc_member", JSON.stringify(m));
   if(!localStorage.getItem("skyarc_member")) throw new Error("nosave");
   me = m;
+  markReturning();
   return m;
 }
 function welcome(text){
@@ -653,7 +687,7 @@ function welcome(text){
     $("#sheet").hidden = true;
     setHello(text);
     path.length = 0;
-    goTo(()=>{}, W/2, H/2);
+    goTo(()=>{}, W/2, H/2, nodes.find(n=>n.it.join));
   }, 1300);
 }
 const ERR = {
@@ -784,9 +818,9 @@ $("#lForgot").addEventListener("click", e=>{
     });
     localStorage.setItem("skyarc_member", JSON.stringify(m));
     me = m;
-    if(before !== [me.id, me.sup, me.crie, me.role, me.name].join("|") && path.length === 0 && !drag){
+    if(before !== [me.id, me.sup, me.crie, me.role, me.name].join("|")){
       setHello();
-      goTo(()=>{}, W/2, H/2);
+      if(path.length === 0 && !drag) reflow();
     }
   }catch(e){}
 })();
