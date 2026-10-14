@@ -72,6 +72,9 @@
   .f .found{font-size:11.5px;margin-top:5px;font-weight:700;}
   .f .found.ok{color:#2F7A5C;}
   .f .found.ng{color:#B4B0C4;}
+  .pair-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .pair-row input{min-width:0;}
+  .pair .psub{display:block;font-size:10.5px;color:#A8B4AC;margin-bottom:3px;font-weight:400;text-align:left;}
   .find-btn{display:inline-block;margin-top:6px;padding:5px 11px;border-radius:99px;border:1.5px solid var(--leaf);
     background:#fff;color:#2F7A5C;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit;}
   .find-btn:disabled{opacity:.5;}
@@ -253,38 +256,47 @@
       </div>
       <p class="step" style="margin-top:22px;">紹介してくださった方</p>
       <p class="tab-lead" style="margin-bottom:12px;text-align:left;">
-        会員番号が分からないときは、<b>お名前やニックネームでも大丈夫です</b>。<br>
-        あとで担当の方が正しい番号に直してくださいます😊
+        会員番号とお名前の<b>どちらか分かるほうだけで大丈夫です</b>。<br>
+        「照合する」を押すと、もう片方をうめます😊
       </p>
 
-      <div class="f">
-        <label>紹介者の会員番号 <span class="opt">分かれば</span></label>
-        <input type="text" id="inIntro" placeholder="00012345 または お名前" oninput="lookup('inIntro','introFound')">
+      <div class="f pair">
+        <label>紹介者 <span class="opt">分かれば</span></label>
+        <div class="pair-row">
+          <div><span class="psub">会員番号</span><input type="text" id="inIntro" inputmode="numeric" placeholder="00012345" oninput="pairInput('intro')"></div>
+          <div><span class="psub">お名前</span><input type="text" id="inIntroName" placeholder="例:しょうこ" oninput="pairInput('intro')"></div>
+        </div>
+        <button type="button" class="find-btn" id="chk_intro" onclick="checkPair('intro', this)" style="display:none;">🔎 照合する</button>
         <p class="found ng" id="introFound"></p>
       </div>
-
-      <div class="f">
-        <label>アップのクリエイターズ会員番号 <span class="opt">分かれば</span></label>
-        <input type="text" id="inUpline" placeholder="00012345 または お名前" oninput="lookup('inUpline','upFound')">
+      <div class="f pair">
+        <label>アップのクリエイターズ <span class="opt">分かれば</span></label>
+        <div class="pair-row">
+          <div><span class="psub">会員番号</span><input type="text" id="inUpline" inputmode="numeric" placeholder="00012345" oninput="pairInput('up')"></div>
+          <div><span class="psub">お名前</span><input type="text" id="inUplineName" placeholder="例:しょうこ" oninput="pairInput('up')"></div>
+        </div>
+        <button type="button" class="find-btn" id="chk_up" onclick="checkPair('up', this)" style="display:none;">🔎 照合する</button>
         <p class="found ng" id="upFound"></p>
       </div>
-
-      <div class="f">
-        <label>サポート担当者の会員番号 <span class="opt">分かれば</span></label>
-        <input type="text" id="inHelper" placeholder="00012345 または お名前" oninput="lookup('inHelper','helperFound')">
+      <div class="f pair">
+        <label>サポート担当者 <span class="opt">分かれば</span></label>
+        <div class="pair-row">
+          <div><span class="psub">会員番号</span><input type="text" id="inHelper" inputmode="numeric" placeholder="00012345" oninput="pairInput('helper')"></div>
+          <div><span class="psub">お名前</span><input type="text" id="inHelperName" placeholder="例:しょうこ" oninput="pairInput('helper')"></div>
+        </div>
+        <button type="button" class="find-btn" id="chk_helper" onclick="checkPair('helper', this)" style="display:none;">🔎 照合する</button>
         <p class="found ng" id="helperFound"></p>
       </div>
 
       <p class="step" style="margin-top:22px;">ご入会のときに説明してくださった方</p>
 
-      <div class="f">
-        <label>お名前 <span class="opt">分かれば</span></label>
-        <input type="text" id="inAdvName" placeholder="例:高山翔子">
-      </div>
-
-      <div class="f">
-        <label>会員番号 <span class="opt">分かれば</span></label>
-        <input type="text" id="inAdvId" placeholder="00012345 または お名前" oninput="lookup('inAdvId','advFound')">
+      <div class="f pair">
+        <label>説明してくださった方 <span class="opt">分かれば</span></label>
+        <div class="pair-row">
+          <div><span class="psub">会員番号</span><input type="text" id="inAdvId" inputmode="numeric" placeholder="00012345" oninput="pairInput('adv')"></div>
+          <div><span class="psub">お名前</span><input type="text" id="inAdvName" placeholder="例:しょうこ" oninput="pairInput('adv')"></div>
+        </div>
+        <button type="button" class="find-btn" id="chk_adv" onclick="checkPair('adv', this)" style="display:none;">🔎 照合する</button>
         <p class="found ng" id="advFound"></p>
       </div>
         </div>
@@ -523,12 +535,23 @@ async function prefill(email){
           $("#inKeiretsuOther").value = m.keiretsu;
         }
       }
-      if(m.intro){ $("#inIntro").value = m.intro; lookup("inIntro","introFound"); }
-      if(m.upline){ $("#inUpline").value = m.upline; lookup("inUpline","upFound"); }
-      if(m.helper){ $("#inHelper").value = m.helper; lookup("inHelper","helperFound"); }
+      /* 番号が入っていれば、お名前もうめておきます（お名前で入っていれば、お名前の欄へ） */
+      [["intro", m.intro], ["up", m.upline], ["helper", m.helper]].forEach(([k, v])=>{
+        v = String(v || "").trim();
+        if(!v) return;
+        if(/^\d+$/.test(v)) document.getElementById(PAIRS[k][0]).value = v;
+        else document.getElementById(PAIRS[k][1]).value = v;
+        pairInput(k);
+        if(/^\d+$/.test(v)) checkPair(k, null, true);
+      });
       if(m.realName) $("#inRealName").value = m.realName;
       if(m.advName) $("#inAdvName").value = m.advName;
-      if(m.advId){ $("#inAdvId").value = m.advId; lookup("inAdvId","advFound"); }
+      if(m.advId){
+        const av = String(m.advId).trim();
+        if(/^\d+$/.test(av)) $("#inAdvId").value = av;
+        else if(!m.advName) $("#inAdvName").value = av;
+      }
+      if(m.advName || m.advId){ pairInput("adv"); if(/^\d+$/.test(String(m.advId || "").trim())) checkPair("adv", null, true); }
       if(m.area){
         const asel = $("#inArea");
         if(Array.from(asel.options).some(o=>o.value === m.area)){
@@ -547,74 +570,99 @@ async function prefill(email){
   }catch(e){}
 }
 
-/* 会員番号から名前を確認 */
-let lookupTimer = {};
-function lookup(inputId, outId){
-  const v = document.getElementById(inputId).value.trim();
-  const out = document.getElementById(outId);
-  if(!v){ out.textContent = ""; return; }
-  // 数字でなければ、お名前として受け取ります
-  if(!/^[0-9]+$/.test(v)){
-    out.innerHTML = "→ お名前として承ります(あとで担当の方が番号に直します)<br>"
-      + `<button type="button" class="find-btn" onclick="findByName('${inputId}','${outId}', this)">🔎 会員番号をさがす</button>`;
-    out.className = "found ok";
-    return;
-  }
-  clearTimeout(lookupTimer[inputId]);
-  lookupTimer[inputId] = setTimeout(async ()=>{
-    try{
-      const res = await fetch(`${GAS_URL}?action=lookupName&id=${encodeURIComponent(v)}`);
-      const j = await res.json();
-    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
-      if(j.ok && j.found){
-        out.textContent = "→ " + (j.name || "(名前未登録)") + "さん" + (j.keiretsu ? "(" + j.keiretsu + ")" : "");
-        out.className = "found ok";
-      }else{
-        out.textContent = "→ まだご登録のない番号です(そのままで大丈夫です)";
-        out.className = "found ng";
-      }
-    }catch(e){ out.textContent = ""; }
-  }, 500);
-}
-
 /* ================================================================
-   お名前から会員番号をさがします（見つかれば、その場で番号に置きかえます）
+   会員番号とお名前の「照合」
+   ----------------------------------------------------------------
+   ・番号だけ → お名前をうめます
+   ・お名前だけ → 番号をうめます（同じお名前が複数なら、えらんでいただきます）
+   ・両方 → 同じ方かどうかを確かめます
 ================================================================ */
+const PAIRS = {
+  intro:  ["inIntro",  "inIntroName",  "introFound"],
+  up:     ["inUpline", "inUplineName", "upFound"],
+  helper: ["inHelper", "inHelperName", "helperFound"],
+  adv:    ["inAdvId",  "inAdvName",    "advFound"]
+};
 function escHtml(t){ return String(t == null ? "" : t).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
-async function findByName(inputId, outId, btn){
-  const input = document.getElementById(inputId);
-  const out = document.getElementById(outId);
-  const name = input.value.trim();
-  if(!name) return;
-  if(btn){ btn.disabled = true; btn.textContent = "さがしています…"; }
+function toHalf(t){ return String(t || "").replace(/[０-９]/g, c=>String.fromCharCode(c.charCodeAt(0)-65248)); }
+function pairVals(k){
+  const [ni, mi] = PAIRS[k];
+  let num = toHalf(document.getElementById(ni).value).replace(/\s/g, "");
+  let nm  = document.getElementById(mi).value.trim();
+  /* 番号の欄にお名前が入っていたら、お名前として扱います */
+  if(num && !/^\d+$/.test(num)){ if(!nm) nm = document.getElementById(ni).value.trim(); num = ""; }
+  return { num, nm };
+}
+function pairMsg(k, html, ok){
+  const out = document.getElementById(PAIRS[k][2]);
+  out.className = "found " + (ok ? "ok" : "ng");
+  out.innerHTML = html;
+  return out;
+}
+function pairInput(k){
+  const [ni, mi] = PAIRS[k];
+  const has = document.getElementById(ni).value.trim() || document.getElementById(mi).value.trim();
+  const b = document.getElementById("chk_" + k);
+  b.style.display = has ? "inline-block" : "none";
+  b.disabled = false; b.textContent = "🔎 照合する";
+  pairMsg(k, "", false);
+}
+function pairSet(k, m, text){
+  const [ni, mi] = PAIRS[k];
+  document.getElementById(ni).value = m.id;
+  document.getElementById(mi).value = m.name || document.getElementById(mi).value;
+  pairMsg(k, escHtml(text || ("✓ " + (m.name || "") + "さん" + (m.keiretsu ? "（" + m.keiretsu + "）" : "") + " と照合できました")), true);
+}
+async function checkPair(k, btn, quiet){
+  const { num, nm } = pairVals(k);
+  if(!num && !nm) return;
+  if(btn){ btn.disabled = true; btn.textContent = "照合しています…"; }
   try{
-    const res = await fetch(`${GAS_URL}?action=findByName&name=${encodeURIComponent(name)}`);
-    const j = await res.json();
-    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
-    const list = (j && j.ok && j.members) || [];
-    if(list.length === 1){
-      useFound(inputId, outId, list[0]);
-    }else if(list.length > 1){
-      out.className = "found ok";
-      out.innerHTML = "同じお名前の方が" + list.length + "人います。あてはまる方をえらんでください"
-        + list.map((m,i)=>`<button type="button" class="pick-btn" data-i="${i}">${escHtml(m.name)}さん${m.keiretsu ? "（" + escHtml(m.keiretsu) + "）" : ""}</button>`).join("");
-      out.querySelectorAll(".pick-btn").forEach(b=>b.addEventListener("click", ()=> useFound(inputId, outId, list[Number(b.dataset.i)])));
+    if(num){
+      /* 番号から（お名前もあれば、同じ方かを確かめます） */
+      const r = await fetch(`${GAS_URL}?action=matchIdName&id=${encodeURIComponent(num)}&name=${encodeURIComponent(nm)}`);
+      const j = await r.json();
+      if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
+      if(!j.ok || !j.found){
+        if(!quiet) pairMsg(k, "→ まだご登録のない番号です（このままで大丈夫です）", false);
+      }else if(!nm || j.match){
+        pairSet(k, { id: num, name: nm || j.name, keiretsu: j.keiretsu });
+      }else{
+        const out = pairMsg(k, `→ 会員番号 ${escHtml(num)} は「${escHtml(j.name)}」さんで登録されています。お名前をご確認ください<br>`
+          + `<button type="button" class="pick-btn">「${escHtml(j.name)}」さんにする</button>`, false);
+        out.querySelector(".pick-btn").addEventListener("click", ()=>{
+          document.getElementById(PAIRS[k][1]).value = j.name;
+          pairSet(k, { id: num, name: j.name, keiretsu: j.keiretsu });
+        });
+      }
     }else{
-      out.className = "found ng";
-      out.textContent = (j && j.error === "short")
-        ? "→ もう少しくわしいお名前で、さがしてみてください"
-        : "→ 見つかりませんでした。このままで大丈夫です(あとで担当の方が番号に直します)";
+      /* お名前から番号を */
+      const r = await fetch(`${GAS_URL}?action=findByName&name=${encodeURIComponent(nm)}`);
+      const j = await r.json();
+      if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
+      const list = (j && j.ok && j.members) || [];
+      if(list.length === 1){
+        pairSet(k, { id: list[0].id, name: nm, keiretsu: list[0].keiretsu });
+      }else if(list.length > 1){
+        const out = pairMsg(k, "同じお名前の方が" + list.length + "人います。あてはまる方をえらんでください"
+          + list.map((m,i)=>`<button type="button" class="pick-btn" data-i="${i}">${escHtml(m.name)}さん${m.keiretsu ? "（" + escHtml(m.keiretsu) + "）" : ""}</button>`).join(""), true);
+        out.querySelectorAll(".pick-btn").forEach(b=>b.addEventListener("click", ()=> pairSet(k, list[Number(b.dataset.i)])));
+      }else{
+        pairMsg(k, (j && j.error === "short")
+          ? "→ もう少しくわしいお名前で、照合してみてください"
+          : "→ 見つかりませんでした。お名前のままで大丈夫です（あとで担当の方が番号に直します）", false);
+      }
     }
   }catch(e){
-    out.className = "found ng";
-    out.textContent = "→ いまはさがせませんでした。このままで大丈夫です";
+    if(!quiet) pairMsg(k, "→ いまは照合できませんでした。このままで大丈夫です", false);
+  }finally{
+    if(btn){ btn.disabled = false; btn.textContent = "🔎 照合する"; }
   }
 }
-function useFound(inputId, outId, m){
-  document.getElementById(inputId).value = m.id;
-  const out = document.getElementById(outId);
-  out.className = "found ok";
-  out.textContent = "✓ " + (m.name || "") + "さん" + (m.keiretsu ? "(" + m.keiretsu + ")" : "") + " の会員番号を入れました";
+/* 送るときの値：番号が分かれば番号、なければお名前 */
+function pairValue(k){
+  const { num, nm } = pairVals(k);
+  return num || nm;
 }
 
 function show(t, cls){
@@ -669,12 +717,12 @@ async function submitForm(){
   const name = $("#inName").value.trim();
   let keiretsu = $("#inKeiretsu").value;
   if(keiretsu === "__other__") keiretsu = $("#inKeiretsuOther").value.trim();
-  const intro = $("#inIntro").value.trim();
-  const upline = $("#inUpline").value.trim();
-  const helper = $("#inHelper").value.trim();
+  const intro = pairValue("intro");
+  const upline = pairValue("up");
+  const helper = pairValue("helper");
   const realName = $("#inRealName").value.trim();
   const advName = $("#inAdvName").value.trim();
-  const advId = $("#inAdvId").value.trim();
+  const advId = pairVals("adv").num;
   let area = $("#inArea").value;
   if(area === "__other__") area = $("#inAreaOther").value.trim();
 
