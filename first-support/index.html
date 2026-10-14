@@ -368,9 +368,11 @@ refreshLoginBar();
 
 async function loadProgress(){
   try{
+    if(typeof skyLoading === "function") skyLoading("進捗を読み込んでいます", "データを読み込んでいます。しばらくお待ちください");
     const url = `${GAS_URL}?action=load&app=${APP_ID}&id=${encodeURIComponent(member.id)}&pin=${encodeURIComponent(member.pin)}&items=${encodeURIComponent(ITEM_IDS)}`;
     const res = await fetch(url);
     const j = await res.json();
+    if(typeof skyLoadingDone === "function") skyLoadingDone();
     if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
     if(j.ok && j.data){
       let d = {};
@@ -384,7 +386,7 @@ async function loadProgress(){
       });
       update();
     }
-  }catch(e){}
+  }catch(e){ if(typeof skyLoadingDone === "function") skyLoadingDone(); }
 }
 
 function saveProgress(){
