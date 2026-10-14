@@ -26,7 +26,7 @@
    つまんで動かすと周りがよけて混ざり、離すと元の場所へ。押すとその色が画面いっぱいに広がる */
 :root{
   --ink:#2A2438; --sub:#7A7390; --deep:#6E5FB5; --mist:#F0EDF9; --paper:#FCFBFF; --line:#E4E0F0; --card:#FFFFFF;
-  --g-member:#3FA98A; --g-apply:#E8873A; --g-team:#4E86D6; --g-sup:#D9A21E; --g-crie:#8A6FD6; --g-common:#9A93B0; --g-join:#5FB8E6; --join-ink:#3A9BD0; --rainbow:#F49AC1,#F5A97A,#F5D06A,#8FD9A8,#6FC7D9,#7BA3E8,#A88BE0,#F49AC1;
+  --g-member:#3FA98A; --g-apply:#E8873A; --g-team:#4E86D6; --g-sup:#D9A21E; --g-crie:#8A6FD6; --g-common:#9A93B0; --g-back:#8E86C8; --g-join:#5FB8E6; --join-ink:#3A9BD0; --rainbow:#F49AC1,#F5A97A,#F5D06A,#8FD9A8,#6FC7D9,#7BA3E8,#A88BE0,#F49AC1;
   --halo:rgba(110,95,181,.07);
   --shadow:0 6px 18px rgba(60,42,110,.13);
   --f-head:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Yu Gothic",sans-serif;
@@ -58,7 +58,7 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body)
 .crumb h2{margin:0;font-family:var(--f-head);font-weight:900;font-size:16px;color:var(--ink);}
 
 /* アイコンの舞台（丸いまとまり） */
-.stage{position:relative;width:100%;margin:6px auto 0;touch-action:none;user-select:none;-webkit-user-select:none;}
+.stage{position:relative;width:100%;max-width:440px;margin:6px auto 0;touch-action:none;user-select:none;-webkit-user-select:none;}
 .stage::before{content:"";position:absolute;left:50%;top:50%;width:92%;aspect-ratio:1;max-height:100%;
   transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,var(--halo) 0%,transparent 70%);
   pointer-events:none;}
@@ -69,6 +69,8 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body)
 .bub .ball{width:68px;height:68px;border-radius:50%;display:grid;place-items:center;font-size:30px;
   background:var(--card);border:3px solid var(--c);box-shadow:var(--shadow);transition:box-shadow .2s;pointer-events:none;}
 .bub.grab .ball{box-shadow:0 14px 28px rgba(60,42,110,.25);}
+.bub.backb .ball{width:62px;height:62px;font-size:26px;}
+.bub.backb .nm{color:var(--deep);font-size:13px;}
 .bub .nm{font-family:var(--f-head);font-weight:700;font-size:12px;line-height:1.3;text-align:center;
   white-space:pre-line;pointer-events:none;}
 
@@ -176,16 +178,15 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body)
   </div>
 
   <div class="crumb" id="crumb" hidden>
-    <button type="button" class="back" id="backBtn">‹ もどる</button>
     <h2 id="crumbTitle"></h2>
   </div>
-
-  <nav class="stage" id="stage" aria-live="polite"></nav>
 
   <div class="info" id="info" hidden>
     <p id="infoText"></p>
     <a id="infoBtn" class="info-btn" target="_blank" rel="noopener"></a>
   </div>
+
+  <nav class="stage" id="stage" aria-live="polite"></nav>
 
   <div class="foot">Presented by Skyarc-team<br><span class="verTag"></span></div>
 </div>
@@ -257,7 +258,7 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body)
 <script>
 const B = "./";
 const SHEET = id => "https://docs.google.com/spreadsheets/d/" + id + "/edit";
-const C = {join:"var(--g-join)",member:"var(--g-member)",apply:"var(--g-apply)",team:"var(--g-team)",sup:"var(--g-sup)",crie:"var(--g-crie)",common:"var(--g-common)"};
+const C = {back:"var(--g-back)",join:"var(--g-join)",member:"var(--g-member)",apply:"var(--g-apply)",team:"var(--g-team)",sup:"var(--g-sup)",crie:"var(--g-crie)",common:"var(--g-common)"};
 
 /* アイコンの中身（ここに足せば増やせます） */
 const TREE = [
@@ -326,6 +327,7 @@ function ok(it){
   return true;
 }
 const JOIN = {ic:"", nm:"登録", g:"join", join:true};
+const BACK = {ic:"↩️", nm:"もどる", g:"back", back:true};
 /* この端末で一度でも登録・ログインしたことがあれば、まん中は「ログイン」になります
    （ログアウトしても残ります） */
 const RETURN_KEY = "lsapp_returning";
@@ -355,11 +357,11 @@ function homes(n, centered){
   else if(n === 2 && !centered){ rx = W*.26; ry = 0; pts.push([-rx,0],[rx,0]); }
   else{
     const ring = centered ? n-1 : n;
-    rx = (ring >= 6 || (centered && ring >= 4)) ? Math.max(W*.39, 132) : Math.max(W*.32, 108);
+    rx = (ring >= 6 || (centered && ring >= 3)) ? Math.max(W*.39, 132) : Math.max(W*.32, 108);
     ry = rx * .94;
     if(centered) pts.push([0,0]);
     for(let i=0;i<ring;i++){
-      const a = -Math.PI/2 + i*2*Math.PI/ring;
+      const a = (ring === 2 ? Math.PI : -Math.PI/2) + i*2*Math.PI/ring;
       pts.push([Math.cos(a)*rx, Math.sin(a)*ry]);
     }
   }
@@ -373,7 +375,7 @@ function homes(n, centered){
 function makeNode(it, i, home, fromX, fromY){
   const el = document.createElement("button");
   el.type = "button";
-  el.className = "bub" + (it.join ? " join" : "");
+  el.className = "bub" + (it.join ? " join" : "") + (it.back ? " backb" : "");
   el.style.setProperty("--c", C[it.g]);
   el.innerHTML = `<span class="ball">${it.ic}</span><span class="nm">${it.nm}</span>`;
   stage.appendChild(el);
@@ -413,7 +415,8 @@ function build(fromX, fromY){
   const last = path[path.length-1];
   let items = last ? (last.kids || []).filter(ok) : TREE.filter(ok);
   if(!last && !me) items = [Object.assign({}, JOIN, { nm: isReturning() ? "ログイン" : "登録" })];  /* まだの方は、まん中のひとつだけ */
-  const hs = homes(items.length, path.length === 0 ? true : undefined);  /* いちばん上は、まん中がアカウント */
+  if(last) items = [BACK].concat(items);                      /* 中の段は、まん中が「もどる」 */
+  const hs = homes(items.length, path.length === 0 ? true : items.length > 1);  /* いちばん上は、まん中がアカウント */
   nodes = items.map((it,i)=> makeNode(it, i, hs[i], fromX, fromY));
   document.getElementById("crumb").hidden = path.length === 0;
   document.getElementById("crumbTitle").textContent = (last ? last.nm.replace(/\n/g,"") : "");
@@ -482,6 +485,7 @@ function hook(n){
 function tap(n, e){
   const it = n.it;
   if(it.join){ openJoin(n); return; }
+  if(it.back){ goBack(n); return; }
   if(it.url){
     /* その色が画面いっぱいに広がってから、ページへ */
     const r = n.el.querySelector(".ball").getBoundingClientRect();
@@ -516,10 +520,11 @@ document.addEventListener("click", e=>{
     e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
   }
 }, true);
-document.getElementById("backBtn").addEventListener("click", ()=>{
+/* 「もどる」のアイコンを押したら、1つ前の段へ */
+function goBack(n){
   document.getElementById("info").hidden = true;
-  goTo(()=> path.pop());
-});
+  goTo(()=> path.pop(), n ? n.x : undefined, n ? n.y : undefined, n);
+}
 
 /* ---------- 動き（ばねと、ふわふわ） ---------- */
 function frame(t){
@@ -849,7 +854,7 @@ window.addEventListener("pageshow", ev=>{
 
 /* ---------- 最初に並べます ---------- */
 window.addEventListener("resize", ()=>{
-  const hs = homes(nodes.length, path.length === 0 ? true : undefined);
+  const hs = homes(nodes.length, path.length === 0 ? true : nodes.length > 1);
   nodes.forEach((n,i)=>{ n.hx = hs[i][0]; n.hy = hs[i][1]; });
 });
 build(null, null);
