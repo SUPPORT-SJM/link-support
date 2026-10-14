@@ -287,6 +287,12 @@
 /* ===== 要確認：一覧のマーク位置と、編集画面の枠 ===== */
 .edit-row{display:flex;align-items:center;justify-content:flex-end;gap:5px;flex-wrap:wrap;margin-top:4px;}
 .edit-row .need-check,.edit-row .auto-fill{cursor:pointer;margin:0;}
+.mm-link{display:none;background:#EAF6FC;border:1.5px solid #9FD3EE;border-radius:11px;padding:12px 13px;margin-bottom:14px;}
+.mm-link p{font-size:12px;color:#2F6F93;line-height:1.8;margin:0 0 8px;}
+.mm-link .row{display:flex;gap:8px;}
+.mm-link input{flex:1;min-width:0;}
+.mm-link button{flex:none;padding:0 14px;border-radius:9px;border:none;background:#3A9BD0;color:#fff;font-weight:700;cursor:pointer;font-family:inherit;}
+.edit-row .temp-id{font-size:10.5px;font-weight:700;color:#2F6F93;background:#EAF6FC;border-radius:99px;padding:2px 8px;cursor:pointer;}
 .mm-checknote{display:none;color:#C0392B;font-size:11.5px;line-height:1.85;
   background:#FFF5F7;border-radius:9px;padding:9px 11px;margin-bottom:12px;}
 .mm-checknote b{color:#A93226;}
@@ -488,6 +494,16 @@
         <p class="hint" id="mmIdHint">頭の000も含めて入力してください</p>
         <button type="button" class="mm-next" id="mmNext" onclick="memPeek()">つぎへ ›</button>
         <div class="mm-found" id="mmFound"></div>
+      </div>
+
+      <!-- 仮の番号の方だけ：本当の会員番号をひもづけます -->
+      <div class="mm-link" id="mmLinkWrap">
+        <label style="display:block;font-size:12px;font-weight:700;color:#2F6F93;margin-bottom:4px;">🔗 会員番号をひもづける</label>
+        <p>会員番号が分からないまま登録された方です（いまは仮の番号）。会員番号が分かったら入れてください。</p>
+        <div class="row">
+          <input type="text" id="mmLinkId" inputmode="numeric" placeholder="00012345">
+          <button type="button" id="mmLinkBtn" onclick="linkMemberId()">ひもづける</button>
+        </div>
       </div>
 
       <div class="mm-f">
@@ -1406,7 +1422,8 @@ function render(){
         const open = `onclick='openMember(${JSON.stringify(m).replace(/'/g,"&#39;")})'`;
         const marks =
             (m.needCheck ? `<span class="need-check" ${canFull ? open : ""} title="会員番号の欄にお名前が入っています。編集で直してください">⚠️ 要確認</span>` : "")
-          + (m.autoFill ? `<span class="auto-fill" ${canFull ? open : ""} title="お名前から自動でうめました：${m.autoFill}">🔎 確認待ち</span>` : "");
+          + (m.autoFill ? `<span class="auto-fill" ${canFull ? open : ""} title="お名前から自動でうめました：${m.autoFill}">🔎 確認待ち</span>` : "")
+          + (m.temp ? `<span class="temp-id" ${canFull ? open : ""} title="会員番号が分からないまま登録された方です">🔗 番号まち</span>` : "");
         const btn = canFull ? `<button class="scope-btn" ${open}>編集</button>` : "";
         return (marks || btn) ? `<div class="edit-row">${marks}${btn}</div>` : "";
       })()}</td>
@@ -1595,6 +1612,9 @@ function openMember(m){
     + KEIRETSU.map(k=>`<option value="${k}">${k}</option>`).join("");
 
   document.getElementById("mmId").value = m ? m.id : "";
+  const lw = document.getElementById("mmLinkWrap");
+  lw.style.display = (m && m.temp && data && data.isFull) ? "block" : "none";
+  document.getElementById("mmLinkId").value = "";
   document.getElementById("mmId").readOnly = !!m;
   document.getElementById("mmId").style.background = m ? "#EFEDF5" : "var(--paper)";
   document.getElementById("mmName").value = m ? (m.name||"") : "";
@@ -1734,6 +1754,44 @@ function clearMemberEmail(){
   if(!confirm("このGoogleアカウントの登録を消します。\n次回ログイン時のアカウントが新しく登録されます。よろしいですか?")) return;
   memClearEmail = true;
   document.getElementById("mmEmail").value = "(リセットします)";
+}
+
+/* 仮の番号を、本当の会員番号にひもづけます */
+async function linkMemberId(){
+  if(!memEditing || !memEditing.temp) return;
+  const msg = document.getElementById("mmMsg");
+  const show = (t,cls)=>{ msg.textContent = t; msg.className = "mm-msg " + cls; };
+  const newId = document.getElementById("mmLinkId").value.replace(/[０-９]/g, c=>String.fromCharCode(c.charCodeAt(0)-65248)).replace(/\s/g,"");
+  if(!/^\d+$/.test(newId)){ show("会員番号を数字で入れてください","err"); return; }
+  if(typeof skyBusy === "function" && skyBusy("linkMemberId")) return;
+  const btn = document.getElementById("mmLinkBtn"); btn.disabled = true;
+  show("ひもづけています…","ok");
+  try{
+    const params = { action:"adminLinkId", id:admin.id, pin:admin.pin, email:admin.email,
+                     targetId: memEditing.id, newId: newId, dummy: dummyMode ? "1" : "0" };
+    const res = await fetch(GAS_URL, {method:"POST", body:new URLSearchParams(params)});
+    const j = await res.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
+    if(!j || j.ok !== true){
+      show({
+        exists:"その会員番号は、すでに別の方で登録されています",
+        badid:"会員番号を数字で入れてください",
+        noperm:"ひもづけは、管理者・チーム代表の方ができます",
+        nottemp:"この方は、すでに会員番号が入っています",
+        nomember:"この方が見つかりませんでした。一覧を読み込みなおしてください",
+        busy:"いま混み合っています。少しおいてお試しください"
+      }[j && j.error] || "ひもづけできませんでした", "err");
+      return;
+    }
+    toast("会員番号 " + newId + " をひもづけました");
+    closeMember();
+    load();
+  }catch(e){
+    show("通信できませんでした。電波のよい場所でお試しください","err");
+  }finally{
+    btn.disabled = false;
+    if(typeof skyBusyEnd === "function") skyBusyEnd("linkMemberId");
+  }
 }
 
 function closeMember(){
