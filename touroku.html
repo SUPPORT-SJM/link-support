@@ -72,6 +72,11 @@
   .f .found{font-size:11.5px;margin-top:5px;font-weight:700;}
   .f .found.ok{color:#2F7A5C;}
   .f .found.ng{color:#B4B0C4;}
+  .find-btn{display:inline-block;margin-top:6px;padding:5px 11px;border-radius:99px;border:1.5px solid var(--leaf);
+    background:#fff;color:#2F7A5C;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit;}
+  .find-btn:disabled{opacity:.5;}
+  .pick-btn{display:block;width:100%;text-align:left;margin-top:6px;padding:8px 11px;border-radius:9px;
+    border:1.5px solid var(--mist);background:var(--paper);color:var(--ink,#22322A);font-size:12.5px;cursor:pointer;font-family:inherit;}
 
   .btn-main{width:100%;padding:15px;border-radius:14px;background:var(--leaf);color:var(--white);font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:16px;margin-top:6px;}
   .btn-main:active{transform:scale(.98);}
@@ -283,7 +288,6 @@
         <p class="found ng" id="advFound"></p>
       </div>
         </div>
-      </div>
       <button class="btn-main locked" id="submitBtn" onclick="submitForm()">登録する</button>
       <button class="back-btn" onclick="backStep1()">‹ もどる</button>
     </div>
@@ -551,7 +555,8 @@ function lookup(inputId, outId){
   if(!v){ out.textContent = ""; return; }
   // 数字でなければ、お名前として受け取ります
   if(!/^[0-9]+$/.test(v)){
-    out.textContent = "→ お名前として承ります(あとで担当の方が番号に直します)";
+    out.innerHTML = "→ お名前として承ります(あとで担当の方が番号に直します)<br>"
+      + `<button type="button" class="find-btn" onclick="findByName('${inputId}','${outId}', this)">🔎 会員番号をさがす</button>`;
     out.className = "found ok";
     return;
   }
@@ -570,6 +575,46 @@ function lookup(inputId, outId){
       }
     }catch(e){ out.textContent = ""; }
   }, 500);
+}
+
+/* ================================================================
+   お名前から会員番号をさがします（見つかれば、その場で番号に置きかえます）
+================================================================ */
+function escHtml(t){ return String(t == null ? "" : t).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+async function findByName(inputId, outId, btn){
+  const input = document.getElementById(inputId);
+  const out = document.getElementById(outId);
+  const name = input.value.trim();
+  if(!name) return;
+  if(btn){ btn.disabled = true; btn.textContent = "さがしています…"; }
+  try{
+    const res = await fetch(`${GAS_URL}?action=findByName&name=${encodeURIComponent(name)}`);
+    const j = await res.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
+    const list = (j && j.ok && j.members) || [];
+    if(list.length === 1){
+      useFound(inputId, outId, list[0]);
+    }else if(list.length > 1){
+      out.className = "found ok";
+      out.innerHTML = "同じお名前の方が" + list.length + "人います。あてはまる方をえらんでください"
+        + list.map((m,i)=>`<button type="button" class="pick-btn" data-i="${i}">${escHtml(m.name)}さん${m.keiretsu ? "（" + escHtml(m.keiretsu) + "）" : ""}</button>`).join("");
+      out.querySelectorAll(".pick-btn").forEach(b=>b.addEventListener("click", ()=> useFound(inputId, outId, list[Number(b.dataset.i)])));
+    }else{
+      out.className = "found ng";
+      out.textContent = (j && j.error === "short")
+        ? "→ もう少しくわしいお名前で、さがしてみてください"
+        : "→ 見つかりませんでした。このままで大丈夫です(あとで担当の方が番号に直します)";
+    }
+  }catch(e){
+    out.className = "found ng";
+    out.textContent = "→ いまはさがせませんでした。このままで大丈夫です";
+  }
+}
+function useFound(inputId, outId, m){
+  document.getElementById(inputId).value = m.id;
+  const out = document.getElementById(outId);
+  out.className = "found ok";
+  out.textContent = "✓ " + (m.name || "") + "さん" + (m.keiretsu ? "(" + m.keiretsu + ")" : "") + " の会員番号を入れました";
 }
 
 function show(t, cls){
