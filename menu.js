@@ -189,7 +189,7 @@
       if (m) {
         html += '<button class="out" id="skymOut">ログアウト</button>';
       } else {
-        html += '<a class="it" href="' + up + 'index.html" style="background:#6E5FB5;color:#fff;'
+        html += '<a class="it" href="' + up + 'index.html#login" style="background:#6E5FB5;color:#fff;'
               + 'justify-content:center;margin-top:12px;font-weight:700;">🌱 ログインする</a>';
       }
       sheet.innerHTML = html;
