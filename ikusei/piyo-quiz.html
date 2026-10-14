@@ -438,8 +438,10 @@ async function refreshMarks(showToast){
     return;
   }
   try{
+    if(typeof skyLoading === "function") skyLoading("進捗を読み込んでいます", "データを読み込んでいます。しばらくお待ちください");
     const res = await fetch(`${gasUrlFor(member && member.keiretsu)}?action=load&app=${APP_ID}&id=${encodeURIComponent(member.id)}&pin=${encodeURIComponent(member.pin)}&items=${encodeURIComponent(ITEM_IDS)}`);
     const j = await res.json();
+    if(typeof skyLoadingDone === "function") skyLoadingDone();
     if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
     if(j.ok && j.marks){
       teacher = {};
@@ -451,6 +453,7 @@ async function refreshMarks(showToast){
       if(showToast) toast("先生の丸を更新しました⭕");
     }
   }catch(e){
+    if(typeof skyLoadingDone === "function") skyLoadingDone();
     if(showToast) toast("電波のあるところで試してね");
   }
 }

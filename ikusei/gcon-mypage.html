@@ -551,9 +551,11 @@ async function login(){
   if(gasUrlFor(keiretsu || (member&&member.keiretsu) || "")){
     setSync("☁️ 読み込み中…");
     try{
+      if(typeof skyLoading === "function") skyLoading("進捗を読み込んでいます", "データを読み込んでいます。しばらくお待ちください");
       await fetch(gasUrlFor(keiretsu), {method:"POST", body:new URLSearchParams({action:"login", app:APP_ID, id, pin, name:name||"", keiretsu:keiretsu||""})});
       const res = await fetch(`${gasUrlFor(keiretsu)}?action=load&app=${APP_ID}&id=${encodeURIComponent(id)}&pin=${encodeURIComponent(pin)}&items=${encodeURIComponent(ITEM_IDS)}`);
       const j = await res.json();
+      if(typeof skyLoadingDone === "function") skyLoadingDone();
     if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
       if(j.ok === false && j.error === "pin"){
         err.textContent = "パスコードが一致しません。忘れた場合は担当コーチにご確認ください。";
@@ -567,7 +569,7 @@ async function login(){
         if(j.name && !member.name) member.name = j.name;
         if(j.keiretsu && !member.keiretsu) member.keiretsu = j.keiretsu;
       }
-    }catch(e){ /* オフラインでもOK */ }
+    }catch(e){ if(typeof skyLoadingDone === "function") skyLoadingDone(); /* オフラインでもOK */ }
   }
   localStorage.setItem("gcon_member", JSON.stringify(member));
   if(member.name) localStorage.setItem("gcon_name_"+id, member.name);

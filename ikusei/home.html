@@ -316,8 +316,10 @@ function updateRole(){
 
 async function loadHome(showToast){
   try{
+    if(typeof skyLoading === "function") skyLoading("進捗を読み込んでいます", "データを読み込んでいます。しばらくお待ちください");
     const res = await fetch(`${gasUrlFor(member && member.keiretsu)}?action=home&id=${encodeURIComponent(member.id)}&pin=${encodeURIComponent(member.pin)}&apps=${encodeURIComponent(APPS)}`);
     const j = await res.json();
+    if(typeof skyLoadingDone === "function") skyLoadingDone();
     if(j.ok){
       homeData = j.progress || {};
       member.role = j.role || ""; member.crie = j.crie === true;
@@ -328,6 +330,7 @@ async function loadHome(showToast){
       if(showToast) toast("最新の状況に更新しました");
     }
   }catch(e){
+    if(typeof skyLoadingDone === "function") skyLoadingDone();
     if(showToast) toast("通信できませんでした");
   }
 }

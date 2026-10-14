@@ -1895,10 +1895,11 @@ let findKeiretsu = "";   // クリエが検索したときの系列
 async function openDetail(id, keiretsu){
   findKeiretsu = keiretsu || "";
   try{
-    toast("読み込んでいます…");
+    if(typeof skyLoading === "function") skyLoading("進捗を読み込んでいます", "データを読み込んでいます。しばらくお待ちください");
     const url = `${GAS_URL}?action=adminDetail&id=${encodeURIComponent(admin.id)}&pin=${encodeURIComponent(admin.pin)}&email=${encodeURIComponent(admin.email)}&target=${encodeURIComponent(id)}&apps=${encodeURIComponent(APPS)}&keiretsu=${encodeURIComponent(findKeiretsu)}&dummy=${dummyMode?1:0}`;
     const res = await fetch(url);
     const j = await res.json();
+    if(typeof skyLoadingDone === "function") skyLoadingDone();
     if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
     if(j.ok === false){
       toast({
@@ -1912,7 +1913,7 @@ async function openDetail(id, keiretsu){
     detailData = j;
     renderDetail();
     document.getElementById("detailModal").classList.add("show");
-  }catch(e){ toast("通信できませんでした"); }
+  }catch(e){ if(typeof skyLoadingDone === "function") skyLoadingDone(); toast("通信できませんでした"); }
 }
 
 let selfEditMode = {};   // app名 → true で本人チェック編集モード
