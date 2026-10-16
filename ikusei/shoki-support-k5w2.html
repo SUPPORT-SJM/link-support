@@ -83,18 +83,21 @@
   .btns .save:disabled{opacity:.5;}
   .btns .close{background:#F0EDF9;color:#6E5FB5;}
   .upd{font-size:11px;color:#A8A4BC;margin-top:8px;}
-  .who .hide{margin-top:6px;background:none;border:1.5px solid #E1DCF2;color:#8A84A0;font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:999px;}
-  .who .hide:hover{border-color:#C9C2EC;color:#6E5FB5;}
-  .row.going{opacity:0;transform:translateX(16px);transition:opacity .35s, transform .35s;}
-  #hid{display:none;position:fixed;inset:0;z-index:70;background:rgba(30,26,50,.55);align-items:center;justify-content:center;padding:14px;}
-  #hid.show{display:flex;}
-  #hid .sheet{background:#fff;border-radius:18px;width:100%;max-width:460px;max-height:90vh;overflow-y:auto;padding:20px 18px;}
-  #hid h3{font-size:16px;font-weight:900;color:#4A3F7A;margin-bottom:4px;}
-  #hid .lead{font-size:12.5px;color:#6A6480;line-height:1.8;margin-bottom:10px;}
-  #hid label.hi{display:flex;align-items:center;gap:10px;padding:9px 10px;border:1.5px solid #E4E0F0;border-radius:10px;margin-top:6px;cursor:pointer;font-size:13.5px;}
-  #hid label.hi input{width:17px;height:17px;}
-  #hid label.hi small{display:block;color:#9A96AE;font-size:11px;}
-  #hid .all{background:none;color:#6E5FB5;font-size:12.5px;font-weight:700;text-decoration:underline;margin-top:8px;}
+  .hidchk{display:inline-flex;align-items:center;gap:4px;margin-top:6px;white-space:nowrap;font-size:11.5px;color:#8A84A0;cursor:pointer;
+    border:1.5px solid #E1DCF2;border-radius:999px;padding:3px 10px 3px 7px;background:#fff;}
+  .hidchk input{width:14px;height:14px;margin:0;}
+  .pend{outline:2.5px dashed #E5A823;outline-offset:1px;}
+  .row.hidden-row > .chip{opacity:.4;}
+  .row.hidden-row .nm{color:#9A96AE;}
+  .tools .savetop{background:#F5C452;color:#3B2A00;}
+  .tools .savetop[disabled]{opacity:.45;}
+  #leave{display:none;position:fixed;inset:0;z-index:95;background:rgba(30,26,50,.55);align-items:center;justify-content:center;padding:18px;}
+  #leave.show{display:flex;}
+  #leave .card{background:#fff;border-radius:18px;max-width:360px;width:100%;padding:24px 20px;text-align:center;}
+  #leave h3{font-size:16px;font-weight:900;color:#4A3F7A;margin-bottom:8px;}
+  #leave p{font-size:13px;color:#5A5470;line-height:1.8;margin-bottom:16px;}
+  #leave button{display:block;width:100%;padding:13px;border-radius:12px;font-weight:700;font-size:14px;margin-top:8px;}
+  #leave .b1{background:#6E5FB5;color:#fff;} #leave .b2{background:#F0EDF9;color:#6E5FB5;} #leave .b3{background:none;color:#8A84A0;font-size:13px;}
   #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:#3B3550;color:#fff;font-size:13px;
          padding:10px 16px;border-radius:12px;opacity:0;pointer-events:none;transition:all .25s;z-index:90;max-width:92vw;text-align:center;}
   #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
@@ -120,9 +123,11 @@
       <select id="fHelper" onchange="draw()"></select>
       <label><input type="checkbox" id="fNew" onchange="draw()"> 登録3ヶ月以内</label>
       <label><input type="checkbox" id="fIdle" onchange="draw()"> 30日以上ログインなし</label>
-      <button class="back" id="btnHidden" onclick="openHidden()">🙈 非表示の方（0）</button>
+      <button class="back savetop" id="btnSaveTop" onclick="savePending()" disabled>💾 一覧の変更を保存</button>
+      <button class="back" id="btnUndo" onclick="undoPending()" style="display:none;">元にもどす</button>
+      <button class="back" id="btnShowHid" onclick="toggleShowHidden()">🙈 非表示の方も出す（0）</button>
       <button class="back" onclick="saveReport()">📄 報告用に保存</button>
-      <button class="back" onclick="location.href='kanri-x7k2m9.html'">‹ 管理画面へ</button>
+      <button class="back" onclick="leaveOk(()=>location.href='kanri-x7k2m9.html')">‹ 管理画面へ</button>
     </div>
   </div></div>
   <div class="bar">
@@ -140,23 +145,19 @@
     <div class="msg" id="edMsg"></div>
     <div class="btns">
       <button class="close" onclick="closeEd()">とじる</button>
-      <button class="save" id="edSave" onclick="saveEd()">保存する</button>
+      <button class="save" id="edSave" onclick="saveEd()">この内容にする</button>
     </div>
     <div class="upd" id="edUpd"></div>
   </div>
 </div>
 
-<div id="hid" onclick="if(event.target===this)closeHidden()">
-  <div class="sheet">
-    <h3>🙈 非表示の方</h3>
-    <p class="lead">あなたの画面で非表示にしている方です（ほかの方の画面には出ています）。<br>表示を戻す方にチェックを入れて「表示を戻す」を押してください。</p>
-    <div id="hidList"></div>
-    <button class="all" id="hidAll" onclick="hidAll()">すべてえらぶ</button>
-    <div class="msg" id="hidMsg"></div>
-    <div class="btns">
-      <button class="close" onclick="closeHidden()">とじる</button>
-      <button class="save" id="hidSave" onclick="restoreHidden()">表示を戻す</button>
-    </div>
+<div id="leave">
+  <div class="card">
+    <h3>このページの内容が変更されています</h3>
+    <p>保存していない変更が <b id="leaveCount">0</b>件あります。<br>保存しますか？</p>
+    <button class="b1" onclick="leaveChoose('save')">保存する</button>
+    <button class="b2" onclick="leaveChoose('discard')">保存しないで進む</button>
+    <button class="b3" onclick="leaveChoose('stay')">このページにもどる</button>
   </div>
 </div>
 <div id="toast"></div>
@@ -290,7 +291,10 @@ async function load(){
       return;
     }
     data = j;
-    hiddenSet = {}; (j.hidden || []).forEach(k=>{ hiddenSet[String(k).replace(/^0+/, "")] = true; });
+    hiddenOrig = {}; (j.hidden || []).forEach(k=>{ hiddenOrig[hkey(k)] = true; });
+    pendingHide = {};
+    /* 保存前の変更と見くらべるため、読みこんだときの状態を控えます */
+    data.members.forEach(m=>{ m.orig = JSON.parse(JSON.stringify(m.items)); });
     $("#gate").style.display = "none"; $("#app").style.display = "block";
     $("#who").textContent = (j.adminName ? j.adminName + "さん" : "") + "｜" + ({ all:"全員", scope:"担当系列の方", kei:"ご自身の系列の方", helper:"ご自身が担当・紹介した方" })[j.viewMode];
     fillKei();
@@ -340,7 +344,7 @@ function draw(){
   const t = today0();
   const sameId = (a,b)=>String(a || "").replace(/^0+/, "") === String(b || "").replace(/^0+/, "");
   let list = data.members.filter(m=>{
-    if(isHidden(m)) return false;
+    if(!showHidden && hiddenOrig[hkey(m.id)] && !(hkey(m.id) in pendingHide)) return false;
     if(q && !((m.name || "").toLowerCase().includes(q) || String(m.id).includes(q))) return false;
     if(fk === "__none" && m.keiretsu) return false;
     if(fk && fk !== "__none" && m.keiretsu !== fk) return false;
@@ -363,89 +367,149 @@ function draw(){
   if(!list.length){ $("#list").innerHTML = '<div class="empty">該当する方がいません</div>'; return; }
   $("#list").innerHTML = list.map(x=>{
     const m = x.m;
-    const chip = g=>`<button class="chip" onclick="openEd('${esc(m.id)}','${g.key}')">
+    const hidOn = effHidden(m), hidPend = hidOn !== !!hiddenOrig[hkey(m.id)];
+    const chip = g=>`<button class="chip ${g.items.some(k=>itemChanged(m, k)) ? "pend" : ""}" onclick="openEd('${esc(m.id)}','${g.key}')">
         <span class="dot ${x.sg[g.key].c}"></span>
         <span><span class="t">${esc(g.title)}</span><br><span class="v">${esc(x.sg[g.key].v)}</span></span></button>`;
-    return `<div class="row">
+    return `<div class="row ${hidOn ? "hidden-row" : ""}">
       <div class="who"><div class="nm">${esc(m.name || "(名前未登録)")}</div>
         <div class="sub">${esc(m.id)}${m.keiretsu ? "｜" + esc(m.keiretsu) : ""}<br>担当：${esc(m.helperName || (m.helper ? "会員番号 " + m.helper : "未設定"))}${m.joined ? "｜登録 " + esc(m.joined) : ""}</div>
-        <button class="hide" onclick="hideOne('${esc(m.id)}', this)">非表示にする</button></div>
+        <label class="hidchk ${hidPend ? "pend" : ""}" title="あなたの画面だけで非表示にします"><input type="checkbox" ${hidOn ? "checked" : ""} onchange="toggleHide('${esc(m.id)}', this.checked)">非表示</label></div>
       ${GROUPS.map(chip).join("")}
     </div>`;
   }).join("");
 }
 
 /* ================================================================
-   非表示（あなたの画面だけ）
-   ・「非表示にする」を押すと、その方は一覧から外れます
-   ・「🙈 非表示の方」から、えらんだ方の表示を戻せます
+   一覧の変更（状態・非表示）は、まずこの画面の中だけで変えます
+   ・点線の枠＝まだ保存していない変更
+   ・上の「💾 一覧の変更を保存」で、まとめて保存します
+   ・保存しないままほかのページへ移ろうとしたときは、保存するかをおたずねします
+   ・非表示は、あなたの画面だけに効きます（管理画面の一覧と同じ設定です）
 ================================================================ */
-let hiddenSet = {}, lastList = [];
+let hiddenOrig = {}, pendingHide = {}, showHidden = false, lastList = [];
 function hkey(id){ return String(id || "").replace(/^0+/, ""); }
-function isHidden(m){ return !!hiddenSet[hkey(m.id)]; }
+function effHidden(m){ const k = hkey(m.id); return (k in pendingHide) ? pendingHide[k] : !!hiddenOrig[k]; }
+function itemChanged(m, k){
+  const a = (m.items && m.items[k]) || {}, b = (m.orig && m.orig[k]) || {};
+  return (a.s || "") !== (b.s || "") || (a.d || "") !== (b.d || "");
+}
+function supChanges(){
+  const out = [];
+  (data ? data.members : []).forEach(m=>Object.keys(m.items || {}).forEach(k=>{
+    if(itemChanged(m, k)) out.push({ target: m.id, item: k, state: m.items[k].s || "", date: m.items[k].d || "" });
+  }));
+  return out;
+}
+function pendCount(){ return supChanges().length + Object.keys(pendingHide).length; }
 function toast(t){
   const e = $("#toast"); e.textContent = t; e.classList.add("show");
   clearTimeout(toast._t); toast._t = setTimeout(()=>e.classList.remove("show"), 2600);
 }
 function drawHiddenBtn(){
-  const n = data ? data.members.filter(isHidden).length : 0;
-  $("#btnHidden").textContent = "🙈 非表示の方（" + n + "）";
+  const n = data ? data.members.filter(m=>hiddenOrig[hkey(m.id)]).length : 0;
+  $("#btnShowHid").textContent = (showHidden ? "🙈 非表示の方をかくす（" : "🙈 非表示の方も出す（") + n + "）";
+  const c = pendCount();
+  $("#btnSaveTop").disabled = c === 0;
+  $("#btnSaveTop").textContent = "💾 一覧の変更を保存" + (c ? "（" + c + "件）" : "");
+  $("#btnUndo").style.display = c ? "" : "none";
 }
-async function sendHide(ids, hide){
-  const j = await api({ action:"supportHide", targets: JSON.stringify(ids), hide: hide ? "1" : "0" });
-  if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return null;
-  if(!j || j.ok !== true) return j || {};
-  hiddenSet = {}; (j.hidden || []).forEach(k=>{ hiddenSet[hkey(k)] = true; });
-  return j;
+function toggleHide(id, on){
+  const k = hkey(id);
+  if(!!hiddenOrig[k] === !!on) delete pendingHide[k]; else pendingHide[k] = !!on;
+  draw();
 }
-async function hideOne(id, btn){
-  const m = data.members.find(x=>x.id === id); if(!m) return;
-  if(typeof skyBusy === "function" && skyBusy("hide")) return;
-  btn.disabled = true;
+function toggleShowHidden(){ showHidden = !showHidden; draw(); }
+function undoPending(){
+  if(!pendCount()) return;
+  if(!confirm("保存していない変更（" + pendCount() + "件）を元にもどします。よろしいですか？")) return;
+  pendingHide = {};
+  data.members.forEach(m=>{ m.items = JSON.parse(JSON.stringify(m.orig)); });
+  draw();
+}
+
+async function savePending(){
+  const changes = supChanges();
+  const hideIds = Object.keys(pendingHide).filter(k=>pendingHide[k]);
+  const showIds = Object.keys(pendingHide).filter(k=>!pendingHide[k]);
+  if(!changes.length && !hideIds.length && !showIds.length) return true;
+  if(typeof skyBusy === "function" && skyBusy("savelist")) return false;
+  const btn = $("#btnSaveTop"); btn.disabled = true;
+  if(typeof skyLoading === "function") skyLoading("一覧の変更を保存しています", "しばらくお待ちください");
+  let allOk = true;
   try{
-    const j = await sendHide([id], true);
-    if(!j) return;
-    if(j.ok !== true){ toast(({ busy:"いま混み合っています。少しおいてお試しください" })[j.error] || "非表示にできませんでした"); return; }
-    const row = btn.closest(".row");
-    if(row){ row.classList.add("going"); await new Promise(r=>setTimeout(r, 360)); }
+    if(changes.length){
+      const j = await api({ action:"supportSetMany", changes: JSON.stringify(changes) });
+      if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return false;
+      if(!j || j.ok !== true){
+        allOk = false;
+        toast(({ busy:"いま混み合っています。少しおいてお試しください",
+                 suplayout:"「サポート状況」タブの見出しが決まった形とちがうため、保存を止めました。管理者の方にお知らせください" })[j && j.error] || "保存できませんでした");
+      }else{
+        const bad = [];
+        j.results.forEach(r=>{
+          const m = data.members.find(x=>x.id === r.target);
+          if(!m) return;
+          if(r.ok){ m.orig[r.item] = { s: r.s, d: r.d }; m.items[r.item] = { s: r.s, d: r.d }; m.updated = j.updated; m.updatedBy = j.updatedBy; }
+          else{
+            m.items[r.item] = JSON.parse(JSON.stringify(m.orig[r.item] || { s:"", d:"" }));
+            bad.push((m.name || r.target) + "さん：" + ({ outofscope:"担当の範囲外の方です", baddate:"日付の形がちがいます" }[r.error] || "保存できませんでした"));
+          }
+        });
+        if(bad.length){ allOk = false; alert("保存できなかった変更があります（" + bad.length + "件）\n\n" + bad.join("\n")); }
+      }
+    }
+    if(hideIds.length || showIds.length){
+      const j = await api({ action:"supportHide", hideIds: JSON.stringify(hideIds), showIds: JSON.stringify(showIds) });
+      if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return false;
+      if(!j || j.ok !== true){ allOk = false; toast(({ busy:"いま混み合っています。少しおいてお試しください" })[j && j.error] || "非表示の保存ができませんでした"); }
+      else{ hiddenOrig = {}; (j.hidden || []).forEach(k=>{ hiddenOrig[hkey(k)] = true; }); pendingHide = {}; }
+    }
+    if(typeof skyLoadingDone === "function") skyLoadingDone();
     draw();
-    toast((m.name || "") + "さんを非表示にしました（「🙈 非表示の方」から戻せます）");
-  }catch(e){ toast("通信できませんでした"); }
-  finally{ btn.disabled = false; if(typeof skyBusyEnd === "function") skyBusyEnd("hide"); }
+    if(allOk) toast("✅ 一覧の変更を保存しました");
+    return allOk;
+  }catch(e){
+    if(typeof skyLoadingDone === "function") skyLoadingDone();
+    toast("通信できませんでした");
+    return false;
+  }finally{
+    if(typeof skyLoadingDone === "function") skyLoadingDone();
+    if(typeof skyBusyEnd === "function") skyBusyEnd("savelist");
+    drawHiddenBtn();
+  }
 }
-function openHidden(){
-  const list = data.members.filter(isHidden).sort((a,b)=>(a.name || "").localeCompare(b.name || "", "ja"));
-  $("#hidMsg").className = "msg";
-  $("#hidList").innerHTML = list.length
-    ? list.map(m=>`<label class="hi"><input type="checkbox" value="${esc(m.id)}">
-        <span>${esc(m.name || "(名前未登録)")}<small>${esc(m.id)}${m.keiretsu ? "｜" + esc(m.keiretsu) : ""}</small></span></label>`).join("")
-    : '<p style="color:#8A84A0;font-size:13px;padding:10px 0;">非表示にしている方はいません</p>';
-  $("#hidAll").style.display = list.length > 1 ? "inline-block" : "none";
-  $("#hidSave").style.display = list.length ? "" : "none";
-  $("#hid").classList.add("show");
+
+/* ほかのページへ移る前に、保存していない変更がないかを確かめます */
+let leaveNext = null;
+function leaveOk(next){
+  if(!pendCount()){ next(); return true; }
+  leaveNext = next;
+  $("#leaveCount").textContent = pendCount();
+  $("#leave").classList.add("show");
+  return false;
 }
-function closeHidden(){ $("#hid").classList.remove("show"); }
-function hidAll(){
-  const cs = [...document.querySelectorAll("#hidList input")];
-  const on = !cs.every(c=>c.checked);
-  cs.forEach(c=>{ c.checked = on; });
-  $("#hidAll").textContent = on ? "すべてはずす" : "すべてえらぶ";
+async function leaveChoose(c){
+  $("#leave").classList.remove("show");
+  const next = leaveNext; leaveNext = null;
+  if(c === "stay" || !next) return;
+  if(c === "save"){ const ok = await savePending(); if(!ok) return; }
+  if(c === "discard"){ pendingHide = {}; data.members.forEach(m=>{ m.items = JSON.parse(JSON.stringify(m.orig)); }); }
+  next();
 }
-async function restoreHidden(){
-  const ids = [...document.querySelectorAll("#hidList input:checked")].map(c=>c.value);
-  if(!ids.length){ $("#hidMsg").className = "msg err"; $("#hidMsg").textContent = "表示を戻す方にチェックを入れてください"; return; }
-  if(typeof skyBusy === "function" && skyBusy("hide")) return;
-  const btn = $("#hidSave"); btn.disabled = true;
-  try{
-    const j = await sendHide(ids, false);
-    if(!j) return;
-    if(j.ok !== true){ $("#hidMsg").className = "msg err"; $("#hidMsg").textContent = ({ busy:"いま混み合っています。少しおいてお試しください" })[j.error] || "表示を戻せませんでした"; return; }
-    closeHidden();
-    draw();
-    toast(ids.length + "名の表示を戻しました");
-  }catch(e){ $("#hidMsg").className = "msg err"; $("#hidMsg").textContent = "通信できませんでした"; }
-  finally{ btn.disabled = false; if(typeof skyBusyEnd === "function") skyBusyEnd("hide"); }
-}
+document.addEventListener("click", function(e){
+  if(!data || !pendCount()) return;
+  const a = e.target.closest && e.target.closest("a[href]");
+  if(!a) return;
+  const href = a.getAttribute("href") || "";
+  if(!href || href.charAt(0) === "#" || /^javascript:/i.test(href) || a.target === "_blank") return;
+  e.preventDefault(); e.stopPropagation();
+  leaveOk(()=>{ location.href = a.href; });
+}, true);
+window.addEventListener("beforeunload", function(e){
+  if(!data || !pendCount()) return;
+  e.preventDefault(); e.returnValue = "";
+});
 
 /* ================================================================
    報告用に保存：いま表示している一覧を、スプレッドシートの「初期サポート報告」タブに足します
@@ -453,6 +517,7 @@ async function restoreHidden(){
 async function saveReport(){
   if(!data) return;
   if(!lastList.length){ toast("表示している方がいません"); return; }
+  if(pendCount()){ toast("先に「💾 一覧の変更を保存」を押してから、報告用に保存してください"); return; }
   const parts = [];
   ["#fKei", "#fHelper"].forEach(sel=>{ const o = $(sel).selectedOptions[0]; if($(sel).value && o) parts.push(o.textContent); });
   if($("#fNew").checked) parts.push("登録3ヶ月以内");
@@ -529,36 +594,15 @@ function pickState(k, v){
   drawEd();
 }
 function pickDate(k, v){ edDraft[k].d = v ? v.replace(/-/g, "/") : ""; drawEd(); }
-async function saveEd(){
+function saveEd(){
   const changed = edGroup.items.filter(k=>{ const it = edMember.items[k] || {}; return (it.s || "") !== edDraft[k].s || (it.d || "") !== edDraft[k].d; });
   if(!changed.length){ closeEd(); return; }
   const noDate = changed.filter(k=>edDraft[k].s === "参加予定" && !edDraft[k].d);
   if(noDate.length){ $("#edMsg").className = "msg err"; $("#edMsg").textContent = "参加予定の日付を入れてください"; return; }
-  if(typeof skyBusy === "function" && skyBusy("sup")) return;
-  const btn = $("#edSave"); btn.disabled = true;
-  try{
-    for(const k of changed){
-      const j = await api({ action:"supportSet", target: edMember.id, item:k, state: edDraft[k].s, date: edDraft[k].d });
-      if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
-      if(!j || j.ok !== true){
-        $("#edMsg").className = "msg err";
-        $("#edMsg").textContent = ({ outofscope:"この方の記録は、担当の範囲外のため変えられません",
-          busy:"いま混み合っています。少しおいてお試しください",
-          suplayout:"「サポート状況」タブの見出しが決まった形とちがうため、保存を止めました。管理者の方にお知らせください",
-          baddate:"日付の形がちがいます" })[j && j.error] || "保存できませんでした";
-        return;
-      }
-      edMember.items[k] = { s: j.s, d: j.d };
-      edMember.updated = j.updated; edMember.updatedBy = j.updatedBy;
-    }
-    closeEd();
-    draw();
-  }catch(e){
-    $("#edMsg").className = "msg err"; $("#edMsg").textContent = "通信できませんでした。電波のよい場所でお試しください";
-  }finally{
-    btn.disabled = false;
-    if(typeof skyBusyEnd === "function") skyBusyEnd("sup");
-  }
+  /* この画面の中だけで変えます。上の「💾 一覧の変更を保存」でまとめて保存します */
+  changed.forEach(k=>{ edMember.items[k] = { s: edDraft[k].s, d: edDraft[k].d }; });
+  closeEd();
+  draw();
 }
 
 /* ================================================================

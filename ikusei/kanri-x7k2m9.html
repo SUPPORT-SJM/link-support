@@ -135,6 +135,15 @@
   .fbtn.kei.on{background:#7BB3A0;border-color:#7BB3A0;color:#fff;}
   /* まだ保存していない変更 */
   .fbtn.pend{outline:2.5px dashed #E5A823;outline-offset:1px;}
+  /* 非表示（あなたの画面だけ） */
+  .hidchk{display:inline-flex;align-items:center;gap:4px;margin-top:5px;white-space:nowrap;font-size:11px;color:#8A84A0;cursor:pointer;
+    border:1.5px solid #E1DCF2;border-radius:999px;padding:2px 9px 2px 6px;background:#fff;}
+  .hidchk input{width:14px;height:14px;margin:0;}
+  .hidchk.pend{outline:2.5px dashed #E5A823;outline-offset:1px;}
+  #tbody tr.row-hid > td{opacity:.45;}
+  #tbody tr.row-hid > td:first-child{opacity:1;}
+  #btnSaveTop{background:#F5C452 !important;color:#3B2A00 !important;}
+  #btnSaveTop[disabled]{opacity:.45;}
   #pendBar{display:none;position:fixed;left:0;right:0;bottom:0;z-index:58;background:#3B3550;color:#fff;
     padding:10px 14px calc(10px + env(safe-area-inset-bottom));box-shadow:0 -4px 18px rgba(0,0,0,.18);}
   #pendBar.show{display:block;}
@@ -463,13 +472,15 @@
         <button class="btn-add" id="btnAdd" onclick="openMember(null)" style="display:none;">＋ 会員を追加</button>
         <button class="btn-add" id="btnReq" onclick="openReqList()" style="display:none;background:#F2B33D;">
           🔔 新規登録の依頼 <span id="reqCount">0</span></button>
+        <button id="btnSaveTop" onclick="savePending()" disabled>💾 一覧の変更を保存</button>
+        <button id="btnShowHid" onclick="toggleShowHidden()">🙈 非表示の方も出す（0）</button>
         <button class="btn-add" id="btnBulk" onclick="openBulk()" style="display:none;background:#5E8FD8;">📥 まとめて登録</button>
         <button class="btn-add" id="btnTree" onclick="openTree()" style="display:none;background:#8A6FD1;">🌳 系列のつながり</button>
-        <button class="btn-add" id="btnSupport" onclick="leaveOk(()=>location.href='shoki-support-k5w2.html')" style="background:#3DAA6E;">🌱 初期サポートマネジメント</button>
+        <button class="btn-add" id="btnSupport" onclick="goLeave(()=>location.href='shoki-support-k5w2.html')" style="background:#3DAA6E;">🌱 初期サポートマネジメント</button>
         <button id="btnStats" onclick="openStats()" style="display:none;">📊 アクセス</button>
         <button id="btnDummy" onclick="toggleDummy()" style="display:none;">🧪 テストモード</button>
         <button id="btnBackPortal" onclick="backToPortal()">‹ ポータルへ</button>
-        <button onclick="leaveOk(()=>location.href='./creamap-x7k2m9.html')">🗺 クリエマップ</button>
+        <button onclick="goLeave(()=>location.href='./creamap-x7k2m9.html')">🗺 クリエマップ</button>
         <button onclick="load()">🔄 更新</button>
         <button onclick="backToPortal()">‹ 育成プログラムへ戻る</button>
         <button onclick="logout()" style="background:#FDEBEB;color:#B3352F;">ログアウト</button>
@@ -1525,6 +1536,7 @@ async function load(isLogin){
       return false;
     }
     data = j;
+    hiddenOrig = {}; (j.hidden || []).forEach(k=>{ hiddenOrig[hk(k)] = true; });
 
     // ダミーモードの表示を実際の状態に合わせる
     if(dummyMode && j.dummy !== true){
@@ -1641,9 +1653,12 @@ function render(){
   if(!data) return;
   const q = $("#search").value.trim().toLowerCase();
   const list = data.members.filter(m=>{
+    /* 非表示にしてある方は出しません（「非表示の方も出す」のとき・保存前に変えた方は出します） */
+    if(!showHidden && hiddenOrig[hk(m.id)] && !(hk(m.id) in pendingHide)) return false;
     if(!q) return true;
     return (m.name||"").toLowerCase().includes(q) || String(m.id).includes(q);
   });
+  drawHidBtn();
   const tb = $("#tbody");
   if(list.length === 0){
     tb.innerHTML = '<tr><td colspan="6" class="empty">該当する方がいません</td></tr>';
@@ -1684,8 +1699,10 @@ function rowsHtml(list){
           : `<br><span class="scope-view">担当系列: ${m.scope || "未設定"}</span>`)
       : "";
 
-    return `<tr class="${m.needCheck ? "row-check" : (m.autoFill ? "row-auto" : "")}">
-      <td><a href="#" class="nm nm-link" onclick="openDetail('${m.id}');return false;">${m.name || "(名前未登録)"}</a>${m.realName && m.realName !== m.name ? `<br><span style="font-size:10.5px;color:#A8A4BC;">(${m.realName})</span>` : ""}<br><span class="id">${m.id}</span></td>
+    const hidOn = effHidden(m), hidPend = hidOn !== !!hiddenOrig[hk(m.id)];
+    return `<tr class="${m.needCheck ? "row-check" : (m.autoFill ? "row-auto" : "")} ${hidOn ? "row-hid" : ""}">
+      <td><a href="#" class="nm nm-link" onclick="openDetail('${m.id}');return false;">${m.name || "(名前未登録)"}</a>${m.realName && m.realName !== m.name ? `<br><span style="font-size:10.5px;color:#A8A4BC;">(${m.realName})</span>` : ""}<br><span class="id">${m.id}</span>
+        <br><label class="hidchk ${hidPend ? "pend" : ""}" title="あなたの画面だけで非表示にします"><input type="checkbox" ${hidOn ? "checked" : ""} onchange="toggleHide('${m.id}', this.checked)">非表示</label></td>
       <td class="kei">${m.keiretsu || "–"}${m.area ? `<br><span style="font-size:10px;color:#A8A4BC;">${m.area}</span>` : ""}${hasSup(m) && !hasCrie(m) ? '<br><span style="font-size:10px;color:#B8860B;font-weight:700;">サポーター</span>' : ""}</td>
       <td class="prog">${piyo}</td>
       <td class="prog">${gr}</td>
@@ -1720,7 +1737,23 @@ function effFlag(m, flag){
   return (p && Object.prototype.hasOwnProperty.call(p, flag)) ? p[flag] : origFlag(m, flag);
 }
 function pendCount(){
-  return Object.keys(pendingRoles).reduce((n, id)=>n + Object.keys(pendingRoles[id]).length, 0);
+  return Object.keys(pendingRoles).reduce((n, id)=>n + Object.keys(pendingRoles[id]).length, 0)
+       + Object.keys(pendingHide).length;
+}
+
+/* ---------- 非表示（あなたの画面だけ。初期サポートマネジメントと同じ設定です） ---------- */
+let hiddenOrig = {}, pendingHide = {}, showHidden = false;
+function hk(id){ return String(id || "").replace(/^0+/, ""); }
+function effHidden(m){ const k = hk(m.id); return (k in pendingHide) ? pendingHide[k] : !!hiddenOrig[k]; }
+function toggleHide(id, on){
+  const k = hk(id);
+  if(!!hiddenOrig[k] === !!on) delete pendingHide[k]; else pendingHide[k] = !!on;
+  render(); drawPendBar();
+}
+function toggleShowHidden(){ showHidden = !showHidden; render(); }
+function drawHidBtn(){
+  const n = data ? data.members.filter(m=>hiddenOrig[hk(m.id)]).length : 0;
+  $("#btnShowHid").textContent = (showHidden ? "🙈 非表示の方をかくす（" : "🙈 非表示の方も出す（") + n + "）";
 }
 /* 読み直したあとに、もう同じになっているものは外します */
 function prunePending(){
@@ -1730,11 +1763,15 @@ function prunePending(){
     Object.keys(p).forEach(f=>{ if(!m || origFlag(m, f) === p[f]) delete p[f]; });
     if(!Object.keys(p).length) delete pendingRoles[id];
   });
+  Object.keys(pendingHide).forEach(k=>{ if(!!hiddenOrig[k] === pendingHide[k]) delete pendingHide[k]; });
 }
 function drawPendBar(){
   const n = pendCount();
   document.getElementById("pendCount").textContent = n;
   document.getElementById("pendBar").classList.toggle("show", n > 0);
+  const top = document.getElementById("btnSaveTop");
+  top.disabled = n === 0;
+  top.textContent = "💾 一覧の変更を保存" + (n ? "（" + n + "件）" : "");
   document.body.classList.toggle("has-pend", n > 0);
 }
 
@@ -1752,11 +1789,34 @@ function setFlag(target, flag, on){
 function undoPending(){
   if(!pendCount()) return;
   if(!confirm("保存していない変更（" + pendCount() + "件）を元にもどします。よろしいですか？")) return;
-  pendingRoles = {};
+  pendingRoles = {}; pendingHide = {};
   render(); drawPendBar();
 }
 
 async function savePending(){
+  const okRoles = await saveRolesPart();
+  const okHide = await saveHidePart();
+  return okRoles && okHide;
+}
+async function saveHidePart(){
+  const hideIds = Object.keys(pendingHide).filter(k=>pendingHide[k]);
+  const showIds = Object.keys(pendingHide).filter(k=>!pendingHide[k]);
+  if(!hideIds.length && !showIds.length) return true;
+  try{
+    const body = new URLSearchParams({ action:"supportHide", id:admin.id, pin:admin.pin, email:admin.email,
+      hideIds: JSON.stringify(hideIds), showIds: JSON.stringify(showIds), dummy: dummyMode ? "1" : "0" });
+    const res = await fetch(GAS_URL, { method:"POST", body });
+    const j = await res.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return false;
+    if(!j || j.ok !== true){ toast(({ busy:"いま混み合っています。少しおいてお試しください" })[j && j.error] || "非表示の保存ができませんでした"); return false; }
+    hiddenOrig = {}; (j.hidden || []).forEach(k=>{ hiddenOrig[hk(k)] = true; });
+    pendingHide = {};
+    render(); drawPendBar();
+    toast("✅ 非表示の設定を保存しました");
+    return true;
+  }catch(e){ toast("通信できませんでした"); return false; }
+}
+async function saveRolesPart(){
   const changes = [];
   Object.keys(pendingRoles).forEach(id=>{
     Object.keys(pendingRoles[id]).forEach(f=>changes.push({ target:id, flag:f, on: pendingRoles[id][f] }));
@@ -1811,6 +1871,8 @@ async function savePending(){
 /* ほかのページへ移る前に、保存していない変更がないかを確かめます
    leaveOk(続きの処理) … 変更がなければ true。あれば「保存しますか？」を出して false */
 let leaveNext = null;
+/* ボタンから移るとき：変更がなければすぐ進み、あれば「保存しますか？」を出します */
+function goLeave(next){ if(leaveOk(next)) next(); }
 function leaveOk(next){
   if(!pendCount()) return true;
   leaveNext = next;
@@ -1823,7 +1885,7 @@ async function leaveChoose(c){
   const next = leaveNext; leaveNext = null;
   if(c === "stay" || !next) return;
   if(c === "save"){ const ok = await savePending(); if(!ok) return; }
-  if(c === "discard"){ pendingRoles = {}; render(); drawPendBar(); }
+  if(c === "discard"){ pendingRoles = {}; pendingHide = {}; render(); drawPendBar(); }
   next();
 }
 /* メニューなどのリンクで移るとき */
