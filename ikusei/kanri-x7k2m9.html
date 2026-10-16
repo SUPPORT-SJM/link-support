@@ -258,6 +258,40 @@
 #reqModal .mm-close{display:block;width:100%;margin-top:6px;padding:12px;border-radius:11px;
   border:1.5px solid #E4E0F0;background:#fff;color:#6A6480;font-size:13px;font-weight:700;
   cursor:pointer;font-family:inherit;}
+/* ===== まとめて登録 ===== */
+#bulkModal{display:none;position:fixed;inset:0;z-index:77;background:rgba(30,26,50,.55);
+  align-items:center;justify-content:center;padding:16px;}
+#bulkModal.show{display:flex;}
+#bulkModal .sheet{background:#fff;border-radius:18px;width:100%;max-width:760px;max-height:90vh;
+  overflow-y:auto;padding:20px 18px 16px;box-shadow:0 14px 50px rgba(0,0,0,.3);}
+#bulkModal h3{font-size:17px;font-weight:900;color:#4A3F7A;margin-bottom:6px;}
+#bulkModal .lead{font-size:12.5px;color:#6A6480;line-height:1.9;margin-bottom:12px;}
+#bulkModal textarea{width:100%;min-height:150px;padding:10px 12px;border:1.5px solid #E4E0F0;border-radius:11px;
+  font-size:13px;font-family:inherit;background:#FCFBFF;}
+#bulkModal .row2{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0;}
+#bulkModal .bk-btn{padding:11px 16px;border-radius:11px;border:none;background:#6E5FB5;color:#fff;font-weight:700;
+  font-size:13.5px;cursor:pointer;font-family:inherit;}
+#bulkModal .bk-btn.sub{background:#F0EDF9;color:#6E5FB5;}
+#bulkModal .bk-btn:disabled{opacity:.5;}
+#bulkModal .bk-tbl-wrap{overflow-x:auto;border:1.5px solid #E4E0F0;border-radius:11px;margin:8px 0 12px;}
+#bulkModal table{border-collapse:collapse;font-size:12px;min-width:100%;}
+#bulkModal th,#bulkModal td{padding:6px 8px;border-bottom:1px solid #F0EDF9;text-align:left;white-space:nowrap;}
+#bulkModal th select{font-size:11.5px;padding:3px;border-radius:6px;border:1.5px solid #D9D4EC;font-family:inherit;}
+#bulkModal .bk-sum{font-size:13px;font-weight:700;color:#4A3F7A;margin:6px 0;}
+#bulkModal .st-add{color:#2F7A5C;font-weight:700;}
+#bulkModal .st-skip{color:#B3352F;}
+#bulkModal .st-warn{color:#8A6D00;font-size:11px;}
+#bulkModal .bk-kei{background:#F6F3FE;border:1.5px solid #D9D2F3;border-radius:12px;padding:12px 13px;margin-bottom:10px;}
+#bulkModal .bk-kei label{display:block;font-size:13px;font-weight:700;color:#4A3F7A;margin-bottom:6px;}
+#bulkModal .bk-kei select{width:100%;padding:10px;border-radius:9px;border:1.5px solid #D9D2F3;font-size:14px;font-family:inherit;background:#fff;}
+#bulkModal .bk-kei-note{font-size:11.5px;color:#6A6480;margin-top:6px;line-height:1.7;}
+#bulkModal .bk-kei-chip{display:inline-block;font-size:12.5px;font-weight:700;color:#4A3F7A;background:#F0EDF9;border-radius:99px;padding:5px 12px;}
+#bulkModal .bk-alert{background:#FFF3D6;border:1.5px solid #F2C861;color:#7A5A00;border-radius:11px;padding:10px 12px;font-size:12.5px;line-height:1.8;margin:8px 0;}
+#bulkModal .bk-close{display:block;width:100%;margin-top:6px;padding:12px;border-radius:11px;
+  border:1.5px solid #E4E0F0;background:#fff;color:#6A6480;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}
+#bulkModal .bk-msg{display:none;border-radius:10px;padding:10px 12px;font-size:12.5px;margin:8px 0;line-height:1.8;}
+#bulkModal .bk-msg.err{display:block;background:#FDEBEB;color:#B3352F;}
+#bulkModal .bk-msg.ok{display:block;background:#EAF7F0;color:#2F7A5C;}
 .req-card{background:#FFFBF2;border:1.5px solid #F0D9A8;border-radius:13px;
   padding:14px 15px;margin-bottom:11px;}
 .req-top{display:flex;align-items:baseline;gap:9px;margin-bottom:3px;flex-wrap:wrap;}
@@ -363,6 +397,7 @@
         <button class="btn-add" id="btnAdd" onclick="openMember(null)" style="display:none;">＋ 会員を追加</button>
         <button class="btn-add" id="btnReq" onclick="openReqList()" style="display:none;background:#F2B33D;">
           🔔 新規登録の依頼 <span id="reqCount">0</span></button>
+        <button class="btn-add" id="btnBulk" onclick="openBulk()" style="display:none;background:#5E8FD8;">📥 まとめて登録</button>
         <button id="btnStats" onclick="openStats()" style="display:none;">📊 アクセス</button>
         <button id="btnDummy" onclick="toggleDummy()" style="display:none;">🧪 テストモード</button>
         <button id="btnBackPortal" onclick="backToPortal()">‹ ポータルへ</button>
@@ -474,6 +509,52 @@
       登録すると、その方は<b>会員番号とパスコード 1111</b> でログインできます。</p>
     <div id="reqBody"></div>
     <button class="mm-close" onclick="closeReq()">とじる</button>
+  </div>
+</div>
+
+<div id="bulkModal" onclick="if(event.target===this)closeBulk()">
+  <div class="sheet">
+    <h3>📥 まとめて登録</h3>
+    <div id="bkStep1">
+      <p class="lead">名簿のスプレッドシートで範囲をえらんでコピーし、下に貼りつけてください。<br>
+        CSVやExcelのファイルをえらぶこともできます。<br>
+        <b>お名前</b>が分かれば入れられます。会員番号がない方には仮の番号が付き、パスコードは <b>1111</b> になります。<br>
+        すでに名簿にある会員番号の方は、上書きせずにとばします。</p>
+      <div class="bk-kei">
+        <label for="bkKei">この名簿は、どの系列の名簿ですか？</label>
+        <select id="bkKei"></select>
+        <p class="bk-kei-note" id="bkKeiNote"></p>
+      </div>
+      <textarea id="bkText" placeholder="ここに貼りつけ（1行目に見出しがあると、そのまま読み取れます）"></textarea>
+      <div class="row2">
+        <input type="file" id="bkFile" accept=".csv,.tsv,.txt,.xlsx,.xls">
+        <button class="bk-btn" onclick="bulkParse()">読み取る ›</button>
+      </div>
+    </div>
+    <div id="bkStep2" style="display:none;">
+      <p class="lead">それぞれの列が何かをえらんでください（自動でえらんであります）。<br>
+        ちがっていたら直して「確かめる」を押してください。<b>まだ名簿には入りません。</b></p>
+      <div class="row2">
+        <label style="font-size:12.5px;"><input type="checkbox" id="bkHead" onchange="bulkDrawMap()"> 1行目は見出し</label>
+        <span class="bk-kei-chip" id="bkKeiChip"></span>
+      </div>
+      <div class="bk-tbl-wrap"><table id="bkMapTbl"></table></div>
+      <div class="bk-msg" id="bkMsg2"></div>
+      <div class="row2">
+        <button class="bk-btn sub" onclick="bulkBack()">‹ 貼りつけにもどる</button>
+        <button class="bk-btn" id="bkCheckBtn" onclick="bulkRun('check')">確かめる ›</button>
+      </div>
+    </div>
+    <div id="bkStep3" style="display:none;">
+      <p class="bk-sum" id="bkSum"></p>
+      <div class="bk-tbl-wrap"><table id="bkResTbl"></table></div>
+      <div class="bk-msg" id="bkMsg3"></div>
+      <div class="row2">
+        <button class="bk-btn sub" id="bkBack2" onclick="bulkShow(2)">‹ 列のえらび方にもどる</button>
+        <button class="bk-btn" id="bkWriteBtn" onclick="bulkRun('write')">名簿に登録する</button>
+      </div>
+    </div>
+    <button class="bk-close" onclick="closeBulk()">とじる</button>
   </div>
 </div>
 
@@ -1335,6 +1416,7 @@ async function load(isLogin){
     $("#listArea").style.display = "block";
     $("#findArea").style.display = "none";
     $("#btnAdd").style.display = j.isFull ? "inline-block" : "none";
+    $("#btnBulk").style.display = (j.isFull || j.isKeiRep || j.isAdv) ? "inline-block" : "none";
 
     const lvl = j.isFull ? "全体管理"
               : j.isKeiRep ? "系列代表"
@@ -1791,6 +1873,294 @@ async function linkMemberId(){
   }finally{
     btn.disabled = false;
     if(typeof skyBusyEnd === "function") skyBusyEnd("linkMemberId");
+  }
+}
+
+/* ================================================================
+   まとめて登録（アドバンス・系列代表・チーム代表・管理者）
+================================================================ */
+const BK_FIELDS = [
+  ["", "使わない"], ["id", "会員番号"], ["name", "お名前（ニックネーム）"], ["realName", "本名"],
+  ["keiretsu", "系列"], ["area", "居住地域"], ["email", "メール"],
+  ["intro", "紹介者の会員番号"], ["introName", "紹介者のお名前"],
+  ["upline", "アップの会員番号"], ["uplineName", "アップのお名前"],
+  ["helper", "サポート担当の会員番号"], ["helperName", "サポート担当のお名前"]
+];
+let bkTable = [], bkMap = [], bkRows = [], bkLastCheck = null;
+function bkEsc(t){ return String(t == null ? "" : t).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function bkNorm(t){ let x = String(t == null ? "" : t); try{ x = x.normalize("NFKC"); }catch(e){} return x.trim(); }
+
+const BK_MULTI = "__multi__";
+function bkAllowedKei(){
+  if(data && data.isFull) return KEIRETSU.slice();
+  const sc = (data && data.scope) || [];
+  const own = (data && data.myKei) || "";
+  /* ご自身の系列をいちばん上に */
+  const list = sc.filter(k=>k && k !== own);
+  if(own) list.unshift(own);
+  return list;
+}
+function openBulk(){
+  document.getElementById("bkText").value = "";
+  document.getElementById("bkFile").value = "";
+  const allowed = bkAllowedKei();
+  const own = (data && data.myKei) || "";
+  const ks = document.getElementById("bkKei");
+  ks.innerHTML = '<option value="">えらんでください</option>'
+    + allowed.map(k=>`<option value="${bkEsc(k)}">${bkEsc(k)}${k === own ? "（あなたの系列）" : ""}</option>`).join("")
+    + `<option value="${BK_MULTI}">いくつかの系列がまざっている（名簿の「系列」の列を使う）</option>`;
+  /* ふだんはご自身の系列をえらんでおきます（ちがう系列の名簿なら、えらび直してください） */
+  ks.value = (own && allowed.indexOf(own) >= 0) ? own : "";
+  const note = document.getElementById("bkKeiNote");
+  const upd = ()=>{
+    note.textContent = ks.value === BK_MULTI
+      ? "名簿の中の「系列」の列を使います。系列が書かれていない行は登録できないので、元の名簿に系列名を記入しておいてください。"
+      : ks.value
+        ? "この名簿の方は、全員「" + ks.value + "」として登録します。名簿に系列の列があっても使いません。"
+        : "ほかの系列の方から名簿を預かったときは、その系列をえらんでください。";
+  };
+  ks.onchange = upd; upd();
+  bulkShow(1);
+  document.getElementById("bulkModal").classList.add("show");
+}
+function closeBulk(){ document.getElementById("bulkModal").classList.remove("show"); }
+function bulkShow(n){
+  [1,2,3].forEach(i=> document.getElementById("bkStep" + i).style.display = (i === n) ? "block" : "none");
+  ["bkMsg2","bkMsg3"].forEach(id=>{ const e = document.getElementById(id); e.className = "bk-msg"; e.textContent = ""; });
+}
+function bulkBack(){ bulkShow(1); }
+function bkSay(id, text, cls){ const e = document.getElementById(id); e.className = "bk-msg " + cls; e.innerHTML = text; }
+
+/* 貼りつけた文字やCSVを表にします（タブ区切り・カンマ区切りのどちらでも） */
+function bkParseText(t){
+  t = String(t || "").replace(/^﻿/, "").replace(/\r\n?/g, "\n");
+  const tab = t.indexOf("\t") >= 0;
+  const sep = tab ? "\t" : ",";
+  const rows = []; let row = [], cell = "", q = false;
+  for(let i = 0; i < t.length; i++){
+    const c = t[i];
+    if(q){
+      if(c === '"'){ if(t[i+1] === '"'){ cell += '"'; i++; } else q = false; }
+      else cell += c;
+    }else if(c === '"' && cell === ""){ q = true; }
+    else if(c === sep){ row.push(cell); cell = ""; }
+    else if(c === "\n"){ row.push(cell); rows.push(row); row = []; cell = ""; }
+    else cell += c;
+  }
+  if(cell !== "" || row.length) { row.push(cell); rows.push(row); }
+  return rows.map(r=>r.map(bkNorm)).filter(r=>r.some(x=>x !== ""));
+}
+function bkLoadXlsx(){
+  return new Promise((ok, ng)=>{
+    if(window.XLSX) return ok();
+    const sc = document.createElement("script");
+    sc.src = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
+    sc.onload = ()=>ok(); sc.onerror = ()=>ng(new Error("xlsx"));
+    document.head.appendChild(sc);
+  });
+}
+async function bulkParse(){
+  if(!document.getElementById("bkKei").value){
+    toast("先に「どの系列の名簿か」をえらんでください");
+    document.getElementById("bkKei").focus();
+    return;
+  }
+  const f = document.getElementById("bkFile").files[0];
+  let table = [];
+  try{
+    if(f){
+      if(/\.xlsx?$/i.test(f.name)){
+        await bkLoadXlsx();
+        const wb = XLSX.read(await f.arrayBuffer(), { type:"array" });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        table = XLSX.utils.sheet_to_json(ws, { header:1, raw:false, defval:"" })
+          .map(r=>r.map(bkNorm)).filter(r=>r.some(x=>x !== ""));
+      }else{
+        table = bkParseText(await f.text());
+      }
+    }else{
+      table = bkParseText(document.getElementById("bkText").value);
+    }
+  }catch(e){
+    toast("ファイルを読めませんでした。貼りつけでお試しください"); return;
+  }
+  if(!table.length){ toast("読み取れる行がありませんでした"); return; }
+  const w = Math.max.apply(null, table.map(r=>r.length));
+  bkTable = table.map(r=>{ const o = r.slice(); while(o.length < w) o.push(""); return o; });
+  /* 1行目が見出しかどうか、列が何かを自動でえらびます */
+  const guess = bkTable[0].map(bkGuessHead);
+  const isHead = guess.some(g=>g !== null);
+  document.getElementById("bkHead").checked = isHead;
+  bkMap = isHead ? guess.map(g=>g || "") : bkGuessByContent();
+  bulkShow(2);
+  bulkDrawMap();
+}
+function bkGuessHead(h){
+  h = String(h || "").replace(/\s/g, "");
+  if(!h) return null;
+  const num = /番号|ID|ｉｄ|No/i.test(h);
+  if(/紹介/.test(h)) return num ? "intro" : "introName";
+  if(/アップ/.test(h)) return num ? "upline" : "uplineName";
+  if(/サポート|担当/.test(h)) return num ? "helper" : "helperName";
+  if(/オプチャ|アドバイザー|説明/.test(h)) return "";
+  if(/本名|氏名/.test(h)) return "realName";
+  if(/系列|チーム/.test(h)) return "keiretsu";
+  if(/地域|都道府県|住所|居住/.test(h)) return "area";
+  if(/メール|mail/i.test(h)) return "email";
+  if(/会員番号|^番号$|^ID$|会員ID/i.test(h)) return "id";
+  if(/ニックネーム|お名前|名前|なまえ/.test(h)) return "name";
+  return null;
+}
+function bkGuessByContent(){
+  const w = bkTable[0].length, map = new Array(w).fill("");
+  let nameSet = false, idSet = false;
+  for(let c = 0; c < w; c++){
+    const vals = bkTable.map(r=>r[c]).filter(Boolean);
+    if(!vals.length) continue;
+    const digits = vals.filter(v=>/^\d{4,}$/.test(v.replace(/\s/g,""))).length / vals.length;
+    const keiHit = vals.filter(v=>bkMatchKei(v)).length / vals.length;
+    if(!idSet && digits >= 0.8){ map[c] = "id"; idSet = true; }
+    else if(keiHit >= 0.6 && map.indexOf("keiretsu") < 0){ map[c] = "keiretsu"; }
+    else if(!nameSet && digits < 0.2){ map[c] = "name"; nameSet = true; }
+  }
+  return map;
+}
+/* 系列名を、正式な書き方にそろえます（大文字小文字・空白・記号のちがいを吸収） */
+function bkKeiKey(t){ return bkNorm(t).toLowerCase().replace(/[^\p{L}\p{N}]/gu, ""); }   /* 絵文字・記号・空白は見ません */
+function bkMatchKei(v){
+  const k = bkKeiKey(v);
+  if(!k) return "";
+  const same = KEIRETSU.find(x=>bkKeiKey(x) === k);
+  if(same) return same;
+  /* 「クラウドブルー」のように一部だけのときは、あてはまるのが1つだけなら、それにします */
+  if(k.length >= 3){
+    const part = KEIRETSU.filter(x=>{ const xk = bkKeiKey(x); return xk.indexOf(k) >= 0 || k.indexOf(xk) >= 0; });
+    if(part.length === 1) return part[0];
+  }
+  return "";
+}
+function bkKeiChoice(){ return document.getElementById("bkKei").value; }
+function bulkDrawMap(){
+  const kc = bkKeiChoice();
+  document.getElementById("bkKeiChip").textContent = kc === BK_MULTI ? "系列：名簿の「系列」の列を使う" : "系列：" + kc + "（全員）";
+  const head = document.getElementById("bkHead").checked;
+  const body = head ? bkTable.slice(1) : bkTable;
+  const w = bkTable[0].length;
+  const opts = (sel)=> BK_FIELDS.map(([v,l])=>`<option value="${v}" ${v === sel ? "selected" : ""}>${l}</option>`).join("");
+  let html = "<tr>" + Array.from({length:w}, (_,c)=>`<th><select data-c="${c}">${opts(bkMap[c] || "")}</select>`
+    + (head ? `<div style="font-size:10.5px;color:#9A93B0;margin-top:3px;">${bkEsc(bkTable[0][c])}</div>` : "") + "</th>").join("") + "</tr>";
+  html += body.slice(0, 8).map(r=>"<tr>" + r.map(x=>`<td>${bkEsc(x)}</td>`).join("") + "</tr>").join("");
+  if(body.length > 8) html += `<tr><td colspan="${w}" style="color:#9A93B0;">…ほか ${body.length - 8} 行（全部で ${body.length} 行）</td></tr>`;
+  const t = document.getElementById("bkMapTbl");
+  t.innerHTML = html;
+  t.querySelectorAll("select").forEach(sel=> sel.addEventListener("change", ()=>{ bkMap[Number(sel.dataset.c)] = sel.value; }));
+}
+function bkBuildRows(){
+  const head = document.getElementById("bkHead").checked;
+  const kc = bkKeiChoice();
+  const body = head ? bkTable.slice(1) : bkTable;
+  return body.map(r=>{
+    const o = {};
+    bkMap.forEach((f, c)=>{ if(f && r[c] && !o[f]) o[f] = r[c]; });
+    if(kc !== BK_MULTI){ o.keiretsu = kc; }
+    else{
+      const raw = o.keiretsu || "";
+      const hit = bkMatchKei(raw);
+      if(!raw) o._bad = "nokeiwrite";
+      else if(!hit) o._bad = "unknownkei";
+      o.keiretsu = hit || raw;
+    }
+    return o;
+  });
+}
+const BK_REASON = {
+  exists:"すでに名簿にある番号です（上書きしません）", badid:"会員番号が数字ではありません",
+  dup:"同じ会員番号が上にもあります", noname:"お名前がありません",
+  outofscope:"担当系列の方ではありません", nokei:"系列がありません",
+  nokeiwrite:"系列が書かれていません。元の名簿に系列名を記入してください",
+  unknownkei:"系列名が一覧にありません。正しい系列名を記入してください"
+};
+const BK_WARN = { bademail:"メールの形がちがうので、メールは入れません", emailtaken:"メールがほかの方と同じなので、メールは入れません" };
+async function bulkRun(mode){
+  if(mode === "check"){
+    bkRows = bkBuildRows();
+    if(bkMap.indexOf("name") < 0 && bkMap.indexOf("realName") < 0){ bkSay("bkMsg2", "「お名前」か「本名」の列をえらんでください", "err"); return; }
+    if(bkKeiChoice() === BK_MULTI && bkMap.indexOf("keiretsu") < 0){
+      bkSay("bkMsg2", "「いくつかの系列がまざっている」をえらんだときは、名簿の中の「系列」の列をえらんでください。<br>系列の列がない名簿なら、1つめの画面で系列をえらんでください。", "err"); return;
+    }
+    if(!bkRows.length){ bkSay("bkMsg2", "登録する行がありません", "err"); return; }
+  }
+  if(mode === "write"){
+    const kc = bkKeiChoice();
+    const n = bkRows.filter(r=>!r._bad).length;
+    const what = kc === BK_MULTI ? "名簿に書かれた系列で" : "「" + kc + "」の方として";
+    if(!confirm(what + " " + n + "行ぶんを、名簿に登録します。\nよろしいですか？")) return;
+  }
+  /* 系列に問題のある行は送らずに、とばす行としてお見せします */
+  const sendIdx = [], local = [];
+  bkRows.forEach((r, i)=>{
+    if(r._bad) local.push({ i: i, name: r.name || r.realName || "", id: r.id || "", keiretsu: r.keiretsu || "", status:"skip", reason: r._bad });
+    else sendIdx.push(i);
+  });
+  const sendRows = sendIdx.map(i=>{ const o = Object.assign({}, bkRows[i]); delete o._bad; return o; });
+  if(typeof skyBusy === "function" && skyBusy("bulk")) return;
+  const btn = document.getElementById(mode === "check" ? "bkCheckBtn" : "bkWriteBtn");
+  btn.disabled = true;
+  if(typeof skyLoading === "function") skyLoading(mode === "check" ? "確かめています" : "名簿に登録しています", "しばらくお待ちください");
+  try{
+    /* 300行ずつに分けて送ります */
+    const all = [];
+    let added = 0;
+    for(let k = 0; k < sendRows.length; k += 300){
+      const part = sendRows.slice(k, k + 300);
+      const params = { action:"bulkImport", id:admin.id, pin:admin.pin, email:admin.email,
+                       rows: JSON.stringify(part), mode: mode, dummy: dummyMode ? "1" : "0" };
+      const res = await fetch(GAS_URL, { method:"POST", body:new URLSearchParams(params) });
+      const j = await res.json();
+      if(typeof skyLoadingDone === "function") skyLoadingDone();
+      if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
+      if(!j || j.ok !== true){
+        bkSay(mode === "check" ? "bkMsg2" : "bkMsg3", ({ noperm:"まとめて登録は、アドバンス以上の方がお使いいただけます",
+          busy:"いま混み合っています。少しおいてお試しください" })[j && j.error] || "うまくいきませんでした", "err");
+        return;
+      }
+      j.results.forEach(x=>{ x.i = sendIdx[x.i + k]; all.push(x); });
+      added += j.added;
+    }
+    if(typeof skyLoadingDone === "function") skyLoadingDone();
+    local.forEach(x=>all.push(x));
+    all.sort((a,b)=>a.i - b.i);
+    bkLastCheck = all;
+    const temp = all.filter(x=>x.status === "add" && x.temp).length;
+    const skip = all.length - added;
+    bulkShow(3);
+    document.getElementById("bkSum").textContent = (mode === "check")
+      ? `${all.length}行のうち、登録できる方 ${added}名（うち仮の番号 ${temp}名）／とばす方 ${skip}名`
+      : `✅ ${added}名を名簿に登録しました（うち仮の番号 ${temp}名）。パスコードは 1111 です。`;
+    const badKei = local.length;
+    const alertBox = document.getElementById("bkMsg3");
+    if(badKei){
+      alertBox.className = "bk-alert";
+      alertBox.innerHTML = `⚠️ 系列が書かれていない・一覧にない行が <b>${badKei}行</b> あります。この行は登録しません。<br>`
+        + `元の名簿に正しい系列名を記入してから、もう一度貼りつけてください。`;
+    }
+    document.getElementById("bkResTbl").innerHTML =
+      "<tr><th>行</th><th>会員番号</th><th>お名前</th><th>系列</th><th>結果</th></tr>" +
+      all.map(x=>`<tr><td>${x.i + 1}</td><td>${bkEsc(x.id || (x.temp ? "（仮の番号）" : ""))}</td><td>${bkEsc(x.name)}</td><td>${bkEsc(x.keiretsu)}</td>`
+        + `<td>${x.status === "add"
+              ? `<span class="st-add">${mode === "check" ? "登録できます" : "登録しました"}${x.temp ? "（仮の番号）" : ""}</span>`
+                + (x.warn && x.warn.length ? `<div class="st-warn">${x.warn.map(w=>BK_WARN[w] || w).join("・")}</div>` : "")
+              : `<span class="st-skip">とばします：${BK_REASON[x.reason] || x.reason}</span>`}</td></tr>`).join("");
+    document.getElementById("bkWriteBtn").style.display = (mode === "check" && added > 0) ? "inline-block" : "none";
+    document.getElementById("bkWriteBtn").textContent = `${added}名を名簿に登録する`;
+    document.getElementById("bkBack2").style.display = (mode === "check") ? "inline-block" : "none";
+    if(mode === "write"){ toast(`${added}名を登録しました`); load(); }
+  }catch(e){
+    if(typeof skyLoadingDone === "function") skyLoadingDone();
+    bkSay(mode === "check" ? "bkMsg2" : "bkMsg3", "通信できませんでした。電波のよい場所でお試しください", "err");
+  }finally{
+    btn.disabled = false;
+    if(typeof skyBusyEnd === "function") skyBusyEnd("bulk");
   }
 }
 
