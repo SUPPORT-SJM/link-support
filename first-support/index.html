@@ -290,7 +290,7 @@ const APP_ID  = "hajime";
 const KEYS = ["H1","H2","H3"];
 const ITEM_IDS = KEYS.join(",");
 
-/* 系列の一覧は、共通設定（config.js）から受け取ります（「系列のつながり」でなくなった系列は出ません） */
+/* 系列の一覧は、共通設定（config.js）から受け取ります（「系列のつながり」にある系列が出ます） */
 const KEIRETSU = (window.SKY_KEIRETSU || []).slice();
 
 /* 系列ごとのオープンチャット・グループ
