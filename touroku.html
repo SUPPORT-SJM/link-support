@@ -371,11 +371,8 @@ const GOOGLE_CLIENT_ID = "315827385958-ikdpkfhkr6nmrgql470aolt4pv27pak3.apps.goo
 /* 登録後に案内するページ */
 const GUIDE_URL = "./first-support/";   /* 初期サポートガイド */
 
-const KEIRETSU = [
-  "🚀SkyExceed","🦅Zenith1","🏰Utop","🌟グローハピネス🌟","🥷HOT STUFF⚜️",
-  "TELLUS.","FEAT","🌬️ザ・クラウドブルー(蒼雲)","✈️JET RISE","✨アフロディーテ",
-  "⭐️ルミナス","エネルギー🔥","💎プリズム","📚FairyTail","ミラメリ🪄","🪽HERO","♾️ZERO♾️",
-];
+/* 系列の一覧は、共通設定（config.js）から受け取ります（「系列のつながり」でなくなった系列は出ません） */
+const KEIRETSU = (window.SKY_KEIRETSU || []).slice();
 
 const $ = (s)=>document.querySelector(s);
 let googleEmail = "";
@@ -536,13 +533,14 @@ async function prefill(email){
         }
       }
       /* 番号が入っていれば、お名前もうめておきます（お名前で入っていれば、お名前の欄へ） */
-      [["intro", m.intro], ["up", m.upline], ["helper", m.helper]].forEach(([k, v])=>{
-        v = String(v || "").trim();
-        if(!v) return;
+      [["intro", m.intro, m.introName], ["up", m.upline, m.uplineName], ["helper", m.helper, m.helperName]].forEach(([k, v, nm])=>{
+        v = String(v || "").trim(); nm = String(nm || "").trim();
+        if(!v && !nm) return;
         if(/^\d+$/.test(v)) document.getElementById(PAIRS[k][0]).value = v;
-        else document.getElementById(PAIRS[k][1]).value = v;
+        else if(v && !nm) nm = v;
+        if(nm) document.getElementById(PAIRS[k][1]).value = nm;
         pairInput(k);
-        if(/^\d+$/.test(v)) checkPair(k, null, true);
+        if(/^\d+$/.test(v) && !nm) checkPair(k, null, true);   /* 名簿にお名前がなければ、番号からうめます */
       });
       if(m.realName) $("#inRealName").value = m.realName;
       if(m.advName) $("#inAdvName").value = m.advName;
@@ -743,7 +741,8 @@ async function submitForm(){
     const params = {
       action:"register", id, email:email,
       authType: (authMode === "google") ? "Google" : "メール",
-      name, realName, area, keiretsu, intro, upline, helper, advName, advId
+      name, realName, area, keiretsu, intro, upline, helper, advName, advId,
+      introName: pairVals("intro").nm, uplineName: pairVals("up").nm, helperName: pairVals("helper").nm
     };
     if(pin) params.pin = pin;
     const res = await fetch(GAS_URL, {method:"POST", body:new URLSearchParams(params)});

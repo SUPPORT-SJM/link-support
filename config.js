@@ -9,7 +9,7 @@
 ================================================================ */
 
 /* ---------------- ① バージョン ---------------- */
-window.SKY_VERSION = "v1.137";
+window.SKY_VERSION = "v1.138";
 window.SKY_VERSION_DATE = "2026/10/16";
 
 /* ---------------- ② GASのURL ----------------
@@ -17,12 +17,78 @@ window.SKY_VERSION_DATE = "2026/10/16";
 window.SKY_GAS_URL = "https://script.google.com/macros/s/AKfycbzY2l20zwGULjnKRUqvRpbH79fPkl5e-sWNVoXEIgBrDpqhjDAx2zLvJuqO3sZxAfHj/exec";
 
 /* ---------------- ③ 系列の一覧 ----------------
-   系列が増えたり名前が変わったときは、ここだけ直してください */
+   ふだんは、管理画面の「🌳 系列のつながり」で直します（そちらが優先されます）。
+   下の一覧は、「系列のつながり」をまだ作っていないときや、読みこめないときに使います */
 window.SKY_KEIRETSU = [
   "🚀SkyExceed","🦅Zenith1","🏰Utop","🌟グローハピネス🌟","🥷HOT STUFF⚜️",
   "TELLUS.","FEAT","🌬️ザ・クラウドブルー(蒼雲)","✈️JET RISE","✨アフロディーテ",
   "⭐️ルミナス","エネルギー🔥","💎プリズム","📚FairyTail","ミラメリ🪄","🪽HERO","♾️ZERO♾️"
 ];
+
+/* ---------------- ③-2 「系列のつながり」から、いまある系列を受け取ります ----------------
+   ・前に受け取った一覧を、この端末に覚えておいて、すぐに使います
+   ・10分以上たっていたら、裏で新しい一覧を受け取ります
+   ・受け取った一覧が変わっていたら、ページの系列の選択肢も入れかえます
+     （いま選んである系列は、なくなった系列でも消しません） */
+window.SKY_KEIRETSU_DEFAULT = window.SKY_KEIRETSU.slice();
+(function () {
+  var KEY = "sky_keiretsu_v1";
+  function use(c) {
+    if (!c || !c.list || !c.list.length) return false;
+    window.SKY_KEIRETSU = c.list.slice();
+    window.SKY_KEIRETSU_INFO = c.all || [];
+    return true;
+  }
+  /* 系列の選択肢を入れかえます（系列名が3つ以上ならんでいる選択肢だけ） */
+  function refill(oldList) {
+    var known = {};
+    oldList.concat(window.SKY_KEIRETSU_DEFAULT, window.SKY_KEIRETSU).forEach(function (k) { known[k] = true; });
+    document.querySelectorAll("select").forEach(function (sel) {
+      if (sel.getAttribute("data-kei-fixed")) return;
+      var opts = Array.prototype.slice.call(sel.options);
+      var keiOpts = opts.filter(function (o) { return known[o.value] && o.textContent === o.value; });
+      if (keiOpts.length < 3) return;
+      var cur = sel.value;
+      var first = opts.indexOf(keiOpts[0]);
+      var before = opts.slice(0, first).filter(function (o) { return !known[o.value]; });
+      var after = opts.slice(first).filter(function (o) { return !known[o.value]; });
+      var list = window.SKY_KEIRETSU.slice();
+      if (cur && known[cur] && list.indexOf(cur) < 0) list.push(cur);
+      sel.innerHTML = "";
+      before.forEach(function (o) { sel.appendChild(o); });
+      list.forEach(function (k) { var o = document.createElement("option"); o.value = k; o.textContent = k; sel.appendChild(o); });
+      after.forEach(function (o) { sel.appendChild(o); });
+      sel.value = cur;
+    });
+  }
+  window.skyKeiretsuStore = function (j) {
+    if (!j || j.ok !== true) return;
+    var oldList = (window.SKY_KEIRETSU || []).slice();
+    if (!j.list || !j.list.length) {
+      try { localStorage.removeItem(KEY); } catch (e) {}
+      return;
+    }
+    try { localStorage.setItem(KEY, JSON.stringify({ t: Date.now(), list: j.list, all: j.all || [] })); } catch (e) {}
+    use(j);
+    if (JSON.stringify(oldList) !== JSON.stringify(window.SKY_KEIRETSU)) {
+      var go = function () {
+        refill(oldList);
+        try { document.dispatchEvent(new Event("sky-keiretsu")); } catch (e) {}
+      };
+      if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", go); else go();
+    }
+  };
+  var c = null;
+  try { c = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) {}
+  if (c) use(c);
+  var fresh = c && c.t && (Date.now() - c.t < 10 * 60 * 1000);
+  if (!fresh && window.SKY_GAS_URL && window.fetch) {
+    fetch(window.SKY_GAS_URL + "?action=keiretsuList")
+      .then(function (r) { return r.json(); })
+      .then(window.skyKeiretsuStore)
+      .catch(function () {});
+  }
+})();
 
 /* ---------------- ④ お住まいの地域 ---------------- */
 window.SKY_AREAS = [
