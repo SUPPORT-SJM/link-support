@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<script src="../config.js"></script>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>初期サポート</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --deep:#3B3550; --leaf:#4FB08C; --mist:#EDEAF9;
+    --paper:#F7F6FA; --ink:#22222A; --line:#E2E0EA;
+    --g:#3DAA6E; --y:#E5A823; --r:#E0566A;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:"Zen Kaku Gothic New",sans-serif;background:var(--paper);color:var(--ink);line-height:1.7;font-size:14.5px;}
+  button,select,input{font-family:inherit;}
+  button{cursor:pointer;border:none;}
+
+  .head{background:var(--deep);color:#fff;padding:18px 16px 14px;}
+  .head .in{max-width:1080px;margin:0 auto;padding-right:64px;}
+  .head h1{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:19px;}
+  .head .who{font-size:12px;opacity:.8;margin-top:2px;}
+  .tools{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;align-items:center;}
+  .tools #q,.tools select{padding:8px 12px;border-radius:999px;border:none;font-size:13px;background:#fff;color:#3B3550;}
+  .tools #q{flex:1 1 180px;min-width:150px;}
+  .tools label input{width:15px;height:15px;margin:0;}
+  .tools label{font-size:12.5px;display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.12);padding:6px 11px;border-radius:999px;cursor:pointer;}
+  .tools .back{background:rgba(255,255,255,.14);color:#fff;padding:8px 14px;border-radius:999px;font-size:12.5px;font-weight:700;}
+
+  .bar{max-width:1080px;margin:0 auto;padding:12px 16px 4px;font-size:12.5px;color:#6A6480;display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;}
+  .bar b{color:var(--deep);}
+  .legend span{margin-right:10px;white-space:nowrap;}
+
+  .list{max-width:1080px;margin:0 auto;padding:6px 16px 30px;}
+  .row{background:#fff;border-radius:14px;box-shadow:0 2px 10px rgba(60,50,110,.06);padding:12px 14px;margin-bottom:10px;
+       display:grid;grid-template-columns:minmax(150px,1.1fr) repeat(4,minmax(0,1fr));gap:8px;align-items:center;}
+  .who .nm{font-weight:700;color:var(--deep);font-size:14.5px;}
+  .who .sub{font-size:11px;color:#9A96AE;line-height:1.6;}
+  .chip{display:flex;align-items:flex-start;gap:7px;text-align:left;background:#FAF9FD;border:1.5px solid var(--line);border-radius:11px;padding:8px 9px;min-height:54px;width:100%;}
+  .chip:hover{border-color:#C9C2EC;}
+  .dot{flex:0 0 auto;width:12px;height:12px;border-radius:50%;margin-top:4px;}
+  .dot.g{background:var(--g);} .dot.y{background:var(--y);} .dot.r{background:var(--r);}
+  .chip .t{font-size:10.5px;color:#8A84A0;font-weight:700;line-height:1.4;}
+  .chip .v{font-size:12.5px;color:var(--ink);line-height:1.45;}
+  .empty{text-align:center;color:#8A84A0;padding:40px 0;}
+  @media (max-width:760px){
+    .row{grid-template-columns:1fr 1fr;}
+    .who{grid-column:1 / -1;}
+  }
+
+  .gate{max-width:420px;margin:60px auto;background:#fff;border-radius:18px;padding:26px 22px;text-align:center;box-shadow:0 6px 24px rgba(60,50,110,.1);}
+  .gate p{font-size:13.5px;color:#5A5470;line-height:1.9;margin-bottom:16px;}
+  .gate a{display:inline-block;background:#6E5FB5;color:#fff;text-decoration:none;font-weight:700;padding:12px 22px;border-radius:12px;}
+
+  /* 状態を変える画面 */
+  #ed{display:none;position:fixed;inset:0;z-index:70;background:rgba(30,26,50,.55);align-items:center;justify-content:center;padding:14px;}
+  #ed.show{display:flex;}
+  #ed .sheet{background:#fff;border-radius:18px;width:100%;max-width:460px;max-height:90vh;overflow-y:auto;padding:20px 18px;}
+  #ed h3{font-size:16px;font-weight:900;color:#4A3F7A;}
+  #ed .who2{font-size:12.5px;color:#7A7390;margin-bottom:10px;}
+  .sem{border-top:1px solid #F0EDF9;padding:10px 0;}
+  .sem:first-of-type{border-top:none;}
+  .sem .lb{font-size:13px;font-weight:700;color:var(--deep);margin-bottom:6px;}
+  .states{display:flex;flex-wrap:wrap;gap:6px;}
+  .states button{padding:7px 11px;border-radius:999px;border:1.5px solid #E1DCF2;background:#fff;color:#5A5470;font-size:12.5px;font-weight:700;}
+  .states button.on{background:#6E5FB5;border-color:#6E5FB5;color:#fff;}
+  .dt{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:12px;color:#6A6480;}
+  .dt input{padding:7px 9px;border-radius:9px;border:1.5px solid #E1DCF2;font-size:14px;}
+  .dt .x{background:none;color:#9A96AE;font-size:12px;text-decoration:underline;}
+  .msg{display:none;border-radius:10px;padding:9px 12px;font-size:12.5px;margin:10px 0 0;line-height:1.7;}
+  .msg.err{display:block;background:#FDEBEB;color:#B3352F;}
+  .msg.ok{display:block;background:#EAF7F0;color:#2F7A5C;}
+  .btns{display:flex;gap:8px;margin-top:14px;}
+  .btns button{flex:1;padding:12px;border-radius:11px;font-weight:700;font-size:14px;}
+  .btns .save{background:#6E5FB5;color:#fff;}
+  .btns .save:disabled{opacity:.5;}
+  .btns .close{background:#F0EDF9;color:#6E5FB5;}
+  .upd{font-size:11px;color:#A8A4BC;margin-top:8px;}
+  .verTag{display:block;text-align:center;font-size:11px;color:#B5B1C6;padding:10px 0 24px;font-family:monospace;}
+</style>
+</head>
+<body>
+<script src="../loading.js"></script>
+<script src="../login.js"></script>
+
+<div id="gate" class="gate" style="display:none;">
+  <p id="gateMsg">管理画面からお入りください。</p>
+  <a href="kanri-x7k2m9.html">管理画面へ</a>
+</div>
+
+<div id="app" style="display:none;">
+  <div class="head"><div class="in">
+    <h1>🌱 初期サポート</h1>
+    <div class="who" id="who"></div>
+    <div class="tools">
+      <input id="q" placeholder="名前・番号で検索" oninput="draw()">
+      <select id="fHelper" onchange="draw()"></select>
+      <label><input type="checkbox" id="fNew" onchange="draw()"> 登録3ヶ月以内</label>
+      <label><input type="checkbox" id="fIdle" onchange="draw()"> 30日以上ログインなし</label>
+      <button class="back" onclick="location.href='kanri-x7k2m9.html'">‹ 管理画面へ</button>
+    </div>
+  </div></div>
+  <div class="bar">
+    <span id="count"></span>
+    <span class="legend"><span>🟢 OK</span><span>🟡 そろそろ・返事待ち</span><span>🔴 未案内・日付が過ぎた</span></span>
+  </div>
+  <div class="list" id="list"></div>
+</div>
+
+<div id="ed" onclick="if(event.target===this)closeEd()">
+  <div class="sheet">
+    <h3 id="edTitle"></h3>
+    <div class="who2" id="edWho"></div>
+    <div id="edBody"></div>
+    <div class="msg" id="edMsg"></div>
+    <div class="btns">
+      <button class="close" onclick="closeEd()">とじる</button>
+      <button class="save" id="edSave" onclick="saveEd()">保存する</button>
+    </div>
+    <div class="upd" id="edUpd"></div>
+  </div>
+</div>
+
+<span class="verTag"></span>
+
+<script>
+const GAS_URL = window.SKY_GAS_URL;   /* 共通設定（config.js）から受け取ります */
+const $ = s=>document.querySelector(s);
+const esc = t=>String(t == null ? "" : t).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+/* ================================================================
+   項目と状態
+================================================================ */
+const GROUPS = [
+  { key:"u",   title:"① ユーザーサポート会", items:["u"] },
+  { key:"sem", title:"② LINKセミナー（5種類）", items:["s1","s2","s3","s4","s5"] },
+  { key:"g",   title:"③ グルコン", items:["g"] },
+  { key:"k",   title:"④ チーム交流会", items:["k"] }
+];
+const ITEM_LABEL = { u:"ユーザーサポート会", s1:"通常編", s2:"社長編", s3:"自己ブランディング特化版",
+                     s4:"グループ構築特化版", s5:"新サービス特化版", g:"グルコン", k:"チーム交流会" };
+const STATES = [
+  { v:"",         t:"未案内" },
+  { v:"案内した", t:"案内した（返事待ち）" },
+  { v:"参加予定", t:"参加予定" },
+  { v:"参加済み", t:"参加済み" },
+  { v:"見送り",   t:"今回は見送り" }
+];
+
+let me = null, data = null;
+
+/* ================================================================
+   日付の計算（経過月数・直近3ヶ月）
+================================================================ */
+function today0(){ const d = new Date(); d.setHours(0,0,0,0); return d; }
+function parseD(t){
+  const m = String(t || "").match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})/);
+  return m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : null;
+}
+function md(t){ const d = parseD(t); return d ? (d.getMonth() + 1) + "/" + d.getDate() : ""; }
+function monthsSince(d){
+  const t = today0();
+  let n = (t.getFullYear() - d.getFullYear()) * 12 + (t.getMonth() - d.getMonth());
+  if(t.getDate() < d.getDate()) n--;
+  return Math.max(0, n);
+}
+function within3(d){ return d && monthsSince(d) < 3; }
+
+/* 1つの項目の信号（①③④） */
+function sigOne(key, it){
+  const s = it.s, d = parseD(it.d);
+  if(!s) return { c:"r", v:"未案内" };
+  if(s === "案内した") return { c:"y", v:"返事待ち" + (d ? "（" + md(it.d) + " 案内）" : "") };
+  if(s === "見送り") return { c:"y", v:"今回は見送り" };
+  if(s === "参加予定"){
+    if(!d) return { c:"y", v:"参加予定（日付なし）" };
+    if(d < today0()) return { c:"r", v:md(it.d) + " の予定が過ぎています" };
+    return { c:"y", v:md(it.d) + " に参加予定" };
+  }
+  /* 参加済み */
+  if(!d) return { c:"g", v:"参加済み" };
+  const n = monthsSince(d);
+  const ago = n === 0 ? "今月" : n + "ヶ月前";
+  if(key === "k" && n >= 3) return { c:"y", v:"前回 " + md(it.d) + "（" + ago + "）" };
+  return { c:"g", v:"参加済み " + md(it.d) + "（" + ago + "）" };
+}
+/* セミナー5種のまとめ */
+function sigSem(items){
+  const ks = ["s1","s2","s3","s4","s5"];
+  let done = 0, latest = null, passed = false, moving = false;
+  ks.forEach(k=>{
+    const it = items[k] || {}; const d = parseD(it.d);
+    if(it.s === "参加済み"){ done++; if(d && (!latest || d > latest)) latest = d; }
+    else if(it.s === "参加予定"){ moving = true; if(d && d < today0()) passed = true; }
+    else if(it.s === "案内した" || it.s === "見送り") moving = true;
+  });
+  const last = latest ? "／直近 " + (latest.getMonth() + 1) + "/" + latest.getDate() : "";
+  if(passed) return { c:"r", v:done + "/5 種・予定日が過ぎています" };
+  if(done === 0) return moving ? { c:"y", v:"0/5 種・案内中" } : { c:"r", v:"0/5 種・未案内" };
+  /* 参加した日が入っていないときは、3ヶ月の判定はしません */
+  const recent = latest ? within3(latest) : null;
+  if(recent === false && !moving) return { c:"r", v:done + "/5 種・3ヶ月以上あいています" + last };
+  if(done === 5 && recent !== false) return { c:"g", v:"5/5 種 参加済み" + last };
+  return { c:"y", v:done + "/5 種" + (recent === false ? "・3ヶ月以上あいています" : "") + last };
+}
+function signals(m){
+  return {
+    u: sigOne("u", m.items.u || {}),
+    sem: sigSem(m.items),
+    g: sigOne("g", m.items.g || {}),
+    k: sigOne("k", m.items.k || {})
+  };
+}
+/* 参加予定のいちばん近い日（並べ替えに使います） */
+function nextPlan(m){
+  let best = null;
+  Object.keys(m.items).forEach(k=>{
+    const it = m.items[k]; if(it.s !== "参加予定") return;
+    const d = parseD(it.d); if(d && d >= today0() && (!best || d < best)) best = d;
+  });
+  return best;
+}
+
+/* ================================================================
+   読みこみ
+================================================================ */
+async function api(params){
+  const body = Object.assign({ id:me.id, pin:me.pin, email:me.email || "" }, params);
+  const res = await fetch(GAS_URL, { method:"POST", body:new URLSearchParams(body) });
+  return res.json();
+}
+function gate(t){
+  $("#gateMsg").innerHTML = t;
+  $("#gate").style.display = "block"; $("#app").style.display = "none";
+}
+async function load(){
+  if(typeof skyLoading === "function") skyLoading("サポートの記録を読みこんでいます", "しばらくお待ちください");
+  try{
+    const j = await api({ action:"supportList" });
+    if(typeof skyLoadingDone === "function") skyLoadingDone();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
+    if(!j || j.ok !== true){
+      if(j && j.error === "suplayout"){
+        gate("スプレッドシートの「サポート状況」タブの見出しが、決まった形とちがっています。<br>記録がずれないよう、いまは読み書きを止めています。<br>管理者の方にお知らせください。");
+      }else if(j && (j.error === "noperm" || j.error === "pin" || j.error === "nomember")){
+        gate("この画面は、サポーター以上の方がお使いいただけます。<br>管理画面からログインしてお入りください。");
+      }else{
+        gate("読みこめませんでした。少しおいてお試しください。");
+      }
+      return;
+    }
+    data = j;
+    $("#gate").style.display = "none"; $("#app").style.display = "block";
+    $("#who").textContent = (j.adminName ? j.adminName + "さん" : "") + "｜" + ({ all:"全員", scope:"担当系列の方", kei:"ご自身の系列の方", helper:"ご自身が担当・紹介した方" })[j.viewMode];
+    fillHelpers();
+    draw();
+  }catch(e){
+    if(typeof skyLoadingDone === "function") skyLoadingDone();
+    gate("通信できませんでした。電波のよい場所でお試しください。");
+  }
+}
+function fillHelpers(){
+  const sel = $("#fHelper"), keep = sel.value;
+  const names = {};
+  data.members.forEach(m=>{ if(m.helper) names[m.helper] = m.helperName || ("会員番号 " + m.helper); });
+  const ids = Object.keys(names).sort((a,b)=>names[a].localeCompare(names[b], "ja"));
+  sel.innerHTML = '<option value="">担当者：すべて</option>'
+    + '<option value="__me">担当者：自分</option>'
+    + '<option value="__none">担当者：未設定</option>'
+    + ids.map(id=>`<option value="${esc(id)}">担当者：${esc(names[id])}</option>`).join("");
+  sel.value = keep;
+}
+
+/* ================================================================
+   一覧
+================================================================ */
+function draw(){
+  if(!data) return;
+  const q = $("#q").value.trim().toLowerCase();
+  const fh = $("#fHelper").value;
+  const fNew = $("#fNew").checked, fIdle = $("#fIdle").checked;
+  const t = today0();
+  const sameId = (a,b)=>String(a || "").replace(/^0+/, "") === String(b || "").replace(/^0+/, "");
+  let list = data.members.filter(m=>{
+    if(q && !((m.name || "").toLowerCase().includes(q) || String(m.id).includes(q))) return false;
+    if(fh === "__me" && !sameId(m.helper, data.me)) return false;
+    if(fh === "__none" && m.helper) return false;
+    if(fh && fh !== "__me" && fh !== "__none" && m.helper !== fh) return false;
+    if(fNew){ const d = parseD(m.joined); if(!d || monthsSince(d) >= 3) return false; }
+    if(fIdle){ const d = parseD(m.lastSeen); if(d && (t - d) < 30 * 86400000) return false; }
+    return true;
+  }).map(m=>{ const sg = signals(m); const cs = Object.values(sg).map(x=>x.c);
+    return { m, sg, r: cs.filter(c=>c === "r").length, y: cs.filter(c=>c === "y").length, np: nextPlan(m) }; });
+  /* 🔴が多い方 → 🟡が多い方 → 参加予定が近い方 の順 */
+  list.sort((a,b)=> (b.r - a.r) || (b.y - a.y)
+    || ((a.np ? a.np.getTime() : 9e15) - (b.np ? b.np.getTime() : 9e15))
+    || (a.m.name || "").localeCompare(b.m.name || "", "ja"));
+  const red = list.filter(x=>x.r > 0).length;
+  $("#count").innerHTML = `<b>${list.length}</b> 名を表示中／🔴 がある方 <b>${red}</b> 名`;
+  if(!list.length){ $("#list").innerHTML = '<div class="empty">該当する方がいません</div>'; return; }
+  $("#list").innerHTML = list.map(x=>{
+    const m = x.m;
+    const chip = g=>`<button class="chip" onclick="openEd('${esc(m.id)}','${g.key}')">
+        <span class="dot ${x.sg[g.key].c}"></span>
+        <span><span class="t">${esc(g.title)}</span><br><span class="v">${esc(x.sg[g.key].v)}</span></span></button>`;
+    return `<div class="row">
+      <div class="who"><div class="nm">${esc(m.name || "(名前未登録)")}</div>
+        <div class="sub">${esc(m.id)}${m.keiretsu ? "｜" + esc(m.keiretsu) : ""}<br>担当：${esc(m.helperName || (m.helper ? "会員番号 " + m.helper : "未設定"))}${m.joined ? "｜登録 " + esc(m.joined) : ""}</div></div>
+      ${GROUPS.map(chip).join("")}
+    </div>`;
+  }).join("");
+}
+
+/* ================================================================
+   状態を変える
+================================================================ */
+let edMember = null, edGroup = null, edDraft = {};
+function openEd(id, gkey){
+  edMember = data.members.find(m=>m.id === id);
+  edGroup = GROUPS.find(g=>g.key === gkey);
+  if(!edMember || !edGroup) return;
+  edDraft = {};
+  edGroup.items.forEach(k=>{ const it = edMember.items[k] || {}; edDraft[k] = { s: it.s || "", d: it.d || "" }; });
+  $("#edTitle").textContent = edGroup.title;
+  $("#edWho").textContent = (edMember.name || "") + "さん（" + edMember.id + "）";
+  $("#edMsg").className = "msg";
+  $("#edUpd").textContent = edMember.updated ? "最後の更新：" + edMember.updated + "　" + (edMember.updatedBy || "") : "";
+  drawEd();
+  $("#ed").classList.add("show");
+}
+function closeEd(){ $("#ed").classList.remove("show"); }
+function toInputDate(t){ const d = parseD(t); if(!d) return ""; const p = n=>String(n).padStart(2,"0"); return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()); }
+function todayText(){ const d = today0(); return d.getFullYear() + "/" + (d.getMonth() + 1) + "/" + d.getDate(); }
+function drawEd(){
+  $("#edBody").innerHTML = edGroup.items.map(k=>{
+    const dr = edDraft[k];
+    const dateLabel = dr.s === "参加予定" ? "参加する日" : dr.s === "参加済み" ? "参加した日" : dr.s === "案内した" ? "案内した日" : "日付";
+    return `<div class="sem">
+      ${edGroup.items.length > 1 ? `<div class="lb">${esc(ITEM_LABEL[k])}</div>` : ""}
+      <div class="states">${STATES.map(st=>`<button type="button" class="${dr.s === st.v ? "on" : ""}" onclick="pickState('${k}','${st.v}')">${esc(st.t)}</button>`).join("")}</div>
+      ${dr.s ? `<div class="dt">${dateLabel}<input type="date" value="${toInputDate(dr.d)}" onchange="pickDate('${k}',this.value)">
+        ${dr.d ? `<button type="button" class="x" onclick="pickDate('${k}','')">日付を消す</button>` : ""}</div>` : ""}
+    </div>`;
+  }).join("");
+}
+function pickState(k, v){
+  const dr = edDraft[k];
+  dr.s = v;
+  if(!v) dr.d = "";
+  /* 案内した・参加済みは、日付が空なら今日を入れておきます（あとで直せます） */
+  else if(!dr.d && (v === "案内した" || v === "参加済み")) dr.d = todayText();
+  else if(v === "参加予定" || v === "見送り"){ const d = parseD(dr.d); if(v === "見送り") dr.d = ""; else if(d && d < today0()) dr.d = ""; }
+  drawEd();
+}
+function pickDate(k, v){ edDraft[k].d = v ? v.replace(/-/g, "/") : ""; drawEd(); }
+async function saveEd(){
+  const changed = edGroup.items.filter(k=>{ const it = edMember.items[k] || {}; return (it.s || "") !== edDraft[k].s || (it.d || "") !== edDraft[k].d; });
+  if(!changed.length){ closeEd(); return; }
+  const noDate = changed.filter(k=>edDraft[k].s === "参加予定" && !edDraft[k].d);
+  if(noDate.length){ $("#edMsg").className = "msg err"; $("#edMsg").textContent = "参加予定の日付を入れてください"; return; }
+  if(typeof skyBusy === "function" && skyBusy("sup")) return;
+  const btn = $("#edSave"); btn.disabled = true;
+  try{
+    for(const k of changed){
+      const j = await api({ action:"supportSet", target: edMember.id, item:k, state: edDraft[k].s, date: edDraft[k].d });
+      if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
+      if(!j || j.ok !== true){
+        $("#edMsg").className = "msg err";
+        $("#edMsg").textContent = ({ outofscope:"この方の記録は、担当の範囲外のため変えられません",
+          busy:"いま混み合っています。少しおいてお試しください",
+          suplayout:"「サポート状況」タブの見出しが決まった形とちがうため、保存を止めました。管理者の方にお知らせください",
+          baddate:"日付の形がちがいます" })[j && j.error] || "保存できませんでした";
+        return;
+      }
+      edMember.items[k] = { s: j.s, d: j.d };
+      edMember.updated = j.updated; edMember.updatedBy = j.updatedBy;
+    }
+    closeEd();
+    draw();
+  }catch(e){
+    $("#edMsg").className = "msg err"; $("#edMsg").textContent = "通信できませんでした。電波のよい場所でお試しください";
+  }finally{
+    btn.disabled = false;
+    if(typeof skyBusyEnd === "function") skyBusyEnd("sup");
+  }
+}
+
+/* ================================================================
+   はじめに：管理画面のログインをそのまま使います
+================================================================ */
+(function(){
+  try{ const raw = localStorage.getItem("skyarc_member"); if(raw && raw !== "null") me = JSON.parse(raw); }catch(e){}
+  if(!me || !me.id || !me.pin){ gate("管理画面からログインしてお入りください。"); return; }
+  load();
+})();
+</script>
+<script src="../menu.js"></script>
+</body>
+</html>
