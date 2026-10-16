@@ -296,24 +296,37 @@
 #bulkModal .bk-msg.ok{display:block;background:#EAF7F0;color:#2F7A5C;}
 #bulkModal .bk-root-link{font-size:12px;margin:-2px 0 10px;}
 #bulkModal .bk-root-link a{color:#6E5FB5;font-weight:700;}
-/* 系列の起点 */
-#rootModal{display:none;position:fixed;inset:0;z-index:78;background:rgba(30,26,50,.55);align-items:center;justify-content:center;padding:14px;}
-#rootModal.show{display:flex;}
-#rootModal .sheet{background:#fff;border-radius:18px;width:100%;max-width:680px;max-height:90vh;overflow-y:auto;padding:20px 18px;}
-#rootModal h3{font-size:16px;font-weight:900;color:#4A3F7A;margin-bottom:6px;}
-#rootModal .lead{font-size:12.5px;color:#6A6480;line-height:1.9;margin-bottom:10px;}
-#rootModal .rt-wrap{overflow-x:auto;border:1.5px solid #E4E0F0;border-radius:11px;margin:8px 0 12px;}
-#rootModal table{border-collapse:collapse;font-size:12px;min-width:100%;}
-#rootModal th,#rootModal td{padding:7px 8px;border-bottom:1px solid #F0EDF9;text-align:left;white-space:nowrap;}
-#rootModal .rt-form{background:#F6F3FE;border:1.5px solid #D9D2F3;border-radius:12px;padding:12px 13px;}
-#rootModal .rt-form label{display:block;font-size:12px;font-weight:700;color:#4A3F7A;margin:8px 0 4px;}
-#rootModal .rt-form select,#rootModal .rt-form input{width:100%;padding:9px 10px;border-radius:9px;border:1.5px solid #D9D2F3;font-size:14px;font-family:inherit;background:#fff;}
-#rootModal .bk-btn{padding:11px 16px;border-radius:11px;border:none;background:#6E5FB5;color:#fff;font-weight:700;font-size:13.5px;cursor:pointer;font-family:inherit;margin-top:10px;}
-#rootModal .rt-del{padding:5px 10px;border-radius:8px;border:1.5px solid #E4E0F0;background:#fff;color:#8A84A0;font-size:11.5px;cursor:pointer;font-family:inherit;}
-#rootModal .bk-msg{display:none;border-radius:10px;padding:10px 12px;font-size:12.5px;margin:8px 0;line-height:1.8;}
-#rootModal .bk-msg.err{display:block;background:#FDEBEB;color:#B3352F;}
-#rootModal .bk-msg.ok{display:block;background:#EAF7F0;color:#2F7A5C;}
-#rootModal .bk-close{display:block;width:100%;margin-top:12px;padding:12px;border-radius:11px;border:none;background:#F0EDF9;color:#6E5FB5;font-weight:700;cursor:pointer;font-family:inherit;}
+/* 系列のつながり */
+#treeModal{display:none;position:fixed;inset:0;z-index:79;background:rgba(30,26,50,.55);align-items:center;justify-content:center;padding:14px;}
+#treeModal.show{display:flex;}
+#treeModal .sheet{background:#fff;border-radius:18px;width:100%;max-width:720px;max-height:92vh;overflow-y:auto;padding:20px 18px;}
+#treeModal h3{font-size:16px;font-weight:900;color:#4A3F7A;margin-bottom:6px;}
+#treeModal .lead{font-size:12.5px;color:#6A6480;line-height:1.9;margin-bottom:10px;}
+#treeModal .tr-root{font-weight:900;color:#3B3550;font-size:14px;padding:8px 10px;background:#F0EDF9;border-radius:10px;margin-top:6px;}
+#treeModal .tr-node{display:flex;align-items:flex-start;gap:8px;width:100%;text-align:left;background:#fff;border:1.5px solid #E4E0F0;border-radius:10px;padding:8px 10px;margin-top:6px;cursor:pointer;font-family:inherit;}
+#treeModal .tr-node:hover{border-color:#C9C2EC;}
+#treeModal .tr-node.sel{border-color:#6E5FB5;background:#F6F3FE;}
+#treeModal .tr-node.gone{background:#F7F6F9;color:#9A96AE;}
+#treeModal .tr-nm{font-weight:700;font-size:13.5px;}
+#treeModal .tr-sub{font-size:11.5px;color:#8A84A0;line-height:1.6;}
+#treeModal .tr-badge{display:inline-block;font-size:10.5px;font-weight:700;border-radius:99px;padding:1px 8px;margin-left:6px;background:#EEE;color:#888;}
+#treeModal .tr-badge.chg{background:#FFF3D6;color:#8A6D00;}
+#treeModal .tr-form{background:#F6F3FE;border:1.5px solid #D9D2F3;border-radius:12px;padding:12px 13px;margin:10px 0;}
+#treeModal .tr-form label{display:block;font-size:12px;font-weight:700;color:#4A3F7A;margin:8px 0 4px;}
+#treeModal .tr-form select,#treeModal .tr-form input[type=text]{width:100%;padding:9px 10px;border-radius:9px;border:1.5px solid #D9D2F3;font-size:14px;font-family:inherit;background:#fff;}
+#treeModal .tr-form input[readonly]{background:#EFEDF5;color:#6A6480;}
+#treeModal .tr-radio{display:flex;gap:14px;font-size:13.5px;}
+#treeModal .tr-radio label{display:flex;align-items:center;gap:5px;margin:0;font-weight:500;color:#3B3550;}
+#treeModal .tr-note{font-size:11.5px;color:#8A6D00;background:#FFF3D6;border-radius:9px;padding:7px 10px;margin-top:8px;line-height:1.7;}
+#treeModal .row2{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
+#treeModal .bk-btn{padding:11px 16px;border-radius:11px;border:none;background:#6E5FB5;color:#fff;font-weight:700;font-size:13.5px;cursor:pointer;font-family:inherit;}
+#treeModal .bk-btn.sub{background:#F0EDF9;color:#6E5FB5;}
+#treeModal .bk-btn:disabled{opacity:.45;cursor:default;}
+#treeModal .bk-msg{display:none;border-radius:10px;padding:10px 12px;font-size:12.5px;margin:8px 0;line-height:1.8;}
+#treeModal .bk-msg.err{display:block;background:#FDEBEB;color:#B3352F;}
+#treeModal .bk-msg.ok{display:block;background:#EAF7F0;color:#2F7A5C;}
+#treeModal .bk-close{display:block;width:100%;margin-top:12px;padding:12px;border-radius:11px;border:none;background:#F0EDF9;color:#6E5FB5;font-weight:700;cursor:pointer;font-family:inherit;}
+
 .req-card{background:#FFFBF2;border:1.5px solid #F0D9A8;border-radius:13px;
   padding:14px 15px;margin-bottom:11px;}
 .req-top{display:flex;align-items:baseline;gap:9px;margin-bottom:3px;flex-wrap:wrap;}
@@ -428,6 +441,7 @@
         <button class="btn-add" id="btnReq" onclick="openReqList()" style="display:none;background:#F2B33D;">
           🔔 新規登録の依頼 <span id="reqCount">0</span></button>
         <button class="btn-add" id="btnBulk" onclick="openBulk()" style="display:none;background:#5E8FD8;">📥 まとめて登録</button>
+        <button class="btn-add" id="btnTree" onclick="openTree()" style="display:none;background:#8A6FD1;">🌳 系列のつながり</button>
         <button class="btn-add" id="btnSupport" onclick="location.href='shoki-support-k5w2.html'" style="background:#3DAA6E;">🌱 初期サポート</button>
         <button id="btnStats" onclick="openStats()" style="display:none;">📊 アクセス</button>
         <button id="btnDummy" onclick="toggleDummy()" style="display:none;">🧪 テストモード</button>
@@ -461,7 +475,7 @@
         </div>
         <div class="field">
           <label style="display:block;font-size:12.5px;font-weight:700;color:var(--deep);margin-bottom:5px;">系列</label>
-          <select id="findKeiretsu"></select>
+          <select id="findKeiretsu" data-kei-fixed="1"></select>
         </div>
         <button class="btn-find" onclick="findMember()">この方を呼び出す</button>
         <p class="hint">※ 会員番号と系列の両方が合っていないと開けません。<br>
@@ -553,11 +567,11 @@
         すでに名簿にある会員番号の方は、上書きせずにとばします。</p>
       <div class="bk-kei">
         <label for="bkKei">この名簿は、どの系列の名簿ですか？</label>
-        <select id="bkKei"></select>
+        <select id="bkKei" data-kei-fixed="1"></select>
         <p class="bk-kei-note" id="bkKeiNote"></p>
       </div>
-      <p class="bk-root-link"><a href="#" onclick="openRoots();return false;">🌳 系列の起点</a>
-        … 上の系列の名簿に、下で分かれた系列の方がまざっているときの設定です</p>
+      <p class="bk-root-link">🌳 上の系列の名簿に、下で分かれた系列の方がまざっていても、紹介者をたどって見分けます。
+        見分けには「系列のつながり」の各系列の代表の方を使います<span id="bkTreeLink"></span>。</p>
       <textarea id="bkText" placeholder="ここに貼りつけ（1行目に見出しがあると、そのまま読み取れます）"></textarea>
       <div class="row2">
         <input type="file" id="bkFile" accept=".csv,.tsv,.txt,.xlsx,.xls">
@@ -591,27 +605,27 @@
   </div>
 </div>
 
-<div id="rootModal" onclick="if(event.target===this)closeRoots()">
+<div id="treeModal" onclick="if(event.target===this)closeTree()">
   <div class="sheet">
-    <h3>🌳 系列の起点</h3>
-    <p class="lead">上の系列の名簿には、その下で分かれた系列の方もまざっています。<br>
-      「この方から下は〇〇系列」という<b>起点の方</b>を登録しておくと、まとめて登録のときに<b>紹介者をたどって見分け</b>、
-      ほかの系列の方は登録せずにとばします。<br>
-      名簿を入れる系列の起点（例：いちばん上の代表の方）も登録しておくと、より確実に見分けられます。</p>
-    <div class="bk-msg" id="rtMsg"></div>
-    <div class="rt-wrap"><table id="rtTbl"></table></div>
-    <div class="rt-form" id="rtForm">
-      <label for="rtKei">系列</label>
-      <select id="rtKei"></select>
-      <label for="rtId">起点の方の会員番号</label>
-      <input id="rtId" inputmode="numeric" placeholder="例：00012345">
-      <label for="rtName">起点の方のお名前</label>
-      <input id="rtName" placeholder="例：〇〇さん">
-      <label for="rtMemo">メモ（どこから分かれたかなど）</label>
-      <input id="rtMemo" placeholder="例：フェアリーテイルの中で分かれた系列">
-      <button class="bk-btn" id="rtSave" onclick="saveRoot()">起点を登録する</button>
+    <h3>🌳 系列のつながり</h3>
+    <p class="lead">Skyarc（公式チーム）の中の系列と、その中で分かれた系列のつながりです。<br>
+      系列をえらぶと、上の系列・代表の方・状態を直せます。直したら、いちばん下の「保存する」を押してください。<br>
+      各系列の<b>代表の方</b>は、まとめて登録で「ほかの系列の方」を見分けるときの起点になります。<br>
+      系列がなくなったときは「なくなった」にして、<b>吸収先</b>（未定 または ほかの系列）をえらびます。
+      なくなった系列は、登録画面などの選択肢に出なくなります（会員名簿の系列は書きかえません）。</p>
+    <div class="bk-msg" id="trMsg"></div>
+    <div id="trSeed" style="display:none;" class="tr-form">
+      <p style="font-size:13px;line-height:1.8;color:#4A3F7A;">まだ「系列のつながり」が作られていません。<br>
+        今の系列の一覧（<span id="trSeedN"></span>系列）から作りはじめます。作ったあと、上の系列や代表の方を直して保存してください。</p>
+      <div class="row2"><button class="bk-btn" onclick="seedTree()">今の系列の一覧から作る</button></div>
     </div>
-    <button class="bk-close" onclick="closeRoots()">とじる</button>
+    <div id="trForm" class="tr-form" style="display:none;"></div>
+    <div id="trTree"></div>
+    <div class="row2">
+      <button class="bk-btn sub" id="trAdd" onclick="addTreeNode()">＋ 系列を追加</button>
+      <button class="bk-btn" id="trSave" onclick="saveTree()" disabled>保存する</button>
+    </div>
+    <button class="bk-close" onclick="closeTree()">とじる</button>
   </div>
 </div>
 
@@ -656,7 +670,7 @@
 
       <div class="mm-f">
         <label>系列</label>
-        <select id="mmKeiretsu"></select>
+        <select id="mmKeiretsu" data-kei-fixed="1"></select>
       </div>
 
       <div class="mm-f">
@@ -877,11 +891,16 @@ const AREAS = [
 ];
 
 /* 系列リスト ※育成サイト側と同じものに揃えてください */
-const KEIRETSU = [
-  "🚀SkyExceed","🦅Zenith1","🏰Utop","🌟グローハピネス🌟","🥷HOT STUFF⚜️",
-  "TELLUS.","FEAT","🌬️ザ・クラウドブルー(蒼雲)","✈️JET RISE","✨アフロディーテ",
-  "⭐️ルミナス","エネルギー🔥","💎プリズム","📚FairyTail","ミラメリ🪄","🪽HERO","♾️ZERO♾️",
-];
+/* 系列の一覧は、共通設定（config.js）が「系列のつながり」から受け取ったものを使います
+   ・keiActive() … いまある系列（選択肢に出すもの）
+   ・keiWith(list) … いまある系列 ＋ すでに入っている系列（なくなった系列でも消さないように） */
+function keiActive(){ return (window.SKY_KEIRETSU || []).slice(); }
+function keiWith(cur){
+  const a = keiActive();
+  (cur || []).forEach(k=>{ if(k && a.indexOf(k) < 0) a.push(k); });
+  return a;
+}
+function keiGoneMark(k){ return keiActive().indexOf(k) < 0 ? "（なくなった系列）" : ""; }
 const $ = (s)=>document.querySelector(s);
 const PIN_RESET_URL = GAS_URL;
 let admin = null;       // {id,pin,email}
@@ -1493,6 +1512,7 @@ async function load(isLogin){
     $("#findArea").style.display = "none";
     $("#btnAdd").style.display = j.isFull ? "inline-block" : "none";
     $("#btnBulk").style.display = (j.isFull || j.isKeiRep || j.isAdv) ? "inline-block" : "none";
+    $("#btnTree").style.display = j.isFull ? "inline-block" : "none";
 
     const lvl = j.isFull ? "全体管理"
               : j.isKeiRep ? "系列代表"
@@ -1674,12 +1694,12 @@ function openScope(id){
     (m.name || "(名前未登録)") + "さん(" + m.id + ")";
   document.getElementById("smOwn").textContent =
     "所属系列「" + (m.keiretsu || "未設定") + "」は自動で担当に含まれます。その先の系列だけ選んでください。";
-  document.getElementById("smList").innerHTML = KEIRETSU.map((k,i)=>{
+  document.getElementById("smList").innerHTML = keiWith(selected).map((k,i)=>{
     const on = selected.indexOf(k) >= 0;
     return `<label class="sm-item ${on?'checked':''}" id="smi_${i}">
       <input type="checkbox" value="${k}" ${on?'checked':''}
         onchange="document.getElementById('smi_${i}').classList.toggle('checked', this.checked)">
-      <span>${k}</span></label>`;
+      <span>${k}${keiGoneMark(k)}</span></label>`;
   }).join("");
   document.getElementById("scopeModal").classList.add("show");
 }
@@ -1818,7 +1838,7 @@ function openMember(m){
   // 系列セレクト
   const ksel = document.getElementById("mmKeiretsu");
   ksel.innerHTML = '<option value="">選択してください</option>'
-    + KEIRETSU.map(k=>`<option value="${k}">${k}</option>`).join("");
+    + keiWith(m && m.keiretsu ? [m.keiretsu] : []).map(k=>`<option value="${k}">${k}${keiGoneMark(k)}</option>`).join("");
 
   document.getElementById("mmId").value = m ? m.id : "";
   const lw = document.getElementById("mmLinkWrap");
@@ -1895,12 +1915,12 @@ function openMember(m){
 
   // 担当系列
   const scope = m ? String(m.scope||"").split(/[,、\s]+/).filter(x=>x) : [];
-  document.getElementById("mmScopeList").innerHTML = KEIRETSU.map((k,i)=>{
+  document.getElementById("mmScopeList").innerHTML = keiWith(scope).map((k,i)=>{
     const on = scope.indexOf(k) >= 0;
     return `<label class="sm-item ${on?'checked':''}" id="mms_${i}" style="font-size:12px;padding:7px 9px;">
       <input type="checkbox" value="${k}" ${on?'checked':''}
         onchange="document.getElementById('mms_${i}').classList.toggle('checked', this.checked)">
-      <span>${k}</span></label>`;
+      <span>${k}${keiGoneMark(k)}</span></label>`;
   }).join("");
   updateScopeVisibility();
   markChecks();
@@ -2019,7 +2039,7 @@ function bkNorm(t){ let x = String(t == null ? "" : t); try{ x = x.normalize("NF
 
 const BK_MULTI = "__multi__";
 function bkAllowedKei(){
-  if(data && data.isFull) return KEIRETSU.slice();
+  if(data && data.isFull) return keiActive();
   const sc = (data && data.scope) || [];
   const own = (data && data.myKei) || "";
   /* ご自身の系列をいちばん上に */
@@ -2047,93 +2067,238 @@ function openBulk(){
         : "ほかの系列の方から名簿を預かったときは、その系列をえらんでください。";
   };
   ks.onchange = upd; upd();
+  document.getElementById("bkTreeLink").innerHTML = (data && data.isFull)
+    ? '（<a href="#" onclick="openTree();return false;">系列のつながりを見る</a>）' : "（管理者・チーム代表の方が設定します）";
   bulkShow(1);
   document.getElementById("bulkModal").classList.add("show");
 }
 function closeBulk(){ document.getElementById("bulkModal").classList.remove("show"); }
 
 /* ================================================================
-   系列の起点（登録・一覧・削除）
+   系列のつながり（管理者・チーム代表の方だけ）
+   ・下書きを画面の中で直して、「保存する」でまとめて保存します
+   ・系列の行は消せません（なくなったときは「なくなった」にします）
 ================================================================ */
-let rtCanEdit = false;
-function rtSay(t, cls){ const e = document.getElementById("rtMsg"); e.className = "bk-msg " + (cls || ""); e.innerHTML = t || ""; }
-async function rtCall(params){
+let trRows = [], trSaved = "", trSel = -1, trLegacy = [];
+function trSay(t, cls){ const e = document.getElementById("trMsg"); e.className = "bk-msg " + (cls || ""); e.innerHTML = t || ""; }
+async function trCall(params){
   const body = Object.assign({ id:admin.id, pin:admin.pin, email:admin.email, dummy: dummyMode ? "1" : "0" }, params);
   const res = await fetch(GAS_URL, { method:"POST", body:new URLSearchParams(body) });
   return res.json();
 }
-async function openRoots(){
-  const ks = document.getElementById("rtKei");
-  ks.innerHTML = '<option value="">えらんでください</option>' + KEIRETSU.map(k=>`<option value="${bkEsc(k)}">${bkEsc(k)}</option>`).join("");
-  ["rtId","rtName","rtMemo"].forEach(id=>{ document.getElementById(id).value = ""; });
-  rtSay("");
-  document.getElementById("rtTbl").innerHTML = "";
-  document.getElementById("rootModal").classList.add("show");
-  await loadRoots();
-}
-function closeRoots(){ document.getElementById("rootModal").classList.remove("show"); }
-async function loadRoots(){
-  if(typeof skyLoading === "function") skyLoading("系列の起点を読みこんでいます", "しばらくお待ちください");
+function trPack(r){ return { kei:r.kei, parent:r.parent || "", repId:r.repId || "", repName:r.repName || "", state:r.state || "あり", absorb:r.state === "なくなった" ? (r.absorb || "未定") : "", memo:r.memo || "" }; }
+function trDirty(){ return JSON.stringify(trRows.map(trPack)) !== trSaved; }
+function trUpdateSave(){ document.getElementById("trSave").disabled = !trRows.length || !trDirty(); }
+
+async function openTree(){
+  if(!data || !data.isFull) return;
+  trSel = -1; trSay("");
+  document.getElementById("trForm").style.display = "none";
+  document.getElementById("treeModal").classList.add("show");
+  if(typeof skyLoading === "function") skyLoading("系列のつながりを読みこんでいます", "しばらくお待ちください");
   try{
-    const j = await rtCall({ action:"keiRootList" });
+    const j = await trCall({ action:"keiTree" });
     if(typeof skyLoadingDone === "function") skyLoadingDone();
-    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
-    if(!j || j.ok !== true){ rtSay("読みこめませんでした", "err"); return; }
-    rtCanEdit = j.canEdit === true;
-    document.getElementById("rtForm").style.display = rtCanEdit ? "block" : "none";
-    const tb = document.getElementById("rtTbl");
-    tb.innerHTML = (j.roots || []).length
-      ? "<tr><th>系列</th><th>起点の方</th><th>メモ</th><th>登録した方</th><th></th></tr>"
-        + j.roots.map(r=>`<tr><td>${bkEsc(r.kei)}</td><td>${bkEsc(r.name)}<br><span style="color:#A8A4BC;">${bkEsc(r.id)}</span></td>`
-          + `<td style="white-space:normal;min-width:140px;">${bkEsc(r.memo)}</td><td>${bkEsc(r.by)}<br><span style="color:#A8A4BC;">${bkEsc(r.date)}</span></td>`
-          + `<td>${rtCanEdit ? `<button class="rt-del" onclick="deleteRoot('${bkEsc(r.id)}','${bkEsc(r.name || r.id)}')">消す</button>` : ""}</td></tr>`).join("")
-      : '<tr><td style="color:#8A84A0;">まだ登録はありません</td></tr>';
-    if(!rtCanEdit) rtSay("起点の登録は、系列代表・チーム代表・管理者の方ができます。", "ok");
-  }catch(e){
-    if(typeof skyLoadingDone === "function") skyLoadingDone();
-    rtSay("通信できませんでした。電波のよい場所でお試しください", "err");
-  }
-}
-async function saveRoot(){
-  const kei = document.getElementById("rtKei").value;
-  const rid = bkNorm(document.getElementById("rtId").value).replace(/\s/g, "");
-  const nm = bkNorm(document.getElementById("rtName").value);
-  if(!kei){ rtSay("系列をえらんでください", "err"); return; }
-  if(!/^\d+$/.test(rid)){ rtSay("会員番号を数字で入れてください", "err"); return; }
-  if(typeof skyBusy === "function" && skyBusy("root")) return;
-  const btn = document.getElementById("rtSave"); btn.disabled = true;
-  try{
-    const j = await rtCall({ action:"keiRootSave", kei:kei, rootId:rid, rootName:nm, memo: bkNorm(document.getElementById("rtMemo").value) });
     if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
     if(!j || j.ok !== true){
-      rtSay(({ dup: "この会員番号は、すでに「" + bkEsc(j && j.kei) + "」の起点として登録されています",
-               noperm:"起点の登録は、系列代表・チーム代表・管理者の方ができます",
-               busy:"いま混み合っています。少しおいてお試しください" })[j && j.error] || "登録できませんでした", "err");
+      trSay(({ treelayout:"スプレッドシートの「系列のつながり」タブの見出しが、決まった形とちがっています。ずれないよう、読み書きを止めています。",
+               noperm:"この画面は、管理者・チーム代表の方がお使いいただけます" })[j && j.error] || "読みこめませんでした", "err");
+      trRows = []; drawTree(); return;
+    }
+    trRows = (j.rows || []).map(r=>Object.assign({}, r));
+    trLegacy = j.legacyRoots || [];
+    trSaved = JSON.stringify(trRows.map(trPack));
+    drawTree();
+  }catch(e){
+    if(typeof skyLoadingDone === "function") skyLoadingDone();
+    trSay("通信できませんでした。電波のよい場所でお試しください", "err");
+  }
+}
+function closeTree(){
+  if(trDirty() && trRows.length && !confirm("保存していない変更があります。とじてもよろしいですか？")) return;
+  document.getElementById("treeModal").classList.remove("show");
+}
+
+/* はじめて作るとき：今の系列の一覧（config.js）から。前の「系列の起点」があれば代表の方として引きつぎます */
+function seedTree(){
+  const base = (window.SKY_KEIRETSU_DEFAULT || window.SKY_KEIRETSU || []).slice();
+  trRows = base.map(k=>{
+    const lg = trLegacy.find(x=>bkKeiKey(x.kei) === bkKeiKey(k));
+    return { kei:k, parent:"", repId: lg ? lg.id : "", repName: lg ? lg.name : "", state:"あり", absorb:"", memo:"", _new:true };
+  });
+  trSay("今の系列の一覧から作りました。上の系列・代表の方を直して「保存する」を押してください（まだ保存されていません）。", "ok");
+  drawTree();
+}
+
+/* 下にある系列（自分をふくまない） */
+function trDescendants(kei){
+  if(!kei) return [];   /* 追加したばかりで名前がまだない系列には、下の系列はありません */
+  const out = [], stack = [kei];
+  while(stack.length){
+    const k = stack.pop();
+    trRows.forEach(r=>{ if(r.parent === k && out.indexOf(r.kei) < 0 && r.kei !== kei){ out.push(r.kei); stack.push(r.kei); } });
+  }
+  return out;
+}
+
+function drawTree(){
+  document.getElementById("trSeed").style.display = trRows.length ? "none" : "block";
+  document.getElementById("trSeedN").textContent = (window.SKY_KEIRETSU_DEFAULT || window.SKY_KEIRETSU || []).length;
+  document.getElementById("trAdd").style.display = trRows.length ? "inline-block" : "none";
+  const names = trRows.map(r=>r.kei);
+  const saved = JSON.parse(trSaved || "[]");
+  const node = (r, depth)=>{
+    const i = trRows.indexOf(r);
+    const old = saved.find(x=>x.kei === r.kei);
+    const chg = !old || JSON.stringify(old) !== JSON.stringify(trPack(r));
+    const gone = r.state === "なくなった";
+    const rep = r.repName || r.repId ? "代表：" + bkEsc(r.repName || "") + (r.repId ? "（" + bkEsc(r.repId) + "）" : "") : "代表：未設定";
+    return `<button type="button" class="tr-node ${gone ? "gone" : ""} ${i === trSel ? "sel" : ""}" style="margin-left:${depth * 22}px;width:calc(100% - ${depth * 22}px);" onclick="pickTree(${i})">
+      <span>${depth ? "└" : "●"}</span>
+      <span><span class="tr-nm">${r.kei ? bkEsc(r.kei) : "（新しい系列）"}</span>${gone ? '<span class="tr-badge">なくなった</span>' : ""}${chg ? '<span class="tr-badge chg">未保存</span>' : ""}
+        <br><span class="tr-sub">${rep}${gone ? "　吸収先：" + bkEsc(r.absorb || "未定") : ""}${r.memo ? "<br>" + bkEsc(r.memo) : ""}</span></span></button>`;
+  };
+  const walk = (parent, depth, seen)=> trRows
+    .filter(r=> (parent === "" ? (!r.parent || names.indexOf(r.parent) < 0) : r.parent === parent) && seen.indexOf(r.kei) < 0)
+    .map(r=> node(r, depth) + (r.kei ? walk(r.kei, depth + 1, seen.concat([r.kei])) : "")).join("");
+  document.getElementById("trTree").innerHTML = trRows.length
+    ? '<div class="tr-root">🏢 Skyarc（公式チーム）</div>' + walk("", 1, []) : "";
+  trUpdateSave();
+}
+
+function pickTree(i){
+  trSel = i;
+  const r = trRows[i];
+  const below = trDescendants(r.kei);
+  const parents = trRows.filter(x=>x.kei !== r.kei && below.indexOf(x.kei) < 0).map(x=>x.kei);
+  const absorbs = trRows.filter(x=>x.kei !== r.kei && x.state !== "なくなった").map(x=>x.kei);
+  const opt = (v, t, on)=>`<option value="${bkEsc(v)}" ${on ? "selected" : ""}>${bkEsc(t)}</option>`;
+  const kids = trRows.filter(x=>x.parent === r.kei).map(x=>x.kei);
+  const f = document.getElementById("trForm");
+  f.innerHTML = `
+    <label>系列の名前</label>
+    <input type="text" id="trKei" value="${bkEsc(r.kei)}" ${r._new ? "" : "readonly"} placeholder="例：🌈レインボー">
+    ${r._new ? "" : '<p style="font-size:11px;color:#8A84A0;margin-top:3px;">保存ずみの系列の名前は変えられません（会員名簿の系列とずれないように）</p>'}
+    <label>上の系列（どの系列の中にあるか）</label>
+    <select id="trParent" data-kei-fixed="1">${opt("", "Skyarc（公式チーム）のすぐ下", !r.parent)}${parents.map(k=>opt(k, k + "の中", r.parent === k)).join("")}</select>
+    <label>代表の方の会員番号</label>
+    <input type="text" id="trRepId" inputmode="numeric" value="${bkEsc(r.repId)}" placeholder="例：00012345">
+    <label>代表の方のお名前</label>
+    <input type="text" id="trRepName" value="${bkEsc(r.repName)}" placeholder="例：〇〇さん">
+    <label>状態</label>
+    <div class="tr-radio">
+      <label><input type="radio" name="trState" value="あり" ${r.state !== "なくなった" ? "checked" : ""} onchange="trStateUi()"> あり</label>
+      <label><input type="radio" name="trState" value="なくなった" ${r.state === "なくなった" ? "checked" : ""} onchange="trStateUi()"> なくなった</label>
+    </div>
+    <div id="trAbsorbWrap">
+      <label>吸収先（どの系列に入るか）</label>
+      <select id="trAbsorb" data-kei-fixed="1">${opt("未定", "未定", !r.absorb || r.absorb === "未定")}${absorbs.map(k=>opt(k, k, r.absorb === k)).join("")}</select>
+      ${kids.length ? `<div class="tr-note">この系列の中に「${kids.map(bkEsc).join("」「")}」があります。必要なら、そちらの上の系列も直してください。</div>` : ""}
+    </div>
+    <label>メモ</label>
+    <input type="text" id="trMemo" value="${bkEsc(r.memo)}" placeholder="例：〇年〇月に〇〇から分かれた">
+    <div class="bk-msg" id="trFormMsg"></div>
+    <div class="row2">
+      <button class="bk-btn" onclick="applyTree()">この内容にする</button>
+      <button class="bk-btn sub" onclick="cancelTree()">${r._added ? "追加をやめる" : "やめる"}</button>
+    </div>`;
+  f.style.display = "block";
+  trStateUi();
+  drawTree();
+  f.scrollIntoView({ behavior:"smooth", block:"nearest" });
+}
+function trStateUi(){
+  const gone = (document.querySelector('input[name="trState"]:checked') || {}).value === "なくなった";
+  document.getElementById("trAbsorbWrap").style.display = gone ? "block" : "none";
+}
+function trFormSay(t){ const e = document.getElementById("trFormMsg"); e.className = "bk-msg err"; e.textContent = t; }
+function applyTree(){
+  const r = trRows[trSel]; if(!r) return;
+  const kei = bkNorm(document.getElementById("trKei").value);
+  const repId = bkNorm(document.getElementById("trRepId").value).replace(/\s/g, "");
+  if(!kei){ trFormSay("系列の名前を入れてください"); return; }
+  if(trRows.some((x, i)=>i !== trSel && bkKeiKey(x.kei) === bkKeiKey(kei))){ trFormSay("同じ名前の系列がすでにあります"); return; }
+  if(repId && !/^\d+$/.test(repId)){ trFormSay("代表の方の会員番号は、数字で入れてください"); return; }
+  const dupRep = repId && trRows.find((x, i)=>i !== trSel && x.repId && x.repId.replace(/^0+/, "") === repId.replace(/^0+/, ""));
+  if(dupRep){ trFormSay("この会員番号の方は、すでに「" + dupRep.kei + "」の代表になっています"); return; }
+  const state = (document.querySelector('input[name="trState"]:checked') || {}).value || "あり";
+  /* 名前を変えた（追加したばかりの系列）ときは、その下の系列のつながりもつけかえます */
+  if(r.kei && r.kei !== kei) trRows.forEach(x=>{ if(x !== r && x.parent === r.kei) x.parent = kei; if(x !== r && x.absorb === r.kei) x.absorb = kei; });
+  r.kei = kei;
+  r.parent = document.getElementById("trParent").value;
+  r.repId = repId;
+  r.repName = bkNorm(document.getElementById("trRepName").value);
+  r.state = state;
+  r.absorb = state === "なくなった" ? document.getElementById("trAbsorb").value || "未定" : "";
+  r.memo = bkNorm(document.getElementById("trMemo").value);
+  /* この系列がなくなったなら、ここを吸収先にしていた系列は「未定」にもどします */
+  if(state === "なくなった") trRows.forEach(x=>{ if(x !== r && x.absorb === r.kei){ x.absorb = "未定"; } });
+  trSel = -1;
+  document.getElementById("trForm").style.display = "none";
+  trSay("下書きを直しました。まとめて「保存する」を押すと保存されます。", "ok");
+  drawTree();
+}
+function cancelTree(){
+  const r = trRows[trSel];
+  if(r && r._added){ trRows.splice(trSel, 1); }
+  trSel = -1;
+  document.getElementById("trForm").style.display = "none";
+  drawTree();
+}
+function addTreeNode(){
+  trRows.push({ kei:"", parent:"", repId:"", repName:"", state:"あり", absorb:"", memo:"", _new:true, _added:true });
+  pickTree(trRows.length - 1);
+}
+async function saveTree(){
+  if(trSel >= 0){ trSay("えらんでいる系列の「この内容にする」か「やめる」を先に押してください", "err"); return; }
+  const empty = trRows.findIndex(r=>!r.kei);
+  if(empty >= 0) trRows.splice(empty, 1);
+  if(!trRows.length || !trDirty()) return;
+  if(!confirm("系列のつながりを保存します。よろしいですか？\n（なくなった系列は、登録画面などの選択肢に出なくなります）")) return;
+  if(typeof skyBusy === "function" && skyBusy("tree")) return;
+  const btn = document.getElementById("trSave"); btn.disabled = true;
+  if(typeof skyLoading === "function") skyLoading("保存しています", "しばらくお待ちください");
+  try{
+    const j = await trCall({ action:"keiTreeSave", rows: JSON.stringify(trRows.map(trPack)) });
+    if(typeof skyLoadingDone === "function") skyLoadingDone();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
+    if(!j || j.ok !== true){
+      const k = bkEsc(j && j.kei || "");
+      trSay(({
+        loop:"「" + k + "」の上の系列をたどると、ぐるっと元にもどってしまいます。上の系列を直してください",
+        dupname:"「" + k + "」と同じ名前の系列があります",
+        duprep:"「" + k + "」と「" + bkEsc(j && j.other || "") + "」の代表の方が同じです",
+        badparent:"「" + k + "」の上の系列が見つかりません",
+        badabsorb:"「" + k + "」の吸収先が見つかりません",
+        absorbgone:"「" + k + "」の吸収先「" + bkEsc(j && j.absorb || "") + "」も、なくなった系列です。今ある系列をえらんでください",
+        badrep:"「" + k + "」の代表の方の会員番号が数字ではありません",
+        removed:"「" + k + "」がなくなっています。系列は消せないので、「なくなった」にしてください",
+        treelayout:"「系列のつながり」タブの見出しが決まった形とちがうため、保存を止めました",
+        busy:"いま混み合っています。少しおいてお試しください",
+        noperm:"この画面は、管理者・チーム代表の方がお使いいただけます"
+      })[j && j.error] || "保存できませんでした", "err");
       return;
     }
-    ["rtId","rtName","rtMemo"].forEach(id=>{ document.getElementById(id).value = ""; });
-    await loadRoots();
-    rtSay("✅ 「" + bkEsc(kei) + "」の起点として登録しました", "ok");
+    trRows = (j.rows || []).map(r=>Object.assign({}, r));
+    trSaved = JSON.stringify(trRows.map(trPack));
+    /* この端末の選択肢も、すぐに新しくします */
+    if(typeof window.skyKeiretsuStore === "function"){
+      window.skyKeiretsuStore({ ok:true, list: trRows.filter(r=>r.state !== "なくなった").map(r=>r.kei),
+                                all: trRows.map(r=>({ kei:r.kei, state:r.state, absorb:r.absorb })) });
+    }
+    trSay("✅ 保存しました", "ok");
+    drawTree();
+    toast("系列のつながりを保存しました");
   }catch(e){
-    rtSay("通信できませんでした。電波のよい場所でお試しください", "err");
+    if(typeof skyLoadingDone === "function") skyLoadingDone();
+    trSay("通信できませんでした。電波のよい場所でお試しください", "err");
   }finally{
-    btn.disabled = false;
-    if(typeof skyBusyEnd === "function") skyBusyEnd("root");
+    btn.disabled = false; trUpdateSave();
+    if(typeof skyBusyEnd === "function") skyBusyEnd("tree");
   }
 }
-async function deleteRoot(rid, label){
-  if(!confirm("「" + label + "」さんの起点の登録を消します。よろしいですか？")) return;
-  try{
-    const j = await rtCall({ action:"keiRootDelete", rootId:rid });
-    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
-    if(!j || j.ok !== true){
-      rtSay(({ notmine:"系列代表の方は、ご自身で登録した起点だけ消せます", notfound:"見つかりませんでした" })[j && j.error] || "消せませんでした", "err");
-      return;
-    }
-    await loadRoots();
-    rtSay("起点の登録を消しました", "ok");
-  }catch(e){ rtSay("通信できませんでした。電波のよい場所でお試しください", "err"); }
-}
+
+
 function bulkShow(n){
   [1,2,3].forEach(i=> document.getElementById("bkStep" + i).style.display = (i === n) ? "block" : "none");
   ["bkMsg2","bkMsg3"].forEach(id=>{ const e = document.getElementById(id); e.className = "bk-msg"; e.textContent = ""; });
@@ -2240,11 +2405,11 @@ function bkKeiKey(t){ return bkNorm(t).toLowerCase().replace(/[^\p{L}\p{N}]/gu, 
 function bkMatchKei(v){
   const k = bkKeiKey(v);
   if(!k) return "";
-  const same = KEIRETSU.find(x=>bkKeiKey(x) === k);
+  const same = keiActive().find(x=>bkKeiKey(x) === k);
   if(same) return same;
   /* 「クラウドブルー」のように一部だけのときは、あてはまるのが1つだけなら、それにします */
   if(k.length >= 3){
-    const part = KEIRETSU.filter(x=>{ const xk = bkKeiKey(x); return xk.indexOf(k) >= 0 || k.indexOf(xk) >= 0; });
+    const part = keiActive().filter(x=>{ const xk = bkKeiKey(x); return xk.indexOf(k) >= 0 || k.indexOf(xk) >= 0; });
     if(part.length === 1) return part[0];
   }
   return "";
@@ -2293,8 +2458,8 @@ const BK_REASON = {
 /* 系列の起点で見分けた方の理由 */
 function bkReasonText(x){
   const who = x.rootName ? x.rootName + "さん" : (x.rootId ? "会員番号 " + x.rootId + " の方" : "起点の方");
-  if(x.reason === "otherkei") return "「" + (x.otherKei || "") + "」の方です（起点：" + who + "）";
-  if(x.reason === "otherkeimaybe") return "「" + (x.otherKei || "") + "」の起点（" + who + "）の下の方です。この名簿の系列の起点も登録すると、見分けられます";
+  if(x.reason === "otherkei") return "「" + (x.otherKei || "") + "」の方です（代表：" + who + " の下）";
+  if(x.reason === "otherkeimaybe") return "「" + (x.otherKei || "") + "」の代表（" + who + "）の下の方です。「系列のつながり」で、この名簿の系列の代表や、系列の入れ子を設定すると見分けられます";
   return BK_REASON[x.reason] || x.reason;
 }
 const BK_WARN = { bademail:"メールの形がちがうので、メールは入れません", emailtaken:"メールがほかの方と同じなので、メールは入れません" };
@@ -2369,9 +2534,9 @@ async function bulkRun(mode){
         + `元の名簿に正しい系列名を記入してから、もう一度貼りつけてください。`);
     }
     if(rootHits){
-      notes.push(`🌳 系列の起点をたどって、ほかの系列の方を <b>${rootHits}名</b> 見分けました。この方々は登録しません。`);
+      notes.push(`🌳 紹介者をたどって、ほかの系列の方を <b>${rootHits}名</b> 見分けました。この方々は登録しません。`);
     }else if(rootCount && mode === "check" && bkMap.indexOf("intro") < 0){
-      notes.push(`🌳 系列の起点が登録されていますが、この名簿には「紹介者の会員番号」の列がないため、ほかの系列の方の見分けはしていません。<br>`
+      notes.push(`🌳 系列の代表の方が設定されていますが、この名簿には「紹介者の会員番号」の列がないため、ほかの系列の方の見分けはしていません。<br>`
         + `紹介者の列がある名簿なら、列のえらび方で「紹介者の会員番号」をえらんでください。`);
     }
     if(notes.length){
@@ -2480,7 +2645,7 @@ function buildFindKeiretsu(){
   const sel = document.getElementById("findKeiretsu");
   if(sel.options.length > 0) return;
   sel.innerHTML = '<option value="">選択してください</option>'
-    + KEIRETSU.map(k=>`<option value="${k}">${k}</option>`).join("");
+    + keiActive().map(k=>`<option value="${k}">${k}</option>`).join("");
 }
 
 function findMember(){

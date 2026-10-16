@@ -212,11 +212,8 @@ function gasUrlFor(keiretsu){
 const PAGE_CRIE      = "./portal-creators.html";
 const PAGE_SUPPORTER = "./portal-supporter.html";
 
-const KEIRETSU = [
-  "🚀SkyExceed","🦅Zenith1","🏰Utop","🌟グローハピネス🌟","🥷HOT STUFF⚜️",
-  "TELLUS.","FEAT","🌬️ザ・クラウドブルー(蒼雲)","✈️JET RISE","✨アフロディーテ",
-  "⭐️ルミナス","エネルギー🔥","💎プリズム","📚FairyTail","ミラメリ🪄","🪽HERO","♾️ZERO♾️",
-];
+/* 系列の一覧は、共通設定（config.js）から受け取ります（「系列のつながり」でなくなった系列は出ません） */
+const KEIRETSU = (window.SKY_KEIRETSU || []).slice();
 
 const GOOGLE_CLIENT_ID = "315827385958-ikdpkfhkr6nmrgql470aolt4pv27pak3.apps.googleusercontent.com";
 const $ = (s)=>document.querySelector(s);

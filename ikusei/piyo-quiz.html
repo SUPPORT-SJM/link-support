@@ -302,11 +302,8 @@ function gasUrlFor(keiretsu){
 const APP_ID  = "piyo";   /* このサイトの名前(スプレッドシートのタブ名になります) */
 
 /* 系列名リスト ※gcon-mypage.html と同じリストに揃えて編集してね */
-const KEIRETSU = [
-  "🚀SkyExceed","🦅Zenith1","🏰Utop","🌟グローハピネス🌟","🥷HOT STUFF⚜️",
-  "TELLUS.","FEAT","🌬️ザ・クラウドブルー(蒼雲)","✈️JET RISE","✨アフロディーテ",
-  "⭐️ルミナス","エネルギー🔥","💎プリズム","📚FairyTail","ミラメリ🪄","🪽HERO","♾️ZERO♾️",
-];
+/* 系列の一覧は、共通設定（config.js）から受け取ります（「系列のつながり」でなくなった系列は出ません） */
+const KEIRETSU = (window.SKY_KEIRETSU || []).slice();
 
 /* ================================================================
    クイズデータ:あとからコンテンツを足すときはここを編集。
