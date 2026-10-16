@@ -2522,6 +2522,15 @@ async function openDetail(id, keiretsu){
 
 let selfEditMode = {};   // app名 → true で本人チェック編集モード
 
+
+/* 修了の欄（例：「🎓修了 10/7」）の日付を、数の割合と見まちがえないよう「10月7日」と出します */
+function gradText(t){
+  const x = String(t || "");
+  /* 途中の「⭕1/6」は割合なので、そのままにします */
+  if(x.indexOf("修了") < 0) return x;
+  return x.replace(/\s*(\d{1,2})\/(\d{1,2})(?!\d)/, (m, mo, d)=>"（" + Number(mo) + "月" + Number(d) + "日）");
+}
+
 function renderDetail(){
   const m = detailData.member;
   const canEditSelf = data && data.isFull;
@@ -2569,7 +2578,7 @@ function renderDetail(){
     }).join("");
     return `<div class="dm-sec">
       <h4>
-        <span>${master.label}${pg.grad ? `<span class="grad">${pg.grad}</span>` : ""}</span>
+        <span>${master.label}${pg.grad ? `<span class="grad">${gradText(pg.grad)}</span>` : ""}</span>
         <span class="cnt" id="cnt_${app}">⭕ ${marks.length} / ${master.items.length}</span>
       </h4>
       <div class="dm-tools">
