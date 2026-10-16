@@ -880,7 +880,7 @@ async function login(){
     if(r === "notallowed") return;      // ご案内をお出ししたので、そのままにします
     admin = null;                       // 入れなかったので、ログイン画面を出します
   }
-  $("#loginView").style.display = "block";
+  $("#loginView").style.display = "flex";   /* 画面のまん中にカードを出します */
   $("#appView").style.display = "none";
 })();
 
