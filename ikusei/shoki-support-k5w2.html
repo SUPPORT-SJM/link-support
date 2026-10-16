@@ -8,7 +8,7 @@
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex,nofollow">
-<title>初期サポート</title>
+<title>初期サポートマネジメント</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
@@ -97,10 +97,11 @@
 
 <div id="app" style="display:none;">
   <div class="head"><div class="in">
-    <h1>🌱 初期サポート</h1>
+    <h1>🌱 初期サポートマネジメント</h1>
     <div class="who" id="who"></div>
     <div class="tools">
       <input id="q" placeholder="名前・番号で検索" oninput="draw()">
+      <select id="fKei" onchange="draw()" data-kei-fixed="1"></select>
       <select id="fHelper" onchange="draw()"></select>
       <label><input type="checkbox" id="fNew" onchange="draw()"> 登録3ヶ月以内</label>
       <label><input type="checkbox" id="fIdle" onchange="draw()"> 30日以上ログインなし</label>
@@ -259,12 +260,28 @@ async function load(){
     data = j;
     $("#gate").style.display = "none"; $("#app").style.display = "block";
     $("#who").textContent = (j.adminName ? j.adminName + "さん" : "") + "｜" + ({ all:"全員", scope:"担当系列の方", kei:"ご自身の系列の方", helper:"ご自身が担当・紹介した方" })[j.viewMode];
+    fillKei();
     fillHelpers();
     draw();
   }catch(e){
     if(typeof skyLoadingDone === "function") skyLoadingDone();
     gate("通信できませんでした。電波のよい場所でお試しください。");
   }
+}
+/* 系列でしぼりこむ（見えている方の系列だけを、系列の一覧の順にならべます） */
+function fillKei(){
+  const sel = $("#fKei"), keep = sel.value;
+  const has = {}; let none = false;
+  data.members.forEach(m=>{ if(m.keiretsu) has[m.keiretsu] = true; else none = true; });
+  const order = (window.SKY_KEIRETSU || []).slice();
+  const list = order.filter(k=>has[k]).concat(Object.keys(has).filter(k=>order.indexOf(k) < 0));
+  sel.innerHTML = '<option value="">系列：すべて</option>'
+    + list.map(k=>`<option value="${esc(k)}">系列：${esc(k)}</option>`).join("")
+    + (none ? '<option value="__none">系列：チーム未設定</option>' : "");
+  sel.value = keep;
+  if(sel.value !== keep) sel.value = "";
+  /* 系列が1つだけのときは、選ぶ必要がないので出しません */
+  sel.style.display = (list.length + (none ? 1 : 0)) > 1 ? "" : "none";
 }
 function fillHelpers(){
   const sel = $("#fHelper"), keep = sel.value;
@@ -285,11 +302,14 @@ function draw(){
   if(!data) return;
   const q = $("#q").value.trim().toLowerCase();
   const fh = $("#fHelper").value;
+  const fk = $("#fKei").value;
   const fNew = $("#fNew").checked, fIdle = $("#fIdle").checked;
   const t = today0();
   const sameId = (a,b)=>String(a || "").replace(/^0+/, "") === String(b || "").replace(/^0+/, "");
   let list = data.members.filter(m=>{
     if(q && !((m.name || "").toLowerCase().includes(q) || String(m.id).includes(q))) return false;
+    if(fk === "__none" && m.keiretsu) return false;
+    if(fk && fk !== "__none" && m.keiretsu !== fk) return false;
     if(fh === "__me" && !sameId(m.helper, data.me)) return false;
     if(fh === "__none" && m.helper) return false;
     if(fh && fh !== "__me" && fh !== "__none" && m.helper !== fh) return false;
