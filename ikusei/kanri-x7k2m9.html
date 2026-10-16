@@ -294,6 +294,26 @@
 #bulkModal .bk-msg{display:none;border-radius:10px;padding:10px 12px;font-size:12.5px;margin:8px 0;line-height:1.8;}
 #bulkModal .bk-msg.err{display:block;background:#FDEBEB;color:#B3352F;}
 #bulkModal .bk-msg.ok{display:block;background:#EAF7F0;color:#2F7A5C;}
+#bulkModal .bk-root-link{font-size:12px;margin:-2px 0 10px;}
+#bulkModal .bk-root-link a{color:#6E5FB5;font-weight:700;}
+/* 系列の起点 */
+#rootModal{display:none;position:fixed;inset:0;z-index:78;background:rgba(30,26,50,.55);align-items:center;justify-content:center;padding:14px;}
+#rootModal.show{display:flex;}
+#rootModal .sheet{background:#fff;border-radius:18px;width:100%;max-width:680px;max-height:90vh;overflow-y:auto;padding:20px 18px;}
+#rootModal h3{font-size:16px;font-weight:900;color:#4A3F7A;margin-bottom:6px;}
+#rootModal .lead{font-size:12.5px;color:#6A6480;line-height:1.9;margin-bottom:10px;}
+#rootModal .rt-wrap{overflow-x:auto;border:1.5px solid #E4E0F0;border-radius:11px;margin:8px 0 12px;}
+#rootModal table{border-collapse:collapse;font-size:12px;min-width:100%;}
+#rootModal th,#rootModal td{padding:7px 8px;border-bottom:1px solid #F0EDF9;text-align:left;white-space:nowrap;}
+#rootModal .rt-form{background:#F6F3FE;border:1.5px solid #D9D2F3;border-radius:12px;padding:12px 13px;}
+#rootModal .rt-form label{display:block;font-size:12px;font-weight:700;color:#4A3F7A;margin:8px 0 4px;}
+#rootModal .rt-form select,#rootModal .rt-form input{width:100%;padding:9px 10px;border-radius:9px;border:1.5px solid #D9D2F3;font-size:14px;font-family:inherit;background:#fff;}
+#rootModal .bk-btn{padding:11px 16px;border-radius:11px;border:none;background:#6E5FB5;color:#fff;font-weight:700;font-size:13.5px;cursor:pointer;font-family:inherit;margin-top:10px;}
+#rootModal .rt-del{padding:5px 10px;border-radius:8px;border:1.5px solid #E4E0F0;background:#fff;color:#8A84A0;font-size:11.5px;cursor:pointer;font-family:inherit;}
+#rootModal .bk-msg{display:none;border-radius:10px;padding:10px 12px;font-size:12.5px;margin:8px 0;line-height:1.8;}
+#rootModal .bk-msg.err{display:block;background:#FDEBEB;color:#B3352F;}
+#rootModal .bk-msg.ok{display:block;background:#EAF7F0;color:#2F7A5C;}
+#rootModal .bk-close{display:block;width:100%;margin-top:12px;padding:12px;border-radius:11px;border:none;background:#F0EDF9;color:#6E5FB5;font-weight:700;cursor:pointer;font-family:inherit;}
 .req-card{background:#FFFBF2;border:1.5px solid #F0D9A8;border-radius:13px;
   padding:14px 15px;margin-bottom:11px;}
 .req-top{display:flex;align-items:baseline;gap:9px;margin-bottom:3px;flex-wrap:wrap;}
@@ -535,6 +555,8 @@
         <select id="bkKei"></select>
         <p class="bk-kei-note" id="bkKeiNote"></p>
       </div>
+      <p class="bk-root-link"><a href="#" onclick="openRoots();return false;">🌳 系列の起点</a>
+        … 上の系列の名簿に、下で分かれた系列の方がまざっているときの設定です</p>
       <textarea id="bkText" placeholder="ここに貼りつけ（1行目に見出しがあると、そのまま読み取れます）"></textarea>
       <div class="row2">
         <input type="file" id="bkFile" accept=".csv,.tsv,.txt,.xlsx,.xls">
@@ -565,6 +587,30 @@
       </div>
     </div>
     <button class="bk-close" onclick="closeBulk()">とじる</button>
+  </div>
+</div>
+
+<div id="rootModal" onclick="if(event.target===this)closeRoots()">
+  <div class="sheet">
+    <h3>🌳 系列の起点</h3>
+    <p class="lead">上の系列の名簿には、その下で分かれた系列の方もまざっています。<br>
+      「この方から下は〇〇系列」という<b>起点の方</b>を登録しておくと、まとめて登録のときに<b>紹介者をたどって見分け</b>、
+      ほかの系列の方は登録せずにとばします。<br>
+      名簿を入れる系列の起点（例：いちばん上の代表の方）も登録しておくと、より確実に見分けられます。</p>
+    <div class="bk-msg" id="rtMsg"></div>
+    <div class="rt-wrap"><table id="rtTbl"></table></div>
+    <div class="rt-form" id="rtForm">
+      <label for="rtKei">系列</label>
+      <select id="rtKei"></select>
+      <label for="rtId">起点の方の会員番号</label>
+      <input id="rtId" inputmode="numeric" placeholder="例：00012345">
+      <label for="rtName">起点の方のお名前</label>
+      <input id="rtName" placeholder="例：〇〇さん">
+      <label for="rtMemo">メモ（どこから分かれたかなど）</label>
+      <input id="rtMemo" placeholder="例：フェアリーテイルの中で分かれた系列">
+      <button class="bk-btn" id="rtSave" onclick="saveRoot()">起点を登録する</button>
+    </div>
+    <button class="bk-close" onclick="closeRoots()">とじる</button>
   </div>
 </div>
 
@@ -2004,6 +2050,89 @@ function openBulk(){
   document.getElementById("bulkModal").classList.add("show");
 }
 function closeBulk(){ document.getElementById("bulkModal").classList.remove("show"); }
+
+/* ================================================================
+   系列の起点（登録・一覧・削除）
+================================================================ */
+let rtCanEdit = false;
+function rtSay(t, cls){ const e = document.getElementById("rtMsg"); e.className = "bk-msg " + (cls || ""); e.innerHTML = t || ""; }
+async function rtCall(params){
+  const body = Object.assign({ id:admin.id, pin:admin.pin, email:admin.email, dummy: dummyMode ? "1" : "0" }, params);
+  const res = await fetch(GAS_URL, { method:"POST", body:new URLSearchParams(body) });
+  return res.json();
+}
+async function openRoots(){
+  const ks = document.getElementById("rtKei");
+  ks.innerHTML = '<option value="">えらんでください</option>' + KEIRETSU.map(k=>`<option value="${bkEsc(k)}">${bkEsc(k)}</option>`).join("");
+  ["rtId","rtName","rtMemo"].forEach(id=>{ document.getElementById(id).value = ""; });
+  rtSay("");
+  document.getElementById("rtTbl").innerHTML = "";
+  document.getElementById("rootModal").classList.add("show");
+  await loadRoots();
+}
+function closeRoots(){ document.getElementById("rootModal").classList.remove("show"); }
+async function loadRoots(){
+  if(typeof skyLoading === "function") skyLoading("系列の起点を読みこんでいます", "しばらくお待ちください");
+  try{
+    const j = await rtCall({ action:"keiRootList" });
+    if(typeof skyLoadingDone === "function") skyLoadingDone();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
+    if(!j || j.ok !== true){ rtSay("読みこめませんでした", "err"); return; }
+    rtCanEdit = j.canEdit === true;
+    document.getElementById("rtForm").style.display = rtCanEdit ? "block" : "none";
+    const tb = document.getElementById("rtTbl");
+    tb.innerHTML = (j.roots || []).length
+      ? "<tr><th>系列</th><th>起点の方</th><th>メモ</th><th>登録した方</th><th></th></tr>"
+        + j.roots.map(r=>`<tr><td>${bkEsc(r.kei)}</td><td>${bkEsc(r.name)}<br><span style="color:#A8A4BC;">${bkEsc(r.id)}</span></td>`
+          + `<td style="white-space:normal;min-width:140px;">${bkEsc(r.memo)}</td><td>${bkEsc(r.by)}<br><span style="color:#A8A4BC;">${bkEsc(r.date)}</span></td>`
+          + `<td>${rtCanEdit ? `<button class="rt-del" onclick="deleteRoot('${bkEsc(r.id)}','${bkEsc(r.name || r.id)}')">消す</button>` : ""}</td></tr>`).join("")
+      : '<tr><td style="color:#8A84A0;">まだ登録はありません</td></tr>';
+    if(!rtCanEdit) rtSay("起点の登録は、系列代表・チーム代表・管理者の方ができます。", "ok");
+  }catch(e){
+    if(typeof skyLoadingDone === "function") skyLoadingDone();
+    rtSay("通信できませんでした。電波のよい場所でお試しください", "err");
+  }
+}
+async function saveRoot(){
+  const kei = document.getElementById("rtKei").value;
+  const rid = bkNorm(document.getElementById("rtId").value).replace(/\s/g, "");
+  const nm = bkNorm(document.getElementById("rtName").value);
+  if(!kei){ rtSay("系列をえらんでください", "err"); return; }
+  if(!/^\d+$/.test(rid)){ rtSay("会員番号を数字で入れてください", "err"); return; }
+  if(typeof skyBusy === "function" && skyBusy("root")) return;
+  const btn = document.getElementById("rtSave"); btn.disabled = true;
+  try{
+    const j = await rtCall({ action:"keiRootSave", kei:kei, rootId:rid, rootName:nm, memo: bkNorm(document.getElementById("rtMemo").value) });
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
+    if(!j || j.ok !== true){
+      rtSay(({ dup: "この会員番号は、すでに「" + bkEsc(j && j.kei) + "」の起点として登録されています",
+               noperm:"起点の登録は、系列代表・チーム代表・管理者の方ができます",
+               busy:"いま混み合っています。少しおいてお試しください" })[j && j.error] || "登録できませんでした", "err");
+      return;
+    }
+    ["rtId","rtName","rtMemo"].forEach(id=>{ document.getElementById(id).value = ""; });
+    await loadRoots();
+    rtSay("✅ 「" + bkEsc(kei) + "」の起点として登録しました", "ok");
+  }catch(e){
+    rtSay("通信できませんでした。電波のよい場所でお試しください", "err");
+  }finally{
+    btn.disabled = false;
+    if(typeof skyBusyEnd === "function") skyBusyEnd("root");
+  }
+}
+async function deleteRoot(rid, label){
+  if(!confirm("「" + label + "」さんの起点の登録を消します。よろしいですか？")) return;
+  try{
+    const j = await rtCall({ action:"keiRootDelete", rootId:rid });
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
+    if(!j || j.ok !== true){
+      rtSay(({ notmine:"系列代表の方は、ご自身で登録した起点だけ消せます", notfound:"見つかりませんでした" })[j && j.error] || "消せませんでした", "err");
+      return;
+    }
+    await loadRoots();
+    rtSay("起点の登録を消しました", "ok");
+  }catch(e){ rtSay("通信できませんでした。電波のよい場所でお試しください", "err"); }
+}
 function bulkShow(n){
   [1,2,3].forEach(i=> document.getElementById("bkStep" + i).style.display = (i === n) ? "block" : "none");
   ["bkMsg2","bkMsg3"].forEach(id=>{ const e = document.getElementById(id); e.className = "bk-msg"; e.textContent = ""; });
@@ -2160,6 +2289,13 @@ const BK_REASON = {
   nokeiwrite:"系列が書かれていません。元の名簿に系列名を記入してください",
   unknownkei:"系列名が一覧にありません。正しい系列名を記入してください"
 };
+/* 系列の起点で見分けた方の理由 */
+function bkReasonText(x){
+  const who = x.rootName ? x.rootName + "さん" : (x.rootId ? "会員番号 " + x.rootId + " の方" : "起点の方");
+  if(x.reason === "otherkei") return "「" + (x.otherKei || "") + "」の方です（起点：" + who + "）";
+  if(x.reason === "otherkeimaybe") return "「" + (x.otherKei || "") + "」の起点（" + who + "）の下の方です。この名簿の系列の起点も登録すると、見分けられます";
+  return BK_REASON[x.reason] || x.reason;
+}
 const BK_WARN = { bademail:"メールの形がちがうので、メールは入れません", emailtaken:"メールがほかの方と同じなので、メールは入れません" };
 async function bulkRun(mode){
   if(mode === "check"){
@@ -2194,11 +2330,13 @@ async function bulkRun(mode){
   try{
     /* 300行ずつに分けて送ります */
     const all = [];
-    let added = 0;
+    let added = 0, rootCount = 0, rootHits = 0;
+    /* 紹介者のつながり（300行ずつに分けても、名簿全体のつながりで見分けられるように） */
+    const chain = JSON.stringify(sendRows.filter(r=>r.id && r.intro).map(r=>[r.id, r.intro]));
     for(let k = 0; k < sendRows.length; k += 300){
       const part = sendRows.slice(k, k + 300);
       const params = { action:"bulkImport", id:admin.id, pin:admin.pin, email:admin.email,
-                       rows: JSON.stringify(part), mode: mode, dummy: dummyMode ? "1" : "0" };
+                       rows: JSON.stringify(part), chain: chain, mode: mode, dummy: dummyMode ? "1" : "0" };
       const res = await fetch(GAS_URL, { method:"POST", body:new URLSearchParams(params) });
       const j = await res.json();
       if(typeof skyLoadingDone === "function") skyLoadingDone();
@@ -2210,6 +2348,7 @@ async function bulkRun(mode){
       }
       j.results.forEach(x=>{ x.i = sendIdx[x.i + k]; all.push(x); });
       added += j.added;
+      rootCount = j.rootCount || 0; rootHits += j.rootHits || 0;
     }
     if(typeof skyLoadingDone === "function") skyLoadingDone();
     local.forEach(x=>all.push(x));
@@ -2223,10 +2362,20 @@ async function bulkRun(mode){
       : `✅ ${added}名を名簿に登録しました（うち仮の番号 ${temp}名）。パスコードは 1111 です。`;
     const badKei = local.length;
     const alertBox = document.getElementById("bkMsg3");
+    const notes = [];
     if(badKei){
+      notes.push(`⚠️ 系列が書かれていない・一覧にない行が <b>${badKei}行</b> あります。この行は登録しません。<br>`
+        + `元の名簿に正しい系列名を記入してから、もう一度貼りつけてください。`);
+    }
+    if(rootHits){
+      notes.push(`🌳 系列の起点をたどって、ほかの系列の方を <b>${rootHits}名</b> 見分けました。この方々は登録しません。`);
+    }else if(rootCount && mode === "check" && bkMap.indexOf("intro") < 0){
+      notes.push(`🌳 系列の起点が登録されていますが、この名簿には「紹介者の会員番号」の列がないため、ほかの系列の方の見分けはしていません。<br>`
+        + `紹介者の列がある名簿なら、列のえらび方で「紹介者の会員番号」をえらんでください。`);
+    }
+    if(notes.length){
       alertBox.className = "bk-alert";
-      alertBox.innerHTML = `⚠️ 系列が書かれていない・一覧にない行が <b>${badKei}行</b> あります。この行は登録しません。<br>`
-        + `元の名簿に正しい系列名を記入してから、もう一度貼りつけてください。`;
+      alertBox.innerHTML = notes.join("<br><br>");
     }
     document.getElementById("bkResTbl").innerHTML =
       "<tr><th>行</th><th>会員番号</th><th>お名前</th><th>系列</th><th>結果</th></tr>" +
@@ -2234,7 +2383,7 @@ async function bulkRun(mode){
         + `<td>${x.status === "add"
               ? `<span class="st-add">${mode === "check" ? "登録できます" : "登録しました"}${x.temp ? "（仮の番号）" : ""}</span>`
                 + (x.warn && x.warn.length ? `<div class="st-warn">${x.warn.map(w=>BK_WARN[w] || w).join("・")}</div>` : "")
-              : `<span class="st-skip">とばします：${BK_REASON[x.reason] || x.reason}</span>`}</td></tr>`).join("");
+              : `<span class="st-skip">とばします：${bkEsc(bkReasonText(x))}</span>`}</td></tr>`).join("");
     document.getElementById("bkWriteBtn").style.display = (mode === "check" && added > 0) ? "inline-block" : "none";
     document.getElementById("bkWriteBtn").textContent = `${added}名を名簿に登録する`;
     document.getElementById("bkBack2").style.display = (mode === "check") ? "inline-block" : "none";
