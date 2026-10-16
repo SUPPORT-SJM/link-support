@@ -96,6 +96,8 @@
   body.dummy-mode .head{background:#6B5A2E;}
   .dummy-banner{display:none;background:#FFF3D6;border-bottom:2px solid #F0C86A;padding:8px 0;font-size:12px;color:#7A5A00;text-align:center;font-weight:700;}
   body.dummy-mode .dummy-banner{display:block;}
+  #tbody tr.grp td{background:#F0EDF9;color:#4A3F7A;font-weight:900;font-size:13px;padding:9px 12px;border-top:2px solid #D9D2F3;}
+  #tbody tr.grp td small{font-weight:700;color:#7A7390;margin-left:6px;}
   .head input.search{padding:8px 12px;border-radius:999px;border:none;font-size:13px;font-family:inherit;width:170px;}
 
   .bar{background:#fff;border-bottom:1px solid var(--line);padding:10px 0;font-size:12px;color:#66647A;}
@@ -361,6 +363,7 @@
         <span id="gMail"></span><br>
         <a href="#" onclick="resetGoogle();return false;">別のアカウントにする</a>
       </div>
+      <div id="gPick" style="display:none;margin-top:10px;font-size:12.5px;line-height:1.8;"></div>
     </div>
 
     <div id="mainFields" class="locked">
@@ -394,6 +397,13 @@
       </div>
       <div class="tools">
         <input class="search" id="search" placeholder="名前・番号で検索" oninput="render()">
+        <select id="sortMode" onchange="saveSort();render()" title="一覧の並べ方"
+          style="flex-shrink:0;min-width:225px;padding:8px 10px;border-radius:999px;border:none;font-size:12.5px;font-family:inherit;background:#fff;color:#4A3F7A;font-weight:700;">
+          <option value="">並べ方：登録順</option>
+          <option value="upline">並べ方：アップクリエごと</option>
+          <option value="kei">並べ方：系列ごと</option>
+          <option value="name">並べ方：名前順</option>
+        </select>
         <button class="btn-add" id="btnAdd" onclick="openMember(null)" style="display:none;">＋ 会員を追加</button>
         <button class="btn-add" id="btnReq" onclick="openReqList()" style="display:none;background:#F2B33D;">
           🔔 新規登録の依頼 <span id="reqCount">0</span></button>
@@ -879,14 +889,33 @@ async function fillFromEmail(email){
     const res = await fetch(`${GAS_URL}?action=byEmail&email=${encodeURIComponent(email)}`);
     const j = await res.json();
     if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
-    if(j.ok && j.members && j.members.length === 1){
-      document.getElementById("inId").value = j.members[0].id || "";
+    const list = (j && j.ok && j.members) || [];
+    const pick = document.getElementById("gPick");
+    pick.style.display = "none"; pick.innerHTML = "";
+    if(list.length === 1){
+      document.getElementById("inId").value = list[0].id || "";
       document.getElementById("inPin").focus();
+    }else if(list.length > 1){
+      /* 同じGoogleアカウントで、いくつかの会員番号が登録されているとき */
+      const esc = t=>String(t == null ? "" : t).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+      pick.innerHTML = "このGoogleアカウントには " + list.length + " 人分の登録があります。どなたで入りますか？"
+        + list.map((m,i)=>`<button type="button" data-i="${i}" style="display:block;width:100%;text-align:left;margin-top:6px;padding:9px 12px;border-radius:10px;border:1.5px solid #E4E0F0;background:#FCFBFF;cursor:pointer;font-family:inherit;font-size:13px;">${esc(m.id)}　${esc(m.name || "")}</button>`).join("");
+      pick.querySelectorAll("button").forEach(b=>b.addEventListener("click", ()=>{
+        document.getElementById("inId").value = list[Number(b.dataset.i)].id || "";
+        pick.querySelectorAll("button").forEach(x=>{ x.style.borderColor = (x === b) ? "#4FB08C" : "#E4E0F0"; });
+        document.getElementById("inPin").focus();
+      }));
+      pick.style.display = "block";
+    }else if(j && j.ok){
+      pick.textContent = "このGoogleアカウントの登録が名簿に見つかりませんでした。会員番号を入れてください。";
+      pick.style.display = "block";
+      document.getElementById("inId").focus();
     }
   }catch(e){}
 }
 function resetGoogle(){
   googleEmail = "";
+  const gp = document.getElementById("gPick"); if(gp){ gp.style.display = "none"; gp.innerHTML = ""; }
   $("#gDone").classList.remove("show");
   $("#gBtnWrap").style.display = "flex";
   $("#mainFields").classList.add("locked");
@@ -1453,6 +1482,50 @@ function has(role, flag){ return String(role||"").indexOf(flag) >= 0; }
 function hasCrie(m){ return m.crie === true; }
 function hasSup(m){ return m.sup === true; }
 
+/* ================================================================
+   一覧の並べ方（登録順／アップクリエごと／系列ごと／名前順）
+   えらんだ並べ方は、この端末に覚えておきます
+================================================================ */
+function saveSort(){ try{ localStorage.setItem("kanri_sort", $("#sortMode").value); }catch(e){} }
+(function(){ try{ const v = localStorage.getItem("kanri_sort"); if(v !== null && document.getElementById("sortMode")) document.getElementById("sortMode").value = v; }catch(e){} })();
+function sortKeyName(t){ let x = String(t || ""); try{ x = x.normalize("NFKC"); }catch(e){} return x.trim(); }
+/* アップクリエでまとめる目印（番号の頭の0はそろえます） */
+function uplineKey(m){
+  const u = String(m.upline || "").trim();
+  return /^\d+$/.test(u) ? u.replace(/^0+/, "") : u;
+}
+/* 見出しに出すお名前：名簿にいる方はそのお名前、いなければ記録されたお名前 */
+function uplineLabel(rows, byId){
+  const u = String(rows[0].upline || "").trim();
+  const hit = byId[uplineKey(rows[0])];
+  if(hit) return (hit.name || "") + "（" + hit.id + "）";
+  const nm = (rows.find(r=>r.uplineName) || {}).uplineName || "";
+  if(/^\d+$/.test(u)) return nm ? nm + "（" + u + "）" : "会員番号 " + u;
+  return u;
+}
+function arrange(list){
+  const mode = ($("#sortMode") && $("#sortMode").value) || "";
+  const cmp = (a,b)=> sortKeyName(a).localeCompare(sortKeyName(b), "ja");
+  if(mode === "name") return [{ head:"", rows: list.slice().sort((a,b)=>cmp(a.name, b.name)) }];
+  if(mode !== "upline" && mode !== "kei") return [{ head:"", rows:list }];
+  const byId = {};
+  (data.members || []).forEach(x=>{ byId[String(x.id).replace(/^0+/, "")] = x; });
+  const groups = {}, order = [];
+  list.forEach(m=>{
+    const key = mode === "kei" ? (m.keiretsu || "") : uplineKey(m);
+    if(!(key in groups)){ groups[key] = []; order.push(key); }
+    groups[key].push(m);
+  });
+  const label = {};
+  order.forEach(k=>{ label[k] = k === "" ? "" : (mode === "kei" ? k : uplineLabel(groups[k], byId)); });
+  /* 見出しの名前の順にならべ、空（未設定）は最後に */
+  order.sort((a,b)=> (a === "") - (b === "") || cmp(label[a], label[b]));
+  return order.map(k=>({
+    head: k ? (mode === "kei" ? "系列：" + label[k] : "アップクリエ：" + label[k]) : (mode === "kei" ? "系列：未設定" : "アップクリエ：未設定"),
+    rows: groups[k]
+  }));
+}
+
 function render(){
   if(!data) return;
   const q = $("#search").value.trim().toLowerCase();
@@ -1465,7 +1538,14 @@ function render(){
     tb.innerHTML = '<tr><td colspan="6" class="empty">該当する方がいません</td></tr>';
     return;
   }
-  tb.innerHTML = list.map(m=>{
+  const escH = t=>String(t == null ? "" : t).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  tb.innerHTML = arrange(list).map(g=>
+    (g.head ? `<tr class="grp"><td colspan="6">${escH(g.head)}<small>${g.rows.length}名</small></td></tr>` : "")
+    + rowsHtml(g.rows)).join("");
+}
+
+function rowsHtml(list){
+  return list.map(m=>{
     const piyo = m.piyoDone
       ? '<span class="done">🎓 卒業</span>'
       : `<span class="wip">⭕${m.piyoMark}/${m.piyoItems||"–"}　🐣${m.piyoSelf}</span>`;
@@ -2092,9 +2172,13 @@ async function bulkRun(mode){
   }
   if(mode === "write"){
     const kc = bkKeiChoice();
-    const n = bkRows.filter(r=>!r._bad).length;
+    /* 「確かめる」で登録できると分かった人数でお知らせします（とばす方は数えません） */
+    const chk = bkLastCheck || [];
+    const n = chk.filter(x=>x.status === "add").length;
+    const skipN = chk.length - n;
     const what = kc === BK_MULTI ? "名簿に書かれた系列で" : "「" + kc + "」の方として";
-    if(!confirm(what + " " + n + "行ぶんを、名簿に登録します。\nよろしいですか？")) return;
+    if(!confirm(what + " " + n + "名を、名簿に登録します。"
+        + (skipN ? "\n（とばす " + skipN + "名は登録しません）" : "") + "\nよろしいですか？")) return;
   }
   /* 系列に問題のある行は送らずに、とばす行としてお見せします */
   const sendIdx = [], local = [];
