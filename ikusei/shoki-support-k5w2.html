@@ -83,6 +83,21 @@
   .btns .save:disabled{opacity:.5;}
   .btns .close{background:#F0EDF9;color:#6E5FB5;}
   .upd{font-size:11px;color:#A8A4BC;margin-top:8px;}
+  .who .hide{margin-top:6px;background:none;border:1.5px solid #E1DCF2;color:#8A84A0;font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:999px;}
+  .who .hide:hover{border-color:#C9C2EC;color:#6E5FB5;}
+  .row.going{opacity:0;transform:translateX(16px);transition:opacity .35s, transform .35s;}
+  #hid{display:none;position:fixed;inset:0;z-index:70;background:rgba(30,26,50,.55);align-items:center;justify-content:center;padding:14px;}
+  #hid.show{display:flex;}
+  #hid .sheet{background:#fff;border-radius:18px;width:100%;max-width:460px;max-height:90vh;overflow-y:auto;padding:20px 18px;}
+  #hid h3{font-size:16px;font-weight:900;color:#4A3F7A;margin-bottom:4px;}
+  #hid .lead{font-size:12.5px;color:#6A6480;line-height:1.8;margin-bottom:10px;}
+  #hid label.hi{display:flex;align-items:center;gap:10px;padding:9px 10px;border:1.5px solid #E4E0F0;border-radius:10px;margin-top:6px;cursor:pointer;font-size:13.5px;}
+  #hid label.hi input{width:17px;height:17px;}
+  #hid label.hi small{display:block;color:#9A96AE;font-size:11px;}
+  #hid .all{background:none;color:#6E5FB5;font-size:12.5px;font-weight:700;text-decoration:underline;margin-top:8px;}
+  #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:#3B3550;color:#fff;font-size:13px;
+         padding:10px 16px;border-radius:12px;opacity:0;pointer-events:none;transition:all .25s;z-index:90;max-width:92vw;text-align:center;}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
   .verTag{display:block;text-align:center;font-size:11px;color:#B5B1C6;padding:10px 0 24px;font-family:monospace;}
 </style>
 </head>
@@ -105,6 +120,8 @@
       <select id="fHelper" onchange="draw()"></select>
       <label><input type="checkbox" id="fNew" onchange="draw()"> 登録3ヶ月以内</label>
       <label><input type="checkbox" id="fIdle" onchange="draw()"> 30日以上ログインなし</label>
+      <button class="back" id="btnHidden" onclick="openHidden()">🙈 非表示の方（0）</button>
+      <button class="back" onclick="saveReport()">📄 報告用に保存</button>
       <button class="back" onclick="location.href='kanri-x7k2m9.html'">‹ 管理画面へ</button>
     </div>
   </div></div>
@@ -128,6 +145,21 @@
     <div class="upd" id="edUpd"></div>
   </div>
 </div>
+
+<div id="hid" onclick="if(event.target===this)closeHidden()">
+  <div class="sheet">
+    <h3>🙈 非表示の方</h3>
+    <p class="lead">あなたの画面で非表示にしている方です（ほかの方の画面には出ています）。<br>表示を戻す方にチェックを入れて「表示を戻す」を押してください。</p>
+    <div id="hidList"></div>
+    <button class="all" id="hidAll" onclick="hidAll()">すべてえらぶ</button>
+    <div class="msg" id="hidMsg"></div>
+    <div class="btns">
+      <button class="close" onclick="closeHidden()">とじる</button>
+      <button class="save" id="hidSave" onclick="restoreHidden()">表示を戻す</button>
+    </div>
+  </div>
+</div>
+<div id="toast"></div>
 
 <span class="verTag"></span>
 
@@ -258,6 +290,7 @@ async function load(){
       return;
     }
     data = j;
+    hiddenSet = {}; (j.hidden || []).forEach(k=>{ hiddenSet[String(k).replace(/^0+/, "")] = true; });
     $("#gate").style.display = "none"; $("#app").style.display = "block";
     $("#who").textContent = (j.adminName ? j.adminName + "さん" : "") + "｜" + ({ all:"全員", scope:"担当系列の方", kei:"ご自身の系列の方", helper:"ご自身が担当・紹介した方" })[j.viewMode];
     fillKei();
@@ -307,6 +340,7 @@ function draw(){
   const t = today0();
   const sameId = (a,b)=>String(a || "").replace(/^0+/, "") === String(b || "").replace(/^0+/, "");
   let list = data.members.filter(m=>{
+    if(isHidden(m)) return false;
     if(q && !((m.name || "").toLowerCase().includes(q) || String(m.id).includes(q))) return false;
     if(fk === "__none" && m.keiretsu) return false;
     if(fk && fk !== "__none" && m.keiretsu !== fk) return false;
@@ -322,6 +356,8 @@ function draw(){
   list.sort((a,b)=> (b.r - a.r) || (b.y - a.y)
     || ((a.np ? a.np.getTime() : 9e15) - (b.np ? b.np.getTime() : 9e15))
     || (a.m.name || "").localeCompare(b.m.name || "", "ja"));
+  lastList = list;
+  drawHiddenBtn();
   const red = list.filter(x=>x.r > 0).length;
   $("#count").innerHTML = `<b>${list.length}</b> 名を表示中／🔴 がある方 <b>${red}</b> 名`;
   if(!list.length){ $("#list").innerHTML = '<div class="empty">該当する方がいません</div>'; return; }
@@ -332,10 +368,123 @@ function draw(){
         <span><span class="t">${esc(g.title)}</span><br><span class="v">${esc(x.sg[g.key].v)}</span></span></button>`;
     return `<div class="row">
       <div class="who"><div class="nm">${esc(m.name || "(名前未登録)")}</div>
-        <div class="sub">${esc(m.id)}${m.keiretsu ? "｜" + esc(m.keiretsu) : ""}<br>担当：${esc(m.helperName || (m.helper ? "会員番号 " + m.helper : "未設定"))}${m.joined ? "｜登録 " + esc(m.joined) : ""}</div></div>
+        <div class="sub">${esc(m.id)}${m.keiretsu ? "｜" + esc(m.keiretsu) : ""}<br>担当：${esc(m.helperName || (m.helper ? "会員番号 " + m.helper : "未設定"))}${m.joined ? "｜登録 " + esc(m.joined) : ""}</div>
+        <button class="hide" onclick="hideOne('${esc(m.id)}', this)">非表示にする</button></div>
       ${GROUPS.map(chip).join("")}
     </div>`;
   }).join("");
+}
+
+/* ================================================================
+   非表示（あなたの画面だけ）
+   ・「非表示にする」を押すと、その方は一覧から外れます
+   ・「🙈 非表示の方」から、えらんだ方の表示を戻せます
+================================================================ */
+let hiddenSet = {}, lastList = [];
+function hkey(id){ return String(id || "").replace(/^0+/, ""); }
+function isHidden(m){ return !!hiddenSet[hkey(m.id)]; }
+function toast(t){
+  const e = $("#toast"); e.textContent = t; e.classList.add("show");
+  clearTimeout(toast._t); toast._t = setTimeout(()=>e.classList.remove("show"), 2600);
+}
+function drawHiddenBtn(){
+  const n = data ? data.members.filter(isHidden).length : 0;
+  $("#btnHidden").textContent = "🙈 非表示の方（" + n + "）";
+}
+async function sendHide(ids, hide){
+  const j = await api({ action:"supportHide", targets: JSON.stringify(ids), hide: hide ? "1" : "0" });
+  if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return null;
+  if(!j || j.ok !== true) return j || {};
+  hiddenSet = {}; (j.hidden || []).forEach(k=>{ hiddenSet[hkey(k)] = true; });
+  return j;
+}
+async function hideOne(id, btn){
+  const m = data.members.find(x=>x.id === id); if(!m) return;
+  if(typeof skyBusy === "function" && skyBusy("hide")) return;
+  btn.disabled = true;
+  try{
+    const j = await sendHide([id], true);
+    if(!j) return;
+    if(j.ok !== true){ toast(({ busy:"いま混み合っています。少しおいてお試しください" })[j.error] || "非表示にできませんでした"); return; }
+    const row = btn.closest(".row");
+    if(row){ row.classList.add("going"); await new Promise(r=>setTimeout(r, 360)); }
+    draw();
+    toast((m.name || "") + "さんを非表示にしました（「🙈 非表示の方」から戻せます）");
+  }catch(e){ toast("通信できませんでした"); }
+  finally{ btn.disabled = false; if(typeof skyBusyEnd === "function") skyBusyEnd("hide"); }
+}
+function openHidden(){
+  const list = data.members.filter(isHidden).sort((a,b)=>(a.name || "").localeCompare(b.name || "", "ja"));
+  $("#hidMsg").className = "msg";
+  $("#hidList").innerHTML = list.length
+    ? list.map(m=>`<label class="hi"><input type="checkbox" value="${esc(m.id)}">
+        <span>${esc(m.name || "(名前未登録)")}<small>${esc(m.id)}${m.keiretsu ? "｜" + esc(m.keiretsu) : ""}</small></span></label>`).join("")
+    : '<p style="color:#8A84A0;font-size:13px;padding:10px 0;">非表示にしている方はいません</p>';
+  $("#hidAll").style.display = list.length > 1 ? "inline-block" : "none";
+  $("#hidSave").style.display = list.length ? "" : "none";
+  $("#hid").classList.add("show");
+}
+function closeHidden(){ $("#hid").classList.remove("show"); }
+function hidAll(){
+  const cs = [...document.querySelectorAll("#hidList input")];
+  const on = !cs.every(c=>c.checked);
+  cs.forEach(c=>{ c.checked = on; });
+  $("#hidAll").textContent = on ? "すべてはずす" : "すべてえらぶ";
+}
+async function restoreHidden(){
+  const ids = [...document.querySelectorAll("#hidList input:checked")].map(c=>c.value);
+  if(!ids.length){ $("#hidMsg").className = "msg err"; $("#hidMsg").textContent = "表示を戻す方にチェックを入れてください"; return; }
+  if(typeof skyBusy === "function" && skyBusy("hide")) return;
+  const btn = $("#hidSave"); btn.disabled = true;
+  try{
+    const j = await sendHide(ids, false);
+    if(!j) return;
+    if(j.ok !== true){ $("#hidMsg").className = "msg err"; $("#hidMsg").textContent = ({ busy:"いま混み合っています。少しおいてお試しください" })[j.error] || "表示を戻せませんでした"; return; }
+    closeHidden();
+    draw();
+    toast(ids.length + "名の表示を戻しました");
+  }catch(e){ $("#hidMsg").className = "msg err"; $("#hidMsg").textContent = "通信できませんでした"; }
+  finally{ btn.disabled = false; if(typeof skyBusyEnd === "function") skyBusyEnd("hide"); }
+}
+
+/* ================================================================
+   報告用に保存：いま表示している一覧を、スプレッドシートの「初期サポート報告」タブに足します
+================================================================ */
+async function saveReport(){
+  if(!data) return;
+  if(!lastList.length){ toast("表示している方がいません"); return; }
+  const parts = [];
+  ["#fKei", "#fHelper"].forEach(sel=>{ const o = $(sel).selectedOptions[0]; if($(sel).value && o) parts.push(o.textContent); });
+  if($("#fNew").checked) parts.push("登録3ヶ月以内");
+  if($("#fIdle").checked) parts.push("30日以上ログインなし");
+  if($("#q").value.trim()) parts.push("検索：" + $("#q").value.trim());
+  const cond = parts.join("／") || "すべて";
+  if(!confirm("いま表示している " + lastList.length + "名の一覧を、スプレッドシートの「初期サポート報告」タブに保存します。\n（しぼりこみ：" + cond + "）\nよろしいですか？")) return;
+  const mark = { g:"🟢", y:"🟡", r:"🔴" };
+  const rows = lastList.map(x=>({
+    id: x.m.id, name: x.m.name, keiretsu: x.m.keiretsu || "チーム未設定",
+    helper: x.m.helperName || (x.m.helper ? "会員番号 " + x.m.helper : "未設定"), joined: x.m.joined,
+    u: mark[x.sg.u.c] + " " + x.sg.u.v, sem: mark[x.sg.sem.c] + " " + x.sg.sem.v,
+    g: mark[x.sg.g.c] + " " + x.sg.g.v, k: mark[x.sg.k.c] + " " + x.sg.k.v, red: String(x.r)
+  }));
+  if(typeof skyBusy === "function" && skyBusy("report")) return;
+  if(typeof skyLoading === "function") skyLoading("報告用に保存しています", "しばらくお待ちください");
+  try{
+    const j = await api({ action:"supportReport", rows: JSON.stringify(rows), cond: cond });
+    if(typeof skyLoadingDone === "function") skyLoadingDone();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
+    if(!j || j.ok !== true){
+      toast(({ busy:"いま混み合っています。少しおいてお試しください",
+               suplayout:"「初期サポート報告」タブの見出しが決まった形とちがうため、保存を止めました" })[j && j.error] || "保存できませんでした");
+      return;
+    }
+    toast("✅ " + j.count + "名分を「" + j.sheet + "」タブに保存しました（" + j.at + "）");
+  }catch(e){
+    if(typeof skyLoadingDone === "function") skyLoadingDone();
+    toast("通信できませんでした");
+  }finally{
+    if(typeof skyBusyEnd === "function") skyBusyEnd("report");
+  }
 }
 
 /* ================================================================

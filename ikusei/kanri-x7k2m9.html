@@ -133,6 +133,28 @@
   .fbtn.sup.on{background:#F5C452;border-color:#F5C452;color:#5C4200;}
   .fbtn.adv.on{background:var(--blue);border-color:var(--blue);}
   .fbtn.kei.on{background:#7BB3A0;border-color:#7BB3A0;color:#fff;}
+  /* まだ保存していない変更 */
+  .fbtn.pend{outline:2.5px dashed #E5A823;outline-offset:1px;}
+  #pendBar{display:none;position:fixed;left:0;right:0;bottom:0;z-index:58;background:#3B3550;color:#fff;
+    padding:10px 14px calc(10px + env(safe-area-inset-bottom));box-shadow:0 -4px 18px rgba(0,0,0,.18);}
+  #pendBar.show{display:block;}
+  #pendBar .in{max-width:1080px;margin:0 auto;display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;}
+  #pendBar .t{flex:1 1 200px;font-size:13px;font-weight:700;}
+  #pendBar .t small{display:block;font-weight:500;opacity:.8;font-size:11.5px;}
+  #pendBar button{padding:10px 16px;border-radius:11px;font-weight:700;font-size:13.5px;}
+  #pendBar .undo{background:rgba(255,255,255,.14);color:#fff;}
+  #pendBar .save{background:#F5C452;color:#3B2A00;}
+  #pendBar .save:disabled{opacity:.6;}
+  body.has-pend{padding-bottom:84px;}
+  #leaveModal{display:none;position:fixed;inset:0;z-index:95;background:rgba(30,26,50,.55);align-items:center;justify-content:center;padding:18px;}
+  #leaveModal.show{display:flex;}
+  #leaveModal .card{background:#fff;border-radius:18px;max-width:360px;width:100%;padding:24px 20px;text-align:center;}
+  #leaveModal h3{font-size:16px;font-weight:900;color:#4A3F7A;margin-bottom:8px;}
+  #leaveModal p{font-size:13px;color:#5A5470;line-height:1.8;margin-bottom:16px;}
+  #leaveModal button{display:block;width:100%;padding:13px;border-radius:12px;font-weight:700;font-size:14px;margin-top:8px;}
+  #leaveModal .b1{background:#6E5FB5;color:#fff;}
+  #leaveModal .b2{background:#F0EDF9;color:#6E5FB5;}
+  #leaveModal .b3{background:none;color:#8A84A0;font-size:13px;}
   .fbtn.rep.on{background:var(--amber);border-color:var(--amber);color:#5C4200;}
   .fbtn.adm.on{background:var(--red);border-color:var(--red);color:#fff;}
   .fbtn:disabled{opacity:.35;cursor:not-allowed;}
@@ -443,11 +465,11 @@
           🔔 新規登録の依頼 <span id="reqCount">0</span></button>
         <button class="btn-add" id="btnBulk" onclick="openBulk()" style="display:none;background:#5E8FD8;">📥 まとめて登録</button>
         <button class="btn-add" id="btnTree" onclick="openTree()" style="display:none;background:#8A6FD1;">🌳 系列のつながり</button>
-        <button class="btn-add" id="btnSupport" onclick="location.href='shoki-support-k5w2.html'" style="background:#3DAA6E;">🌱 初期サポートマネジメント</button>
+        <button class="btn-add" id="btnSupport" onclick="leaveOk(()=>location.href='shoki-support-k5w2.html')" style="background:#3DAA6E;">🌱 初期サポートマネジメント</button>
         <button id="btnStats" onclick="openStats()" style="display:none;">📊 アクセス</button>
         <button id="btnDummy" onclick="toggleDummy()" style="display:none;">🧪 テストモード</button>
         <button id="btnBackPortal" onclick="backToPortal()">‹ ポータルへ</button>
-        <button onclick="location.href='./creamap-x7k2m9.html'">🗺 クリエマップ</button>
+        <button onclick="leaveOk(()=>location.href='./creamap-x7k2m9.html')">🗺 クリエマップ</button>
         <button onclick="load()">🔄 更新</button>
         <button onclick="backToPortal()">‹ 育成プログラムへ戻る</button>
         <button onclick="logout()" style="background:#FDEBEB;color:#B3352F;">ログアウト</button>
@@ -807,6 +829,22 @@
 </div>
 
 <div id="toast"></div>
+
+<div id="pendBar"><div class="in">
+  <div class="t"><span id="pendCount">0</span>件の変更があります<small>まだ保存していません。「変更を保存する」でまとめて保存します</small></div>
+  <button class="undo" onclick="undoPending()">元にもどす</button>
+  <button class="save" id="pendSave" onclick="savePending()">変更を保存する</button>
+</div></div>
+
+<div id="leaveModal">
+  <div class="card">
+    <h3>このページの内容が変更されています</h3>
+    <p>保存していない変更が <b id="leaveCount">0</b>件あります。<br>保存しますか？</p>
+    <button class="b1" onclick="leaveChoose('save')">保存する</button>
+    <button class="b2" onclick="leaveChoose('discard')">保存しないで進む</button>
+    <button class="b3" onclick="leaveChoose('stay')">このページにもどる</button>
+  </div>
+</div>
 
 <script>
 const GAS_URL = window.SKY_GAS_URL;   /* 共通設定（config.js）から受け取ります */
@@ -1350,6 +1388,7 @@ function renderStats(j){
 
 /* テストモードを切り替える(管理者のみ) */
 async function toggleDummy(){
+  if(!leaveOk(toggleDummy)) return;
   dummyMode = !dummyMode;
   document.body.classList.toggle("dummy-mode", dummyMode);
   document.getElementById("btnDummy").classList.toggle("dummyOn", dummyMode);
@@ -1423,6 +1462,7 @@ function backToPortal(){
 
 /* ログインしたまま、育成プログラムへ戻ります */
 function backToPortal(){
+  if(!leaveOk(backToPortal)) return;
   let m = null;
   try{
     const raw = localStorage.getItem("skyarc_member");
@@ -1438,6 +1478,7 @@ function backToPortal(){
 
 /* ログアウトします（この端末の記録も消します） */
 function logout(){
+  if(!leaveOk(logout)) return;
   if(!confirm("ログアウトしますか?\n(この端末に残った学習の記録も消えます)")) return;
   try{ google.accounts.id.disableAutoSelect(); }catch(e){}
   try{
@@ -1534,7 +1575,9 @@ async function load(isLogin){
       helper: `あなたが担当・紹介された方 <span class="chip">${j.members.length}名</span>`
     }[j.viewMode] || `<span class="chip">${j.members.length}名</span>`;
     $("#scopeLine").innerHTML = where + needTxt;
+    prunePending();   /* 保存していない変更は、読み直しても残します */
     render();
+    drawPendBar();
     return true;
   }catch(e){
     if(typeof skyLoadingDone === "function") skyLoadingDone();
@@ -1628,13 +1671,14 @@ function rowsHtml(list){
                   : data.isAdv ? ["サポーター","クリエ"]
                   : ["サポーター"];
     const fb = (flag, cls) => {
-      const on = (flag === "サポーター") ? hasSup(m)
-               : (flag === "クリエ") ? hasCrie(m) : has(m.role, flag);
+      const on = effFlag(m, flag);
+      const pend = on !== origFlag(m, flag);
       const disabled = allowed.indexOf(flag) < 0 ? "disabled" : "";
-      return `<button class="fbtn ${cls} ${on?'on':''}" ${disabled}
+      return `<button class="fbtn ${cls} ${on?'on':''} ${pend?'pend':''}" ${disabled}
+        ${pend ? 'title="まだ保存していません"' : ""}
         onclick="setFlag('${m.id}','${flag}',${on?0:1})">${flag}</button>`;
     };
-    const scopeBtn = has(m.role,"アドバンス")
+    const scopeBtn = effFlag(m, "アドバンス")
       ? (canFull
           ? `<br><button class="scope-btn" onclick="openScope('${m.id}')">担当系列: ${m.scope || "未設定"} ▾</button>`
           : `<br><span class="scope-view">担当系列: ${m.scope || "未設定"}</span>`)
@@ -1661,28 +1705,142 @@ function rowsHtml(list){
   }).join("");
 }
 
-async function setFlag(target, flag, on){
-  if(flag === "管理者" && on && !confirm("この方に「管理者」権限を与えます。よろしいですか?")) return;
-  try{
-    const body = new URLSearchParams({
-      action:"adminSetRole", id:admin.id, pin:admin.pin, email:admin.email,
-      target:String(target), flag:flag, on:String(on)
-    , dummy:dummyMode?"1":"0"});
-    const res = await fetch(GAS_URL, {method:"POST", body});
-    const j = await res.json();
-    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
-    if(j.ok === false){
-      toast({outofscope:"担当系列外の方は操作できません",
-             scopelimit:"自分の担当系列の範囲でのみ設定できます",
-             noperm:"この権限は操作できません"}[j.error] || "変更できませんでした");
-      return;
-    }
-    const who = (data && data.members || []).find(x => String(x.id) === String(target));
-    const nm = who && who.name ? who.name + "さんの" : "";
-    toast(nm + "「" + flag + "」を" + (on ? "つけました" : "はずしました"));
-    load();
-  }catch(e){ toast("通信できませんでした"); }
+/* ================================================================
+   役職の変更（サポーター・クリエ・アドバンス・系列代表・チーム代表・管理者）
+   ・ボタンを押すと、まずこの画面の中だけで変わります（点線の枠＝まだ保存していない変更）
+   ・下に出る「変更を保存する」で、まとめて1回で保存します
+   ・保存しないままほかのページへ移ろうとしたときは、保存するかをおたずねします
+================================================================ */
+let pendingRoles = {};   /* { 会員番号: { フラグ: つける(true)／はずす(false) } } */
+function origFlag(m, flag){
+  return flag === "サポーター" ? hasSup(m) : flag === "クリエ" ? hasCrie(m) : has(m.role, flag);
 }
+function effFlag(m, flag){
+  const p = pendingRoles[m.id];
+  return (p && Object.prototype.hasOwnProperty.call(p, flag)) ? p[flag] : origFlag(m, flag);
+}
+function pendCount(){
+  return Object.keys(pendingRoles).reduce((n, id)=>n + Object.keys(pendingRoles[id]).length, 0);
+}
+/* 読み直したあとに、もう同じになっているものは外します */
+function prunePending(){
+  Object.keys(pendingRoles).forEach(id=>{
+    const m = data && data.members.find(x=>String(x.id) === String(id));
+    const p = pendingRoles[id];
+    Object.keys(p).forEach(f=>{ if(!m || origFlag(m, f) === p[f]) delete p[f]; });
+    if(!Object.keys(p).length) delete pendingRoles[id];
+  });
+}
+function drawPendBar(){
+  const n = pendCount();
+  document.getElementById("pendCount").textContent = n;
+  document.getElementById("pendBar").classList.toggle("show", n > 0);
+  document.body.classList.toggle("has-pend", n > 0);
+}
+
+function setFlag(target, flag, on){
+  if(flag === "管理者" && on && !confirm("この方に「管理者」権限を与えます。よろしいですか?")) return;
+  const m = (data && data.members || []).find(x=>String(x.id) === String(target));
+  if(!m) return;
+  const p = pendingRoles[m.id] || (pendingRoles[m.id] = {});
+  if(origFlag(m, flag) === !!on) delete p[flag]; else p[flag] = !!on;
+  if(!Object.keys(p).length) delete pendingRoles[m.id];
+  render();
+  drawPendBar();
+}
+
+function undoPending(){
+  if(!pendCount()) return;
+  if(!confirm("保存していない変更（" + pendCount() + "件）を元にもどします。よろしいですか？")) return;
+  pendingRoles = {};
+  render(); drawPendBar();
+}
+
+async function savePending(){
+  const changes = [];
+  Object.keys(pendingRoles).forEach(id=>{
+    Object.keys(pendingRoles[id]).forEach(f=>changes.push({ target:id, flag:f, on: pendingRoles[id][f] }));
+  });
+  if(!changes.length) return true;
+  if(typeof skyBusy === "function" && skyBusy("roles")) return false;
+  const btn = document.getElementById("pendSave"); btn.disabled = true;
+  if(typeof skyLoading === "function") skyLoading("変更を保存しています", "しばらくお待ちください");
+  try{
+    const body = new URLSearchParams({ action:"adminSetRoles", id:admin.id, pin:admin.pin, email:admin.email,
+      changes: JSON.stringify(changes), dummy: dummyMode ? "1" : "0" });
+    const res = await fetch(GAS_URL, { method:"POST", body });
+    const j = await res.json();
+    if(typeof skyLoadingDone === "function") skyLoadingDone();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return false;
+    if(!j || j.ok !== true){
+      toast(({ busy:"いま混み合っています。少しおいてお試しください" })[j && j.error] || "保存できませんでした");
+      return false;
+    }
+    /* 保存できたものを、画面の中の名簿に入れます（全部を読み直さないので速く終わります） */
+    const bad = [];
+    j.results.forEach(r=>{
+      const m = data.members.find(x=>String(x.id) === String(r.target));
+      const p = pendingRoles[r.target];
+      if(r.ok && m){
+        if(r.sup !== undefined) m.sup = r.sup === true;
+        if(r.crie !== undefined) m.crie = r.crie === true;
+        if(r.role !== undefined) m.role = r.role;
+      }else{
+        bad.push((m && m.name ? m.name + "さん" : r.target) + "の「" + r.flag + "」："
+          + ({ outofscope:"担当系列外の方です", noperm:"この権限は操作できません", notfound:"見つかりませんでした" }[r.error] || "保存できませんでした"));
+      }
+      if(p){ delete p[r.flag]; if(!Object.keys(p).length) delete pendingRoles[r.target]; }
+    });
+    render(); drawPendBar();
+    if(bad.length){
+      alert("保存できなかった変更があります（" + bad.length + "件）\n\n" + bad.join("\n"));
+      return false;
+    }
+    toast("✅ " + j.done + "件の変更を保存しました");
+    return true;
+  }catch(e){
+    if(typeof skyLoadingDone === "function") skyLoadingDone();
+    toast("通信できませんでした");
+    return false;
+  }finally{
+    btn.disabled = false;
+    if(typeof skyBusyEnd === "function") skyBusyEnd("roles");
+  }
+}
+
+/* ほかのページへ移る前に、保存していない変更がないかを確かめます
+   leaveOk(続きの処理) … 変更がなければ true。あれば「保存しますか？」を出して false */
+let leaveNext = null;
+function leaveOk(next){
+  if(!pendCount()) return true;
+  leaveNext = next;
+  document.getElementById("leaveCount").textContent = pendCount();
+  document.getElementById("leaveModal").classList.add("show");
+  return false;
+}
+async function leaveChoose(c){
+  document.getElementById("leaveModal").classList.remove("show");
+  const next = leaveNext; leaveNext = null;
+  if(c === "stay" || !next) return;
+  if(c === "save"){ const ok = await savePending(); if(!ok) return; }
+  if(c === "discard"){ pendingRoles = {}; render(); drawPendBar(); }
+  next();
+}
+/* メニューなどのリンクで移るとき */
+document.addEventListener("click", function(e){
+  if(!pendCount()) return;
+  const a = e.target.closest && e.target.closest("a[href]");
+  if(!a) return;
+  const href = a.getAttribute("href") || "";
+  if(!href || href.charAt(0) === "#" || /^javascript:/i.test(href) || a.target === "_blank") return;
+  e.preventDefault(); e.stopPropagation();
+  leaveOk(()=>{ location.href = a.href; });
+}, true);
+/* ブラウザを閉じる・もどるとき */
+window.addEventListener("beforeunload", function(e){
+  if(!pendCount()) return;
+  e.preventDefault(); e.returnValue = "";
+});
 
 let scopeTarget = null;
 
