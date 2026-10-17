@@ -629,6 +629,10 @@
           <option value="">とばす（新しい方だけ登録する）</option>
         </select>
         <p class="bk-kei-note">更新するのは、LINK入会日・紹介者・アップ・サポート担当・居住地域・本名です。系列・お名前・メールは変えません。空の値で消すこともしません。</p>
+        <p class="bk-kei-note">名簿の方は、会員番号か、お名前（ニックネーム・本名のどちらでも）で見つけます。一部だけ合うときは、候補からえらんでいただきます。<br>
+          <span style="font-size:10.5px;">※ お名前は、なるべく名簿と同じ正しい表記でお願いします。</span></p>
+        <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;margin-top:8px;font-weight:500;">
+          <input type="checkbox" id="bkAllowNew"> 名簿に見つからない方を、新しく登録する</label>
       </div>
       <div class="bk-msg" id="bkMsg2"></div>
       <div class="row2">
@@ -769,9 +773,9 @@
       </div>
 
       <div class="mm-f" id="mmAutoWrap" style="display:none;">
-        <label>🔎 自動でうめた欄</label>
+        <label id="mmAutoLabel">🔎 自動でうめた欄</label>
         <div style="background:#E6F0FB;border:1.5px solid #A9C9EA;border-radius:9px;padding:11px 12px;font-size:12.5px;color:#2B5C93;line-height:1.8;" id="mmAutoFill"></div>
-        <p class="hint">お名前から会員番号を見つけてうめました。<br>
+        <p class="hint" id="mmAutoHint">お名前から会員番号を見つけてうめました。<br>
         合っているかご確認のうえ、保存すると印が消えます。</p>
       </div>
 
@@ -1600,10 +1604,12 @@ async function load(isLogin){
               : "サポーター";
     $("#meLine").textContent = (j.adminName||"") + "さん｜" + lvl;
     const needN = (j.members||[]).filter(x=>x.needCheck).length;
-    const autoN = (j.members||[]).filter(x=>x.autoFill).length;
+    const autoN = (j.members||[]).filter(x=>x.autoFill && !/まとめて更新/.test(x.autoFill)).length;
+    const bulkN = (j.members||[]).filter(x=>x.autoFill && /まとめて更新/.test(x.autoFill)).length;
     const needTxt =
       (needN ? ` <span class="chip" style="background:#FFF3D6;color:#8A6D00;">⚠️ 要確認 ${needN}名</span>` : "") +
-      (autoN ? ` <span class="chip" style="background:#E6F0FB;color:#2B5C93;">🔎 確認待ち ${autoN}名</span>` : "");
+      (autoN ? ` <span class="chip" style="background:#E6F0FB;color:#2B5C93;">🔎 確認待ち ${autoN}名</span>` : "") +
+      (bulkN ? ` <span class="chip" style="background:#E6F0FB;color:#2B5C93;">📝 要確認（一部更新） ${bulkN}名</span>` : "");
     /* どの範囲が見えているかをお伝えします */
     const where = {
       all:    `全 <b>${j.members.length}</b> 名を表示中`,
@@ -1738,7 +1744,9 @@ function rowsHtml(list){
         const open = `onclick='openMember(${JSON.stringify(m).replace(/'/g,"&#39;")})'`;
         const marks =
             (m.needCheck ? `<span class="need-check" ${canFull ? open : ""} title="会員番号の欄にお名前が入っています。編集で直してください">⚠️ 要確認</span>` : "")
-          + (m.autoFill ? `<span class="auto-fill" ${canFull ? open : ""} title="お名前から自動でうめました：${m.autoFill}">🔎 確認待ち</span>` : "")
+          + (m.autoFill ? (/まとめて更新/.test(m.autoFill)
+              ? `<span class="auto-fill" ${canFull ? open : ""} title="一部のデータがまとめて更新されています：${m.autoFill}">📝 要確認</span>`
+              : `<span class="auto-fill" ${canFull ? open : ""} title="お名前から自動でうめました：${m.autoFill}">🔎 確認待ち</span>`) : "")
           + (m.temp ? `<span class="temp-id" ${canFull ? open : ""} title="会員番号が分からないまま登録された方です">🔗 番号まち</span>` : "");
         const btn = canFull ? `<button class="scope-btn" ${open}>編集</button>` : "";
         return (marks || btn) ? `<div class="edit-row">${marks}${btn}</div>` : "";
@@ -2147,7 +2155,14 @@ function openMember(m){
   const aw = document.getElementById("mmAutoWrap");
   const af = document.getElementById("mmAutoFill");
   if(aw && af){
-    if(m && m.autoFill){ af.textContent = m.autoFill; aw.style.display = "block"; }
+    if(m && m.autoFill){
+      af.textContent = m.autoFill; aw.style.display = "block";
+      const bulkUp = /まとめて更新/.test(m.autoFill);
+      document.getElementById("mmAutoLabel").textContent = bulkUp ? "📝 要確認：一部のデータが更新されています" : "🔎 自動でうめた欄";
+      document.getElementById("mmAutoHint").innerHTML = bulkUp
+        ? "まとめて登録／更新で、一部のデータが更新されています。<br>内容をご確認のうえ「保存する」を押すと、要確認が外れます。"
+        : "お名前から会員番号を見つけてうめました。<br>合っているかご確認のうえ、保存すると印が消えます。";
+    }
     else aw.style.display = "none";
   }
   document.getElementById("mmEmail").value = m ? (m.email||"") : "";
@@ -2754,15 +2769,28 @@ function bkReasonText(x){
 const BK_WARN = { bademail:"メールの形がちがうので、メールは入れません", emailtaken:"メールがほかの方と同じなので、メールは入れません",
                   baddate:"入会日の形が読めないので、入会日は入れません" };
 BK_REASON.nochange = "変わるところがありません";
+BK_REASON.notfound = "見られる範囲に、該当する方はいません";
+BK_WARN.namemismatch = "表のお名前と、名簿のお名前が合いません";
 BK_REASON.nochangeblank = "足せる空欄がありません（入っている値は変えません）";
 /* 入会日の列が、LINKに入会した日かを、確かめる前に1回だけおたずねします */
 let bkJoinOk = false, bkAskCb = null;
 function bkAsk(text, cb){ document.getElementById("bkAskText").innerHTML = text; bkAskCb = cb; document.getElementById("bkAsk").style.display = "flex"; }
 function bkAnswer(yes){ document.getElementById("bkAsk").style.display = "none"; const cb = bkAskCb; bkAskCb = null; if(cb) cb(yes); }
 function bkUpdMode(){ const e = document.getElementById("bkUpd"); return e ? e.value : ""; }
+/* 候補からえらんだら、その方として確かめ直します */
+function bkPick(i, v){
+  if(!bkRows[i]) return;
+  if(v) bkRows[i].pickId = v; else delete bkRows[i].pickId;
+  bkKeepPicks = true;
+  bulkRun("check");
+}
+let bkKeepPicks = false;
 async function bulkRun(mode){
   if(mode === "check"){
+    const keep = bkKeepPicks ? bkRows.map(r=>r.pickId) : [];
+    bkKeepPicks = false;
     bkRows = bkBuildRows();
+    keep.forEach((v, i)=>{ if(v && bkRows[i]) bkRows[i].pickId = v; });
     const upd = bkUpdMode();
     if(bkMap.indexOf("name") < 0 && bkMap.indexOf("realName") < 0 && !(upd && bkMap.indexOf("id") >= 0)){
       bkSay("bkMsg2", upd ? "「会員番号」か「お名前」の列をえらんでください" : "「お名前」か「本名」の列をえらんでください", "err"); return;
@@ -2790,10 +2818,12 @@ async function bulkRun(mode){
     const chk = bkLastCheck || [];
     const n = chk.filter(x=>x.status === "add").length;
     const u = chk.filter(x=>x.status === "update").length;
-    const skipN = chk.length - n - u;
+    const skipN = chk.length - n - u - chk.filter(x=>x.status === "pick").length;
     const what = kc === BK_MULTI ? "名簿に書かれた系列で" : "「" + kc + "」の方として";
     const lines = [];
     if(n) lines.push(what + " " + n + "名を、名簿に登録します。");
+    const pk = chk.filter(x=>x.status === "pick").length;
+    if(pk) lines.push("候補をえらんでいない " + pk + "名は、変えません。");
     if(u) lines.push("すでにいる " + u + "名の項目を" + (bkUpdMode() === "all" ? "更新します。入っている値も、すべて上書きされます。" : "更新します（空欄のところに足します）。"));
     if(skipN) lines.push(u ? "（とばす " + skipN + "名は、登録も更新もしません）" : "（とばす " + skipN + "名は登録しません）");
     if(!confirm(lines.join("\n") + "\nよろしいですか？")) return;
@@ -2818,7 +2848,8 @@ async function bulkRun(mode){
     for(let k = 0; k < sendRows.length; k += 300){
       const part = sendRows.slice(k, k + 300);
       const params = { action:"bulkImport", id:admin.id, pin:admin.pin, email:admin.email,
-                       rows: JSON.stringify(part), chain: chain, mode: mode, update: bkUpdMode(), dummy: dummyMode ? "1" : "0" };
+                       rows: JSON.stringify(part), chain: chain, mode: mode, update: bkUpdMode(),
+                       allowNew: document.getElementById("bkAllowNew").checked ? "1" : "0", dummy: dummyMode ? "1" : "0" };
       const res = await fetch(GAS_URL, { method:"POST", body:new URLSearchParams(params) });
       const j = await res.json();
       if(typeof skyLoadingDone === "function") skyLoadingDone();
@@ -2837,10 +2868,12 @@ async function bulkRun(mode){
     all.sort((a,b)=>a.i - b.i);
     bkLastCheck = all;
     const temp = all.filter(x=>x.status === "add" && x.temp).length;
-    const skip = all.length - added - updated;
+    const picks = all.filter(x=>x.status === "pick").length;
+    const skip = all.length - added - updated - picks;
     bulkShow(3);
     document.getElementById("bkSum").textContent = (mode === "check")
-      ? `${all.length}行のうち、登録できる方 ${added}名（うち仮の番号 ${temp}名）／更新できる方 ${updated}名／とばす方 ${skip}名`
+      ? `${all.length}行のうち、登録できる方 ${added}名（うち仮の番号 ${temp}名）／更新できる方 ${updated}名／`
+        + (picks ? `候補からえらんでいただく方 ${picks}名／` : "") + `とばす方 ${skip}名`
       : "✅ " + [added ? `${added}名を名簿に登録しました（うち仮の番号 ${temp}名。パスコードは 1111 です）` : "",
                  updated ? `${updated}名を更新しました` : ""].filter(Boolean).join("。") + "。";
     const badKei = local.length;
@@ -2863,8 +2896,17 @@ async function bulkRun(mode){
     document.getElementById("bkResTbl").innerHTML =
       "<tr><th>行</th><th>会員番号</th><th>お名前</th><th>系列</th><th>結果</th></tr>" +
       all.map(x=>`<tr><td>${x.i + 1}</td><td>${bkEsc(x.id || (x.temp ? "（仮の番号）" : ""))}</td><td>${bkEsc(x.name)}</td><td>${bkEsc(x.keiretsu)}</td>`
-        + `<td>${x.status === "update"
+        + `<td>${x.status === "pick"
+              ? `<div style="font-size:12px;color:#8A6D00;margin-bottom:4px;">${x.partial ? "一部だけ合う方がいます。" : "同じお名前の方が何人かいます。"}どの方ですか？</div>
+                 <select data-kei-fixed="1" onchange="bkPick(${x.i}, this.value)" style="max-width:240px;font-size:12px;padding:4px;border-radius:7px;">
+                   <option value="">えらんでください</option>
+                   ${(x.cands || []).map(c=>`<option value="${bkEsc(c.id)}">${bkEsc(c.name || "")}${c.realName && c.realName !== c.name ? "（" + bkEsc(c.realName) + "）" : ""}｜${bkEsc(c.id)}｜${bkEsc(c.keiretsu)}</option>`).join("")}
+                   <option value="__none">この中にはいない</option>
+                 </select>`
+            : x.status === "update"
               ? `<span class="st-add">${mode === "check" ? "更新できます" : "更新しました"}：${bkEsc((x.fields || []).join("・"))}</span>`
+                + (x.matchedBy === "name" || x.matchedBy === "pick" ? `<div style="font-size:11px;color:#6A6480;">お名前で見つけました（${bkEsc(x.id)}）</div>` : "")
+                + (x.dbName ? `<div class="st-warn">名簿のお名前：${bkEsc(x.dbName)}</div>` : "")
                 + (x.warn && x.warn.length ? `<div class="st-warn">${x.warn.map(w=>BK_WARN[w] || w).join("・")}</div>` : "")
             : x.status === "add"
               ? `<span class="st-add">${mode === "check" ? "登録できます" : "登録しました"}${x.temp ? "（仮の番号）" : ""}</span>`
