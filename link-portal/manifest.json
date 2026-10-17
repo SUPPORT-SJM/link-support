@@ -1,0 +1,18 @@
+{
+  "id": "./open.html",
+  "name": "LINKポータル",
+  "short_name": "LINKポータル",
+  "description": "LINKポータル（app.link-event-x.com）をすぐに開くためのアイコンです",
+  "start_url": "./open.html",
+  "scope": "./",
+  "display": "minimal-ui",
+  "orientation": "portrait",
+  "background_color": "#FFFBF8",
+  "theme_color": "#F06A6A",
+  "lang": "ja",
+  "icons": [
+    { "src": "../img/portal-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "../img/portal-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "../img/portal-icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

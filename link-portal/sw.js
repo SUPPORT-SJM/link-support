@@ -1,3 +1,9 @@
+/* ================================================================
+   ホーム画面に置いたときのための、いちばん小さな仕組みです
+   ----------------------------------------------------------------
+   ・ページの控えは取りません（いつも最新のページを読み込みます）
+   ・更新したページが反映されない、ということが起きないようにしています
+================================================================ */
 self.addEventListener("install", function () { self.skipWaiting(); });
 self.addEventListener("activate", function (e) { e.waitUntil(self.clients.claim()); });
-self.addEventListener("fetch", function () {});
+self.addEventListener("fetch", function () { /* 何もしません（ふつうに読み込みます） */ });
