@@ -2,6 +2,7 @@
 <html lang="ja">
 <head>
 <script src="config.js"></script>
+<script src="sky-find.js"></script>
 <meta charset="UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -616,29 +617,27 @@ async function checkPair(k, btn, quiet){
   if(!num && !nm) return;
   if(btn){ btn.disabled = true; btn.textContent = "照合しています…"; }
   try{
+    /* 照合は、共通の部品（sky-find.js）を使います。このページはログイン前なので、ぴったり同じ方だけをさがします */
+    const r = await skyFind.search(num ? { qid:num, qname:nm } : { qname:nm }, {});
+    if(r && r.error === "maintenance") return;
     if(num){
       /* 番号から（お名前もあれば、同じ方かを確かめます） */
-      const r = await fetch(`${GAS_URL}?action=matchIdName&id=${encodeURIComponent(num)}&name=${encodeURIComponent(nm)}`);
-      const j = await r.json();
-      if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
-      if(!j.ok || !j.found){
+      const c = r && r.ok && r.list && r.list[0];
+      if(!c){
         if(!quiet) pairMsg(k, "→ まだご登録のない番号です（このままで大丈夫です）", false);
-      }else if(!nm || j.match){
-        pairSet(k, { id: num, name: nm || j.name, keiretsu: j.keiretsu });
+      }else if(!nm || !r.mismatch){
+        pairSet(k, { id: num, name: nm || c.name, keiretsu: c.keiretsu });
       }else{
-        const out = pairMsg(k, `→ 会員番号 ${escHtml(num)} は「${escHtml(j.name)}」さんで登録されています。お名前をご確認ください<br>`
-          + `<button type="button" class="pick-btn">「${escHtml(j.name)}」さんにする</button>`, false);
+        const out = pairMsg(k, `→ 会員番号 ${escHtml(num)} は「${escHtml(c.name)}」さんで登録されています。お名前をご確認ください<br>`
+          + `<button type="button" class="pick-btn">「${escHtml(c.name)}」さんにする</button>`, false);
         out.querySelector(".pick-btn").addEventListener("click", ()=>{
-          document.getElementById(PAIRS[k][1]).value = j.name;
-          pairSet(k, { id: num, name: j.name, keiretsu: j.keiretsu });
+          document.getElementById(PAIRS[k][1]).value = c.name;
+          pairSet(k, { id: num, name: c.name, keiretsu: c.keiretsu });
         });
       }
     }else{
       /* お名前から番号を */
-      const r = await fetch(`${GAS_URL}?action=findByName&name=${encodeURIComponent(nm)}`);
-      const j = await r.json();
-      if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
-      const list = (j && j.ok && j.members) || [];
+      const list = (r && r.ok && r.list) || [];
       if(list.length === 1){
         pairSet(k, { id: list[0].id, name: nm, keiretsu: list[0].keiretsu });
       }else if(list.length > 1){
@@ -646,7 +645,7 @@ async function checkPair(k, btn, quiet){
           + list.map((m,i)=>`<button type="button" class="pick-btn" data-i="${i}">${escHtml(m.name)}さん${m.keiretsu ? "（" + escHtml(m.keiretsu) + "）" : ""}</button>`).join(""), true);
         out.querySelectorAll(".pick-btn").forEach(b=>b.addEventListener("click", ()=> pairSet(k, list[Number(b.dataset.i)])));
       }else{
-        pairMsg(k, (j && j.error === "short")
+        pairMsg(k, (r && r.error === "short")
           ? "→ もう少しくわしいお名前で、照合してみてください"
           : "→ 見つかりませんでした。お名前のままで大丈夫です（あとで担当の方が番号に直します）", false);
       }
