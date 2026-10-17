@@ -119,6 +119,18 @@
       <div class="row"><span class="lb">お住まい</span><span class="vl" id="vArea">–</span></div>
       <div class="row"><span class="lb">連絡先</span><span class="vl" id="vMail">–</span></div>
       <div class="row"><span class="lb">段階</span><span class="vl" id="vRank">–</span></div>
+      <div class="row"><span class="lb">LINK入会日</span><span class="vl" id="vJoin">–</span></div>
+    </div>
+
+    <!-- LINK入会日 -->
+    <div class="sec">LINK入会日</div>
+    <div class="edit-card">
+      <div class="f" style="margin-bottom:0;">
+        <label>LINKに入会した日</label>
+        <input type="date" id="inJoin">
+        <p class="hint">ビジネスマイページの「契約日」の日付です（このサイトに登録した日ではありません）</p>
+      </div>
+      <button class="btn btn-go" style="margin-top:13px;" onclick="saveJoin()">保存する</button>
     </div>
 
     <!-- 紹介URL -->
@@ -216,11 +228,45 @@ function fill(){
   const rank = member.role ? member.role.split(/[,、\s]+/).filter(x=>x).join(" / ")
              : (member.crie ? "クリエイターズ" : (member.sup ? "サポーター" : "メンバー"));
   set("#vRank", rank);
+  set("#vJoin", member.linkJoin);
+  if(member.linkJoin) $("#inJoin").value = String(member.linkJoin).replace(/\//g, "-");
 
   if(member.refUrl){
     $("#inUrl").value = member.refUrl;
     $("#urlShow").textContent = member.refUrl;
     $("#urlBox").style.display = "flex";
+  }
+}
+
+/* ---------- LINK入会日 ---------- */
+async function saveJoin(){
+  if(typeof skyBusy === "function" && skyBusy("saveJoin")) return;
+  try{
+    const v = $("#inJoin").value;   /* 2023-06-23 の形 */
+    if(!v){ show("LINKに入会した日を入れてください。", "err"); return; }
+    const d = v.replace(/-/g, "/");
+    if(typeof skyLoading === "function") skyLoading("保存しています…");
+    try{
+      const res = await fetch(GAS_URL, {method:"POST", body:new URLSearchParams({
+        action:"saveProfile", id:member.id, pin:member.pin, linkJoin:d
+      })});
+      const j = await res.json();
+      if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
+      if(typeof skyLoadingDone === "function") skyLoadingDone();
+      if(j.ok === false){
+        show(({ baddate:"日付の形がちがいます。", nocol:"いまは保存できません。管理者の方にお知らせください。" })[j.error] || "保存できませんでした。", "err");
+        return;
+      }
+      member.linkJoin = d;
+      try{ localStorage.setItem("skyarc_member", JSON.stringify(member)); }catch(e){}
+      fill();
+      show("✅ LINK入会日を保存しました。", "ok");
+    }catch(e){
+      if(typeof skyLoadingDone === "function") skyLoadingDone();
+      show("通信できませんでした。", "err");
+    }
+  }finally{
+    if(typeof skyBusyEnd === "function") skyBusyEnd("saveJoin");
   }
 }
 

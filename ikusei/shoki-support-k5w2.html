@@ -120,12 +120,12 @@
     <div class="tools">
       <input id="q" placeholder="名前・番号で検索" oninput="draw()">
       <select id="fKei" onchange="draw()" data-kei-fixed="1"></select>
-      <select id="fHelper" onchange="draw()"></select>
-      <label><input type="checkbox" id="fNew" onchange="draw()"> 登録3ヶ月以内</label>
+      <select id="fUp" onchange="draw()" data-kei-fixed="1"></select>
       <label><input type="checkbox" id="fIdle" onchange="draw()"> 30日以上ログインなし</label>
       <button class="back savetop" id="btnSaveTop" onclick="savePending()" disabled>💾 一覧の変更を保存</button>
       <button class="back" id="btnUndo" onclick="undoPending()" style="display:none;">元にもどす</button>
-      <button class="back" id="btnShowHid" onclick="toggleShowHidden()">🙈 非表示の方も出す（0）</button>
+      <span id="orderNote" style="display:none;font-size:11px;opacity:.85;flex-basis:100%;">※ 保存すると、変えた内容に合わせてメンバーの表示順も変わります</span>
+      <button class="back" id="btnShowHid" onclick="toggleShowHidden()">🙈 非表示：ON</button>
       <button class="back" onclick="saveReport()">📄 報告用に保存</button>
       <button class="back" onclick="leaveOk(()=>location.href='kanri-x7k2m9.html')">‹ 管理画面へ</button>
     </div>
@@ -133,6 +133,7 @@
   <div class="bar">
     <span id="count"></span>
     <span class="legend"><span>🟢 OK</span><span>🟡 そろそろ・返事待ち</span><span>🔴 未案内・日付が過ぎた</span></span>
+    <span class="legend"><span>（ク）アップクリエ</span><span>（担）サポート担当</span><span>（紹）紹介者</span><span>（説）アドバイザー</span></span>
   </div>
   <div class="list" id="list"></div>
 </div>
@@ -298,7 +299,7 @@ async function load(){
     $("#gate").style.display = "none"; $("#app").style.display = "block";
     $("#who").textContent = (j.adminName ? j.adminName + "さん" : "") + "｜" + ({ all:"全員", scope:"担当系列の方", kei:"ご自身の系列の方", helper:"ご自身が担当・紹介した方" })[j.viewMode];
     fillKei();
-    fillHelpers();
+    fillUplines();
     draw();
   }catch(e){
     if(typeof skyLoadingDone === "function") skyLoadingDone();
@@ -320,16 +321,20 @@ function fillKei(){
   /* 系列が1つだけのときは、選ぶ必要がないので出しません */
   sel.style.display = (list.length + (none ? 1 : 0)) > 1 ? "" : "none";
 }
-function fillHelpers(){
-  const sel = $("#fHelper"), keep = sel.value;
-  const names = {};
-  data.members.forEach(m=>{ if(m.helper) names[m.helper] = m.helperName || ("会員番号 " + m.helper); });
-  const ids = Object.keys(names).sort((a,b)=>names[a].localeCompare(names[b], "ja"));
-  sel.innerHTML = '<option value="">担当者：すべて</option>'
-    + '<option value="__me">担当者：自分</option>'
-    + '<option value="__none">担当者：未設定</option>'
-    + ids.map(id=>`<option value="${esc(id)}">担当者：${esc(names[id])}</option>`).join("");
+/* アップクリエでしぼりこむ（見えている方のアップクリエを、お名前の順にならべます） */
+function upKey(m){ const u = String(m.upline || "").trim(); return /^\d+$/.test(u) ? u.replace(/^0+/, "") : u; }
+function fillUplines(){
+  const sel = $("#fUp"), keep = sel.value;
+  const names = {}; let none = false;
+  data.members.forEach(m=>{ const k = upKey(m); if(k) names[k] = who(m.uplineName, m.upline); else none = true; });
+  const keys = Object.keys(names).sort((a,b)=>names[a].localeCompare(names[b], "ja"));
+  const meKey = String(data.me || "").replace(/^0+/, "");
+  sel.innerHTML = '<option value="">（ク）アップクリエ：すべて</option>'
+    + (names[meKey] ? '<option value="__me">（ク）アップクリエ：自分</option>' : "")
+    + keys.map(k=>`<option value="${esc(k)}">（ク）アップクリエ：${esc(names[k])}</option>`).join("")
+    + (none ? '<option value="__none">（ク）アップクリエ：未設定</option>' : "");
   sel.value = keep;
+  if(sel.value !== keep) sel.value = "";
 }
 
 /* ================================================================
@@ -338,26 +343,32 @@ function fillHelpers(){
 function draw(){
   if(!data) return;
   const q = $("#q").value.trim().toLowerCase();
-  const fh = $("#fHelper").value;
+  const fu = $("#fUp").value;
   const fk = $("#fKei").value;
-  const fNew = $("#fNew").checked, fIdle = $("#fIdle").checked;
+  const fIdle = $("#fIdle").checked;
   const t = today0();
   const sameId = (a,b)=>String(a || "").replace(/^0+/, "") === String(b || "").replace(/^0+/, "");
   let list = data.members.filter(m=>{
     if(!showHidden && hiddenOrig[hkey(m.id)] && !(hkey(m.id) in pendingHide)) return false;
-    if(q && !((m.name || "").toLowerCase().includes(q) || String(m.id).includes(q))) return false;
+    if(q && !((m.name || "").toLowerCase().includes(q) || String(m.id).includes(q) || pad8(m.id).includes(q))) return false;
     if(fk === "__none" && m.keiretsu) return false;
     if(fk && fk !== "__none" && m.keiretsu !== fk) return false;
-    if(fh === "__me" && !sameId(m.helper, data.me)) return false;
-    if(fh === "__none" && m.helper) return false;
-    if(fh && fh !== "__me" && fh !== "__none" && m.helper !== fh) return false;
-    if(fNew){ const d = parseD(m.joined); if(!d || monthsSince(d) >= 3) return false; }
+    if(fu === "__me" && !sameId(m.upline, data.me)) return false;
+    if(fu === "__none" && upKey(m)) return false;
+    if(fu && fu !== "__me" && fu !== "__none" && upKey(m) !== fu) return false;
     if(fIdle){ const d = parseD(m.lastSeen); if(d && (t - d) < 30 * 86400000) return false; }
     return true;
-  }).map(m=>{ const sg = signals(m); const cs = Object.values(sg).map(x=>x.c);
-    return { m, sg, r: cs.filter(c=>c === "r").length, y: cs.filter(c=>c === "y").length, np: nextPlan(m) }; });
+  }).map(m=>{
+    /* 色は今の（保存前の変更をふくむ）状態で出します */
+    const sg = signals(m);
+    /* 並び順は「保存ずみの状態」で決めます。保存前に状態を変えても、その方は同じ場所にいます */
+    const saved = { items: m.orig || m.items };
+    const cs = Object.values(signals(saved)).map(x=>x.c);
+    const rr = cs.filter(c=>c === "r").length;
+    const yy = cs.filter(c=>c === "y").length;
+    return { m, sg, r: Object.values(sg).filter(x=>x.c === "r").length, sr: rr, sy: yy, np: nextPlan(saved) }; });
   /* 🔴が多い方 → 🟡が多い方 → 参加予定が近い方 の順 */
-  list.sort((a,b)=> (b.r - a.r) || (b.y - a.y)
+  list.sort((a,b)=> (b.sr - a.sr) || (b.sy - a.sy)
     || ((a.np ? a.np.getTime() : 9e15) - (b.np ? b.np.getTime() : 9e15))
     || (a.m.name || "").localeCompare(b.m.name || "", "ja"));
   lastList = list;
@@ -373,7 +384,9 @@ function draw(){
         <span><span class="t">${esc(g.title)}</span><br><span class="v">${esc(x.sg[g.key].v)}</span></span></button>`;
     return `<div class="row ${hidOn ? "hidden-row" : ""}">
       <div class="who"><div class="nm">${esc(m.name || "(名前未登録)")}</div>
-        <div class="sub">${esc(m.id)}${m.keiretsu ? "｜" + esc(m.keiretsu) : ""}<br>担当：${esc(m.helperName || (m.helper ? "会員番号 " + m.helper : "未設定"))}${m.joined ? "｜登録 " + esc(m.joined) : ""}</div>
+        <div class="sub">${esc(pad8(m.id))}${m.keiretsu ? "｜" + esc(m.keiretsu) : ""}
+          <br><span title="アップクリエ">（ク）${esc(who(m.uplineName, m.upline))}</span>　<span title="サポート担当">（担）${esc(who(m.helperName, m.helper))}</span>
+          <br><span title="紹介者">（紹）${esc(who(m.introName, m.intro))}</span>　<span title="アドバイザー（説明してくださった方）">（説）${esc(who(m.advName, m.advId))}</span></div>
         <label class="hidchk ${hidPend ? "pend" : ""}" title="あなたの画面だけで非表示にします"><input type="checkbox" ${hidOn ? "checked" : ""} onchange="toggleHide('${esc(m.id)}', this.checked)">非表示</label></div>
       ${GROUPS.map(chip).join("")}
     </div>`;
@@ -389,6 +402,10 @@ function draw(){
 ================================================================ */
 let hiddenOrig = {}, pendingHide = {}, showHidden = false, lastList = [];
 function hkey(id){ return String(id || "").replace(/^0+/, ""); }
+/* 会員番号は 8けた（頭に0をつけて）で出します。仮の番号（T00001 など）はそのまま */
+function pad8(id){ const t = String(id || ""); return /^\d+$/.test(t) && t.length < 8 ? t.padStart(8, "0") : t; }
+/* お名前があればお名前、なければ番号、どちらもなければ「未設定」 */
+function who(name, id){ return name || (id ? (/^\d+$/.test(String(id)) ? pad8(id) : String(id)) : "未設定"); }
 function effHidden(m){ const k = hkey(m.id); return (k in pendingHide) ? pendingHide[k] : !!hiddenOrig[k]; }
 function itemChanged(m, k){
   const a = (m.items && m.items[k]) || {}, b = (m.orig && m.orig[k]) || {};
@@ -408,11 +425,14 @@ function toast(t){
 }
 function drawHiddenBtn(){
   const n = data ? data.members.filter(m=>hiddenOrig[hkey(m.id)]).length : 0;
-  $("#btnShowHid").textContent = (showHidden ? "🙈 非表示の方をかくす（" : "🙈 非表示の方も出す（") + n + "）";
+  /* ON＝非表示にした方をかくしている／OFF＝非表示にした方も（うすく）出している */
+  $("#btnShowHid").textContent = "🙈 非表示：" + (showHidden ? "OFF" : "ON") + (n ? "（" + n + "名）" : "");
+  $("#btnShowHid").title = showHidden ? "押すと、非表示にした方をかくします" : "押すと、非表示にした方もうすく出します（チェックを外すと表示に戻せます）";
   const c = pendCount();
   $("#btnSaveTop").disabled = c === 0;
   $("#btnSaveTop").textContent = "💾 一覧の変更を保存" + (c ? "（" + c + "件）" : "");
   $("#btnUndo").style.display = c ? "" : "none";
+  $("#orderNote").style.display = c ? "" : "none";
 }
 function toggleHide(id, on){
   const k = hkey(id);
@@ -519,8 +539,7 @@ async function saveReport(){
   if(!lastList.length){ toast("表示している方がいません"); return; }
   if(pendCount()){ toast("先に「💾 一覧の変更を保存」を押してから、報告用に保存してください"); return; }
   const parts = [];
-  ["#fKei", "#fHelper"].forEach(sel=>{ const o = $(sel).selectedOptions[0]; if($(sel).value && o) parts.push(o.textContent); });
-  if($("#fNew").checked) parts.push("登録3ヶ月以内");
+  ["#fKei", "#fUp"].forEach(sel=>{ const o = $(sel).selectedOptions[0]; if($(sel).value && o) parts.push(o.textContent); });
   if($("#fIdle").checked) parts.push("30日以上ログインなし");
   if($("#q").value.trim()) parts.push("検索：" + $("#q").value.trim());
   const cond = parts.join("／") || "すべて";
@@ -528,7 +547,7 @@ async function saveReport(){
   const mark = { g:"🟢", y:"🟡", r:"🔴" };
   const rows = lastList.map(x=>({
     id: x.m.id, name: x.m.name, keiretsu: x.m.keiretsu || "チーム未設定",
-    helper: x.m.helperName || (x.m.helper ? "会員番号 " + x.m.helper : "未設定"), joined: x.m.joined,
+    helper: x.m.helperName || (x.m.helper ? "会員番号 " + x.m.helper : "未設定"),
     u: mark[x.sg.u.c] + " " + x.sg.u.v, sem: mark[x.sg.sem.c] + " " + x.sg.sem.v,
     g: mark[x.sg.g.c] + " " + x.sg.g.v, k: mark[x.sg.k.c] + " " + x.sg.k.v, red: String(x.r)
   }));

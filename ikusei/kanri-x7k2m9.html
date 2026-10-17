@@ -473,8 +473,7 @@
         <button class="btn-add" id="btnReq" onclick="openReqList()" style="display:none;background:#F2B33D;">
           🔔 新規登録の依頼 <span id="reqCount">0</span></button>
         <button id="btnSaveTop" onclick="savePending()" disabled>💾 一覧の変更を保存</button>
-        <button id="btnShowHid" onclick="toggleShowHidden()">🙈 非表示の方も出す（0）</button>
-        <button class="btn-add" id="btnBulk" onclick="openBulk()" style="display:none;background:#5E8FD8;">📥 まとめて登録</button>
+        <button class="btn-add" id="btnBulk" onclick="openBulk()" style="display:none;background:#5E8FD8;">📥 まとめて登録／更新</button>
         <button class="btn-add" id="btnTree" onclick="openTree()" style="display:none;background:#8A6FD1;">🌳 系列のつながり</button>
         <button class="btn-add" id="btnSupport" onclick="goLeave(()=>location.href='shoki-support-k5w2.html')" style="background:#3DAA6E;">🌱 初期サポートマネジメント</button>
         <button id="btnStats" onclick="openStats()" style="display:none;">📊 アクセス</button>
@@ -483,6 +482,7 @@
         <button onclick="goLeave(()=>location.href='./creamap-x7k2m9.html')">🗺 クリエマップ</button>
         <button onclick="load()">🔄 更新</button>
         <button onclick="backToPortal()">‹ 育成プログラムへ戻る</button>
+        <button id="btnShowHid" onclick="toggleShowHidden()">🙈 非表示：ON</button>
         <button onclick="logout()" style="background:#FDEBEB;color:#B3352F;">ログアウト</button>
       </div>
     </div>
@@ -593,12 +593,13 @@
 
 <div id="bulkModal" onclick="if(event.target===this)closeBulk()">
   <div class="sheet">
-    <h3>📥 まとめて登録</h3>
+    <h3>📥 まとめて登録／更新</h3>
     <div id="bkStep1">
       <p class="lead">名簿のスプレッドシートで範囲をえらんでコピーし、下に貼りつけてください。<br>
         CSVやExcelのファイルをえらぶこともできます。<br>
         <b>お名前</b>が分かれば入れられます。会員番号がない方には仮の番号が付き、パスコードは <b>1111</b> になります。<br>
-        すでに名簿にある会員番号の方は、上書きせずにとばします。</p>
+        すでに名簿にいる方は、入会日・紹介者などの<b>空欄に足す</b>か<b>上書き</b>ができます（次の画面でえらびます）。<br>
+        たとえば「会員番号」と「入会日」の2列だけの表でも、すでにいる方の入会日を入れられます。</p>
       <div class="bk-kei">
         <label for="bkKei">この名簿は、どの系列の名簿ですか？</label>
         <select id="bkKei" data-kei-fixed="1"></select>
@@ -620,6 +621,15 @@
         <span class="bk-kei-chip" id="bkKeiChip"></span>
       </div>
       <div class="bk-tbl-wrap"><table id="bkMapTbl"></table></div>
+      <div class="bk-kei" style="margin-top:4px;">
+        <label for="bkUpd">すでに名簿にいる方は</label>
+        <select id="bkUpd" data-kei-fixed="1" onchange="bkJoinOk=false">
+          <option value="blank">空欄のところだけ足す（入っている値は変えない）</option>
+          <option value="all">入っている値も上書きする</option>
+          <option value="">とばす（新しい方だけ登録する）</option>
+        </select>
+        <p class="bk-kei-note">更新するのは、LINK入会日・紹介者・アップ・サポート担当・居住地域・本名です。系列・お名前・メールは変えません。空の値で消すこともしません。</p>
+      </div>
       <div class="bk-msg" id="bkMsg2"></div>
       <div class="row2">
         <button class="bk-btn sub" onclick="bulkBack()">‹ 貼りつけにもどる</button>
@@ -660,6 +670,15 @@
       <button class="bk-btn" id="trSave" onclick="saveTree()" disabled>保存する</button>
     </div>
     <button class="bk-close" onclick="closeTree()">とじる</button>
+  </div>
+</div>
+
+<div id="bkAsk" style="display:none;position:fixed;inset:0;z-index:96;background:rgba(30,26,50,.55);align-items:center;justify-content:center;padding:18px;">
+  <div style="background:#fff;border-radius:18px;max-width:360px;width:100%;padding:24px 20px;text-align:center;">
+    <h3 style="font-size:16px;font-weight:900;color:#4A3F7A;margin-bottom:8px;">確認させてください</h3>
+    <p id="bkAskText" style="font-size:13.5px;color:#4A4560;line-height:1.9;margin-bottom:16px;"></p>
+    <button onclick="bkAnswer(true)" style="display:block;width:100%;padding:13px;border-radius:12px;border:none;background:#6E5FB5;color:#fff;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;">はい</button>
+    <button onclick="bkAnswer(false)" style="display:block;width:100%;padding:13px;border-radius:12px;border:none;background:#F0EDF9;color:#6E5FB5;font-weight:700;font-size:14px;margin-top:8px;cursor:pointer;font-family:inherit;">いいえ</button>
   </div>
 </div>
 
@@ -705,6 +724,12 @@
       <div class="mm-f">
         <label>系列</label>
         <select id="mmKeiretsu" data-kei-fixed="1"></select>
+      </div>
+
+      <div class="mm-f">
+        <label>LINK入会日</label>
+        <input type="date" id="mmLinkJoin">
+        <p style="font-size:11px;color:#8A84A0;margin-top:4px;">ビジネスマイページの「契約日」の日付です（このサイトに登録した日ではありません）</p>
       </div>
 
       <div class="mm-f">
@@ -1653,7 +1678,7 @@ function render(){
   if(!data) return;
   const q = $("#search").value.trim().toLowerCase();
   const list = data.members.filter(m=>{
-    /* 非表示にしてある方は出しません（「非表示の方も出す」のとき・保存前に変えた方は出します） */
+    /* 非表示にしてある方は出しません（非表示：OFF のとき・保存前に変えた方は出します） */
     if(!showHidden && hiddenOrig[hk(m.id)] && !(hk(m.id) in pendingHide)) return false;
     if(!q) return true;
     return (m.name||"").toLowerCase().includes(q) || String(m.id).includes(q);
@@ -1753,7 +1778,9 @@ function toggleHide(id, on){
 function toggleShowHidden(){ showHidden = !showHidden; render(); }
 function drawHidBtn(){
   const n = data ? data.members.filter(m=>hiddenOrig[hk(m.id)]).length : 0;
-  $("#btnShowHid").textContent = (showHidden ? "🙈 非表示の方をかくす（" : "🙈 非表示の方も出す（") + n + "）";
+  /* ON＝非表示にした方をかくしている／OFF＝非表示にした方も（うすく）出している */
+  $("#btnShowHid").textContent = "🙈 非表示：" + (showHidden ? "OFF" : "ON") + (n ? "（" + n + "名）" : "");
+  $("#btnShowHid").title = showHidden ? "押すと、非表示にした方をかくします" : "押すと、非表示にした方もうすく出します（チェックを外すと表示に戻せます）";
 }
 /* 読み直したあとに、もう同じになっているものは外します */
 function prunePending(){
@@ -2069,6 +2096,7 @@ function openMember(m){
   document.getElementById("mmId").style.background = m ? "#EFEDF5" : "var(--paper)";
   document.getElementById("mmName").value = m ? (m.name||"") : "";
   document.getElementById("mmRealName").value = m ? (m.realName||"") : "";
+  document.getElementById("mmLinkJoin").value = m && m.linkJoin ? String(m.linkJoin).replace(/\//g, "-") : "";
   document.getElementById("mmAdvName").value = m ? (m.advName||"") : "";
   document.getElementById("mmAdvId").value = m ? (m.advId||"") : "";
 
@@ -2252,7 +2280,8 @@ const BK_FIELDS = [
   ["keiretsu", "系列"], ["area", "居住地域"], ["email", "メール"],
   ["intro", "紹介者の会員番号"], ["introName", "紹介者のお名前"],
   ["upline", "アップの会員番号"], ["uplineName", "アップのお名前"],
-  ["helper", "サポート担当の会員番号"], ["helperName", "サポート担当のお名前"]
+  ["helper", "サポート担当の会員番号"], ["helperName", "サポート担当のお名前"],
+  ["linkJoin", "LINK入会日（契約日）"]
 ];
 let bkTable = [], bkMap = [], bkRows = [], bkLastCheck = null;
 function bkEsc(t){ return String(t == null ? "" : t).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
@@ -2633,6 +2662,7 @@ function bkGuessHead(h){
   h = String(h || "").replace(/\s/g, "");
   if(!h) return null;
   const num = /番号|ID|ｉｄ|No/i.test(h);
+  if(/契約日|入会日/.test(h)) return "linkJoin";
   if(/紹介/.test(h)) return num ? "intro" : "introName";
   if(/アップ/.test(h)) return num ? "upline" : "uplineName";
   if(/サポート|担当/.test(h)) return num ? "helper" : "helperName";
@@ -2721,11 +2751,34 @@ function bkReasonText(x){
   if(x.reason === "otherkeimaybe") return "「" + (x.otherKei || "") + "」の代表（" + who + "）の下の方です。「系列のつながり」で、この名簿の系列の代表や、系列の入れ子を設定すると見分けられます";
   return BK_REASON[x.reason] || x.reason;
 }
-const BK_WARN = { bademail:"メールの形がちがうので、メールは入れません", emailtaken:"メールがほかの方と同じなので、メールは入れません" };
+const BK_WARN = { bademail:"メールの形がちがうので、メールは入れません", emailtaken:"メールがほかの方と同じなので、メールは入れません",
+                  baddate:"入会日の形が読めないので、入会日は入れません" };
+BK_REASON.nochange = "変わるところがありません";
+BK_REASON.nochangeblank = "足せる空欄がありません（入っている値は変えません）";
+/* 入会日の列が、LINKに入会した日かを、確かめる前に1回だけおたずねします */
+let bkJoinOk = false, bkAskCb = null;
+function bkAsk(text, cb){ document.getElementById("bkAskText").innerHTML = text; bkAskCb = cb; document.getElementById("bkAsk").style.display = "flex"; }
+function bkAnswer(yes){ document.getElementById("bkAsk").style.display = "none"; const cb = bkAskCb; bkAskCb = null; if(cb) cb(yes); }
+function bkUpdMode(){ const e = document.getElementById("bkUpd"); return e ? e.value : ""; }
 async function bulkRun(mode){
   if(mode === "check"){
     bkRows = bkBuildRows();
-    if(bkMap.indexOf("name") < 0 && bkMap.indexOf("realName") < 0){ bkSay("bkMsg2", "「お名前」か「本名」の列をえらんでください", "err"); return; }
+    const upd = bkUpdMode();
+    if(bkMap.indexOf("name") < 0 && bkMap.indexOf("realName") < 0 && !(upd && bkMap.indexOf("id") >= 0)){
+      bkSay("bkMsg2", upd ? "「会員番号」か「お名前」の列をえらんでください" : "「お名前」か「本名」の列をえらんでください", "err"); return;
+    }
+    /* 入会日の列があるときは、LINKに入会した日かをおたずねします */
+    const jc = bkMap.indexOf("linkJoin");
+    if(jc >= 0 && !bkJoinOk){
+      const head = document.getElementById("bkHead").checked ? String((bkTable[0] || [])[jc] || "") : "";
+      bkAsk("「" + bkEsc(head || "入会日") + "」の列は、<b>LINKに入会した日</b>（ビジネスマイページの契約日）ですか？", yes=>{
+        if(yes){ bkJoinOk = true; bulkRun("check"); return; }
+        bkMap = bkMap.map(f=>f === "linkJoin" ? "" : f);
+        bulkDrawMap();
+        bkSay("bkMsg2", "入会日の列は「使わない」にしました。ほかの列のえらび方を確かめて、もう一度「確かめる」を押してください", "ok");
+      });
+      return;
+    }
     if(bkKeiChoice() === BK_MULTI && bkMap.indexOf("keiretsu") < 0){
       bkSay("bkMsg2", "「いくつかの系列がまざっている」をえらんだときは、名簿の中の「系列」の列をえらんでください。<br>系列の列がない名簿なら、1つめの画面で系列をえらんでください。", "err"); return;
     }
@@ -2736,10 +2789,14 @@ async function bulkRun(mode){
     /* 「確かめる」で登録できると分かった人数でお知らせします（とばす方は数えません） */
     const chk = bkLastCheck || [];
     const n = chk.filter(x=>x.status === "add").length;
-    const skipN = chk.length - n;
+    const u = chk.filter(x=>x.status === "update").length;
+    const skipN = chk.length - n - u;
     const what = kc === BK_MULTI ? "名簿に書かれた系列で" : "「" + kc + "」の方として";
-    if(!confirm(what + " " + n + "名を、名簿に登録します。"
-        + (skipN ? "\n（とばす " + skipN + "名は登録しません）" : "") + "\nよろしいですか？")) return;
+    const lines = [];
+    if(n) lines.push(what + " " + n + "名を、名簿に登録します。");
+    if(u) lines.push("すでにいる " + u + "名の項目を" + (bkUpdMode() === "all" ? "更新します。入っている値も、すべて上書きされます。" : "更新します（空欄のところに足します）。"));
+    if(skipN) lines.push(u ? "（とばす " + skipN + "名は、登録も更新もしません）" : "（とばす " + skipN + "名は登録しません）");
+    if(!confirm(lines.join("\n") + "\nよろしいですか？")) return;
   }
   /* 系列に問題のある行は送らずに、とばす行としてお見せします */
   const sendIdx = [], local = [];
@@ -2755,13 +2812,13 @@ async function bulkRun(mode){
   try{
     /* 300行ずつに分けて送ります */
     const all = [];
-    let added = 0, rootCount = 0, rootHits = 0;
+    let added = 0, updated = 0, rootCount = 0, rootHits = 0;
     /* 紹介者のつながり（300行ずつに分けても、名簿全体のつながりで見分けられるように） */
     const chain = JSON.stringify(sendRows.filter(r=>r.id && r.intro).map(r=>[r.id, r.intro]));
     for(let k = 0; k < sendRows.length; k += 300){
       const part = sendRows.slice(k, k + 300);
       const params = { action:"bulkImport", id:admin.id, pin:admin.pin, email:admin.email,
-                       rows: JSON.stringify(part), chain: chain, mode: mode, dummy: dummyMode ? "1" : "0" };
+                       rows: JSON.stringify(part), chain: chain, mode: mode, update: bkUpdMode(), dummy: dummyMode ? "1" : "0" };
       const res = await fetch(GAS_URL, { method:"POST", body:new URLSearchParams(params) });
       const j = await res.json();
       if(typeof skyLoadingDone === "function") skyLoadingDone();
@@ -2772,7 +2829,7 @@ async function bulkRun(mode){
         return;
       }
       j.results.forEach(x=>{ x.i = sendIdx[x.i + k]; all.push(x); });
-      added += j.added;
+      added += j.added; updated += j.updated || 0;
       rootCount = j.rootCount || 0; rootHits += j.rootHits || 0;
     }
     if(typeof skyLoadingDone === "function") skyLoadingDone();
@@ -2780,11 +2837,12 @@ async function bulkRun(mode){
     all.sort((a,b)=>a.i - b.i);
     bkLastCheck = all;
     const temp = all.filter(x=>x.status === "add" && x.temp).length;
-    const skip = all.length - added;
+    const skip = all.length - added - updated;
     bulkShow(3);
     document.getElementById("bkSum").textContent = (mode === "check")
-      ? `${all.length}行のうち、登録できる方 ${added}名（うち仮の番号 ${temp}名）／とばす方 ${skip}名`
-      : `✅ ${added}名を名簿に登録しました（うち仮の番号 ${temp}名）。パスコードは 1111 です。`;
+      ? `${all.length}行のうち、登録できる方 ${added}名（うち仮の番号 ${temp}名）／更新できる方 ${updated}名／とばす方 ${skip}名`
+      : "✅ " + [added ? `${added}名を名簿に登録しました（うち仮の番号 ${temp}名。パスコードは 1111 です）` : "",
+                 updated ? `${updated}名を更新しました` : ""].filter(Boolean).join("。") + "。";
     const badKei = local.length;
     const alertBox = document.getElementById("bkMsg3");
     const notes = [];
@@ -2805,14 +2863,18 @@ async function bulkRun(mode){
     document.getElementById("bkResTbl").innerHTML =
       "<tr><th>行</th><th>会員番号</th><th>お名前</th><th>系列</th><th>結果</th></tr>" +
       all.map(x=>`<tr><td>${x.i + 1}</td><td>${bkEsc(x.id || (x.temp ? "（仮の番号）" : ""))}</td><td>${bkEsc(x.name)}</td><td>${bkEsc(x.keiretsu)}</td>`
-        + `<td>${x.status === "add"
+        + `<td>${x.status === "update"
+              ? `<span class="st-add">${mode === "check" ? "更新できます" : "更新しました"}：${bkEsc((x.fields || []).join("・"))}</span>`
+                + (x.warn && x.warn.length ? `<div class="st-warn">${x.warn.map(w=>BK_WARN[w] || w).join("・")}</div>` : "")
+            : x.status === "add"
               ? `<span class="st-add">${mode === "check" ? "登録できます" : "登録しました"}${x.temp ? "（仮の番号）" : ""}</span>`
                 + (x.warn && x.warn.length ? `<div class="st-warn">${x.warn.map(w=>BK_WARN[w] || w).join("・")}</div>` : "")
               : `<span class="st-skip">とばします：${bkEsc(bkReasonText(x))}</span>`}</td></tr>`).join("");
-    document.getElementById("bkWriteBtn").style.display = (mode === "check" && added > 0) ? "inline-block" : "none";
-    document.getElementById("bkWriteBtn").textContent = `${added}名を名簿に登録する`;
+    document.getElementById("bkWriteBtn").style.display = (mode === "check" && (added + updated) > 0) ? "inline-block" : "none";
+    document.getElementById("bkWriteBtn").textContent = added && updated ? `${added}名を登録・${updated}名を更新する`
+      : updated ? `${updated}名を更新する` : `${added}名を名簿に登録する`;
     document.getElementById("bkBack2").style.display = (mode === "check") ? "inline-block" : "none";
-    if(mode === "write"){ toast(`${added}名を登録しました`); load(); }
+    if(mode === "write"){ toast([added ? `${added}名を登録` : "", updated ? `${updated}名を更新` : ""].filter(Boolean).join("・") + "しました"); load(); }
   }catch(e){
     if(typeof skyLoadingDone === "function") skyLoadingDone();
     bkSay(mode === "check" ? "bkMsg2" : "bkMsg3", "通信できませんでした。電波のよい場所でお試しください", "err");
@@ -2871,6 +2933,7 @@ async function saveMember(){
       intro:document.getElementById("mmIntro").value.trim(),
       upline:document.getElementById("mmUpline").value.trim(),
       helper:document.getElementById("mmHelper").value.trim(),
+      linkJoin:document.getElementById("mmLinkJoin").value.replace(/-/g, "/"),
       clearAutoFill: (memEditing && memEditing.autoFill) ? "1" : "0",
       sup:document.getElementById("mmSup").checked ? "1" : "0",
       crie:document.getElementById("mmCrie").checked ? "1" : "0",
