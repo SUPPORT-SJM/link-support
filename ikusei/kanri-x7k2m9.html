@@ -2,6 +2,7 @@
 <html lang="ja">
 <head>
 <script src="../config.js"></script>
+<script src="../sky-find.js"></script>
 <meta charset="UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -90,12 +91,6 @@
   .st-note{font-size:11px;color:#8B889E;line-height:1.8;background:var(--paper);border-radius:10px;padding:10px 12px;}
   .st-empty{text-align:center;padding:40px;color:#8B889E;font-size:13px;line-height:1.9;}
 
-  /* テストモード(仮データ表示) */
-  .head button#btnDummy.dummyOn{background:#F5C452;color:#5C4200;}
-  body.dummy-mode{box-shadow:inset 0 0 0 4px #F5C452;}
-  body.dummy-mode .head{background:#6B5A2E;}
-  .dummy-banner{display:none;background:#FFF3D6;border-bottom:2px solid #F0C86A;padding:8px 0;font-size:12px;color:#7A5A00;text-align:center;font-weight:700;}
-  body.dummy-mode .dummy-banner{display:block;}
   #tbody tr.grp td{background:#F0EDF9;color:#4A3F7A;font-weight:900;font-size:13px;padding:9px 12px;border-top:2px solid #D9D2F3;}
   #tbody tr.grp td small{font-weight:700;color:#7A7390;margin-left:6px;}
   .head input.search{padding:8px 12px;border-radius:999px;border:none;font-size:13px;font-family:inherit;width:170px;}
@@ -244,6 +239,7 @@
   .mm-f input,.mm-f select{width:100%;padding:11px 12px;font-size:15px;border:2px solid var(--line);border-radius:9px;font-family:inherit;background:var(--paper);}
   .mm-f input:focus,.mm-f select:focus{outline:none;border-color:var(--leaf);}
   .mm-f .hint{font-size:11px;color:#8B889E;margin-top:4px;line-height:1.6;}
+  .mm-f .mm-find{margin-top:6px;padding:5px 12px;border-radius:99px;border:1.5px solid #6E5FB5;background:#fff;color:#6E5FB5;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;}
   .mm-roles{display:flex;gap:6px;flex-wrap:wrap;margin-top:2px;}
   .mm-role{border:1.5px solid var(--line);background:#fff;color:#8B889E;border-radius:999px;padding:6px 13px;font-size:12px;font-weight:700;cursor:pointer;}
   .mm-role.on{background:var(--leaf);border-color:var(--leaf);color:#fff;}
@@ -477,7 +473,6 @@
         <button class="btn-add" id="btnTree" onclick="openTree()" style="display:none;background:#8A6FD1;">🌳 系列のつながり</button>
         <button class="btn-add" id="btnSupport" onclick="goLeave(()=>location.href='shoki-support-k5w2.html')" style="background:#3DAA6E;">🌱 初期サポートマネジメント</button>
         <button id="btnStats" onclick="openStats()" style="display:none;">📊 アクセス</button>
-        <button id="btnDummy" onclick="toggleDummy()" style="display:none;">🧪 テストモード</button>
         <button id="btnBackPortal" onclick="backToPortal()">‹ ポータルへ</button>
         <button onclick="goLeave(()=>location.href='./creamap-x7k2m9.html')">🗺 クリエマップ</button>
         <button onclick="load()">🔄 更新</button>
@@ -486,13 +481,6 @@
         <button onclick="logout()" style="background:#FDEBEB;color:#B3352F;">ログアウト</button>
       </div>
     </div>
-  </div>
-
-  <div class="dummy-banner">
-    🧪 テストモードです(仮のデータを表示しています・本番データではありません)
-    <span id="dummyBetaNote" style="display:none;font-weight:400;">／ベータ期間中の機能です</span>
-    <button onclick="makeDummy()" style="background:#F0B429;color:#fff;border:none;border-radius:999px;padding:4px 12px;font-size:11px;font-weight:700;margin-left:8px;cursor:pointer;">仮データを作り直す</button>
-    <button onclick="clearDummy()" style="background:#E8788A;color:#fff;border:none;border-radius:999px;padding:4px 12px;font-size:11px;font-weight:700;margin-left:4px;cursor:pointer;">仮データを消す</button>
   </div>
 
   <div class="bar"><div class="wrap" id="scopeLine"></div></div>
@@ -628,8 +616,8 @@
           <option value="all">入っている値も上書きする</option>
           <option value="">とばす（新しい方だけ登録する）</option>
         </select>
-        <p class="bk-kei-note">更新するのは、LINK入会日・紹介者・アップ・サポート担当・居住地域・本名です。系列・お名前・メールは変えません。空の値で消すこともしません。</p>
-        <p class="bk-kei-note">名簿の方は、会員番号か、お名前（ニックネーム・本名のどちらでも）で見つけます。一部だけ合うときは、候補からえらんでいただきます。<br>
+        <p class="bk-kei-note">更新するのは、LINK入会日・紹介者・アップクリエ・サポート担当・居住地域・本名です。系列・お名前・メールは変えません。空の値で消すこともしません。</p>
+        <p class="bk-kei-note">名簿の方は、会員番号か、お名前（ニックネーム・本名・名字だけ・下の名前だけでも）で見つけます。一部だけ合うときは、候補からえらんでいただきます。<br>
           <span style="font-size:10.5px;">※ お名前は、なるべく名簿と同じ正しい表記でお願いします。</span></p>
         <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;margin-top:8px;font-weight:500;">
           <input type="checkbox" id="bkAllowNew"> 名簿に見つからない方を、新しく登録する</label>
@@ -677,6 +665,22 @@
   </div>
 </div>
 
+<div id="bkCol" style="display:none;position:fixed;inset:0;z-index:97;background:rgba(30,26,50,.55);align-items:center;justify-content:center;padding:18px;">
+  <div style="background:#fff;border-radius:18px;max-width:420px;width:100%;padding:22px 18px;text-align:center;max-height:90vh;overflow:auto;">
+    <div style="font-size:11px;color:#9A93B0;margin-bottom:4px;">列の確認 <span id="bkColStep"></span></div>
+    <h3 style="font-size:16px;font-weight:900;color:#4A3F7A;margin-bottom:10px;">この列は、どの項目ですか？</h3>
+    <p id="bkColHead" style="font-size:13.5px;color:#4A4560;line-height:1.8;margin-bottom:10px;word-break:break-all;"></p>
+    <p id="bkColQ" style="font-size:13.5px;color:#4A4560;line-height:1.8;margin-bottom:12px;"></p>
+    <div id="bkColBtns"></div>
+  </div>
+</div>
+<style>
+  #bkCol .bkc-main,#bkCol .bkc-sub{display:block;width:100%;padding:12px;border-radius:12px;border:none;font-weight:700;font-size:14px;margin-top:8px;cursor:pointer;font-family:inherit;}
+  #bkCol .bkc-main{background:#6E5FB5;color:#fff;}
+  #bkCol .bkc-sub{background:#F0EDF9;color:#6E5FB5;}
+  #bkCol .bkc-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+  #bkCol .bkc-opt{padding:10px 6px;border-radius:10px;border:1.5px solid #D9D3EF;background:#fff;color:#4A3F7A;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;line-height:1.4;}
+</style>
 <div id="bkAsk" style="display:none;position:fixed;inset:0;z-index:96;background:rgba(30,26,50,.55);align-items:center;justify-content:center;padding:18px;">
   <div style="background:#fff;border-radius:18px;max-width:360px;width:100%;padding:24px 20px;text-align:center;">
     <h3 style="font-size:16px;font-weight:900;color:#4A3F7A;margin-bottom:8px;">確認させてください</h3>
@@ -781,20 +785,26 @@
 
       <div class="mm-f">
         <label>紹介者の会員番号</label>
-        <input type="text" id="mmIntro" inputmode="numeric" placeholder="00012345">
+        <input type="text" id="mmIntro" placeholder="会員番号（お名前でも照合できます）">
+        <button type="button" class="mm-find" onclick="mmFind('mmIntro')">🔎 照合する</button>
+        <div id="mmIntroFind"></div>
         <p class="hint">本人が登録時に入力した「紹介してくれた方」です</p>
       </div>
 
       <div class="mm-f">
         <label>アップのクリエ会員番号</label>
-        <input type="text" id="mmUpline" inputmode="numeric" placeholder="00012345(クリエイターズ以上)">
+        <input type="text" id="mmUpline" placeholder="会員番号（お名前でも照合できます）">
+        <button type="button" class="mm-find" onclick="mmFind('mmUpline')">🔎 照合する</button>
+        <div id="mmUplineFind"></div>
         <p class="hint">この方を紹介・育成したクリエイターズの会員番号です。クリエマップ(系統図)に使われます。<br>
         <span style="color:#8A6D00;">※ お名前が入っている場合は、正しい会員番号に直してください</span></p>
       </div>
 
       <div class="mm-f">
         <label>サポート担当者の会員番号</label>
-        <input type="text" id="mmHelper" inputmode="numeric" placeholder="00012345">
+        <input type="text" id="mmHelper" placeholder="会員番号（お名前でも照合できます）">
+        <button type="button" class="mm-find" onclick="mmFind('mmHelper')">🔎 照合する</button>
+        <div id="mmHelperFind"></div>
         <p class="hint">実際にサポートを担当されている方です</p>
       </div>
 
@@ -802,6 +812,8 @@
         <label>アドバイザー <span style="font-weight:400;font-size:11px;color:#77748A;">(入会時に説明された方)</span></label>
         <input type="text" id="mmAdvName" placeholder="お名前" style="margin-bottom:8px;">
         <input type="text" id="mmAdvId" inputmode="numeric" placeholder="会員番号">
+        <button type="button" class="mm-find" onclick="mmFind('mmAdvId')">🔎 照合する</button>
+        <div id="mmAdvIdFind"></div>
       </div>
 
       <div class="mm-f" id="mmScopeWrap" style="display:none;">
@@ -983,7 +995,6 @@ function keiGoneMark(k){ return ""; }   /* 系列名のほかに、印は付け�
 const $ = (s)=>document.querySelector(s);
 const PIN_RESET_URL = GAS_URL;
 let admin = null;       // {id,pin,email}
-let dummyMode = false;  // テストモード(仮データ表示)
 let googleEmail = "";
 
 
@@ -1426,73 +1437,6 @@ function renderStats(j){
     </p>`;
 }
 
-/* テストモードを切り替える(管理者のみ) */
-async function toggleDummy(){
-  if(!leaveOk(toggleDummy)) return;
-  dummyMode = !dummyMode;
-  document.body.classList.toggle("dummy-mode", dummyMode);
-  document.getElementById("btnDummy").classList.toggle("dummyOn", dummyMode);
-  document.getElementById("btnDummy").textContent = dummyMode ? "🧪 テスト中" : "🧪 テストモード";
-  if(!dummyMode){ toast("本番データに戻しました"); load(); return; }
-
-  toast("テストモードに切り替えました🧪");
-  await load();
-  // データがまだ無ければ、その場で作れるようにご案内します
-  if(dummyMode && data && (!data.members || data.members.length === 0)){
-    if(confirm("仮データがまだありません。\n\n今すぐ作りますか?")) makeDummy();
-  }
-}
-
-/* 仮データを作る(管理者のみ) */
-async function makeDummy(){
-  const ans = prompt("何名分つくりますか?(10〜300)\n\n" +
-    "内訳の目安\n" +
-    "・チーム代表 1名\n・系列代表 約1%\n・アドバンス 約2%\n" +
-    "・クリエイターズ 約6%\n・サポーター 約10%\n・メンバー 残り", "50");
-  if(ans === null) return;
-  const n = parseInt(String(ans).replace(/[^0-9]/g,""), 10) || 50;
-
-  toast("作成しています…(少しお待ちください)");
-  try{
-    const body = new URLSearchParams({
-      action:"makeDummy", id:admin.id, pin:admin.pin, count:String(n)
-    });
-    const res = await fetch(GAS_URL, {method:"POST", body});
-    const j = await res.json();
-    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
-    if(j.ok === false){
-      toast({noperm:"管理者のみご利用いただけます", pin:"パスコードが違います"}[j.error] || "作成できませんでした");
-      return;
-    }
-    alert("できました🧪\n\n" + j.count + "名分を作りました。\n" + (j.detail||""));
-    if(!dummyMode){
-      dummyMode = true;
-      document.body.classList.add("dummy-mode");
-      const bd = document.getElementById("btnDummy");
-      if(bd){ bd.classList.add("dummyOn"); bd.textContent = "🧪 テスト中"; }
-    }
-    load();
-  }catch(e){ toast("通信できませんでした"); }
-}
-
-/* 仮データを消す(管理者のみ) */
-async function clearDummy(){
-  if(!confirm("仮データをすべて消します。\n(本番データには影響しません)\n\nよろしいですか?")) return;
-  try{
-    const body = new URLSearchParams({ action:"clearDummy", id:admin.id, pin:admin.pin });
-    const res = await fetch(GAS_URL, {method:"POST", body});
-    const j = await res.json();
-    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
-    if(j.ok === false){ toast("削除できませんでした"); return; }
-    toast("仮データを消しました");
-    dummyMode = false;
-    document.body.classList.remove("dummy-mode");
-    const bd = document.getElementById("btnDummy");
-    if(bd){ bd.classList.remove("dummyOn"); bd.textContent = "🧪 テストモード"; }
-    load();
-  }catch(e){ toast("通信できませんでした"); }
-}
-
 function backToPortal(){
   let m = null;
   try{ m = JSON.parse(localStorage.getItem("skyarc_member")||"null"); }catch(e){}
@@ -1536,7 +1480,7 @@ function logout(){
 async function load(isLogin){
   if(typeof skyLoading === "function") skyLoading(isLogin ? "ログインしています…" : "読み込んでいます…");
   try{
-    const url = `${GAS_URL}?action=adminList&id=${encodeURIComponent(admin.id)}&pin=${encodeURIComponent(admin.pin)}&email=${encodeURIComponent(admin.email)}&dummy=${dummyMode?1:0}`;
+    const url = `${GAS_URL}?action=adminList&id=${encodeURIComponent(admin.id)}&pin=${encodeURIComponent(admin.pin)}&email=${encodeURIComponent(admin.email)}`;
     const res = await fetch(url);
     const j = await res.json();
     if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
@@ -1567,25 +1511,8 @@ async function load(isLogin){
     data = j;
     hiddenOrig = {}; (j.hidden || []).forEach(k=>{ hiddenOrig[hk(k)] = true; });
 
-    // ダミーモードの表示を実際の状態に合わせる
-    if(dummyMode && j.dummy !== true){
-      dummyMode = false;
-      document.body.classList.remove("dummy-mode");
-      const bd = document.getElementById("btnDummy");
-      if(bd){ bd.classList.remove("dummyOn"); bd.textContent = "🧪 テストモード"; }
-      toast("テストモードは管理者のみご利用いただけます");
-    }
     const bs = document.getElementById("btnStats");
     if(bs) bs.style.display = j.isAdmin ? "inline-block" : "none";
-    const bd2 = document.getElementById("btnDummy");
-    if(bd2){
-      bd2.style.display = j.canDummy ? "inline-block" : "none";
-      bd2.title = j.betaMode
-        ? "ベータテスト中のため、アドバンス以上の方がご利用いただけます"
-        : "管理者専用の機能です";
-    }
-    const bn = document.getElementById("dummyBetaNote");
-    if(bn) bn.style.display = (j.betaMode && !j.isAdmin) ? "inline" : "none";
 
     /* 届いている依頼がないか、あわせて確かめます */
     checkReq();
@@ -1839,7 +1766,7 @@ async function saveHidePart(){
   if(!hideIds.length && !showIds.length) return true;
   try{
     const body = new URLSearchParams({ action:"supportHide", id:admin.id, pin:admin.pin, email:admin.email,
-      hideIds: JSON.stringify(hideIds), showIds: JSON.stringify(showIds), dummy: dummyMode ? "1" : "0" });
+      hideIds: JSON.stringify(hideIds), showIds: JSON.stringify(showIds) });
     const res = await fetch(GAS_URL, { method:"POST", body });
     const j = await res.json();
     if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return false;
@@ -1862,7 +1789,7 @@ async function saveRolesPart(){
   if(typeof skyLoading === "function") skyLoading("変更を保存しています", "しばらくお待ちください");
   try{
     const body = new URLSearchParams({ action:"adminSetRoles", id:admin.id, pin:admin.pin, email:admin.email,
-      changes: JSON.stringify(changes), dummy: dummyMode ? "1" : "0" });
+      changes: JSON.stringify(changes) });
     const res = await fetch(GAS_URL, { method:"POST", body });
     const j = await res.json();
     if(typeof skyLoadingDone === "function") skyLoadingDone();
@@ -1976,7 +1903,7 @@ async function saveScope(){
     const body = new URLSearchParams({
       action:"adminSetScope", id:admin.id, pin:admin.pin, email:admin.email,
       target:String(scopeTarget.id), scope:scope
-    , dummy:dummyMode?"1":"0"});
+    });
     const res = await fetch(GAS_URL, {method:"POST", body});
     const j = await res.json();
     if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
@@ -2152,6 +2079,7 @@ function openMember(m){
   document.getElementById("mmIntro").value = m ? (m.intro||"") : "";
   document.getElementById("mmUpline").value = m ? (m.upline||"") : "";
   document.getElementById("mmHelper").value = m ? (m.helper||"") : "";
+  ["mmIntro","mmUpline","mmHelper","mmAdvId"].forEach(f=>{ const b = document.getElementById(f + "Find"); if(b) b.innerHTML = ""; });
   const aw = document.getElementById("mmAutoWrap");
   const af = document.getElementById("mmAutoFill");
   if(aw && af){
@@ -2261,7 +2189,7 @@ async function linkMemberId(){
   show("ひもづけています…","ok");
   try{
     const params = { action:"adminLinkId", id:admin.id, pin:admin.pin, email:admin.email,
-                     targetId: memEditing.id, newId: newId, dummy: dummyMode ? "1" : "0" };
+                     targetId: memEditing.id, newId: newId };
     const res = await fetch(GAS_URL, {method:"POST", body:new URLSearchParams(params)});
     const j = await res.json();
     if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
@@ -2291,10 +2219,11 @@ async function linkMemberId(){
    まとめて登録（アドバンス・系列代表・チーム代表・管理者）
 ================================================================ */
 const BK_FIELDS = [
-  ["", "使わない"], ["id", "会員番号"], ["name", "お名前（ニックネーム）"], ["realName", "本名"],
+  ["", "使わない"], ["id", "会員番号"], ["name", "お名前（ニックネーム）"], ["realName", "本名（フルネーム）"],
+  ["sei", "名字（姓）"], ["mei", "下の名前（名）"],
   ["keiretsu", "系列"], ["area", "居住地域"], ["email", "メール"],
   ["intro", "紹介者の会員番号"], ["introName", "紹介者のお名前"],
-  ["upline", "アップの会員番号"], ["uplineName", "アップのお名前"],
+  ["upline", "アップクリエの会員番号"], ["uplineName", "アップクリエのお名前"],
   ["helper", "サポート担当の会員番号"], ["helperName", "サポート担当のお名前"],
   ["linkJoin", "LINK入会日（契約日）"]
 ];
@@ -2347,7 +2276,7 @@ function closeBulk(){ document.getElementById("bulkModal").classList.remove("sho
 let trRows = [], trSaved = "", trSel = -1, trLegacy = [];
 function trSay(t, cls){ const e = document.getElementById("trMsg"); e.className = "bk-msg " + (cls || ""); e.innerHTML = t || ""; }
 async function trCall(params){
-  const body = Object.assign({ id:admin.id, pin:admin.pin, email:admin.email, dummy: dummyMode ? "1" : "0" }, params);
+  const body = Object.assign({ id:admin.id, pin:admin.pin, email:admin.email }, params);
   const res = await fetch(GAS_URL, { method:"POST", body:new URLSearchParams(body) });
   return res.json();
 }
@@ -2547,8 +2476,7 @@ async function mergeTree(){
   }
 }
 function trMergeErr(j){
-  return ({ dummy:"テストモードのときは統合できません。テストモードを切ってからお試しください",
-            nokei:"この系列が見つかりませんでした。画面を開き直してください",
+  return ({ nokei:"この系列が見つかりませんでした。画面を開き直してください",
             badto:"統合先が見つかりませんでした",
             layout:"会員名簿の並びがずれているように見えるため、統合を止めました。管理者の方にお知らせください",
             treelayout:"「系列のつながり」タブの見出しが決まった形とちがうため、統合を止めました",
@@ -2666,30 +2594,122 @@ async function bulkParse(){
   const w = Math.max.apply(null, table.map(r=>r.length));
   bkTable = table.map(r=>{ const o = r.slice(); while(o.length < w) o.push(""); return o; });
   /* 1行目が見出しかどうか、列が何かを自動でえらびます */
-  const guess = bkTable[0].map(bkGuessHead);
-  const isHead = guess.some(g=>g !== null);
+  const colVals = (c)=>bkTable.slice(1).map(r=>r[c]);
+  const g0 = bkTable[0].map((h, c)=>bkGuessHead2(h, colVals(c), false));
+  const hasSei = g0.some(g=>g.f === "sei");
+  const guess = bkTable[0].map((h, c)=>bkGuessHead2(h, colVals(c), hasSei));
+  const isHead = guess.some(g=>g.f !== null);
   document.getElementById("bkHead").checked = isHead;
-  bkMap = isHead ? guess.map(g=>g || "") : bkGuessByContent();
+  bkMap = isHead ? guess.map(g=>g.f || "") : bkGuessByContent();
+  bkJoinOk = false;
+  if(isHead && guess.some((g, c)=>g.sure && g.f === "linkJoin" && /LINK/i.test(bkHeadKey(bkTable[0][c])))) bkJoinOk = true;
+  /* 自動でえらべたか自信のない列は、1列ずつ「この項目ですか？」とおたずねします */
+  const body = isHead ? bkTable.slice(1) : bkTable;
+  bkColQueue = [];
+  bkMap.forEach((f, c)=>{
+    if(!body.some(r=>r[c])) return;                 /* 中身のない列はおたずねしません */
+    if(isHead && guess[c].sure) return;            /* 見出しがそのものずばりの列も */
+    bkColQueue.push(c);
+  });
+  bkColTotal = bkColQueue.length;
+  if(bkColQueue.length){ bkColAskNext(); return; }
   bulkShow(2);
   bulkDrawMap();
 }
-function bkGuessHead(h){
-  h = String(h || "").replace(/\s/g, "");
-  if(!h) return null;
-  const num = /番号|ID|ｉｄ|No/i.test(h);
-  if(/契約日|入会日/.test(h)) return "linkJoin";
-  if(/紹介/.test(h)) return num ? "intro" : "introName";
-  if(/アップ/.test(h)) return num ? "upline" : "uplineName";
-  if(/サポート|担当/.test(h)) return num ? "helper" : "helperName";
-  if(/オプチャ|アドバイザー|説明/.test(h)) return "";
-  if(/本名|氏名/.test(h)) return "realName";
-  if(/系列|チーム/.test(h)) return "keiretsu";
-  if(/地域|都道府県|住所|居住/.test(h)) return "area";
-  if(/メール|mail/i.test(h)) return "email";
-  if(/会員番号|^番号$|^ID$|会員ID/i.test(h)) return "id";
-  if(/ニックネーム|お名前|名前|なまえ/.test(h)) return "name";
-  return null;
+
+/* ================================================================
+   列のおたずね：「この列は、どの項目ですか？」
+   ・おそらくこれ、が分かるとき … 「〇〇だと思います。合っていますか？」→ はい／ちがいます／使わない
+   ・ちがいます、のとき・分からないとき … 「では、どの項目ですか？」と一覧からえらんでいただきます
+================================================================ */
+let bkColQueue = [], bkColTotal = 0, bkColCur = -1;
+function bkFieldLabel(f){ const x = BK_FIELDS.find(a=>a[0] === f); return x ? x[1] : f; }
+function bkColAskNext(){
+  if(!bkColQueue.length){
+    document.getElementById("bkCol").style.display = "none";
+    bulkShow(2);
+    bulkDrawMap();
+    bkSay("bkMsg2", "列の確認ができました。下の表で、もう一度見直すこともできます。よければ「確かめる」を押してください", "ok");
+    return;
+  }
+  bkColCur = bkColQueue.shift();
+  const c = bkColCur;
+  const head = document.getElementById("bkHead").checked;
+  const body = head ? bkTable.slice(1) : bkTable;
+  const samples = body.map(r=>r[c]).filter(Boolean).slice(0, 3);
+  const title = head && bkTable[0][c] ? "「" + bkEsc(bkTable[0][c]) + "」の列" : (c + 1) + "列目";
+  document.getElementById("bkColStep").textContent = (bkColTotal - bkColQueue.length) + " / " + bkColTotal;
+  document.getElementById("bkColHead").innerHTML = "<b>" + title + "</b><br><span style=\"font-size:12px;color:#8A84A0;\">中身の例：" + samples.map(bkEsc).join("／") + "</span>";
+  const f = bkMap[c];
+  if(f){
+    document.getElementById("bkColQ").innerHTML = "おそらく<b>「" + bkEsc(bkFieldLabel(f)) + "」</b>だと思います。<br>合っていますか？";
+    document.getElementById("bkColBtns").innerHTML =
+      '<button class="bkc-main" onclick="bkColYes()">はい、合っています</button>'
+      + '<button class="bkc-sub" onclick="bkColList(true)">ちがいます</button>'
+      + '<button class="bkc-sub" onclick="bkColSet(\'\')">この列は使わない</button>';
+  }else{
+    bkColList(false);
+  }
+  document.getElementById("bkCol").style.display = "flex";
 }
+function bkColYes(){ if(bkMap[bkColCur] === "linkJoin") bkJoinOk = true; bkColAskNext(); }
+function bkColList(wrong){
+  document.getElementById("bkColQ").innerHTML = wrong ? "では、どの項目ですか？" : "どの項目か、こちらでは分かりませんでした。<br>どの項目ですか？";
+  const now = bkMap[bkColCur];
+  document.getElementById("bkColBtns").innerHTML = '<div class="bkc-grid">'
+    + BK_FIELDS.filter(a=>a[0] && a[0] !== now).map(a=>`<button class="bkc-opt" onclick="bkColSet('${a[0]}')">${bkEsc(a[1])}</button>`).join("")
+    + '</div><button class="bkc-sub" onclick="bkColSet(\'\')">この列は使わない</button>';
+}
+function bkColSet(f){
+  bkMap[bkColCur] = f;
+  if(f === "linkJoin") bkJoinOk = true;
+  bkColAskNext();
+}
+/* 見出しから、どの項目かを考えます → { f:項目, sure:まちがいなさそうか }
+   vals … その列の中身（番号ばかりなら「会員番号」の方、文字なら「お名前」の方にします）
+   hasSei … ほかの列に「名字」があるか（あれば「名前」の列は下の名前と考えます） */
+const BK_SURE = {
+  "会員番号":"id", "ID":"id", "会員ID":"id",
+  "ニックネーム":"name", "お名前(ニックネーム)":"name", "お名前":"name",
+  "本名":"realName", "氏名":"realName", "フルネーム":"realName",
+  "姓":"sei", "名字":"sei", "苗字":"sei", "名字(姓)":"sei", "下の名前":"mei", "下の名前(名)":"mei",
+  "系列":"keiretsu", "メール":"email", "メールアドレス":"email",
+  "居住地域":"area", "お住まいの地域":"area", "都道府県":"area",
+  "LINK入会日":"linkJoin", "LINK入会日(契約日)":"linkJoin",
+  "紹介者の会員番号":"intro", "紹介者のお名前":"introName",
+  "アップクリエの会員番号":"upline", "アップクリエのお名前":"uplineName",
+  "サポート担当の会員番号":"helper", "サポート担当のお名前":"helperName"
+};
+function bkHeadKey(h){ let x = String(h || ""); try{ x = x.normalize("NFKC"); }catch(e){} return x.replace(/\s/g, ""); }
+function bkIsNumCol(vals){
+  const v = (vals || []).filter(Boolean);
+  if(!v.length) return null;
+  return v.filter(x=>/^\d{4,}$/.test(String(x).replace(/[\s-]/g, ""))).length / v.length >= 0.8;
+}
+function bkGuessHead2(h, vals, hasSei){
+  const k = bkHeadKey(h);
+  if(!k) return { f:null, sure:false };
+  if(BK_SURE[k]) return { f: BK_SURE[k], sure: true };
+  if(k === "名前" && !hasSei) return { f:"name", sure: true };
+  const isNum = bkIsNumCol(vals);
+  const num = isNum === null ? /番号|ID|No/i.test(k) : isNum;
+  if(/契約日|入会日|入会/.test(k)) return { f:"linkJoin", sure:false };
+  if(/紹介/.test(k)) return { f: num ? "intro" : "introName", sure:false };
+  if(/アップ|クリエ|upline/i.test(k)) return { f: num ? "upline" : "uplineName", sure:false };
+  if(/サポート|担当|helper/i.test(k)) return { f: num ? "helper" : "helperName", sure:false };
+  if(/オプチャ|アドバイザー|説明/.test(k)) return { f:null, sure:false };
+  if(/^(姓|名字|苗字|せい|みょうじ)/.test(k)) return { f:"sei", sure:false };
+  if(/本名|氏名|フルネーム/.test(k)) return { f:"realName", sure:false };
+  if(/系列|チーム/.test(k)) return { f:"keiretsu", sure:false };
+  if(/地域|都道府県|住所|居住/.test(k)) return { f:"area", sure:false };
+  if(/メール|mail/i.test(k)) return { f:"email", sure:false };
+  if(/会員番号|^番号$|^ID$|会員ID/i.test(k)) return { f:"id", sure:false };
+  if(hasSei && /^(名|名前|なまえ|下の名前)$/.test(k)) return { f:"mei", sure:false };
+  if(/ニックネーム|お名前|名前|なまえ|^名$/.test(k)) return { f: num ? "id" : "name", sure:false };
+  return { f:null, sure:false };
+}
+/* 前のしくみと同じ呼び方もできるようにしておきます */
+function bkGuessHead(h){ const g = bkGuessHead2(h, null, false); return g.f; }
 function bkGuessByContent(){
   const w = bkTable[0].length, map = new Array(w).fill("");
   let nameSet = false, idSet = false;
@@ -2772,6 +2792,7 @@ BK_REASON.nochange = "変わるところがありません";
 BK_REASON.notfound = "見られる範囲に、該当する方はいません";
 BK_WARN.namemismatch = "表のお名前と、名簿のお名前が合いません";
 BK_REASON.nochangeblank = "足せる空欄がありません（入っている値は変えません）";
+BK_REASON.idused = "この会員番号では登録できません";
 /* 入会日の列が、LINKに入会した日かを、確かめる前に1回だけおたずねします */
 let bkJoinOk = false, bkAskCb = null;
 function bkAsk(text, cb){ document.getElementById("bkAskText").innerHTML = text; bkAskCb = cb; document.getElementById("bkAsk").style.display = "flex"; }
@@ -2785,6 +2806,20 @@ function bkPick(i, v){
   bulkRun("check");
 }
 let bkKeepPicks = false;
+/* 候補の一覧からえらんだとき：「この中にはいない」なら、手で入れて照合する欄を出します */
+function bkPickSel(i, v){
+  const man = document.getElementById("bkMan" + i);
+  if(v === "__none"){ if(man){ man.style.display = "block"; const inp = document.getElementById("bkManIn" + i); if(inp) inp.focus(); } return; }
+  if(man) man.style.display = "none";
+  bkPick(i, v);
+}
+/* 手で入れた番号・お名前で照合します（見られる範囲の方だけ。共通の照合 sky-find.js を使います） */
+function bkManFind(i){
+  const t = (document.getElementById("bkManIn" + i) || {}).value || "";
+  const box = document.getElementById("bkManRes" + i);
+  if(!t.trim()){ box.innerHTML = '<p class="skf-ng">会員番号か、お名前を入れてください</p>'; return; }
+  skyFind.run(box, t, c=>bkPick(i, c.id), { auth: { id:admin.id, pin:admin.pin, email:admin.email }, scopeOnly: true });
+}
 async function bulkRun(mode){
   if(mode === "check"){
     const keep = bkKeepPicks ? bkRows.map(r=>r.pickId) : [];
@@ -2792,8 +2827,14 @@ async function bulkRun(mode){
     bkRows = bkBuildRows();
     keep.forEach((v, i)=>{ if(v && bkRows[i]) bkRows[i].pickId = v; });
     const upd = bkUpdMode();
-    if(bkMap.indexOf("name") < 0 && bkMap.indexOf("realName") < 0 && !(upd && bkMap.indexOf("id") >= 0)){
+    const hasNm = ["name","realName","sei","mei"].some(f=>bkMap.indexOf(f) >= 0);
+    if(!hasNm && !(upd && bkMap.indexOf("id") >= 0)){
       bkSay("bkMsg2", upd ? "「会員番号」か「お名前」の列をえらんでください" : "「お名前」か「本名」の列をえらんでください", "err"); return;
+    }
+    /* すでにいる方を更新するのに、更新できる列がひとつもえらばれていないとき */
+    const UPD_F = ["linkJoin","intro","introName","upline","uplineName","helper","helperName","area","realName"];
+    if(upd && !document.getElementById("bkAllowNew").checked && !bkMap.some(f=>UPD_F.indexOf(f) >= 0)){
+      bkSay("bkMsg2", "更新に使う列がえらばれていません。<br>たとえば「クリエイターズ」の列なら、上の表で「アップクリエのお名前」（番号なら「アップクリエの会員番号」）をえらんでください", "err"); return;
     }
     /* 入会日の列があるときは、LINKに入会した日かをおたずねします */
     const jc = bkMap.indexOf("linkJoin");
@@ -2849,7 +2890,7 @@ async function bulkRun(mode){
       const part = sendRows.slice(k, k + 300);
       const params = { action:"bulkImport", id:admin.id, pin:admin.pin, email:admin.email,
                        rows: JSON.stringify(part), chain: chain, mode: mode, update: bkUpdMode(),
-                       allowNew: document.getElementById("bkAllowNew").checked ? "1" : "0", dummy: dummyMode ? "1" : "0" };
+                       allowNew: document.getElementById("bkAllowNew").checked ? "1" : "0" };
       const res = await fetch(GAS_URL, { method:"POST", body:new URLSearchParams(params) });
       const j = await res.json();
       if(typeof skyLoadingDone === "function") skyLoadingDone();
@@ -2897,12 +2938,21 @@ async function bulkRun(mode){
       "<tr><th>行</th><th>会員番号</th><th>お名前</th><th>系列</th><th>結果</th></tr>" +
       all.map(x=>`<tr><td>${x.i + 1}</td><td>${bkEsc(x.id || (x.temp ? "（仮の番号）" : ""))}</td><td>${bkEsc(x.name)}</td><td>${bkEsc(x.keiretsu)}</td>`
         + `<td>${x.status === "pick"
-              ? `<div style="font-size:12px;color:#8A6D00;margin-bottom:4px;">${x.partial ? "一部だけ合う方がいます。" : "同じお名前の方が何人かいます。"}どの方ですか？</div>
-                 <select data-kei-fixed="1" onchange="bkPick(${x.i}, this.value)" style="max-width:240px;font-size:12px;padding:4px;border-radius:7px;">
+              ? `<div style="font-size:12px;color:#8A6D00;margin-bottom:4px;">${!(x.cands || []).length ? "" : x.partial ? "一部だけ合う方がいます。" : "同じお名前の方が何人かいます。"}${(x.cands || []).length ? "どの方ですか？" : ""}</div>
+                 <select data-kei-fixed="1" onchange="bkPickSel(${x.i}, this.value)" style="display:${(x.cands || []).length ? "inline-block" : "none"};max-width:240px;font-size:12px;padding:4px;border-radius:7px;">
                    <option value="">えらんでください</option>
                    ${(x.cands || []).map(c=>`<option value="${bkEsc(c.id)}">${bkEsc(c.name || "")}${c.realName && c.realName !== c.name ? "（" + bkEsc(c.realName) + "）" : ""}｜${bkEsc(c.id)}｜${bkEsc(c.keiretsu)}</option>`).join("")}
                    <option value="__none">この中にはいない</option>
-                 </select>`
+                 </select>
+                 <div id="bkMan${x.i}" style="display:${(x.cands || []).length ? "none" : "block"};margin-top:6px;max-width:250px;white-space:normal;">
+                   ${x.miss === "id" ? `<div class="st-warn">見られる範囲に、会員番号 ${bkEsc(x.tried || "")} の方はいません</div>` : ""}
+                   ${(x.cands || []).length ? "" : `<div style="font-size:12px;color:#8A6D00;margin-bottom:4px;">名簿の中から、この方をさがします</div>`}
+                   <div style="font-size:11.5px;color:#6A6480;">会員番号か、お名前（名字だけ・下の名前だけでも）を入れて照合してください</div>
+                   <input id="bkManIn${x.i}" placeholder="例：00012345／さかい" style="width:100%;box-sizing:border-box;font-size:12.5px;padding:5px 8px;border-radius:7px;border:1.5px solid #D9D3EF;margin-top:4px;font-family:inherit;">
+                   <button type="button" onclick="bkManFind(${x.i})" style="margin-top:4px;font-size:12px;padding:5px 10px;border-radius:7px;border:none;background:#6E5FB5;color:#fff;font-weight:700;cursor:pointer;font-family:inherit;">🔎 照合する</button>
+                   <button type="button" onclick="bkPick(${x.i}, '__none')" style="margin-top:4px;font-size:11.5px;padding:5px 10px;border-radius:7px;border:none;background:#F0EDF9;color:#6E5FB5;font-weight:700;cursor:pointer;font-family:inherit;">見つからないので、とばす</button>
+                   <div id="bkManRes${x.i}"></div>
+                 </div>`
             : x.status === "update"
               ? `<span class="st-add">${mode === "check" ? "更新できます" : "更新しました"}：${bkEsc((x.fields || []).join("・"))}</span>`
                 + (x.matchedBy === "name" || x.matchedBy === "pick" ? `<div style="font-size:11px;color:#6A6480;">お名前で見つけました（${bkEsc(x.id)}）</div>` : "")
@@ -2924,6 +2974,23 @@ async function bulkRun(mode){
     btn.disabled = false;
     if(typeof skyBusyEnd === "function") skyBusyEnd("bulk");
   }
+}
+
+/* 会員の編集：番号かお名前を入れて「照合する」→「この方ですか？」（共通の照合 sky-find.js を使います） */
+function mmFind(fid){
+  const el = document.getElementById(fid);
+  const box = document.getElementById(fid + "Find");
+  let text = el.value.trim();
+  /* アドバイザーは、番号が空ならお名前の欄でさがします */
+  if(fid === "mmAdvId" && !text) text = document.getElementById("mmAdvName").value.trim();
+  if(!text){ box.innerHTML = '<p class="skf-ng">会員番号か、お名前を入れてから押してください</p>'; return; }
+  const q = skyFind.parse(text);
+  /* アドバイザーで番号とお名前の両方があれば、同じ方かも確かめます */
+  if(fid === "mmAdvId" && q.qid) q.qname = document.getElementById("mmAdvName").value.trim();
+  skyFind.run(box, q, c=>{
+    el.value = c.id;
+    if(fid === "mmAdvId") document.getElementById("mmAdvName").value = c.name || document.getElementById("mmAdvName").value;
+  }, { auth: { id:admin.id, pin:admin.pin, email:admin.email } });
 }
 
 function closeMember(){
@@ -2979,8 +3046,7 @@ async function saveMember(){
       clearAutoFill: (memEditing && memEditing.autoFill) ? "1" : "0",
       sup:document.getElementById("mmSup").checked ? "1" : "0",
       crie:document.getElementById("mmCrie").checked ? "1" : "0",
-      role:roles.join(","), scope:scope.join(","),
-      dummy: dummyMode ? "1" : "0"
+      role:roles.join(","), scope:scope.join(",")
     };
     if(pin) params.newPin = pin;
     if(memClearEmail) params.clearEmail = "1";
@@ -3029,7 +3095,7 @@ async function openDetail(id, keiretsu){
   findKeiretsu = keiretsu || "";
   try{
     if(typeof skyLoading === "function") skyLoading("進捗を読み込んでいます", "データを読み込んでいます。しばらくお待ちください");
-    const url = `${GAS_URL}?action=adminDetail&id=${encodeURIComponent(admin.id)}&pin=${encodeURIComponent(admin.pin)}&email=${encodeURIComponent(admin.email)}&target=${encodeURIComponent(id)}&apps=${encodeURIComponent(APPS)}&keiretsu=${encodeURIComponent(findKeiretsu)}&dummy=${dummyMode?1:0}`;
+    const url = `${GAS_URL}?action=adminDetail&id=${encodeURIComponent(admin.id)}&pin=${encodeURIComponent(admin.pin)}&email=${encodeURIComponent(admin.email)}&target=${encodeURIComponent(id)}&apps=${encodeURIComponent(APPS)}&keiretsu=${encodeURIComponent(findKeiretsu)}`;
     const res = await fetch(url);
     const j = await res.json();
     if(typeof skyLoadingDone === "function") skyLoadingDone();
@@ -3176,7 +3242,7 @@ async function saveMarks(){
         const res2 = await fetch(GAS_URL, {method:"POST", body:new URLSearchParams({
           action:"adminSetSelf", id:admin.id, pin:admin.pin, email:admin.email,
           target:String(target), app:app, self:selfChecked.join(","), items:items2
-        , dummy:dummyMode?"1":"0"})});
+        })});
         const j2 = await res2.json();
         if(j2.ok === false){ toast("本人チェックを保存できませんでした"); return; }
         continue;
@@ -3191,7 +3257,7 @@ async function saveMarks(){
         action:"adminSetMarks", id:admin.id, pin:admin.pin, email:admin.email,
         target:String(target), app:app, marks:checked.join(","), items:items,
         keiretsu: findKeiretsu
-      , dummy:dummyMode?"1":"0"});
+      });
       const res = await fetch(GAS_URL, {method:"POST", body});
       const j = await res.json();
     if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;

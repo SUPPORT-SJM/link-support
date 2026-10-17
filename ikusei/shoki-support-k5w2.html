@@ -2,6 +2,7 @@
 <html lang="ja">
 <head>
 <script src="../config.js"></script>
+<script src="../sky-find.js"></script>
 <meta charset="UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -111,9 +112,6 @@
   #pp label{display:block;font-size:12px;font-weight:700;color:#4A3F7A;margin:10px 0 4px;}
   #pp input{width:100%;padding:10px;border-radius:9px;border:1.5px solid #E1DCF2;font-size:15px;}
   #pp .find{margin-top:12px;width:100%;padding:11px;border-radius:11px;background:#F0EDF9;color:#6E5FB5;font-weight:700;font-size:14px;}
-  #pp .cand{border:1.5px solid #E4E0F0;border-radius:11px;padding:10px 12px;margin-top:8px;font-size:13.5px;}
-  #pp .cand small{display:block;color:#8A84A0;font-size:11.5px;}
-  #pp .cand button{margin-top:8px;width:100%;padding:9px;border-radius:10px;background:#6E5FB5;color:#fff;font-weight:700;font-size:13px;}
   #pp .clear{margin-top:12px;background:none;color:#8A84A0;font-size:12.5px;text-decoration:underline;}
   .verTag{display:block;text-align:center;font-size:11px;color:#B5B1C6;padding:10px 0 24px;font-family:monospace;}
 </style>
@@ -179,7 +177,7 @@
   <div class="sheet">
     <h3 id="ppTitle"></h3>
     <div class="who2" id="ppWho"></div>
-    <p style="font-size:12.5px;color:#6A6480;line-height:1.8;">会員番号か、お名前のどちらかを入れて「照合する」を押してください。</p>
+    <p style="font-size:12.5px;color:#6A6480;line-height:1.8;">会員番号か、お名前のどちらかを入れて「照合する」を押してください。お名前は、名字だけ・下の名前だけでもさがせます。</p>
     <label for="ppId">会員番号</label>
     <input id="ppId" inputmode="numeric" placeholder="例：00012345">
     <label for="ppName">お名前</label>
@@ -594,41 +592,16 @@ function openPeople(id, f){
   setTimeout(()=>$("#ppId").focus(), 50);
 }
 function closePeople(){ $("#pp").classList.remove("show"); }
-async function getJson(params){
-  const q = Object.keys(params).map(k=>k + "=" + encodeURIComponent(params[k])).join("&");
-  const res = await fetch(GAS_URL + "?" + q);
-  return res.json();
-}
-function candHtml(list, note){
-  return (note ? `<p style="font-size:12.5px;color:#8A6D00;margin-top:10px;line-height:1.7;">${note}</p>` : "")
-    + list.map(c=>`<div class="cand">この方ですか？<br><b>${esc(c.name || "（お名前未登録）")}</b>さん
-        <small>${esc(pad8(c.id))}${c.keiretsu ? "｜" + esc(c.keiretsu) : ""}</small>
-        <button onclick="pickPerson('${esc(c.id)}','${esc(c.name || "")}')">はい、この方にする</button></div>`).join("");
-}
-async function findPeople(){
+/* 照合は、共通の部品（sky-find.js）を使います（管理画面の会員の編集・まとめて登録と同じしくみです） */
+function findPeople(){
   const id = String($("#ppId").value || "").normalize("NFKC").replace(/\s/g, "");
   const nm = String($("#ppName").value || "").trim();
   const msg = (t)=>{ $("#ppMsg").className = "msg err"; $("#ppMsg").textContent = t; };
   $("#ppRes").innerHTML = ""; $("#ppMsg").className = "msg";
   if(!id && !nm){ msg("会員番号か、お名前を入れてください"); return; }
   if(id && !/^\d+$/.test(id)){ msg("会員番号は数字で入れてください"); return; }
-  try{
-    if(id){
-      const j = await getJson(nm ? { action:"matchIdName", id:id, name:nm } : { action:"lookupName", id:id });
-      if(!j || j.ok !== true){ msg("照合できませんでした"); return; }
-      if(!j.found){ msg("その会員番号の方は、名簿にいません"); return; }
-      if(nm && j.match === false){
-        $("#ppRes").innerHTML = candHtml([{ id:id, name:j.name, keiretsu:j.keiretsu }], "この番号の方は「" + esc(j.name) + "」さんです。入れたお名前と合いません。");
-        return;
-      }
-      $("#ppRes").innerHTML = candHtml([{ id:id, name:j.name, keiretsu:j.keiretsu }]);
-      return;
-    }
-    const j = await getJson({ action:"findByName", name:nm });
-    if(!j || j.ok !== true){ msg(j && j.error === "short" ? "お名前は2文字以上で入れてください" : "照合できませんでした"); return; }
-    if(!(j.members || []).length){ msg("そのお名前の方は、名簿に見つかりませんでした"); return; }
-    $("#ppRes").innerHTML = candHtml(j.members, j.members.length > 1 ? "同じお名前の方が " + j.members.length + "人います。番号と系列で見分けてください。" : "");
-  }catch(e){ msg("通信できませんでした"); }
+  skyFind.run($("#ppRes"), { qid: id, qname: nm }, c=>pickPerson(c.id, c.name || ""),
+              { auth: { id: me.id, pin: me.pin, email: me.email || "" } });
 }
 function pickPerson(id, name){
   if(!ppTarget) return;
