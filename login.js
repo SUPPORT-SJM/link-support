@@ -118,7 +118,7 @@
         id: id, pin: pin,
         name: j.name || "", realName: j.realName || "", area: j.area || "", keiretsu: j.keiretsu || "",
         role: j.role || "", sup: j.sup === true, crie: j.crie === true,
-        nick: j.nick || "", keiChat: j.keiChat || "", refUrl: j.refUrl || "",
+        nick: j.nick || "", keiChat: j.keiChat || "", refUrl: j.refUrl || "", linkJoin: j.linkJoin || "",
         badges: j.badges || [], celebrate: j.celebrate || "",
         email: j.email || "", helper: j.helper || "",
         needPin: j.needPin === true

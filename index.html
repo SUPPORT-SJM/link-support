@@ -674,7 +674,7 @@ function saveMe(j, pin, fallbackId){
     name: j.name || "", realName: j.realName || "", area: j.area || "",
     keiretsu: j.keiretsu || "", role: j.role || "",
     sup: j.sup === true, crie: j.crie === true,
-    nick: j.nick || "", keiChat: j.keiChat || "", refUrl: j.refUrl || "",
+    nick: j.nick || "", keiChat: j.keiChat || "", refUrl: j.refUrl || "", linkJoin: j.linkJoin || "",
     badges: j.badges || [], celebrate: j.celebrate || "", helper: j.helper || "",
     needPin: j.needPin === true
   };
@@ -818,7 +818,7 @@ $("#lForgot").addEventListener("click", e=>{
       id: j.id || keep.id, name: j.name || keep.name || "", realName: j.realName || "",
       area: j.area || "", keiretsu: j.keiretsu || "", role: j.role || "",
       sup: j.sup === true, crie: j.crie === true, email: j.email || keep.email || "",
-      nick: j.nick || "", keiChat: j.keiChat || "", refUrl: j.refUrl || "", helper: j.helper || "",
+      nick: j.nick || "", keiChat: j.keiChat || "", refUrl: j.refUrl || "", linkJoin: j.linkJoin || "", helper: j.helper || "",
       needPin: j.needPin === true
     });
     localStorage.setItem("skyarc_member", JSON.stringify(m));
