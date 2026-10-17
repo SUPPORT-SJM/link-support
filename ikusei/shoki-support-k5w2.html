@@ -101,6 +101,20 @@
   #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:#3B3550;color:#fff;font-size:13px;
          padding:10px 16px;border-radius:12px;opacity:0;pointer-events:none;transition:all .25s;z-index:90;max-width:92vw;text-align:center;}
   #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .plink{color:inherit;text-decoration:underline;text-decoration-color:#C9C2EC;text-underline-offset:2px;cursor:pointer;}
+  .plink:hover{color:#6E5FB5;}
+  .plink.pend{outline:2px dashed #E5A823;outline-offset:1px;border-radius:4px;}
+  #pp{display:none;position:fixed;inset:0;z-index:72;background:rgba(30,26,50,.55);align-items:center;justify-content:center;padding:14px;}
+  #pp.show{display:flex;}
+  #pp .sheet{background:#fff;border-radius:18px;width:100%;max-width:420px;max-height:90vh;overflow-y:auto;padding:20px 18px;}
+  #pp h3{font-size:16px;font-weight:900;color:#4A3F7A;}
+  #pp label{display:block;font-size:12px;font-weight:700;color:#4A3F7A;margin:10px 0 4px;}
+  #pp input{width:100%;padding:10px;border-radius:9px;border:1.5px solid #E1DCF2;font-size:15px;}
+  #pp .find{margin-top:12px;width:100%;padding:11px;border-radius:11px;background:#F0EDF9;color:#6E5FB5;font-weight:700;font-size:14px;}
+  #pp .cand{border:1.5px solid #E4E0F0;border-radius:11px;padding:10px 12px;margin-top:8px;font-size:13.5px;}
+  #pp .cand small{display:block;color:#8A84A0;font-size:11.5px;}
+  #pp .cand button{margin-top:8px;width:100%;padding:9px;border-radius:10px;background:#6E5FB5;color:#fff;font-weight:700;font-size:13px;}
+  #pp .clear{margin-top:12px;background:none;color:#8A84A0;font-size:12.5px;text-decoration:underline;}
   .verTag{display:block;text-align:center;font-size:11px;color:#B5B1C6;padding:10px 0 24px;font-family:monospace;}
 </style>
 </head>
@@ -159,6 +173,22 @@
     <button class="b1" onclick="leaveChoose('save')">保存する</button>
     <button class="b2" onclick="leaveChoose('discard')">保存しないで進む</button>
     <button class="b3" onclick="leaveChoose('stay')">このページにもどる</button>
+  </div>
+</div>
+<div id="pp" onclick="if(event.target===this)closePeople()">
+  <div class="sheet">
+    <h3 id="ppTitle"></h3>
+    <div class="who2" id="ppWho"></div>
+    <p style="font-size:12.5px;color:#6A6480;line-height:1.8;">会員番号か、お名前のどちらかを入れて「照合する」を押してください。</p>
+    <label for="ppId">会員番号</label>
+    <input id="ppId" inputmode="numeric" placeholder="例：00012345">
+    <label for="ppName">お名前</label>
+    <input id="ppName" placeholder="例：さかいあたる">
+    <button class="find" onclick="findPeople()">🔎 照合する</button>
+    <div id="ppRes"></div>
+    <div class="msg" id="ppMsg"></div>
+    <button class="clear" id="ppClear" onclick="pickPerson('', '')">未設定にもどす</button>
+    <div class="btns"><button class="close" onclick="closePeople()">とじる</button></div>
   </div>
 </div>
 <div id="toast"></div>
@@ -385,7 +415,7 @@ function draw(){
     return `<div class="row ${hidOn ? "hidden-row" : ""}">
       <div class="who"><div class="nm">${esc(m.name || "(名前未登録)")}</div>
         <div class="sub">${esc(pad8(m.id))}${m.keiretsu ? "｜" + esc(m.keiretsu) : ""}
-          <br><span title="アップクリエ">（ク）${esc(who(m.uplineName, m.upline))}</span>　<span title="サポート担当">（担）${esc(who(m.helperName, m.helper))}</span>
+          <br><span title="アップクリエ">（ク）${personHtml(m, "upline")}</span>　<span title="サポート担当">（担）${personHtml(m, "helper")}</span>
           <br><span title="紹介者">（紹）${esc(who(m.introName, m.intro))}</span>　<span title="アドバイザー（説明してくださった方）">（説）${esc(who(m.advName, m.advId))}</span></div>
         <label class="hidchk ${hidPend ? "pend" : ""}" title="あなたの画面だけで非表示にします"><input type="checkbox" ${hidOn ? "checked" : ""} onchange="toggleHide('${esc(m.id)}', this.checked)">非表示</label></div>
       ${GROUPS.map(chip).join("")}
@@ -418,7 +448,7 @@ function supChanges(){
   }));
   return out;
 }
-function pendCount(){ return supChanges().length + Object.keys(pendingHide).length; }
+function pendCount(){ return supChanges().length + Object.keys(pendingHide).length + peopleChanges().length; }
 function toast(t){
   const e = $("#toast"); e.textContent = t; e.classList.add("show");
   clearTimeout(toast._t); toast._t = setTimeout(()=>e.classList.remove("show"), 2600);
@@ -443,7 +473,7 @@ function toggleShowHidden(){ showHidden = !showHidden; draw(); }
 function undoPending(){
   if(!pendCount()) return;
   if(!confirm("保存していない変更（" + pendCount() + "件）を元にもどします。よろしいですか？")) return;
-  pendingHide = {};
+  pendingHide = {}; pendingPeople = {};
   data.members.forEach(m=>{ m.items = JSON.parse(JSON.stringify(m.orig)); });
   draw();
 }
@@ -452,7 +482,8 @@ async function savePending(){
   const changes = supChanges();
   const hideIds = Object.keys(pendingHide).filter(k=>pendingHide[k]);
   const showIds = Object.keys(pendingHide).filter(k=>!pendingHide[k]);
-  if(!changes.length && !hideIds.length && !showIds.length) return true;
+  const pchanges = peopleChanges();
+  if(!changes.length && !hideIds.length && !showIds.length && !pchanges.length) return true;
   if(typeof skyBusy === "function" && skyBusy("savelist")) return false;
   const btn = $("#btnSaveTop"); btn.disabled = true;
   if(typeof skyLoading === "function") skyLoading("一覧の変更を保存しています", "しばらくお待ちください");
@@ -479,6 +510,29 @@ async function savePending(){
         if(bad.length){ allOk = false; alert("保存できなかった変更があります（" + bad.length + "件）\n\n" + bad.join("\n")); }
       }
     }
+    if(pchanges.length){
+      const j = await api({ action:"supportSetPeople", changes: JSON.stringify(pchanges) });
+      if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return false;
+      if(!j || j.ok !== true){
+        allOk = false;
+        toast(({ busy:"いま混み合っています。少しおいてお試しください", noperm:"アップクリエ・サポート担当の設定は、クリエイターズ以上の方ができます" })[j && j.error] || "アップクリエ・サポート担当の保存ができませんでした");
+      }else{
+        const bad = [];
+        j.results.forEach(r=>{
+          const m = data.members.find(x=>x.id === r.target);
+          const k = hkey(r.target);
+          if(m && r.ok){
+            if(r.field === "upline"){ m.upline = r.id; m.uplineName = r.name; } else { m.helper = r.id; m.helperName = r.name; }
+          }else if(m){
+            bad.push((m.name || r.target) + "さんの" + (r.field === "upline" ? "アップクリエ" : "サポート担当") + "："
+              + ({ outofscope:"担当の範囲外の方です", noperson:"その番号の方が名簿にいません" }[r.error] || "保存できませんでした"));
+          }
+          if(pendingPeople[k]){ delete pendingPeople[k][r.field]; if(!Object.keys(pendingPeople[k]).length) delete pendingPeople[k]; }
+        });
+        if(bad.length){ allOk = false; alert("保存できなかった変更があります（" + bad.length + "件）\n\n" + bad.join("\n")); }
+        fillUplines();
+      }
+    }
     if(hideIds.length || showIds.length){
       const j = await api({ action:"supportHide", hideIds: JSON.stringify(hideIds), showIds: JSON.stringify(showIds) });
       if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return false;
@@ -500,6 +554,94 @@ async function savePending(){
   }
 }
 
+/* ================================================================
+   （ク）アップクリエ・（担）サポート担当の設定（クリエイターズ以上の方）
+   ・一覧の（ク）（担）のお名前を押すと開きます
+   ・番号かお名前で照合して「この方ですか？」で決めます。保存は「💾 一覧の変更を保存」で
+================================================================ */
+let pendingPeople = {}, ppTarget = null, ppField = "";
+function effPerson(m, f){
+  const p = pendingPeople[hkey(m.id)];
+  if(p && p[f]) return p[f];
+  return f === "upline" ? { id: m.upline, name: m.uplineName } : { id: m.helper, name: m.helperName };
+}
+function personHtml(m, f){
+  const e = effPerson(m, f);
+  const txt = esc(who(e.name, e.id));
+  if(!data || !data.canPeople) return txt;
+  const pend = !!(pendingPeople[hkey(m.id)] && pendingPeople[hkey(m.id)][f]);
+  return `<a href="#" class="plink ${pend ? "pend" : ""}" onclick="openPeople('${esc(m.id)}','${f}');return false;">${txt}</a>`;
+}
+function peopleChanges(){
+  const out = [];
+  Object.keys(pendingPeople).forEach(k=>{
+    const m = data && data.members.find(x=>hkey(x.id) === k);
+    if(!m) return;
+    Object.keys(pendingPeople[k]).forEach(f=>out.push({ target: m.id, field: f, id: pendingPeople[k][f].id }));
+  });
+  return out;
+}
+function openPeople(id, f){
+  ppTarget = data.members.find(x=>x.id === id); ppField = f;
+  if(!ppTarget) return;
+  const e = effPerson(ppTarget, f);
+  $("#ppTitle").textContent = f === "upline" ? "（ク）アップクリエを設定" : "（担）サポート担当を設定";
+  $("#ppWho").textContent = (ppTarget.name || "") + "さん（" + pad8(ppTarget.id) + "）";
+  $("#ppId").value = ""; $("#ppName").value = "";
+  $("#ppRes").innerHTML = ""; $("#ppMsg").className = "msg";
+  $("#ppClear").style.display = e.id ? "" : "none";
+  $("#pp").classList.add("show");
+  setTimeout(()=>$("#ppId").focus(), 50);
+}
+function closePeople(){ $("#pp").classList.remove("show"); }
+async function getJson(params){
+  const q = Object.keys(params).map(k=>k + "=" + encodeURIComponent(params[k])).join("&");
+  const res = await fetch(GAS_URL + "?" + q);
+  return res.json();
+}
+function candHtml(list, note){
+  return (note ? `<p style="font-size:12.5px;color:#8A6D00;margin-top:10px;line-height:1.7;">${note}</p>` : "")
+    + list.map(c=>`<div class="cand">この方ですか？<br><b>${esc(c.name || "（お名前未登録）")}</b>さん
+        <small>${esc(pad8(c.id))}${c.keiretsu ? "｜" + esc(c.keiretsu) : ""}</small>
+        <button onclick="pickPerson('${esc(c.id)}','${esc(c.name || "")}')">はい、この方にする</button></div>`).join("");
+}
+async function findPeople(){
+  const id = String($("#ppId").value || "").normalize("NFKC").replace(/\s/g, "");
+  const nm = String($("#ppName").value || "").trim();
+  const msg = (t)=>{ $("#ppMsg").className = "msg err"; $("#ppMsg").textContent = t; };
+  $("#ppRes").innerHTML = ""; $("#ppMsg").className = "msg";
+  if(!id && !nm){ msg("会員番号か、お名前を入れてください"); return; }
+  if(id && !/^\d+$/.test(id)){ msg("会員番号は数字で入れてください"); return; }
+  try{
+    if(id){
+      const j = await getJson(nm ? { action:"matchIdName", id:id, name:nm } : { action:"lookupName", id:id });
+      if(!j || j.ok !== true){ msg("照合できませんでした"); return; }
+      if(!j.found){ msg("その会員番号の方は、名簿にいません"); return; }
+      if(nm && j.match === false){
+        $("#ppRes").innerHTML = candHtml([{ id:id, name:j.name, keiretsu:j.keiretsu }], "この番号の方は「" + esc(j.name) + "」さんです。入れたお名前と合いません。");
+        return;
+      }
+      $("#ppRes").innerHTML = candHtml([{ id:id, name:j.name, keiretsu:j.keiretsu }]);
+      return;
+    }
+    const j = await getJson({ action:"findByName", name:nm });
+    if(!j || j.ok !== true){ msg(j && j.error === "short" ? "お名前は2文字以上で入れてください" : "照合できませんでした"); return; }
+    if(!(j.members || []).length){ msg("そのお名前の方は、名簿に見つかりませんでした"); return; }
+    $("#ppRes").innerHTML = candHtml(j.members, j.members.length > 1 ? "同じお名前の方が " + j.members.length + "人います。番号と系列で見分けてください。" : "");
+  }catch(e){ msg("通信できませんでした"); }
+}
+function pickPerson(id, name){
+  if(!ppTarget) return;
+  const k = hkey(ppTarget.id);
+  const now = ppField === "upline" ? { id: ppTarget.upline, name: ppTarget.uplineName } : { id: ppTarget.helper, name: ppTarget.helperName };
+  pendingPeople[k] = pendingPeople[k] || {};
+  if(hkey(now.id) === hkey(id)) delete pendingPeople[k][ppField];   /* 元と同じなら、変更なし */
+  else pendingPeople[k][ppField] = { id: id, name: name };
+  if(!Object.keys(pendingPeople[k]).length) delete pendingPeople[k];
+  closePeople();
+  draw();
+}
+
 /* ほかのページへ移る前に、保存していない変更がないかを確かめます */
 let leaveNext = null;
 function leaveOk(next){
@@ -514,7 +656,7 @@ async function leaveChoose(c){
   const next = leaveNext; leaveNext = null;
   if(c === "stay" || !next) return;
   if(c === "save"){ const ok = await savePending(); if(!ok) return; }
-  if(c === "discard"){ pendingHide = {}; data.members.forEach(m=>{ m.items = JSON.parse(JSON.stringify(m.orig)); }); }
+  if(c === "discard"){ pendingHide = {}; pendingPeople = {}; data.members.forEach(m=>{ m.items = JSON.parse(JSON.stringify(m.orig)); }); }
   next();
 }
 document.addEventListener("click", function(e){
