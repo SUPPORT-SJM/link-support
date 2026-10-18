@@ -15,9 +15,6 @@
   var ITEMS = [
     { sec: "アカウント" },
     { ic:"👤", nm:"会員情報の確認・編集", url: up+"ikusei/account.html", need:"" },
-    { ic:"🏠", nm:"LINKポータル",
-      sub:"LINKのマイページ・各種サービス",
-      url:"https://app.link-event-x.com", ext:true, need:"" },
 
     { sec: "まなぶ" },
     { ic:"👋", nm:"はじめの一歩",        url: up+"first-support/",            need:"" },
@@ -44,6 +41,12 @@
     { sec: "チーム運営" },
     { ic:"🔐", nm:"管理ページ",          url: up+"ikusei/kanri-x7k2m9.html",  need:"sup" },
     { ic:"🗺", nm:"クリエマップ",         url: up+"ikusei/creamap-x7k2m9.html", need:"crie" },
+    { ic:"🌱", nm:"初期サポートマネジメント", url: up+"ikusei/shoki-support-k5w2.html", need:"sup" },
+
+    { sec: "外部リンク" },
+    { ic:"🏠", nm:"LINKポータル",
+      sub:"LINKのマイページ・各種サービス",
+      url:"https://app.link-event-x.com", ext:true, need:"" },
   ];
 
   function member() {
