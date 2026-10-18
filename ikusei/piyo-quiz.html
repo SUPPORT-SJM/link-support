@@ -125,6 +125,7 @@
     display:flex;align-items:center;justify-content:space-between;gap:10px;
     font-size:12px;
   }
+  #skyNav a.sky-home{margin-left:-4px;}
   #skyNav a.sky-back{
     color:#fff;text-decoration:none;font-weight:700;
     background:rgba(255,255,255,.18);border-radius:999px;padding:6px 14px;
@@ -199,7 +200,7 @@
 <!-- ========== QUIZ ========== -->
 <div id="quizView">
 <div id="skyNav"><div class="sky-inner">
-  <a class="sky-back" id="navBack" href="./portal-supporter.html">‹ ポータル</a>
+  <a class="sky-back" id="navBack" href="./portal-supporter.html">‹ ポータル</a><a class="sky-back sky-home" href="../index.html">🏠 ホーム</a>
   <span class="sky-badges" id="navBadges"></span><span class="sky-who" id="navWho"></span>
   <a class="sky-admin" id="navAdmin" href="./kanri-x7k2m9.html" style="display:none;">🔐 管理</a>
   <button class="sky-out" onclick="skyLogout()">ログアウト</button>
@@ -559,18 +560,38 @@ function toast(msg){
     }
     return;
   }
-  /* 段階が足りない方には、ご案内をお出しして、お戻しします */
-  if(m.sup !== true && !String(m.role||"")){
-    if(typeof skyNotAllowed === "function"){
-      skyNotAllowed();
-      return;
-    }
+  /* 入れる方：サポーター・クリエ・役職をお持ちの方（メニューや最初のページと同じ決め方です） */
+  const canEnter = x => !!x && (x.sup === true || x.crie === true || String(x.role||"") !== "");
+  function start(mm){
+    member = mm;
+    localStorage.setItem("piyo_member", JSON.stringify(mm));
+    selfChecks = JSON.parse(localStorage.getItem('piyo_self_v2_'+mm.id) || '{}');
+    enterQuiz();
+    refreshMarks(false);
   }
-  member = m;
-  localStorage.setItem("piyo_member", JSON.stringify(m));
-  selfChecks = JSON.parse(localStorage.getItem('piyo_self_v2_'+m.id) || '{}');
-  enterQuiz();
-  refreshMarks(false);
+  if(canEnter(m)){ start(m); return; }
+  /* この端末の記録が古いだけのこともあるので、名簿で今の立場を確かめ直してから決めます */
+  (async function(){
+    try{
+      const r = await fetch(`${window.SKY_GAS_URL}?action=loginFast&id=${encodeURIComponent(m.id)}&pin=${encodeURIComponent(m.pin)}`);
+      const j = await r.json();
+      if(j && j.ok === true){
+        m = Object.assign({}, m, {
+          name: j.name || m.name || "", keiretsu: j.keiretsu || m.keiretsu || "",
+          role: j.role || "", sup: j.sup === true, crie: j.crie === true
+        });
+        localStorage.setItem("skyarc_member", JSON.stringify(m));
+        const who = document.getElementById("navWho");
+        if(who) who.textContent = (m.name ? m.name+"さん" : "会員番号 "+m.id) + (m.keiretsu ? "｜"+m.keiretsu : "");
+        const adminLink = document.getElementById("navAdmin");
+        if(adminLink && (m.crie === true || String(m.role||"") !== "")) adminLink.style.display = "inline-block";
+      }
+    }catch(e){}
+    if(canEnter(m)){ start(m); return; }
+    /* 段階が足りない方には、ご案内をお出しして、お戻しします */
+    if(typeof skyNotAllowed === "function"){ skyNotAllowed(); return; }
+    start(m);
+  })();
 })();
 </script>
 

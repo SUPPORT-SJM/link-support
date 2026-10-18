@@ -474,6 +474,7 @@
         <button class="btn-add" id="btnSupport" onclick="goLeave(()=>location.href='shoki-support-k5w2.html')" style="background:#3DAA6E;">🌱 初期サポートマネジメント</button>
         <button id="btnStats" onclick="openStats()" style="display:none;">📊 アクセス</button>
         <button id="btnBackPortal" onclick="backToPortal()">‹ ポータルへ</button>
+        <button id="btnHome" onclick="goLeave(()=>location.href='../index.html')">🏠 ホーム</button>
         <button onclick="goLeave(()=>location.href='./creamap-x7k2m9.html')">🗺 クリエマップ</button>
         <button onclick="load()">🔄 更新</button>
         <button onclick="backToPortal()">‹ 育成プログラムへ戻る</button>
@@ -1111,7 +1112,10 @@ async function login(){
     try{
       let m = null;
       try{ m = JSON.parse(localStorage.getItem("skyarc_member")||"null"); }catch(e){}
-      if(!m || String(m.id) !== String(admin.id)) m = {};
+      /* 同じ方なら、立場（役職・サポーター・クリエなど）の記録はそのまま残します
+         （頭の「0」の有無で別の方と取りちがえないよう、数字だけを見比べます） */
+      const sameId = (a,b) => String(a||"").replace(/^0+/,"") === String(b||"").replace(/^0+/,"");
+      if(!m || !sameId(m.id, admin.id)) m = {};
       m.id = admin.id; m.pin = admin.pin; m.email = admin.email;
       if(data){
         if(data.adminName) m.name = data.adminName;
