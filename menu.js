@@ -13,6 +13,8 @@
 
   /* 出す項目（段階が足りない方には出しません） */
   var ITEMS = [
+    { ic:"🏠", nm:"トップページに戻る",   url: up+"index.html", need:"", home:true },
+
     { sec: "アカウント" },
     { ic:"👤", nm:"会員情報の確認・編集", url: up+"ikusei/account.html", need:"" },
 
@@ -127,6 +129,17 @@
       + '.skym a.it.now .ar{display:none;}'
       + '.skym a.it .bd{background:#3FA98A;color:#fff;font-size:9.5px;font-weight:700;'
       + 'border-radius:99px;padding:1px 8px;flex-shrink:0;}'
+      /* どのページからでもトップページへ戻れるボタン（メニューのすぐ下） */
+      + '.skym-home{position:fixed;right:14px;top:calc(env(safe-area-inset-top) + 86px);'
+      + 'width:50px;height:50px;border-radius:16px;background:#fff;border:2px solid #6E5FB5;'
+      + 'box-shadow:0 4px 14px rgba(110,95,181,.25);z-index:7999;text-decoration:none;'
+      + 'display:flex;align-items:center;justify-content:center;font-size:22px;line-height:1;}'
+      + '.skym-home::after{content:"ホーム";position:absolute;bottom:-15px;left:50%;'
+      + 'transform:translateX(-50%);font-size:9px;font-weight:700;color:#6E5FB5;'
+      + 'white-space:nowrap;font-family:"Zen Kaku Gothic New","Noto Sans JP",sans-serif;}'
+      /* スマホでは、右上のボタンの下に重なる帯・入力欄を、少し左に寄せます */
+      + '@media (max-width:640px){.login-bar{padding-right:64px !important;}'
+      +   '.head .tools{padding-right:58px;box-sizing:border-box;}}'
       + '.skym .out{display:block;width:100%;text-align:center;font-size:12.5px;color:#B3352F;'
       + 'padding:13px;margin-top:10px;background:none;border:none;cursor:pointer;'
       + 'font-family:inherit;}';
@@ -144,6 +157,17 @@
     sheet.className = "skym";
 
     document.body.appendChild(btn);
+    /* トップページ以外では、メニューの下に「ホーム」を出します
+       （上のナビに「ホーム」があるページは、そちらを使います） */
+    var atTop = !inIkusei && !inFirst && /\/(index\.html)?$/.test(here);
+    if (!atTop && !document.querySelector(".sky-home")) {
+      var home = document.createElement("a");
+      home.className = "skym-home";
+      home.href = up + "index.html";
+      home.setAttribute("aria-label", "トップページに戻る");
+      home.textContent = "🏠";
+      document.body.appendChild(home);
+    }
     document.body.appendChild(bg);
     document.body.appendChild(sheet);
 

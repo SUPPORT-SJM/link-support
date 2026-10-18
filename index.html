@@ -74,6 +74,14 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body)
 .bub .nm{font-family:var(--f-head);font-weight:700;font-size:12px;line-height:1.3;text-align:center;
   white-space:pre-line;pointer-events:none;}
 
+/* 次に進むところを指さす 👉（はじめの一歩 → 初期サポートガイド → 活用の1stステップ） */
+.bub.pointed{z-index:4;}
+.bub .point{position:absolute;left:-14px;top:-12px;font-size:34px;line-height:1;pointer-events:none;
+  transform:rotate(38deg);transform-origin:70% 50%;filter:drop-shadow(0 3px 4px rgba(60,42,110,.28));
+  animation:pointPoke 1.1s ease-in-out infinite;}
+@keyframes pointPoke{0%,100%{translate:0 0;}50%{translate:7px 7px;}}
+@media (prefers-reduced-motion: reduce){ .bub .point{animation:none;} }
+
 /* 案内だけの段（公式公認イベント） */
 .info{margin-top:22px;background:var(--card);border:2px solid var(--g-apply);border-radius:22px;padding:22px 18px;
   box-shadow:var(--shadow);display:flex;flex-direction:column;gap:14px;text-align:center;
@@ -379,6 +387,7 @@ function makeNode(it, i, home, fromX, fromY){
   el.className = "bub" + (it.join ? " join" : "") + (it.back ? " backb" : "");
   el.style.setProperty("--c", C[it.g]);
   el.innerHTML = `<span class="ball">${it.ic}</span><span class="nm">${it.nm}</span>`;
+  if(path.length === 0 && it.url && it.url === pointUrl()){ el.classList.add("pointed"); el.insertAdjacentHTML("beforeend", '<span class="point" aria-hidden="true">👉</span>'); }
   stage.appendChild(el);
   const n = { el, it, hx:home[0], hy:home[1],
     x: fromX ?? home[0], y: fromY ?? home[1], vx:0, vy:0,
@@ -683,6 +692,7 @@ function saveMe(j, pin, fallbackId){
   if(!localStorage.getItem("skyarc_member")) throw new Error("nosave");
   me = m;
   markReturning();
+  pointProg = null; loadPoint();
   return m;
 }
 function welcome(text){
@@ -830,6 +840,52 @@ $("#lForgot").addEventListener("click", e=>{
     }
   }catch(e){}
 })();
+
+/* ================================================================
+   次に進むところを指さします（スプレッドシートの進み具合で決まります）
+     はじめの一歩 → 初期サポートガイド → 活用の1stステップ
+     「終わった」… その進み具合のタブで、項目がぜんぶチェック済み（または卒業）
+     3つとも終わったら、指はなくなります
+================================================================ */
+const POINT_ORDER = [
+  { app:"hajime", url:B+"first-support/" },
+  { app:"guide",  url:B+"first-support/guide.html" },
+  { app:"step1",  url:B+"first-support/step1.html" }
+];
+const POINT_KEY = "skyarc_point";
+let pointProg = null;                 /* { hajime:true/false, guide:…, step1:… } */
+try{
+  const c = JSON.parse(localStorage.getItem(POINT_KEY) || "null");
+  if(c && me && c.id === me.id) pointProg = c.done;
+}catch(e){}
+function pointUrl(){
+  if(!me || !pointProg) return "";
+  const next = POINT_ORDER.find(o=>pointProg[o.app] !== true);
+  return next ? next.url : "";
+}
+function paintPoint(){
+  const want = pointUrl();
+  nodes.forEach(n=>{
+    const on = path.length === 0 && !!n.it.url && n.it.url === want;
+    const has = n.el.querySelector(".point");
+    if(on && !has){ n.el.classList.add("pointed"); n.el.insertAdjacentHTML("beforeend", '<span class="point" aria-hidden="true">👉</span>'); }
+    if(!on && has){ n.el.classList.remove("pointed"); has.remove(); }
+  });
+}
+async function loadPoint(){
+  if(!me || !me.id || !me.pin || !GAS_URL) return;
+  try{
+    const r = await fetch(`${GAS_URL}?action=home&id=${encodeURIComponent(me.id)}&pin=${encodeURIComponent(me.pin)}&apps=${encodeURIComponent(POINT_ORDER.map(o=>o.app).join(","))}`);
+    const j = await r.json();
+    if(!j || j.ok !== true || !j.progress) return;
+    const done = {};
+    POINT_ORDER.forEach(o=>{ done[o.app] = !!(j.progress[o.app] && j.progress[o.app].done); });
+    pointProg = done;
+    try{ localStorage.setItem(POINT_KEY, JSON.stringify({ id: me.id, done: done })); }catch(e){}
+    paintPoint();
+  }catch(e){}
+}
+loadPoint();
 
 /* メニューの「ログインする」から来たときは、ログインの画面をそのまま開きます */
 function openLoginFromMenu(){
