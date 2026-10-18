@@ -494,6 +494,10 @@
           <option value="kei">並べ方：系列ごと</option>
           <option value="name">並べ方：名前順</option>
         </select>
+        <select id="keiFilter" onchange="saveKeiFilter();render()" title="見る系列"
+          style="flex-shrink:0;min-width:190px;padding:8px 10px;border-radius:999px;border:none;font-size:12.5px;font-family:inherit;background:#fff;color:#4A3F7A;font-weight:700;">
+          <option value="">系列：すべて</option>
+        </select>
         <button class="btn-add" id="btnAdd" onclick="openMember(null)" style="display:none;">＋ 会員を追加</button>
         <button class="btn-add" id="btnReq" onclick="openReqList()" style="display:none;background:#F2B33D;">
           🔔 新規登録の依頼 <span id="reqCount">0</span></button>
@@ -1390,11 +1394,12 @@ async function approveReq(row, show){
   try{
     show("登録しています…", "ok");
     const body = new URLSearchParams({
-      action:"reqApprove", id:admin.id, pin:admin.pin, row:String(row),
+      action:"reqApprove", id:admin.id, pin:admin.pin, email:admin.email, row:String(row),
       name: g("mmName"), realName: g("mmRealName"), keiretsu: g("mmKeiretsu"),
       area: (g("mmArea") === "その他" || g("mmArea") === "海外") && g("mmAreaOther")
               ? g("mmAreaOther") : g("mmArea"),
-      email: g("mmEmail"),
+      /* 会員さんのメールは targetEmail で送ります（email は操作する方ご自身のメールです） */
+      targetEmail: g("mmEmail").indexOf("*") >= 0 ? "" : g("mmEmail"),
       intro: g("mmIntro"), upline: g("mmUpline"), helper: g("mmHelper"),
       advName: g("mmAdvName"), advId: g("mmAdvId")
     });
@@ -1638,6 +1643,34 @@ function hasSup(m){ return m.sup === true; }
 ================================================================ */
 function saveSort(){ try{ localStorage.setItem("kanri_sort", $("#sortMode").value); }catch(e){} }
 (function(){ try{ const v = localStorage.getItem("kanri_sort"); if(v !== null && document.getElementById("sortMode")) document.getElementById("sortMode").value = v; }catch(e){} })();
+/* ================================================================
+   見る系列（すべて／ひとつだけ）。えらんだものは、この端末に覚えておきます
+   ・はじめは「すべて」。並べ方「系列ごと」では、ご自身の系列がいちばん上に来ます
+================================================================ */
+function myKeiretsu(){
+  try{
+    const me = (data && data.members || []).find(x=>String(x.id).replace(/^0+/, "") === String(admin && admin.id || "").replace(/^0+/, ""));
+    if(me && me.keiretsu) return me.keiretsu;
+    const m = JSON.parse(localStorage.getItem("skyarc_member") || "null");
+    return (m && m.keiretsu) || "";
+  }catch(e){ return ""; }
+}
+function saveKeiFilter(){ try{ localStorage.setItem("kanri_kei", $("#keiFilter").value); }catch(e){} }
+function fillKeiFilter(){
+  const sel = $("#keiFilter"); if(!sel || !data) return;
+  let keep = sel.value;
+  if(!sel.dataset.ready){ try{ keep = localStorage.getItem("kanri_kei") || ""; }catch(e){} sel.dataset.ready = "1"; }
+  const mine = myKeiretsu();
+  const keis = [];
+  (data.members || []).forEach(m=>{ const k = m.keiretsu || ""; if(k && keis.indexOf(k) < 0) keis.push(k); });
+  keis.sort((a,b)=> (b === mine) - (a === mine) || sortKeyName(a).localeCompare(sortKeyName(b), "ja"));
+  const escO = t=>String(t).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  sel.innerHTML = '<option value="">系列：すべて</option>'
+    + keis.map(k=>`<option value="${escO(k)}">系列：${escO(k)}${k === mine ? "（ご自身の系列）" : ""}</option>`).join("")
+    + (keis.length ? "" : "");
+  sel.value = keis.indexOf(keep) >= 0 ? keep : "";
+  sel.style.display = keis.length > 1 ? "" : "none";       /* 1つの系列しか見えない方には出しません */
+}
 function sortKeyName(t){ let x = String(t || ""); try{ x = x.normalize("NFKC"); }catch(e){} return x.trim(); }
 /* アップクリエでまとめる目印（番号の頭の0はそろえます） */
 function uplineKey(m){
@@ -1668,8 +1701,9 @@ function arrange(list){
   });
   const label = {};
   order.forEach(k=>{ label[k] = k === "" ? "" : (mode === "kei" ? k : uplineLabel(groups[k], byId)); });
-  /* 見出しの名前の順にならべ、空（未設定）は最後に */
-  order.sort((a,b)=> (a === "") - (b === "") || cmp(label[a], label[b]));
+  /* 見出しの名前の順にならべ、空（未設定）は最後に。系列ごとのときは、ご自身の系列をいちばん上に */
+  const mine = mode === "kei" ? myKeiretsu() : "";
+  order.sort((a,b)=> (a === "") - (b === "") || (mine ? (b === mine) - (a === mine) : 0) || cmp(label[a], label[b]));
   return order.map(k=>({
     head: k ? (mode === "kei" ? "系列：" + label[k] : "アップクリエ：" + label[k]) : (mode === "kei" ? "系列：未設定" : "アップクリエ：未設定"),
     rows: groups[k]
@@ -1678,8 +1712,11 @@ function arrange(list){
 
 function render(){
   if(!data) return;
+  fillKeiFilter();
+  const kf = ($("#keiFilter") && $("#keiFilter").value) || "";
   const q = $("#search").value.trim().toLowerCase();
   const list = data.members.filter(m=>{
+    if(kf && (m.keiretsu || "") !== kf) return false;     /* えらんだ系列だけ */
     /* 非表示にしてある方は出しません（非表示：OFF のとき・保存前に変えた方は出します） */
     if(!showHidden && hiddenOrig[hk(m.id)] && !(hk(m.id) in pendingHide)) return false;
     if(!q) return true;
