@@ -318,15 +318,24 @@ function $(q){ return document.querySelector(q); }
   load();
 })();
 
+/* 決まった時間たっても返事がないときは、あきらめます（"timeout" で知らせます）
+   ※ この部品がなかったため、読みこみを始めたところで止まり「通信できませんでした」と出ていました */
+function withLimit(promise, ms){
+  return new Promise(function(ok, ng){
+    const t = setTimeout(function(){ ng(new Error("timeout")); }, ms);
+    promise.then(function(v){ clearTimeout(t); ok(v); }, function(e){ clearTimeout(t); ng(e); });
+  });
+}
+
 async function load(){
   if(typeof skyLoading === "function") skyLoading("予定を読み込んでいます");
   try{
     const q = `id=${encodeURIComponent(member.id)}&pin=${encodeURIComponent(member.pin)}`;
-    /* 45秒たっても返らないときは、いったんあきらめます */
+    /* 60秒たっても返らないときは、いったんあきらめます */
     const [r1, r2] = await withLimit(Promise.all([
       fetch(`${GAS_URL}?action=eventList&${q}`),
       fetch(`${GAS_URL}?action=myEvents&${q}`)
-    ]), 45000);
+    ]), 60000);   /* はじめて読むときは、スプレッドシートを開くのに30秒ほどかかることがあります */
     const j1 = await r1.json();
     const j2 = await r2.json();
     if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j1)) return;
