@@ -44,7 +44,22 @@
   .res{font-size:12.5px;line-height:1.8;border-radius:12px;padding:10px 12px;margin-top:10px;display:none;}
   .res.ok{display:block;background:#EAF8EE;border:1.5px solid #B9E4C7;color:#256B3C;}
   .res.ng{display:block;background:#FDECEA;border:1.5px solid #F2B8B2;color:#B3352F;}
-  .copy:disabled{opacity:.5;}
+  .who{margin-top:18px;}
+  .who .me{font-size:12px;color:var(--sub);margin:-2px 0 8px;}
+  .rec{display:block;width:100%;margin-top:12px;border:2px solid var(--c);border-radius:12px;padding:13px;background:#fff;
+       color:var(--c);font-family:inherit;font-size:15px;font-weight:900;cursor:pointer;}
+  .rec:disabled{opacity:.45;cursor:default;}
+  .who select{width:100%;border:2px solid var(--line);border-radius:10px;padding:10px 12px;font-size:15px;font-family:inherit;background:#fff;color:var(--ink);}
+  .conf{margin-top:12px;border:2px solid var(--c);border-radius:12px;padding:12px;background:#FCFBFF;font-size:13px;line-height:1.8;}
+  .conf h3{font-size:13.5px;color:var(--c);margin-bottom:4px;}
+  .conf ul{list-style:none;margin:4px 0 0;}
+  .conf .warn{background:#FFF6DC;border:1.5px solid #F2D27A;color:#7A5A00;border-radius:10px;padding:8px 10px;margin:8px 0 2px;font-size:12.5px;}
+  .conf .stop{background:#FDECEA;border:1.5px solid #F2B8B2;color:#B3352F;border-radius:10px;padding:8px 10px;margin:8px 0 2px;font-size:12.5px;font-weight:700;}
+  .conf-btns{display:flex;gap:8px;margin-top:10px;}
+  .conf[hidden],.conf-btns[hidden]{display:none !important;}
+  .conf-btns button{flex:1;border-radius:10px;padding:11px;font-family:inherit;font-size:14px;font-weight:900;cursor:pointer;}
+  .conf-btns .yes{border:none;background:linear-gradient(135deg,#8A7DD0,#6E5FB5);color:#fff;}
+  .conf-btns .no{border:2px solid var(--line);background:#fff;color:var(--sub);}
   .hint{font-size:12px;color:var(--sub);text-align:center;margin-top:8px;line-height:1.7;}
   .verTag{display:block;text-align:center;font-size:10.5px;color:#B5AFC8;margin-top:22px;font-family:monospace;}
 </style>
@@ -62,18 +77,6 @@
     <b>②</b>「メッセージをコピーする」を押す<br>
     <b>③</b> LINEで、新規の方とのトークに貼りつけて送る
   </div>
-  <div class="who" id="who" hidden>
-    <h2>✍️ 送る相手と、あなたの立場</h2>
-    <label class="f" for="tid">新規の方の会員番号<small>必須</small></label>
-    <input type="text" id="tid" inputmode="numeric" autocomplete="off" placeholder="例：00012345">
-    <label class="f" style="margin-top:10px;">あなたは、この方の…（当てはまるものすべて）<small>必須</small></label>
-    <div class="roles">
-      <label><input type="checkbox" value="up"> アップクリエ</label>
-      <label><input type="checkbox" value="intro"> 紹介者</label>
-      <label><input type="checkbox" value="sup"> サポーター</label>
-    </div>
-    <p class="note">コピーすると、新規の方の行（スプレッドシート）に、あなたの会員番号が記入されます。<br>新規の方がこの番号で登録すると、お名前などが同じ行に足されていきます。</p>
-  </div>
   <div class="tabs">
     <button data-v="0" class="on">🎉 明るく楽しく</button>
     <button data-v="1">🌸 やさしく丁寧に</button>
@@ -81,7 +84,32 @@
   <div class="msg" id="msg"></div>
   <button class="copy" id="copyBtn">📋 メッセージをコピーする</button>
   <p class="hint" id="hint">コピーしたら、LINEのトークに貼りつけて送ってください</p>
-  <div class="res" id="res"></div>
+  <div class="who" id="who" hidden>
+    <h2>📝 新規の方の情報を記録する（分かるときだけ）</h2>
+    <p class="me" id="whoMe"></p>
+    <label class="f" for="tid">新規の方の会員番号</label>
+    <input type="text" id="tid" inputmode="numeric" autocomplete="off" placeholder="例：00012345">
+    <label class="f" for="tname" style="margin-top:10px;">新規の方のお名前</label>
+    <input type="text" id="tname" autocomplete="off" placeholder="例：やまだはなこ">
+    <label class="f" for="tkei" style="margin-top:10px;">新規の方の系列</label>
+    <select id="tkei"></select>
+    <label class="f" style="margin-top:10px;">あなたは、この方の…（当てはまるものすべて）</label>
+    <div class="roles">
+      <label><input type="checkbox" value="up"> アップクリエ</label>
+      <label><input type="checkbox" value="intro"> 紹介者</label>
+      <label><input type="checkbox" value="sup"> サポーター</label>
+    </div>
+    <button class="rec" id="recBtn" type="button">💾 この情報を記録する</button>
+    <p class="note" id="recHint">会員番号と、あなたの立場を入れると押せます。押すと、まず名簿と照らし合わせて、どう記録されるかをお見せします（まだ書きこみません）。<br>新規の方がこの番号で登録すると、同じ行にご本人の情報が足されます。</p>
+    <div class="conf" id="conf" hidden>
+      <div id="confBody"></div>
+      <div class="conf-btns" id="confBtns">
+        <button type="button" class="yes" id="confYes">はい、この内容で記録する</button>
+        <button type="button" class="no" id="confNo">やめる</button>
+      </div>
+    </div>
+    <div class="res" id="res"></div>
+  </div>
   <span class="verTag"></span>
 </div>
 <script>
@@ -129,49 +157,80 @@ try{ me = JSON.parse(localStorage.getItem("skyarc_member") || "null"); if(!me ||
 const half = t => { let x = String(t || ""); try{ x = x.normalize("NFKC"); }catch(e){} return x.replace(/[\s-]/g, ""); };
 function roles(){ return [...document.querySelectorAll(".roles input:checked")].map(i=>i.value); }
 function ready(){
-  if(!me) return true;
   const id = half($("tid").value);
   return /^\d+$/.test(id) && roles().length > 0;
 }
-function gate(){
-  $("copyBtn").disabled = !ready();
-  if(me && !ready()) $("hint").textContent = "新規の方の会員番号と、あなたの立場を入れると、コピーできます";
-  else if(!$("copyBtn").classList.contains("done")) $("hint").textContent = "コピーしたら、LINEのトークに貼りつけて送ってください";
-}
+function gate(){ if(me) $("recBtn").disabled = !ready(); }
 if(me){
   $("who").hidden = false;
-  $("tid").addEventListener("input", ()=>{ $("res").className = "res"; gate(); });
-  document.querySelectorAll(".roles input").forEach(i=>i.addEventListener("change", ()=>{ $("res").className = "res"; gate(); }));
+  $("whoMe").textContent = "記録する人：" + (me.name ? me.name + "さん" : "") + "（会員番号 " + me.id + "）";
+  /* 系列：はじめは、ログインしている方の系列にしておきます（えらび直せます） */
+  const keis = (window.SKY_KEIRETSU || []).slice();
+  if(me.keiretsu && keis.indexOf(me.keiretsu) < 0) keis.unshift(me.keiretsu);
+  $("tkei").innerHTML = '<option value="">（えらんでください）</option>'
+    + keis.map(k=>'<option>' + String(k).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])) + '</option>').join("");
+  $("tkei").value = me.keiretsu || "";
+  const reset = ()=>{ $("res").className = "res"; $("conf").hidden = true; gate(); };
+  ["tid","tname"].forEach(k=>$(k).addEventListener("input", reset));
+  $("tkei").addEventListener("change", reset);
+  document.querySelectorAll(".roles input").forEach(i=>i.addEventListener("change", reset));
+  $("recBtn").addEventListener("click", ()=>{ if(ready()) record(false); });
+  $("confYes").addEventListener("click", ()=>record(true));
+  $("confNo").addEventListener("click", ()=>{ $("conf").hidden = true; gate(); });
 }
 const ROLE_NAME = { up:"アップクリエ", intro:"紹介者", sup:"サポーター" };
-async function record(){
+const escH = t => String(t == null ? "" : t).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const ERRS = { self:"ご自身の会員番号になっています。新規の方の番号を入れてください。",
+               badtarget:"会員番号は数字で入れてください。",
+               pin:"ログインし直してから、もう一度「記録する」を押してください。",
+               busy:"いま混み合っています。少しおいて、もう一度押してください。",
+               keimismatch:"この会員番号は、ほかの系列の方の番号です。会員番号が間違っている可能性が非常に高いので、改めてチェックしてください（記録はしていません）。" };
+/* write=false … 名簿と照らし合わせて、どう記録されるかをお見せするだけ（書きこみません）
+   write=true  … 「はい」を押したあと、書きこみます */
+async function record(write){
   const target = half($("tid").value), rs = roles();
-  const res = $("res");
-  res.className = "res ok"; res.textContent = "スプレッドシートに記入しています…";
+  const res = $("res"), conf = $("conf");
+  res.className = "res ok"; res.textContent = write ? "スプレッドシートに記録しています…" : "名簿と照らし合わせています…";
+  $("recBtn").disabled = true; $("confYes").disabled = true;
   try{
-    const body = new URLSearchParams({ action:"firstMsgLink", id:me.id, pin:me.pin, target, roles: rs.join(",") });
+    const body = new URLSearchParams({ action:"firstMsgLink", id:me.id, pin:me.pin, target, roles: rs.join(","),
+                                       tname: $("tname").value.trim(), tkei: $("tkei").value, mode: write ? "write" : "check" });
     const r = await fetch(window.SKY_GAS_URL, { method:"POST", body });
     const j = await r.json();
     if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
     if(!j || j.ok !== true){
-      res.className = "res ng";
-      res.textContent = ({ self:"ご自身の会員番号になっています。新規の方の番号を入れてください。",
-                           badtarget:"会員番号は数字で入れてください。",
-                           pin:"ログインし直してから、もう一度コピーを押してください。",
-                           busy:"いま混み合っています。少しおいて、もう一度コピーを押してください。" })[j && j.error]
-                       || "記入できませんでした。少しおいて、もう一度コピーを押してください（メッセージはコピーできています）。";
+      res.className = "res ng"; res.textContent = ERRS[j && j.error] || "うまくいきませんでした。少しおいて、もう一度押してください。";
+      conf.hidden = true; return;
+    }
+    const tn = $("tname").value.trim();
+    if(!write){
+      /* どう記録されるかを、お見せします */
+      let h = j.keiMismatch ? "<h3>この会員番号では、記録できません</h3>" : "<h3>この内容で記録しますか？</h3>";
+      h += j.exists
+        ? "会員番号 " + escH(j.id) + "：名簿では「" + escH(j.cur.name || "（お名前なし）") + "」さん" + (j.cur.keiretsu ? "（" + escH(j.cur.keiretsu) + "）" : "") + "です。"
+        : "会員番号 " + escH(j.id) + "：まだ名簿にいない方です。" + (tn ? "「" + escH(tn) + "」さんとして、" : "") + "番号だけの行を作ります。";
+      if(j.keiMismatch){
+        h += '<p class="stop">⚠️ この会員番号の方は、名簿では「' + escH(j.cur.keiretsu) + '」の系列です（えらんだ系列：' + escH($("tkei").value) + '）。<br>会員番号が間違っている可能性が非常に高いので、会員番号を改めてチェックしてください。</p>';
+      }else{
+        if(j.nameMismatch) h += '<p class="warn">⚠️ 名簿のお名前は「' + escH(j.cur.name) + '」さんで、入れたお名前「' + escH(tn) + '」とちがいます。<br>どちらかが間違えている可能性があるので、あなたのデータを今一度確認してください（名簿のお名前は書きかえません）。</p>';
+        h += "<ul>" + j.plan.map(x=>"<li>・" + ROLE_NAME[x.role] + "："
+          + (x.act === "set" ? "あなたを入れます" : x.act === "same" ? "すでにあなたが入っています" : "<b>" + escH(x.who) + " さんから、あなたに上書きします</b>") + "</li>").join("") + "</ul>";
+      }
+      $("confBody").innerHTML = h;
+      $("confBtns").hidden = !!j.keiMismatch;
+      conf.hidden = false; res.className = "res";
       return;
     }
-    const lines = [];
-    const got = (j.done || []).concat(j.same || []);
-    lines.push("✅ 会員番号 " + target + (j.name ? "（" + j.name + "さん）" : "") + " の行に記入しました"
-               + (got.length ? "：" + got.map(x=>ROLE_NAME[x]).join("・") : ""));
+    conf.hidden = true;
+    const lines = ["✅ 会員番号 " + j.id + (j.name ? "（" + j.name + "さん）" : "") + " の行に記録しました："
+                   + j.plan.map(x=>ROLE_NAME[x.role]).join("・")];
     if(j.created) lines.push("まだ登録前の方なので、番号だけの行を作りました。ご本人がこの番号で登録すると、同じ行に足されます。");
-    (j.other || []).forEach(o=>lines.push("・" + ROLE_NAME[o.role] + "には、すでに " + o.who + " さんが入っているので、そのままにしました。"));
-    res.className = "res ok"; res.innerHTML = lines.map(t=>String(t).replace(/[&<>]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]))).join("<br>");
+    j.plan.filter(x=>x.act === "replace").forEach(x=>lines.push("・" + ROLE_NAME[x.role] + "は、" + x.who + " さんから、あなたに上書きしました。"));
+    res.className = "res ok"; res.innerHTML = lines.map(escH).join("<br>");
   }catch(e){
-    res.className = "res ng";
-    res.textContent = "通信できませんでした。電波のよい場所で、もう一度コピーを押してください（メッセージはコピーできています）。";
+    res.className = "res ng"; res.textContent = "通信できませんでした。電波のよい場所で、もう一度押してください。";
+  }finally{
+    gate(); $("confYes").disabled = false;
   }
 }
 function show(){
@@ -183,7 +242,6 @@ function show(){
 }
 document.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click", ()=>{ cur = Number(b.dataset.v); show(); }));
 $("copyBtn").addEventListener("click", async ()=>{
-  if(!ready()){ gate(); return; }
   const text = MESSAGES[cur];
   let ok = false;
   try{ await navigator.clipboard.writeText(text); ok = true; }
@@ -200,7 +258,6 @@ $("copyBtn").addEventListener("click", async ()=>{
   }else{
     $("hint").textContent = "上の文を長押しして、コピーしてください";
   }
-  if(me) record();
 });
 show();
 gate();
