@@ -18,6 +18,11 @@
     { sec: "アカウント" },
     { ic:"👤", nm:"会員情報の確認・編集", url: up+"ikusei/account.html", need:"" },
 
+    { sec: "新規メンバーサポート" },
+    { ic:"💌", nm:"新規の方への最初のメッセージ",
+      sub:"新しく入会した方に、このサイトを教える",
+      url: up+"ikusei/first-message.html", need:"" },
+
     { sec: "まなぶ" },
     { ic:"👋", nm:"はじめの一歩",        url: up+"first-support/",            need:"" },
     { ic:"📘", nm:"初期サポートガイド",    url: up+"first-support/guide.html",  need:"" },
@@ -33,9 +38,6 @@
       sub:"LINK全体の講座・セミナーはこちら",
       url:"https://link-event-x.com/", ext:true, need:"" },
     { ic:"🤝", nm:"サポートメンバー状況",  url: up+"ikusei/myteam.html",        need:"sup" },
-    { ic:"💌", nm:"新規の方への最初のメッセージ",
-      sub:"登録された方に送る文面をコピーする",
-      url: up+"ikusei/first-message.html", need:"" },
     { ic:"📝", nm:"新規登録の依頼",
       sub:"新しく入られた方の登録をお願いする",
       url: up+"ikusei/shinki-irai.html", need:"" },

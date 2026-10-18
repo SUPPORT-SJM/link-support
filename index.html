@@ -41,12 +41,8 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body)
 
 /* 上の見出し */
 .top{display:flex;align-items:center;gap:12px;padding-right:58px;}
-.appicon{width:52px;height:52px;border-radius:14px;flex:none;position:relative;overflow:hidden;
-  background:linear-gradient(150deg,#8B7BD8 0%,#6E5FB5 55%,#4E86D6 100%);box-shadow:var(--shadow);}
-.appicon::before{content:"";position:absolute;left:9px;right:9px;top:17px;height:34px;border:4px solid #fff;
-  border-bottom:none;border-radius:40px 40px 0 0;opacity:.95;}
-.appicon::after{content:"LINK";position:absolute;left:0;right:0;bottom:6px;text-align:center;color:#fff;
-  font:900 9px/1 var(--f-head);letter-spacing:.12em;}
+.appicon{width:52px;height:52px;border-radius:14px;flex:none;overflow:hidden;box-shadow:var(--shadow);
+  background:#6E5FB5 url("./img/app-icon-180.png") center/cover no-repeat;}   /* ホーム画面のアイコンと同じ絵 */
 .top h1{font-family:var(--f-head);font-weight:900;font-size:18px;line-height:1.35;margin:0;color:var(--deep);text-wrap:balance;}
 .top p{margin:0;font-size:12.5px;color:var(--sub);}
 
@@ -69,6 +65,14 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body)
 .bub .ball{width:68px;height:68px;border-radius:50%;display:grid;place-items:center;font-size:30px;
   background:var(--card);border:3px solid var(--c);box-shadow:var(--shadow);transition:box-shadow .2s;pointer-events:none;}
 .bub.grab .ball{box-shadow:0 14px 28px rgba(60,42,110,.25);}
+.bub.wide .nm{white-space:pre;}   /* 「このサイトを教える」を1行に収めます */
+/* アカウントのまわりを、月のようにまわる小さなアイコン（ほかのアイコンの7割ほど） */
+.bub.moon{z-index:3;gap:4px;}
+.orbit{position:absolute;left:0;top:0;border:1.5px dashed rgba(110,95,181,.28);border-radius:50%;pointer-events:none;
+  transition:opacity .4s;}
+.bub.moon .ball{width:48px;height:48px;font-size:21px;border-width:2.5px;}
+.bub.moon .nm{font-size:10.5px;line-height:1.25;background:rgba(255,255,255,.9);border-radius:8px;padding:2px 6px;
+  box-shadow:0 2px 6px rgba(60,42,110,.12);}   /* ほかのアイコンの前を通っても読めるように */
 .bub.backb .ball{width:62px;height:62px;font-size:26px;}
 .bub.backb .nm{color:var(--deep);font-size:13px;}
 .bub .nm{font-family:var(--f-head);font-weight:700;font-size:12px;line-height:1.3;text-align:center;
@@ -271,6 +275,7 @@ const C = {back:"var(--g-back)",join:"var(--g-join)",member:"var(--g-member)",ap
 /* アイコンの中身（ここに足せば増やせます） */
 const TREE = [
   {ic:"👤", nm:"アカウント", g:"common", url:B+"ikusei/account.html"},
+  {ic:"💌", nm:"新しい仲間へ\nこのサイトを教える", g:"common", url:B+"ikusei/first-message.html", wide:true, moon:true},
   {ic:"📘", nm:"初期サポート\nガイド", g:"member", url:B+"first-support/guide.html"},
   {ic:"🚀", nm:"活用の\n1stステップ", g:"member", url:B+"first-support/step1.html"},
   {ic:"📋", nm:"申込みシート", g:"apply", kids:[
@@ -357,8 +362,9 @@ let W = 360, H = 420;
 
 /* ---------- 丸いまとまりの中の置き場所 ---------- */
 const WOBBLE = [[0,0],[4,-6],[-5,3],[6,4],[-3,-5],[5,2],[-6,-2],[3,6],[-4,5],[2,-4]];
-function homes(n, centered){
+function homes(n, centered, pair){
   if(centered === undefined) centered = n >= 7;
+  if(pair && n >= 4) return homesPair(n);
   W = Math.min(stage.clientWidth || 360, 440);
   const cx = W/2;
   let pts = [], rx, ry;
@@ -380,11 +386,29 @@ function homes(n, centered){
   return pts.map((p,i)=>[cx + p[0] + WOBBLE[i%10][0]*k, H/2 + p[1] + WOBBLE[i%10][1]*k]);
 }
 
+/* いちばん上の段：まん中にアカウント、そのまわりを「新しい仲間へ」が月のようにまわります。
+   ほかのアイコンは、そのまわりに大きめの輪で並べます */
+const ORBIT = { rx: 112, ry: 102, sec: 16 };      /* 月の通り道の大きさと、1周の秒数 */
+function homesPair(n){
+  W = Math.min(stage.clientWidth || 360, 440);
+  const cx = W/2, ring = n-2;
+  const rx = Math.max(W*.41, 140), ry = Math.max(W*.64, 235);
+  const pts = [[0, 0], [0, ORBIT.ry]];
+  for(let i=0;i<ring;i++){
+    const a = -Math.PI/2 + i*2*Math.PI/ring;
+    pts.push([Math.cos(a)*rx, Math.sin(a)*ry]);
+  }
+  H = Math.max(2*ry + 150, 170);
+  stage.style.height = H + "px";
+  const k = W/360;
+  return pts.map((p,i)=>[cx + p[0] + (i<2 ? 0 : WOBBLE[i%10][0]*k*.6), H/2 + p[1] + (i<2 ? 0 : WOBBLE[i%10][1]*k*.6)]);
+}
+
 /* ---------- アイコンをひとつ作る ---------- */
 function makeNode(it, i, home, fromX, fromY){
   const el = document.createElement("button");
   el.type = "button";
-  el.className = "bub" + (it.join ? " join" : "") + (it.back ? " backb" : "");
+  el.className = "bub" + (it.join ? " join" : "") + (it.back ? " backb" : "") + (it.wide ? " wide" : "") + (it.moon ? " moon" : "");
   el.style.setProperty("--c", C[it.g]);
   el.innerHTML = `<span class="ball">${it.ic}</span><span class="nm">${it.nm}</span>`;
   if(path.length === 0 && it.url && it.url === pointUrl()){ el.classList.add("pointed"); el.insertAdjacentHTML("beforeend", '<span class="point" aria-hidden="true">👉</span>'); }
@@ -402,7 +426,7 @@ function makeNode(it, i, home, fromX, fromY){
 function reflow(){
   if(path.length !== 0) return;
   const items = TREE.filter(ok);
-  const hs = homes(items.length, true);
+  const hs = homes(items.length, true, true);
   const keep = [];
   nodes.forEach(n=>{
     if(items.indexOf(n.it) >= 0) keep.push(n);
@@ -426,7 +450,7 @@ function build(fromX, fromY){
   let items = last ? (last.kids || []).filter(ok) : TREE.filter(ok);
   if(!last && !me) items = [Object.assign({}, JOIN, { nm: isReturning() ? "ログイン" : "登録" })];  /* まだの方は、まん中のひとつだけ */
   if(last) items = [BACK].concat(items);                      /* 中の段は、まん中が「もどる」 */
-  const hs = homes(items.length, path.length === 0 ? true : items.length > 1);  /* いちばん上は、まん中がアカウント */
+  const hs = homes(items.length, path.length === 0 ? true : items.length > 1, path.length === 0 && !!me);  /* いちばん上は、まん中に上下でアカウントと「新しい仲間へ」 */
   nodes = items.map((it,i)=> makeNode(it, i, hs[i], fromX, fromY));
   document.getElementById("crumb").hidden = path.length === 0;
   document.getElementById("crumbTitle").textContent = (last ? last.nm.replace(/\n/g,"") : "");
@@ -539,10 +563,30 @@ function goBack(n){
 /* ---------- 動き（ばねと、ふわふわ） ---------- */
 function frame(t){
   const all = nodes.concat(leaving);
+  /* 月：アカウントのまわりを、ゆっくりまわります（つまんでいる間は止まります） */
+  const moon = path.length === 0 ? nodes.find(n=>n.it.moon) : null;
+  const earth = moon ? nodes.find(n=>n.it === TREE[0]) : null;
+  let orb = document.getElementById("orbit");
+  if(!orb){ orb = document.createElement("div"); orb.id = "orbit"; orb.className = "orbit"; orb.style.opacity = 0; stage.prepend(orb); }
+  if(moon && earth){
+    orb.style.width = ORBIT.rx*2 + "px"; orb.style.height = ORBIT.ry*2 + "px";
+    orb.style.transform = `translate(${earth.x - ORBIT.rx}px, ${earth.y - ORBIT.ry}px)`;
+    orb.style.opacity = earth.o;
+  }else orb.style.opacity = 0;
+  if(moon && earth && moon !== drag && earth.hx != null){
+    const a = reduce ? Math.PI/2 : Math.PI/2 + t/1000 * 2*Math.PI/ORBIT.sec;
+    moon.hx = earth.hx + Math.cos(a)*ORBIT.rx;
+    moon.hy = earth.hy + Math.sin(a)*ORBIT.ry;
+  }
   for(const n of all){
     if(n !== drag){
       let ax = 0, ay = 0;
       if(n.hx != null){ ax = (n.hx - n.x)*.055; ay = (n.hy - n.y)*.055; }
+      if(moon && n !== moon && n !== earth && n !== drag && n.hx != null){
+        /* 月が近づいたら、ほかのアイコンは少しよけます */
+        const dx = n.x - moon.x, dy = n.y - (moon.y + 14), d = Math.hypot(dx,dy) || 1, R = 150;
+        if(d < R){ const f = (R-d)/R*7; ax += dx/d*f; ay += dy/d*f; }
+      }
       if(drag && n.hx != null){
         /* つまんだアイコンが近づくと、よけながら混ざる */
         const dx = n.x - drag.x, dy = n.y - drag.y, d = Math.hypot(dx,dy) || 1, R = 140;
@@ -552,13 +596,14 @@ function frame(t){
       }
       n.vx = (n.vx + ax)*.84; n.vy = (n.vy + ay)*.84;
       n.x += n.vx; n.y += n.vy;
+      if(moon && n.hx != null){ n.x = Math.min(Math.max(n.x, 44), W - 44); }   /* よけても、画面の外へは出ません */
     }
     const wait = t - n.born < n.delay;
     if(!wait){ n.s += (n.ts - n.s)*.2; n.o += (n.to - n.o)*.2; }
     if(reduce){ n.s = n.ts; n.o = n.to; }
     const fy = reduce || n === drag ? 0 : Math.sin(t/650 + n.ph)*5;
     const fx = reduce || n === drag ? 0 : Math.cos(t/900 + n.ph)*2.5;
-    const hw = n.it.join ? 55 : 48, hh = n.it.join ? 50 : 40;
+    const hw = n.it.join ? 55 : 48, hh = n.it.join ? 50 : (n.it.moon ? 28 : 40);
     n.el.style.transform = `translate(${n.x - hw + fx}px, ${n.y - hh + fy}px) scale(${n.s})`;
     n.el.style.opacity = n.o;
   }
@@ -911,7 +956,7 @@ window.addEventListener("pageshow", ev=>{
 
 /* ---------- 最初に並べます ---------- */
 window.addEventListener("resize", ()=>{
-  const hs = homes(nodes.length, path.length === 0 ? true : nodes.length > 1);
+  const hs = homes(nodes.length, path.length === 0 ? true : nodes.length > 1, path.length === 0 && !!me);
   nodes.forEach((n,i)=>{ n.hx = hs[i][0]; n.hy = hs[i][1]; });
 });
 build(null, null);
