@@ -50,6 +50,8 @@
   .dot.g{background:var(--g);} .dot.y{background:var(--y);} .dot.r{background:var(--r);}
   .chip .t{font-size:10.5px;color:#8A84A0;font-weight:700;line-height:1.4;}
   .chip .v{font-size:12.5px;color:var(--ink);line-height:1.45;}
+  .chip .me{display:block;font-size:11px;color:#2F7A5C;line-height:1.45;margin-top:2px;}
+  .sub .me{color:#2F7A5C;}
   .empty{text-align:center;color:#8A84A0;padding:40px 0;}
   @media (max-width:760px){
     .row{grid-template-columns:1fr 1fr;}
@@ -281,6 +283,26 @@ function signals(m){
     k: sigOne("k", m.items.k || {})
   };
 }
+/* ================================================================
+   本人の記録（会員ご本人が、初期サポートガイド・活用の1stステップでチェックしたもの）
+   サポーターの記録とは別に「🙋本人：…」と添えて、見くらべられるようにします
+================================================================ */
+const SELF_G = [["g1","高山翔子さん"],["g2","いと・すけさん"],["g3","冨田由起子さん"]];
+function selfLine(m, g){
+  const v = m.self || {};
+  if(g === "u") return v.u ? "🙋本人：参加 " + md(v.u) : "";
+  if(g === "sem"){
+    const n = ["s1","s2","s3","s4","s5"].filter(k=>v[k]).length;
+    return n ? "🙋本人：" + n + "/5 種 見た" : "";
+  }
+  if(g === "g"){
+    const l = SELF_G.filter(x=>v[x[0]]).map(x=>x[1] + " " + md(v[x[0]]));
+    return l.length ? "🙋本人：" + l.join("・") : "";
+  }
+  if(g === "k") return v.k ? "🙋本人：参加 " + md(v.k) : "";
+  return "";
+}
+
 /* 参加予定のいちばん近い日（並べ替えに使います） */
 function nextPlan(m){
   let best = null;
@@ -409,12 +431,13 @@ function draw(){
     const hidOn = effHidden(m), hidPend = hidOn !== !!hiddenOrig[hkey(m.id)];
     const chip = g=>`<button class="chip ${g.items.some(k=>itemChanged(m, k)) ? "pend" : ""}" onclick="openEd('${esc(m.id)}','${g.key}')">
         <span class="dot ${x.sg[g.key].c}"></span>
-        <span><span class="t">${esc(g.title)}</span><br><span class="v">${esc(x.sg[g.key].v)}</span></span></button>`;
+        <span><span class="t">${esc(g.title)}</span><br><span class="v">${esc(x.sg[g.key].v)}</span>${selfLine(m, g.key) ? `<span class="me">${esc(selfLine(m, g.key))}</span>` : ""}</span></button>`;
     return `<div class="row ${hidOn ? "hidden-row" : ""}">
       <div class="who"><div class="nm">${esc(m.name || "(名前未登録)")}</div>
         <div class="sub">${esc(pad8(m.id))}${m.keiretsu ? "｜" + esc(m.keiretsu) : ""}
           <br><span title="アップクリエ">（ク）${personHtml(m, "upline")}</span>　<span title="サポート担当">（担）${personHtml(m, "helper")}</span>
-          <br><span title="紹介者">（紹）${esc(who(m.introName, m.intro))}</span>　<span title="アドバイザー（説明してくださった方）">（説）${esc(who(m.advName, m.advId))}</span></div>
+          <br><span title="紹介者">（紹）${esc(who(m.introName, m.intro))}</span>　<span title="アドバイザー（説明してくださった方）">（説）${esc(who(m.advName, m.advId))}</span>
+          ${m.self && m.self.w ? `<br><span class="me" title="ご本人が「参加しました」を押した日">🙋ワイワイチャット参加 ${esc(md(m.self.w))}</span>` : ""}</div>
         <label class="hidchk ${hidPend ? "pend" : ""}" title="あなたの画面だけで非表示にします"><input type="checkbox" ${hidOn ? "checked" : ""} onchange="toggleHide('${esc(m.id)}', this.checked)">非表示</label></div>
       ${GROUPS.map(chip).join("")}
     </div>`;
