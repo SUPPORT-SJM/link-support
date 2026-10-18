@@ -2,6 +2,8 @@
 <html lang="ja">
 <head>
 <script src="../config.js"></script>
+<script src="../self-check.js"></script>
+<script src="../nickname.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
@@ -80,6 +82,9 @@ body{font-family:"Zen Kaku Gothic New",sans-serif;background:#FFFBF7;padding:16p
 .done-btn{display:block;width:100%;margin-top:12px;padding:12px;border-radius:10px;font-size:15px;font-weight:700;text-align:center;cursor:pointer;border:none;font-family:"Zen Kaku Gothic New",sans-serif;transition:background 0.3s}
 .done-btn-pending{background:#FFE0B2;color:#E65100}
 .done-btn-done{background:#A5D6A7;color:#fff}
+.sem-open{display:inline-block;margin-top:4px;font-size:12px;color:#FF7043;font-weight:700}
+.cer-btn{display:block;width:100%;margin-top:8px;padding:10px;border-radius:10px;font-size:14px;font-weight:700;border:2px solid #FFCCBC;background:#fff;color:#BF360C;cursor:pointer;font-family:inherit}
+.cer-btn.on{background:#E8F5E9;border-color:#A5D6A7;color:#2E7D32}
 
 .step-list{display:flex;flex-direction:column;gap:7px;margin-bottom:8px}
 .step-row{display:flex;align-items:flex-start;gap:8px;font-size:14px;color:#4E342E;line-height:1.7}
@@ -178,10 +183,11 @@ body{font-family:"Zen Kaku Gothic New",sans-serif;background:#FFFBF7;padding:16p
 <div class="note-box">
   <h2>🌸 初期サポートの流れ 🌸</h2>
   <div class="hero-body">
-    <p>LINKは完全フリービジネスですが、</p>
-    <p>初期だけルールがあります👍</p>
-    <p>これは皆さんがスムーズに、</p>
-    <p>LINKを活用出来るようにする為です⚡</p>
+    <p>LINKは、たくさんのことを叶えられる</p>
+    <p>自由な場所です✨</p>
+    <p>その自由をみんなで支え合って使うために、</p>
+    <p>守るべきルールがあります👍</p>
+    <p>一緒に覚えていきましょう⚡</p>
   </div>
 
   <div class="hero-em">『 入ったけど、LINKを使えてない😢』<br>を無くすためです✨</div>
@@ -336,9 +342,14 @@ body{font-family:"Zen Kaku Gothic New",sans-serif;background:#FFFBF7;padding:16p
         <a href="https://link-event-x.com/node/1181" target="_blank" class="lnk lnk-rose">⭐️ LINK No.1 LINKセレモニーに関する記載</a>
       </div>
       <div class="note">📝 申し込みは最下部の「申し込みはこちらから」、Googleフォームに記入ください</div>
-      <div class="bullet" style="margin-top:12px"><div class="dot"></div><div>5種類のLINKセミナー（LINKの宝の地図🗺️）を視聴する事</div></div>
+      <div class="bullet sem-toggle" style="margin-top:12px;cursor:pointer" onclick="semToggle()"><div class="dot"></div><div>5種類のLINKセミナー（LINKの宝の地図🗺️）を視聴する事<br><span class="sem-open" id="semOpen">▼ タップすると5つのセミナーが出ます</span></div></div>
+      <div id="semBox" hidden>
+        <p class="self-note">見たセミナーにチェックを入れて、下の「完了」を押すと記録されます。</p>
+        <div id="semList"></div>
+      </div>
       <div class="note">📝 どうしても出れない場合、『最低でも2つ』✨<br>残りのものは『登録3ヶ月以内』で視聴してください⚡</div>
       <div class="bullet" style="margin-top:10px"><div class="dot"></div><div>🆓 直近のLINKセレモニーの予約</div></div>
+      <button class="cer-btn" id="cerBtn" onclick="cerToggle()">☑️ 予約できた</button>
       <button class="done-btn done-btn-pending" id="btn-3" onclick="markDone('3')">☑️ 完了したらここを押してね！</button>
     </div>
   </div>
@@ -392,8 +403,9 @@ body{font-family:"Zen Kaku Gothic New",sans-serif;background:#FFFBF7;padding:16p
 <div class="note" style="margin-bottom:12px">
   <p>✅ LINK informationにある最初のルール動画でもありましたが、<br>LINK内の全てのオプチャに入る時は、</p>
   <p style="margin-top:6px">参加する名前の後に、<br><strong>【自分の所属するチーム名/系列名】</strong>を入れましょう✨️</p>
-  <p style="margin-top:6px">例）🌈高山翔子/Skyarc/🚀SkyExceed</p>
-  <p>意味「名前/チーム名/系列名」</p>
+  <p style="margin-top:6px">例）🌈高山翔子/Skyarc🪽HERO</p>
+  <p>意味「名前/チーム名＋系列名」</p>
+  <p style="font-size:12px">※ オープンチャットの名前は20文字までなので、こえるときはチーム名（Skyarc）をはぶきます</p>
 </div>
 
 <div class="gen-box">
@@ -604,6 +616,8 @@ function markDone(id){
     skyLoginRequired(function(m){ member = m; location.reload(); });
     return;
   }
+  /* ③ セミナー：チェックしたものを「本人の記録」に保存します（初期サポートマネジメントに出ます） */
+  if(id === "3") saveSem();
   const done=localStorage.getItem('link_done_'+id)==='1';
   setTimeout(refreshProgress, 30);
   if(done){
@@ -638,6 +652,43 @@ function applyState(id,done){
   }
 }
 
+/* ================================================================
+   ③ LINKセミナー5種のチェック・LINKセレモニーの予約（本人の記録）
+   ・保存先はスプレッドシートのタブ「本人の記録」（self-check.js）
+   ・活用の1stステップの「LINKセミナーに参加した」と同じ記録です
+================================================================ */
+const SEM_KEYS = ["s1","s2","s3","s4","s5"];
+let selfVals = {};
+function semToggle(){
+  const b = document.getElementById("semBox");
+  b.hidden = !b.hidden;
+  document.getElementById("semOpen").textContent = b.hidden ? "▼ タップすると5つのセミナーが出ます" : "▲ とじる";
+}
+function drawSelf(){
+  document.getElementById("semList").innerHTML = skySelf.listHtml(SEM_KEYS, selfVals, "sem");
+  drawCer();
+}
+/* セレモニーのボタンだけ描き直します（セミナーのチェック中の内容は消しません） */
+function drawCer(){
+  const c = document.getElementById("cerBtn");
+  c.classList.toggle("on", !!selfVals.c);
+  c.textContent = selfVals.c ? "✅ 予約できた（" + skySelf.md(selfVals.c) + "・もう一度押すと戻せます）" : "☑️ 予約できた";
+}
+async function saveSem(){
+  const r = await skySelf.set(skySelf.readList(document.getElementById("semList")));
+  if(r && r.ok){ selfVals = r.vals || {}; drawSelf(); }
+}
+async function cerToggle(){
+  if((!member || !member.id) && typeof skyLoginRequired === "function"){
+    skyLoginRequired(function(m){ member = m; location.reload(); });
+    return;
+  }
+  const r = await skySelf.set({ c: !selfVals.c });
+  if(r && r.ok){ selfVals = r.vals || {}; drawCer(); }
+}
+drawSelf();
+if(member && member.id){ skySelf.get().then(v=>{ if(v){ selfVals = v; drawSelf(); } }); }
+
 KEYS.forEach(id=>{
   if(localStorage.getItem('link_done_'+id)==='1'){
     progress["G"+id] = true;
@@ -654,10 +705,11 @@ const copyHint=document.getElementById('copyHint');
 function update(){
   const name=nameInput.value.trim();
   const series=seriesSelect.value;
+  if(!name||!series) skyNick.clearWarn(resultBox);
   if(!name&&!series){resultBox.textContent='👆 名前と系列を入力してください';return;}
   if(!name){resultBox.textContent='👆 名前を入力してください';return;}
   if(!series){resultBox.textContent='👆 系列を選んでください';return;}
-  resultBox.textContent='🌈'+name+'/Skyarc/'+series;
+  skyNick.render(resultBox, name, series);   /* 20文字の決まりは nickname.js にまとめています */
 }
 
 function copyResult(){

@@ -2,6 +2,7 @@
 <html lang="ja">
 <head>
 <script src="../config.js"></script>
+<script src="../nickname.js"></script>
 <meta charset="UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -167,7 +168,7 @@
 <div class="card" id="card-H1">
   <div class="card-head" onclick="toggle(this)">
     <span class="card-num">1</span>
-    <span class="card-ttl">Skyarcユーザーサポートに入る</span>
+    <span class="card-ttl">チーム初期サポートオープンチャットに入る</span>
     <span class="badge badge-yet" id="badge-H1">未</span>
     <span class="card-arrow">▼</span>
   </div>
@@ -175,7 +176,7 @@
     <p>Skyarcの仲間が集まるオープンチャット「🌈ユーザーサポート」です。分からないことを気軽に聞ける場所なので、まずはここに入りましょう。</p>
 
     <p style="font-weight:700;color:#E65100;margin-top:14px;">📛 ① まずはニックネームを用意しましょう</p>
-    <p>オープンチャットでは、お名前と系列がひと目で分かる形にします。下で作ってコピーしてください。</p>
+    <p>LINKの各オープンチャットでは、お名前と系列がひと目でわかる形がルールで決められています。下で作ってコピーしてください。</p>
 
     <div class="gen-box">
       <label class="gen-label" id="nameLabel">👤 あなたのお名前</label>
@@ -205,12 +206,13 @@
 <div class="card" id="card-H2">
   <div class="card-head" onclick="toggle(this)">
     <span class="card-num">2</span>
-    <span class="card-ttl">系列のオープンチャット・グループを確認する</span>
+    <span class="card-ttl">系列のオープンチャット・グループLINEを確認する</span>
     <span class="badge badge-yet" id="badge-H2">未</span>
     <span class="card-arrow">▼</span>
   </div>
   <div class="card-body">
     <p>系列ごとに、専用のオープンチャットやLINEグループがある場合があります。あなたの系列を選んでみてください。</p>
+    <p>初期サポートのユーザーサポート会を受けたあとに、Skyarc全体の交流オープンチャットにも招待してもらえます。そちらも楽しみにしていてくださいね😊</p>
 
     <div class="gen-box">
       <label class="gen-label">🏷️ あなたの系列</label>
@@ -237,7 +239,7 @@
 
     <p style="font-weight:700;color:#E65100;margin-top:14px;">📝 発行のしかた</p>
     <ol class="howto">
-      <li><b>ビジネスマイページ</b>にログインします</li>
+      <li><b>ビジネスマイページ</b>にログインします<br><a class="howto-link" href="https://member.link-platform.jp" target="_blank" rel="noopener" style="margin:6px 0 2px;">🔗 ビジネスマイページをひらく</a></li>
       <li>右上の <b>メニュー（三本線）</b> をひらきます</li>
       <li><b>「新規会員紹介」</b> をえらびます</li>
       <li>そこに出ている <b>紹介用アドレスをコピー</b>します</li>
@@ -446,12 +448,13 @@ function updateNick(){
   const box = document.getElementById("resultBox");
   if(!name || !kei){
     box.className = "result-box waiting";
+    skyNick.clearWarn(box);
     box.textContent = !name && !kei ? "👆 お名前と系列を入れてください"
                     : (!name ? "👆 お名前を入れてください" : "👆 系列を選んでください");
     return;
   }
   box.className = "result-box";
-  box.textContent = "🌈" + name + "/Skyarc/" + kei;
+  skyNick.render(box, name, kei);   /* 20文字の決まりは nickname.js にまとめています */
 }
 
 async function copyResult(){

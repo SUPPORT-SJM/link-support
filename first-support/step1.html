@@ -2,6 +2,7 @@
 <html lang="ja">
 <head>
 <script src="../config.js"></script>
+<script src="../self-check.js"></script>
 <meta charset="UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -61,6 +62,12 @@
   .card-body{display:none;padding:0 14px 14px}
   .card-body.open{display:block}
   .card-body p{font-size:13.5px;color:#5D4037;line-height:1.9;margin-bottom:8px}
+  .prep{background:#FFF;border:1.5px dashed #FFCC80;border-radius:10px;padding:10px 12px;font-size:13px;color:#5D4037;line-height:1.8;margin-bottom:10px}
+  .prep ul{margin:4px 0 0 1.3em;padding:0}
+  .goal2{background:#FFF8E1;border:1.5px solid #FFE0A3;border-radius:16px;padding:18px 16px;text-align:center;margin-top:14px}
+  .goal2 h2{font-size:15px;font-weight:900;color:#E65100;margin:4px 0 8px}
+  .goal2 p{font-size:13px;color:#6D4C41;line-height:1.9;margin-bottom:12px}
+  .goal2 a{display:block;background:#FFB74D;color:#fff;border-radius:12px;padding:12px;font-size:14px;font-weight:700;text-decoration:none}
   .tip{background:#FFF8E1;border-radius:10px;padding:10px 12px;font-size:12.5px;color:#8D6E63;line-height:1.8;margin-bottom:10px}
   .link-btn{display:block;background:#FFF3E0;border:1.5px solid #FFCC80;border-radius:10px;padding:11px;text-align:center;color:#E65100;font-size:13px;font-weight:700;text-decoration:none;margin-bottom:8px}
   .done-btn{width:100%;padding:12px;border-radius:10px;font-size:13.5px;font-weight:700;border:none;cursor:pointer}
@@ -114,8 +121,14 @@
 <div class="goal">
   <div class="em">🐣</div>
   <h2>ぜんぶ終わったら</h2>
-  <p>お仲間をご紹介されたら、担当の方にお伝えください。<br>
-  サポーターとして認定されると、<br>育成プログラムが開きます🌱</p>
+  <p style="margin-bottom:0">担当のサポートの方にお伝えください😊</p>
+</div>
+
+<div class="goal2">
+  <h2>🌱 LINKを誰かに紹介したいときは</h2>
+  <p>LINKを誰かに紹介したい方や、「LINKに入れてほしい」と言われた方は、担当のサポートの方にご連絡ください。<br><br>
+  しっかりサポートできるようになるための<b>育成プログラム</b>もあります。興味があれば、ご自身で担当の方にご連絡ください。<br><br>
+  <span style="font-size:12px;">※ 育成プログラムは、条件を満たした方のみご覧いただけます。見てみたい方は、アップライン、または初期サポートのグループLINEで要望を出してください。</span></p>
   <a href="../ikusei/">🌱 育成プログラムを見てみる</a>
 </div>
 
@@ -143,29 +156,37 @@ const STEPS = [
   { phase:"STEP 1　全体を知って、自分の場所をつくる", items:[
     { id:"S1", ttl:"ユーザーサポート会に参加した",
       body:"はじめての方が、いちばん最初に足を運ぶ場所です。分からないことをその場で聞けます。",
+      prep:["自分の会員番号", "入会時に設定したパスワード", "LINKポータルが開けること"],
       tip:"💡 週に何度も開かれています。都合のよい回に、気軽に覗いてみてください",
-      link:{t:"📅 開催日を見る・申し込む", u:"events.html"} },
+      link:{t:"📅 開催日を見る・申し込む", u:"events.html"},
+      self:"u" },
     { id:"S8", ttl:"SASAEAIのマッチング設定をした",
       body:"支え合いのマッチング設定です。できること・してほしいことを登録します。",
-      link:{t:"🤝 SASAEAI設定ガイド", u:"sasaeai.html"} },
+      link:{t:"🤝 SASAEAI設定ガイド", u:"sasaeai.html"},
+      link2:{t:"🆓 公式公認のサポート無料講座情報", u:"https://link-event-x.com/index.php/node/5614", ext:true} },
     { id:"S7", ttl:"LINK-BASEに掲載した",
       body:"自分のことを知ってもらうページです。ご縁が広がるきっかけになります。",
-      link:{t:"🏠 LINK-BASE掲載ガイド", u:"linkbase.html"} },
+      link:{t:"🏠 LINK-BASE掲載ガイド", u:"linkbase.html"},
+      link2:{t:"🆓 公式公認のサポート無料講座情報", u:"https://link-event-x.com/index.php/node/6816", ext:true} },
   ]},
   { phase:"STEP 2　学びと交流に出ていく", items:[
     { id:"S2", ttl:"グルコン(グループコンサル)に参加した",
       body:"グルコンは、あなたの未来を変える1時間です。ご自身の状況に合わせて相談できます。" +
-           "<br><br><b>事前の準備 → 本番 → 終わったあとの打ち合わせ</b>まで、ぜんぶをひとつのパッケージとして受けてください。" +
+           "<br><br><b>① 事前の準備（30分）<br>② 本番（約1時間）<br>③ 終わったあとの打ち合わせ（次に何をするかまで決めます）</b>" +
+           "<br><br>ぜんぶをひとつのパッケージとして受けてください。" +
            "「次に何をするか」まで決めてから帰ることで、この1時間が本当の意味を持ちます。",
-      tip:"💡 しっかり学べる時間を確保してご参加ください。その積み重ねが、あなたの未来につながっていきます✨" },
+      tip:"💡 しっかり学べる時間を確保してご参加ください。その積み重ねが、あなたの未来につながっていきます✨",
+      checks:["g1","g2","g3"], checkNote:"出たグルコンにチェックを入れて、下の「完了」を押すと記録されます。" },
     { id:"S3", ttl:"LINKセミナーに参加した",
       body:"LINKの完全攻略MAP。全会員に必要な基盤となる5種類のセミナーです。",
       tip:"💡 『5ピースのパズル』と思って、ぜひ揃えてみてください✨",
-      link:{t:"📖 LINKセミナーについて", u:"link-seminar.html"} },
+      link:{t:"📖 LINKセミナーについて", u:"link-seminar.html"},
+      checks:["s1","s2","s3","s4","s5"], checkNote:"見たセミナーにチェックを入れて、下の「完了」を押すと記録されます。" },
     { id:"S4", ttl:"チーム交流会に参加した",
       body:"同じチームの仲間と出会える場です。ここで生まれるご縁が、後々の支えになります。",
       tip:"💡 顔を出すだけでも大丈夫。まずは雰囲気を感じてみてください",
-      link:{t:"🎪 交流会・サポート会情報", u:"skyarc-community.html"} },
+      link:{t:"🎪 交流会・サポート会情報", u:"skyarc-community.html"},
+      self:"k" },
   ]},
   { phase:"STEP 3　つながりを広げる", items:[
     { id:"S5", ttl:"LINK全体のオープンチャットに入った",
@@ -198,8 +219,11 @@ let saveTimer = null;
         </div>
         <div class="card-body">
           <p>${it.body}</p>
+          ${it.prep ? `<div class="prep"><b>📝 参加にあたって準備しておくもの</b><ul>${it.prep.map(x=>`<li>${x}</li>`).join("")}</ul></div>` : ""}
           ${it.tip ? `<div class="tip">${it.tip}</div>` : ""}
           ${it.link ? `<a class="link-btn" href="${it.link.u}">${it.link.t}</a>` : ""}
+          ${it.link2 ? `<a class="link-btn" href="${it.link2.u}"${it.link2.ext ? ' target="_blank" rel="noopener"' : ""}>${it.link2.t}</a>` : ""}
+          ${it.checks ? `<p class="self-note">${it.checkNote}</p><div id="chk-${it.id}"></div>` : ""}
           <button class="done-btn done-btn-pending" id="btn-${it.id}" onclick="markDone('${it.id}')">☑️ 完了したらここを押してね!</button>
         </div>
       </div>`).join("");
@@ -307,7 +331,34 @@ function markDone(id){
   }
   update();
   saveProgress();
+  saveSelf(id, !done);
 }
+
+/* ================================================================
+   本人の記録（スプレッドシートのタブ「本人の記録」に保存。初期サポートマネジメントに出ます）
+   ・ユーザーサポート会・チーム交流会 … 「完了」を押した日が入ります（もどすと消えます）
+   ・グルコン・LINKセミナー … チェックしたものに、チェックした日が入ります（「完了」を押したときに保存）
+   ・LINKセミナーは、初期サポートガイドの③と同じ記録です
+================================================================ */
+let selfVals = {};
+function drawSelf(){
+  ALL.forEach(it=>{
+    if(!it.checks) return;
+    const box = document.getElementById("chk-" + it.id);
+    if(box) box.innerHTML = skySelf.listHtml(it.checks, selfVals, it.id);
+  });
+}
+async function saveSelf(id, doneNow){
+  const it = ALL.find(x=>x.id === id);
+  if(!it || (!it.self && !it.checks)) return;
+  const ch = {};
+  if(it.self) ch[it.self] = doneNow;
+  if(it.checks) Object.assign(ch, skySelf.readList(document.getElementById("chk-" + it.id)));
+  const r = await skySelf.set(ch);
+  if(r && r.ok){ selfVals = r.vals || {}; drawSelf(); }
+}
+drawSelf();
+if(member && member.id){ skySelf.get().then(v=>{ if(v){ selfVals = v; drawSelf(); } }); }
 
 function applyState(id,done){
   const card=document.getElementById('card-'+id);

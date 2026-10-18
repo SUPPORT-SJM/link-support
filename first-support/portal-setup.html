@@ -2,6 +2,7 @@
 <html lang="ja">
 <head>
 <script src="../config.js"></script>
+<script src="../nickname.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
@@ -139,10 +140,11 @@ const copyHint=document.getElementById('copyHint');
 function update(){
   const name=nameInput.value.trim();
   const series=seriesSelect.value;
+  if(!name||!series) skyNick.clearWarn(resultBox);
   if(!name&&!series){resultBox.textContent='👆 名前と系列を入力してください';return;}
   if(!name){resultBox.textContent='👆 名前を入力してください';return;}
   if(!series){resultBox.textContent='👆 系列を選んでください';return;}
-  resultBox.textContent='🌈'+name+'/Skyarc/'+series;
+  skyNick.render(resultBox, name, series);   /* 20文字の決まりは nickname.js にまとめています */
 }
 function copyResult(){
   const name=nameInput.value.trim();

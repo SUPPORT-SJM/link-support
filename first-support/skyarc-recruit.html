@@ -2,6 +2,8 @@
 <html lang="ja">
 <head>
 <script src="../config.js"></script>
+<script src="../nickname.js"></script>
+<script src="../self-check.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
@@ -28,6 +30,15 @@ body{font-family:"Zen Kaku Gothic New",sans-serif;background:#FFFBF7;padding:16p
 .coming p{font-size:13px;color:#A1887F;line-height:1.8}
 .lbtn{display:flex;align-items:center;gap:8px;padding:12px 14px;border-radius:10px;font-size:13px;font-weight:500;text-decoration:none;margin:8px 0}
 .lbtn-or{border:1px solid #FFCCBC;background:#FFF8F5;color:#BF360C}
+.gen-label{display:block;font-size:12.5px;font-weight:700;color:#FF7043;margin:10px 0 5px}
+.gen-input,.gen-select{width:100%;border:1px solid #FFCCBC;border-radius:8px;padding:10px 12px;font-size:14px;font-family:inherit;color:#4E342E;background:#fff;outline:none}
+.result-box{background:#FFF0EB;border:2px solid #FF7043;border-radius:10px;padding:12px 14px;font-size:16px;font-weight:700;color:#BF360C;line-height:1.6;margin:4px 0 12px;word-break:break-all}
+.copy-btn{display:block;width:100%;padding:14px;border-radius:12px;border:none;background:#FF7043;color:#fff;-webkit-text-fill-color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
+.copy-hint,.join-note{font-size:12px;color:#A1887F;text-align:center;margin-top:8px;line-height:1.7}
+.join-btn{display:block;width:100%;padding:14px;border-radius:12px;border:none;background:#06C755;color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:6px}
+.join-btn.locked{background:#CFD8DC;color:#78909C}
+.done-btn{display:block;width:100%;margin-top:14px;padding:12px;border-radius:10px;border:none;background:#FFE0B2;color:#E65100;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
+.done-btn.on{background:#A5D6A7;color:#fff}
 .back-btn2{display:block;padding:14px;border-radius:12px;background:#FF7043;color:#fff;text-align:center;font-size:15px;font-weight:700;text-decoration:none;margin-top:20px}
 </style>
 <link rel="stylesheet" href="../beta.css">
@@ -41,26 +52,51 @@ body{font-family:"Zen Kaku Gothic New",sans-serif;background:#FFFBF7;padding:16p
 
   <div class="hero">
     <h1>🚀 紹介・ビジネス活動サポート</h1>
-    <p>アポベア・ビートレ・YYチャットなど<br>ビジネス活動に役立つ情報はこちら</p>
+    <p>ワイワイチャット・アポ部屋・Bトレなど<br>ビジネス活動に役立つ情報はこちら</p>
   </div>
 
   <div class="section">
-    <div class="section-ttl">📅 アポベア・ビートレ</div>
+    <div class="section-ttl">💬 ① まずはワイワイチャットに参加</div>
     <div class="card">
-      <p>LINKを誰かに紹介したい・一緒に活動する仲間を増やしたい方向けの学びや実践の場です。</p>
+      <p>アポ部屋・Bトレは、<b>ワイワイチャットに参加している方</b>が使えます。まずはワイワイチャットに参加しましょう😊</p>
     </div>
-    <div class="coming">
-      <p>🚧 申し込みスプレッドシートへのリンクを準備中です</p>
+
+    <div class="card">
+      <p style="font-weight:700;color:#E65100;">📛 ニックネームを用意しましょう</p>
+      <p>LINKの各オープンチャットでは、お名前と系列がひと目でわかる形がルールで決められています。下で作ってコピーしてください。</p>
+      <label class="gen-label" for="nameInput">👤 あなたのお名前</label>
+      <input class="gen-input" id="nameInput" type="text" name="nickname" autocomplete="nickname" placeholder="例：しょうこ">
+      <label class="gen-label" for="seriesSelect">🏷️ 系列を選ぶ</label>
+      <select class="gen-select" id="seriesSelect"></select>
+      <label class="gen-label">✅ あなたのニックネーム</label>
+      <div class="result-box" id="resultBox">👆 お名前と系列を入れてください</div>
+      <button class="copy-btn" id="copyBtn" onclick="copyNick()">📋 タップしてコピー</button>
+      <p class="copy-hint" id="copyHint">コピーして、参加するときに貼り付けてください</p>
+    </div>
+
+    <div class="card">
+      <p style="font-weight:700;color:#E65100;">📲 用意ができたら参加しましょう</p>
+      <p style="font-size:12.5px;">オープンチャット「🌈【ワイワイ💖】LINKで仲間と楽しく会費￥0へ💖」</p>
+      <button class="join-btn locked" id="joinBtn" onclick="goWaiwai()">📲 ワイワイチャットに参加する</button>
+      <p class="join-note" id="joinNote">先にニックネームをコピーしてから、参加してください</p>
+      <button class="done-btn" id="waiwaiDone" onclick="toggleWaiwai()">☑️ 参加しました</button>
+      <p class="join-note" id="waiwaiNote">参加できたら、上のボタンを押してください</p>
     </div>
   </div>
 
   <div class="section">
-    <div class="section-ttl">💬 YYチャット</div>
+    <div class="section-ttl">📅 ② アポ部屋</div>
     <div class="card">
-      <p>YYチャットの案内・参加方法はこちら👇</p>
+      <p>アポの相談・その場でアポ取りなど</p>
+      <a class="lbtn lbtn-or" href="https://docs.google.com/spreadsheets/d/1HXtpJD21K2vomACuUuT32ZTvGFBS00r6armdCyQgIs4/edit" target="_blank" rel="noopener">📋 アポ部屋の申し込みシートを開く</a>
     </div>
-    <div class="coming">
-      <p>🚧 YYチャットの案内を準備中です</p>
+  </div>
+
+  <div class="section">
+    <div class="section-ttl">📅 ③ Bトレ</div>
+    <div class="card">
+      <p>Bさんの在り方・ロープレ<br>（持ち物：アドバイザーのプロフィール）</p>
+      <a class="lbtn lbtn-or" href="https://docs.google.com/spreadsheets/d/19ENmRvi1XWAwFkf-HoTSMPdLW-QNghC4yBQCJnNGwJ8/edit" target="_blank" rel="noopener">📋 Bトレの申し込みシートを開く</a>
     </div>
   </div>
 
@@ -71,7 +107,88 @@ body{font-family:"Zen Kaku Gothic New",sans-serif;background:#FFFBF7;padding:16p
   <a href="skyarc.html" class="back-btn2">← Skyarcトップに戻る</a>
 
 </div>
-<div style="text-align:center;font-size:9.5px;color:#C4B8B0;font-family:monospace;padding:14px 0 20px;"></div>
+<div style="text-align:center;font-size:9.5px;color:#C4B8B0;font-family:monospace;padding:14px 0 20px;"><span class="verTag"></span></div>
+<script>
+/* ================================================================
+   ワイワイチャット
+   ・ニックネームは共通の部品（nickname.js）で作ります（20文字の決まり）
+   ・ニックネームをコピーしてから、参加ボタンが押せます
+   ・「参加しました」を押すと、スプレッドシートのタブ「本人の記録」の
+     「ワイワイチャット参加」に日付が入ります（もう一度押すと消えます）
+================================================================ */
+const WAIWAI_URL = "https://line.me/ti/g2/9ROIqJyNErs-t7_F3qZR0FUAv-OJKkj9btY5fQ?utm_source=invitation&utm_medium=link_copy&utm_campaign=default";
+const $ = id=>document.getElementById(id);
+let member = null, nickCopied = false, selfVals = {};
+try{ const raw = localStorage.getItem("skyarc_member"); if(raw && raw !== "null" && raw !== "undefined") member = JSON.parse(raw); }catch(e){}
+if(member && !member.id) member = null;
+
+/* 系列の選択肢（共通設定 config.js の一覧） */
+$("seriesSelect").innerHTML = '<option value="">-- 系列を選んでください --</option>'
+  + (window.SKY_KEIRETSU || []).map(k=>`<option value="${k}">${k}</option>`).join("");
+/* ご登録の内容を、先に入れておきます */
+if(member){
+  if(member.nick || member.name) $("nameInput").value = member.name || "";
+  if(member.keiretsu) $("seriesSelect").value = member.keiretsu;
+}
+function updateNick(){
+  const name = $("nameInput").value.trim(), kei = $("seriesSelect").value;
+  nickCopied = false; refreshJoin();
+  if(!name || !kei){
+    skyNick.clearWarn($("resultBox"));
+    $("resultBox").textContent = !name && !kei ? "👆 お名前と系列を入れてください" : (!name ? "👆 お名前を入れてください" : "👆 系列を選んでください");
+    return;
+  }
+  skyNick.render($("resultBox"), name, kei);
+}
+async function copyNick(){
+  const name = $("nameInput").value.trim(), kei = $("seriesSelect").value;
+  if(!name || !kei){ $("copyHint").textContent = !name ? "⚠️ お名前を入れてください" : "⚠️ 系列を選んでください"; return; }
+  const ok = await skyNick.copy($("resultBox").textContent);
+  if(ok){
+    nickCopied = true;
+    $("copyBtn").textContent = "✅ コピーしました";
+    $("copyHint").textContent = "参加するときに、コピーしたお名前を貼り付けてください";
+  }else{
+    $("copyHint").textContent = "上の文字を長押ししてコピーしてください";
+  }
+  refreshJoin();
+}
+function refreshJoin(){
+  $("joinBtn").classList.toggle("locked", !nickCopied);
+  $("joinNote").textContent = nickCopied ? "✅ 準備ができました。参加のときにお名前を貼り付けてください" : "先にニックネームをコピーしてから、参加してください";
+  if(!nickCopied) $("copyBtn").textContent = "📋 タップしてコピー";
+}
+function goWaiwai(){
+  const name = $("nameInput").value.trim(), kei = $("seriesSelect").value;
+  if(!name || !kei){ $("joinNote").textContent = !name ? "⚠️ お名前を入れてください" : "⚠️ 系列を選んでください"; return; }
+  if(!nickCopied){
+    $("joinNote").innerHTML = "⚠️ 先に <b>「📋 タップしてコピー」</b> を押してから参加してください";
+    $("copyBtn").scrollIntoView({ behavior:"smooth", block:"center" });
+    return;
+  }
+  window.open(WAIWAI_URL, "_blank");
+}
+function drawWaiwai(){
+  const on = !!selfVals.w;
+  $("waiwaiDone").classList.toggle("on", on);
+  $("waiwaiDone").textContent = on ? "✅ 参加しました（" + skySelf.md(selfVals.w) + "・もう一度押すと戻せます）" : "☑️ 参加しました";
+  $("waiwaiNote").textContent = on ? "記録しました。アポ部屋・Bトレも使えます😊" : "参加できたら、上のボタンを押してください";
+}
+async function toggleWaiwai(){
+  if(!member){
+    if(typeof skyLoginRequired === "function") skyLoginRequired(function(m){ member = m; toggleWaiwai(); });
+    return;
+  }
+  $("waiwaiNote").textContent = "☁️ 記録しています…";
+  const r = await skySelf.set({ w: !selfVals.w });
+  if(r && r.ok){ selfVals = r.vals || {}; drawWaiwai(); }
+  else $("waiwaiNote").textContent = "記録できませんでした。電波のよい場所でもう一度お試しください";
+}
+$("nameInput").addEventListener("input", updateNick);
+$("seriesSelect").addEventListener("change", updateNick);
+updateNick(); drawWaiwai();
+if(member) skySelf.get().then(v=>{ if(v){ selfVals = v; drawWaiwai(); } });
+</script>
 <script src="../track.js"></script>
 <script src="../menu.js"></script>
 </body>
