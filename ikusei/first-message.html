@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<script src="../config.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>新規の方に送る最初のメッセージ｜スカイアーク</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../beta.css">
+<style>
+  :root{ --ink:#2A2438; --sub:#7A7390; --line:#E4E0F0; --paper:#FCFBFF; --mist:#F0EDF9; --c:#6E5FB5; }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",sans-serif;background:var(--paper);color:var(--ink);line-height:1.7;}
+  .wrap{max-width:480px;margin:0 auto;padding:20px 16px 40px;}
+  .hero{text-align:center;margin:6px 0 16px;}
+  .hero .em{font-size:38px;line-height:1;}
+  .hero h1{font-family:"Zen Maru Gothic","Hiragino Maru Gothic ProN",sans-serif;font-size:20px;font-weight:900;color:#3A3060;margin:8px 0 6px;line-height:1.5;}
+  .hero p{font-size:13.5px;color:#4A4560;line-height:1.85;}
+  .steps{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:14px;font-size:13.5px;line-height:1.8;}
+  .steps b{color:var(--c);}
+  .tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
+  .tabs button{border:2px solid var(--line);background:#fff;border-radius:12px;padding:10px 4px;font-family:inherit;font-size:13.5px;font-weight:700;color:var(--ink);cursor:pointer;}
+  .tabs button.on{border-color:var(--c);background:var(--mist);color:var(--c);}
+  .msg{background:#fff;border:2px solid var(--c);border-radius:14px;padding:14px;font-size:14px;line-height:1.85;white-space:pre-wrap;word-break:break-all;}
+  .copy{display:block;width:100%;margin-top:12px;border:none;border-radius:14px;padding:16px;background:linear-gradient(135deg,#8A7DD0,#6E5FB5);
+        color:#fff !important;-webkit-text-fill-color:#fff;font-family:inherit;font-size:16px;font-weight:900;cursor:pointer;box-shadow:0 6px 16px rgba(60,42,110,.22);}
+  .copy.done{background:#3FA98A;}
+  .hint{font-size:12px;color:var(--sub);text-align:center;margin-top:8px;line-height:1.7;}
+  .verTag{display:block;text-align:center;font-size:10.5px;color:#B5AFC8;margin-top:22px;font-family:monospace;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <div class="em">💌</div>
+    <h1>新規の方に送る<br>最初のメッセージ</h1>
+    <p>新しくLINKに登録された方に、<br>このメッセージを送ってあげてください。</p>
+  </div>
+  <div class="steps">
+    <b>①</b> 下で、送りたい雰囲気をえらぶ<br>
+    <b>②</b>「メッセージをコピーする」を押す<br>
+    <b>③</b> LINEで、新規の方とのトークに貼りつけて送る
+  </div>
+  <div class="tabs">
+    <button data-v="0" class="on">🎉 明るく楽しく</button>
+    <button data-v="1">🌸 やさしく丁寧に</button>
+  </div>
+  <div class="msg" id="msg"></div>
+  <button class="copy" id="copyBtn">📋 メッセージをコピーする</button>
+  <p class="hint" id="hint">コピーしたら、LINEのトークに貼りつけて送ってください</p>
+  <span class="verTag"></span>
+</div>
+<script>
+/* 送るメッセージ（ここを書きかえると、文面が変わります） */
+const URL_APP = "https://support-sjm.github.io/link-support/app.html";
+const MESSAGES = [
+`🎉 LINKへのご登録、おめでとうございます！🎉
+
+スカイアークの仲間として、これから一緒に楽しく活動していきましょう✨
+
+活動の土台を支える「お助けツール」を2つお渡しします🎁
+
+① スカイアーク LINKサポート
+② LINKポータル
+
+下のURLをタップして、2つともスマートフォンのホーム画面にアイコンとして置いてください📱
+画面の案内どおりに進めるだけで、かんたんに置けます👌
+
+👇こちらをタップ
+${URL_APP}
+
+わからないところがあれば、いつでも気軽に声をかけてくださいね😊
+これから、どうぞよろしくお願いします🌈`,
+`LINKへのご登録、本当におめでとうございます🌸
+
+スカイアークの仲間として、これから一緒に、楽しく活動していきましょう。
+
+活動を支えるツールを2つ、お渡しします。
+・スカイアーク LINKサポート
+・LINKポータル
+
+下のURLをタップすると、ご案内の画面が開きます。
+お使いのスマートフォン（iPhone／Android）をえらんで、画面のとおりに進めると、ホーム画面にアイコンが置けます📱
+
+${URL_APP}
+
+むずかしいときは、そのままお声がけください。一緒にやりましょう😊
+これから、どうぞよろしくお願いいたします。`
+];
+let cur = 0;
+const $ = (id)=>document.getElementById(id);
+function show(){
+  $("msg").textContent = MESSAGES[cur];
+  document.querySelectorAll(".tabs button").forEach(b=>b.classList.toggle("on", Number(b.dataset.v) === cur));
+  $("copyBtn").textContent = "📋 メッセージをコピーする"; $("copyBtn").classList.remove("done");
+  $("hint").textContent = "コピーしたら、LINEのトークに貼りつけて送ってください";
+}
+document.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click", ()=>{ cur = Number(b.dataset.v); show(); }));
+$("copyBtn").addEventListener("click", async ()=>{
+  const text = MESSAGES[cur];
+  let ok = false;
+  try{ await navigator.clipboard.writeText(text); ok = true; }
+  catch(e){
+    const ta = document.createElement("textarea");
+    ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    try{ ok = document.execCommand("copy"); }catch(e2){}
+    document.body.removeChild(ta);
+  }
+  if(ok){
+    $("copyBtn").textContent = "✅ コピーしました"; $("copyBtn").classList.add("done");
+    $("hint").textContent = "LINEのトークに貼りつけて、送ってください";
+  }else{
+    $("hint").textContent = "上の文を長押しして、コピーしてください";
+  }
+});
+show();
+</script>
+<script src="../menu.js"></script>
+</body>
+</html>
