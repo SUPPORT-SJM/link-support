@@ -54,6 +54,12 @@
   .cats button[data-k="kouryu-on"]{border-left-color:#5E8FD8;}
   .cats button[data-k="kouryu-re"]{border-left-color:#5E8FD8;}
   .cats button[data-k="douga"]    {border-left-color:#9575CD;}
+  .cats button[data-k="event"]    {border-left-color:#26A69A;}
+  .cats button[data-k="crie"]     {border-left-color:#7CB342;}
+  .cats button[data-k="event"] .cnt{color:#26A69A;}
+  .cats button[data-k="crie"]  .cnt{color:#7CB342;}
+  .ev.k-event .kindbar,.ev.k-event .btn{background:#26A69A;}
+  .ev.k-crie .kindbar,.ev.k-crie .btn{background:#7CB342;}
   .cats button[data-k="support"]   .cnt{color:#FF7043;}
   .cats button[data-k="kouryu-on"] .cnt,
   .cats button[data-k="kouryu-re"] .cnt{color:#5E8FD8;}
@@ -283,7 +289,13 @@ const KIND = {
       "⚠️ <b>オープンチャットのお名前と、お申し込みのお名前をそろえてください。</b>" },
   "douga":     { ic:"🎬", note:
       "⚠️ <b>オープンチャットのお名前と、お申し込みのお名前をそろえてください。</b>" },
+  "event":     { ic:"🎪", note:
+      "⚠️ <b>オープンチャットのお名前と、お申し込みのお名前をそろえてください。</b>" },
+  "crie":      { ic:"🌱", note:
+      "⚠️ <b>クリエイターズ以上の方向けの申込みです。</b>" },
 };
+/* 予定の分け方（管理画面で足した申込みシートは、えらんだ「出す場所」に入ります） */
+const catOf = e => e.cat || e.book;
 
 /* 予定の種類 */
 const CATS = [
@@ -292,6 +304,8 @@ const CATS = [
   { key:"kouryu-on", ic:"💻", nm:"チーム交流会(オンライン)",   sub:"お家から参加できます" },
   { key:"kouryu-re", ic:"🤝", nm:"チーム交流会(リアル)",      sub:"実際にお会いできます" },
   { key:"douga",     ic:"🎬", nm:"動画視聴会",               sub:"みんなで一緒に見ます" },
+  { key:"event",     ic:"🎪", nm:"そのほかの催し",            sub:"合同の会など", onlyIf:true },
+  { key:"crie",      ic:"🌱", nm:"クリエ以上の申込み",        sub:"クリエイターズ以上の方向け", onlyIf:true },
 ];
 
 function $(q){ return document.querySelector(q); }
@@ -389,9 +403,9 @@ function renderCats(){
   $("#listBox").style.display = "none";
   $("#noteBox").style.display = "none";
 
-  $("#cats").innerHTML = CATS.map(c=>{
+  $("#cats").innerHTML = CATS.filter(c=>!c.onlyIf || events.some(e => catOf(e) === c.key)).map(c=>{
     const n = c.key === "all" ? events.length
-            : events.filter(e => e.book === c.key).length;
+            : events.filter(e => catOf(e) === c.key).length;
     return `<button data-k="${c.key}" class="${c.key==="all"?"all":""} ${n?"":"zero"}" onclick="setF('${c.key}')">
       <span class="ic">${c.ic}</span>
       <span class="tx"><span class="nm">${c.nm}</span><br><span class="sub">${c.sub}</span></span>
@@ -420,7 +434,7 @@ function setF(f){
 
 function render(){
   const list = $("#list");
-  const shown = events.filter(e => filter === "all" ? true : e.book === filter);
+  const shown = events.filter(e => filter === "all" ? true : catOf(e) === filter);
   if(!shown.length){
     list.innerHTML = '<div class="empty">この種類の予定は、いまありません</div>';
     return;
@@ -429,8 +443,8 @@ function render(){
   list.innerHTML = shown.map(e => {
     const i = events.indexOf(e);
     return `
-    <div class="ev k-${e.book}">
-      <div class="kindbar">${KIND[e.book] ? KIND[e.book].ic : "📅"} ${e.label}</div>
+    <div class="ev k-${catOf(e)}">
+      <div class="kindbar">${KIND[catOf(e)] ? KIND[catOf(e)].ic : "📅"} ${e.label}</div>
       <div class="top">
         <span class="when">${e.md}</span>
       </div>
@@ -440,7 +454,7 @@ function render(){
         ${e.zoom ? '<span class="zoomtag">Zoomあり</span>' : ""}
       </div>
       ${e.detail ? `<div class="detail">${fmtDetail(e.detail)}</div>` : ""}
-      <div class="caution">${KIND[e.book] ? KIND[e.book].note : ""}</div>
+      <div class="caution">${KIND[catOf(e)] ? KIND[catOf(e)].note : ""}</div>
       <button class="btn" onclick="pick(${i})">📋 申込みシートを開く</button>
       <div class="cal">
         <a href="${gcalUrl(e)}" target="_blank">📅 Googleカレンダー</a>
