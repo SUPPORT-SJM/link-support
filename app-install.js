@@ -4,7 +4,7 @@
    「活動に役立つツールを2つ、ホーム画面に置きましょう」の1枚の画面です。
    ツールごとにアイコンの設定ファイルが別なので、中では2つのアドレスに分かれています。
    見た目は同じ画面で、ツールをえらぶと、えらんでいた端末のまま切りかわります。
-     ・app.html               … スカイアーク LINKサポート（アイコンから最初のページ index.html が開きます）
+     ・app.html               … Skyarc LINKサポート（アイコンから最初のページ index.html が開きます）
      ・link-portal/index.html … LINKポータル（アイコンから LINKポータル が開きます）
 
    ページの側で、次のように設定してから、このファイルを読みこみます
@@ -64,7 +64,7 @@
 
   /* 2つのツール（どちらの画面からも、もう一方へ移れます） */
   const TOOLS = [
-    { key:"support", label:"スカイアーク<br>LINKサポート", page:"app.html", icon:"img/app-icon-180.png" },
+    { key:"support", label:"Skyarc<br>LINKサポート", page:"app.html", icon:"img/app-icon-180.png" },
     { key:"portal",  label:"LINKポータル",                 page:"link-portal/index.html", icon:"img/portal-icon-180.png" }
   ];
   const base = C.base || "./";

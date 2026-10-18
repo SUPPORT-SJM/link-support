@@ -1,7 +1,7 @@
 {
-  "name": "スカイアーク LINKサポート",
+  "name": "Skyarc LINKサポート",
   "short_name": "LINKサポート",
-  "description": "スカイアークのLINKサポートアプリ",
+  "description": "SkyarcのLINKサポートアプリ",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
