@@ -29,6 +29,22 @@
   .copy{display:block;width:100%;margin-top:12px;border:none;border-radius:14px;padding:16px;background:linear-gradient(135deg,#8A7DD0,#6E5FB5);
         color:#fff !important;-webkit-text-fill-color:#fff;font-family:inherit;font-size:16px;font-weight:900;cursor:pointer;box-shadow:0 6px 16px rgba(60,42,110,.22);}
   .copy.done{background:#3FA98A;}
+  /* 送る相手と、あなたの立場（ログインしているとき） */
+  .who{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:13px 14px;margin-bottom:14px;}
+  .who h2{font-size:14px;font-weight:700;color:var(--c);margin-bottom:8px;}
+  .who label.f{display:block;font-size:12.5px;font-weight:700;margin:4px 0 5px;}
+  .who label.f small{color:#B3352F;font-weight:700;margin-left:4px;}
+  .who input[type=text]{width:100%;border:2px solid var(--line);border-radius:10px;padding:11px 12px;font-size:16px;font-family:inherit;letter-spacing:.06em;}
+  .who input[type=text]:focus{outline:none;border-color:var(--c);}
+  .roles{display:flex;flex-wrap:wrap;gap:7px;margin-top:6px;}
+  .roles label{display:flex;align-items:center;gap:6px;border:2px solid var(--line);border-radius:10px;padding:8px 11px;font-size:13.5px;font-weight:700;cursor:pointer;background:#fff;}
+  .roles label:has(input:checked){border-color:var(--c);background:var(--mist);color:var(--c);}
+  .roles input{width:18px;height:18px;accent-color:#6E5FB5;}
+  .who .note{font-size:11.5px;color:var(--sub);line-height:1.7;margin-top:8px;}
+  .res{font-size:12.5px;line-height:1.8;border-radius:12px;padding:10px 12px;margin-top:10px;display:none;}
+  .res.ok{display:block;background:#EAF8EE;border:1.5px solid #B9E4C7;color:#256B3C;}
+  .res.ng{display:block;background:#FDECEA;border:1.5px solid #F2B8B2;color:#B3352F;}
+  .copy:disabled{opacity:.5;}
   .hint{font-size:12px;color:var(--sub);text-align:center;margin-top:8px;line-height:1.7;}
   .verTag{display:block;text-align:center;font-size:10.5px;color:#B5AFC8;margin-top:22px;font-family:monospace;}
 </style>
@@ -46,6 +62,18 @@
     <b>②</b>「メッセージをコピーする」を押す<br>
     <b>③</b> LINEで、新規の方とのトークに貼りつけて送る
   </div>
+  <div class="who" id="who" hidden>
+    <h2>✍️ 送る相手と、あなたの立場</h2>
+    <label class="f" for="tid">新規の方の会員番号<small>必須</small></label>
+    <input type="text" id="tid" inputmode="numeric" autocomplete="off" placeholder="例：00012345">
+    <label class="f" style="margin-top:10px;">あなたは、この方の…（当てはまるものすべて）<small>必須</small></label>
+    <div class="roles">
+      <label><input type="checkbox" value="up"> アップクリエ</label>
+      <label><input type="checkbox" value="intro"> 紹介者</label>
+      <label><input type="checkbox" value="sup"> サポーター</label>
+    </div>
+    <p class="note">コピーすると、新規の方の行（スプレッドシート）に、あなたの会員番号が記入されます。<br>新規の方がこの番号で登録すると、お名前などが同じ行に足されていきます。</p>
+  </div>
   <div class="tabs">
     <button data-v="0" class="on">🎉 明るく楽しく</button>
     <button data-v="1">🌸 やさしく丁寧に</button>
@@ -53,6 +81,7 @@
   <div class="msg" id="msg"></div>
   <button class="copy" id="copyBtn">📋 メッセージをコピーする</button>
   <p class="hint" id="hint">コピーしたら、LINEのトークに貼りつけて送ってください</p>
+  <div class="res" id="res"></div>
   <span class="verTag"></span>
 </div>
 <script>
@@ -94,14 +123,67 @@ ${URL_APP}
 ];
 let cur = 0;
 const $ = (id)=>document.getElementById(id);
+/* ログインしている方は、送る相手と立場を入れてからコピーします */
+let me = null;
+try{ me = JSON.parse(localStorage.getItem("skyarc_member") || "null"); if(!me || !me.id || !me.pin) me = null; }catch(e){ me = null; }
+const half = t => { let x = String(t || ""); try{ x = x.normalize("NFKC"); }catch(e){} return x.replace(/[\s-]/g, ""); };
+function roles(){ return [...document.querySelectorAll(".roles input:checked")].map(i=>i.value); }
+function ready(){
+  if(!me) return true;
+  const id = half($("tid").value);
+  return /^\d+$/.test(id) && roles().length > 0;
+}
+function gate(){
+  $("copyBtn").disabled = !ready();
+  if(me && !ready()) $("hint").textContent = "新規の方の会員番号と、あなたの立場を入れると、コピーできます";
+  else if(!$("copyBtn").classList.contains("done")) $("hint").textContent = "コピーしたら、LINEのトークに貼りつけて送ってください";
+}
+if(me){
+  $("who").hidden = false;
+  $("tid").addEventListener("input", ()=>{ $("res").className = "res"; gate(); });
+  document.querySelectorAll(".roles input").forEach(i=>i.addEventListener("change", ()=>{ $("res").className = "res"; gate(); }));
+}
+const ROLE_NAME = { up:"アップクリエ", intro:"紹介者", sup:"サポーター" };
+async function record(){
+  const target = half($("tid").value), rs = roles();
+  const res = $("res");
+  res.className = "res ok"; res.textContent = "スプレッドシートに記入しています…";
+  try{
+    const body = new URLSearchParams({ action:"firstMsgLink", id:me.id, pin:me.pin, target, roles: rs.join(",") });
+    const r = await fetch(window.SKY_GAS_URL, { method:"POST", body });
+    const j = await r.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
+    if(!j || j.ok !== true){
+      res.className = "res ng";
+      res.textContent = ({ self:"ご自身の会員番号になっています。新規の方の番号を入れてください。",
+                           badtarget:"会員番号は数字で入れてください。",
+                           pin:"ログインし直してから、もう一度コピーを押してください。",
+                           busy:"いま混み合っています。少しおいて、もう一度コピーを押してください。" })[j && j.error]
+                       || "記入できませんでした。少しおいて、もう一度コピーを押してください（メッセージはコピーできています）。";
+      return;
+    }
+    const lines = [];
+    const got = (j.done || []).concat(j.same || []);
+    lines.push("✅ 会員番号 " + target + (j.name ? "（" + j.name + "さん）" : "") + " の行に記入しました"
+               + (got.length ? "：" + got.map(x=>ROLE_NAME[x]).join("・") : ""));
+    if(j.created) lines.push("まだ登録前の方なので、番号だけの行を作りました。ご本人がこの番号で登録すると、同じ行に足されます。");
+    (j.other || []).forEach(o=>lines.push("・" + ROLE_NAME[o.role] + "には、すでに " + o.who + " さんが入っているので、そのままにしました。"));
+    res.className = "res ok"; res.innerHTML = lines.map(t=>String(t).replace(/[&<>]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]))).join("<br>");
+  }catch(e){
+    res.className = "res ng";
+    res.textContent = "通信できませんでした。電波のよい場所で、もう一度コピーを押してください（メッセージはコピーできています）。";
+  }
+}
 function show(){
   $("msg").textContent = MESSAGES[cur];
   document.querySelectorAll(".tabs button").forEach(b=>b.classList.toggle("on", Number(b.dataset.v) === cur));
   $("copyBtn").textContent = "📋 メッセージをコピーする"; $("copyBtn").classList.remove("done");
   $("hint").textContent = "コピーしたら、LINEのトークに貼りつけて送ってください";
+  if(typeof gate === "function" && me) gate();
 }
 document.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click", ()=>{ cur = Number(b.dataset.v); show(); }));
 $("copyBtn").addEventListener("click", async ()=>{
+  if(!ready()){ gate(); return; }
   const text = MESSAGES[cur];
   let ok = false;
   try{ await navigator.clipboard.writeText(text); ok = true; }
@@ -118,8 +200,10 @@ $("copyBtn").addEventListener("click", async ()=>{
   }else{
     $("hint").textContent = "上の文を長押しして、コピーしてください";
   }
+  if(me) record();
 });
 show();
+gate();
 </script>
 <script src="../menu.js"></script>
 </body>
