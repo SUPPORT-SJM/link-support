@@ -96,6 +96,11 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body)
   font-family:var(--f-head);font-weight:700;font-size:15px;}
 .info-btn:focus-visible{outline:3px solid var(--deep);outline-offset:3px;}
 
+/* 短いお知らせ */
+.toast{position:fixed;left:50%;bottom:calc(28px + env(safe-area-inset-bottom));transform:translate(-50%,20px);z-index:60;
+  background:rgba(62,47,40,.92);color:#fff;font-size:13.5px;font-weight:700;border-radius:999px;padding:11px 20px;
+  max-width:calc(100vw - 32px);text-align:center;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;}
+.toast.show{opacity:1;transform:translate(-50%,0);}
 /* 押したとき、その色が画面いっぱいに広がる */
 .spread{position:fixed;inset:0;z-index:50;pointer-events:none;background:var(--c);
   clip-path:circle(0px at var(--x) var(--y));display:grid;place-items:center;}
@@ -270,6 +275,23 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body)
 <script>
 const B = "./";
 const SHEET = id => "https://docs.google.com/spreadsheets/d/" + id + "/edit";
+/* アイコンが開くスプレッドシート（管理画面の「🔗 リンク先の変更」で変えられます）
+   ・GASから受け取ったものを、この端末に覚えておきます
+   ・まだ受け取っていないときは、下のもとのリンク先を使います */
+const LINK_DEF = {
+  "support":   SHEET("1yZ5JO8nX4LlzVM2JMnk8pcrZfOZ6hEbwLes_zTc44Hg"),
+  "kouryu-on": SHEET("1MM-T4y721505YCHRW_D-7c4MycaZB5UjN7loHwIM0GM"),
+  "kouryu-re": SHEET("13qMv4dlEvHODH1bQrUlI1HSQSBgZW0as4y3Om7RORFs"),
+  "douga":     SHEET("1SpCvnlYs2D_mVlO6I5h9yjpRBR2cX7bw-tE-tAeL430")
+};
+const LINKS_KEY = "skyarc_links";
+let LINKS = null;
+try{ const c = JSON.parse(localStorage.getItem(LINKS_KEY) || "null"); if(c && typeof c === "object") LINKS = c; }catch(e){}
+function linkOf(it){
+  if(!it.link) return it.url || "";
+  if(LINKS && Object.prototype.hasOwnProperty.call(LINKS, it.link)) return String(LINKS[it.link] || "");
+  return LINK_DEF[it.link] || "";
+}
 const C = {back:"var(--g-back)",join:"var(--g-join)",member:"var(--g-member)",apply:"var(--g-apply)",team:"var(--g-team)",sup:"var(--g-sup)",crie:"var(--g-crie)",common:"var(--g-common)"};
 
 /* アイコンの中身（ここに足せば増やせます） */
@@ -278,25 +300,31 @@ const TREE = [
   {ic:"💌", nm:"新しい仲間へ\nこのサイトを教える", g:"common", url:B+"ikusei/first-message.html", wide:true, moon:true},
   {ic:"📘", nm:"初期サポート\nガイド", g:"member", url:B+"first-support/guide.html"},
   {ic:"🚀", nm:"活用の\n1stステップ", g:"member", url:B+"first-support/step1.html"},
-  {ic:"📋", nm:"申込みシート", g:"apply", kids:[
+  {ic:"📋", nm:"各種スケジュール情報", g:"apply", wide:true, kids:[
     {ic:"🗓", nm:"公式公認\nイベント", g:"apply", info:{
       text:"LINK公式・公認のイベントは、LINKのスケジュールサイトにまとまっています。こちらから日程を見て、お申し込みください。",
       btn:"🗓 スケジュールを見る", url:"https://link-event-x.com/"}},
     {ic:"☁️", nm:"チーム独自", g:"apply", kids:[
       {ic:"🙋", nm:"メンバー\n向け", g:"member", kids:[
-        {ic:"🧡", nm:"ユーザー\nサポート", g:"member", url:SHEET("1yZ5JO8nX4LlzVM2JMnk8pcrZfOZ6hEbwLes_zTc44Hg")},
-        {ic:"💻", nm:"オンライン\n交流会", g:"member", url:SHEET("1MM-T4y721505YCHRW_D-7c4MycaZB5UjN7loHwIM0GM")},
-        {ic:"🍽", nm:"リアル交流会", g:"member", url:SHEET("13qMv4dlEvHODH1bQrUlI1HSQSBgZW0as4y3Om7RORFs")},
-        {ic:"🎬", nm:"動画視聴会", g:"member", url:SHEET("1SpCvnlYs2D_mVlO6I5h9yjpRBR2cX7bw-tE-tAeL430")},
-        {ic:"📅", nm:"日程から選ぶ", g:"member", url:B+"first-support/events.html"}
+        {ic:"🧡", nm:"ユーザー\nサポート", g:"member", link:"support"},
+        {ic:"💻", nm:"オンライン\n交流会", g:"member", link:"kouryu-on"},
+        {ic:"🍽", nm:"リアル交流会", g:"member", link:"kouryu-re"},
+        {ic:"🎬", nm:"動画視聴会", g:"member", link:"douga"}
       ]},
       {ic:"🐣", nm:"サポーター\n向け", g:"sup", need:"sup", kids:[
-        {ic:"🐣", nm:"ぴよぴよ\n脱出クイズ", g:"sup", url:B+"ikusei/piyo-quiz.html"}
+        {ic:"🏋️", nm:"Bトレ", g:"sup", link:"btore"},
+        {ic:"🐻", nm:"アポベア", g:"sup", link:"apobea"},
+        {ic:"🎬", nm:"動画視聴会", g:"sup", link:"douga"}
       ]},
       {ic:"🌱", nm:"クリエ以上\n向け", g:"crie", need:"crie", kids:[
-        {ic:"🌱", nm:"グルコン\nリーダー育成", g:"crie", url:B+"ikusei/gcon-roadmap.html"}
+        {ic:"🌟", nm:"月初スペシャル\nミーティング", g:"crie", link:"c-monthly"},
+        {ic:"📆", nm:"毎週月曜\nクリエミーティング", g:"crie", wide:true, link:"c-monday"},
+        {ic:"🗾", nm:"全国クリエ会議\n（アフター担当）", g:"crie", wide:true, link:"c-zenkoku"},
+        {ic:"🔥", nm:"クリエ特訓\n＆リンカー特訓", g:"crie", link:"c-tokkun"},
+        {ic:"🗓️", nm:"翔子さんの\n予定カレンダー", g:"crie", url:B+"first-support/calendar.html"}
       ]}
-    ]}
+    ]},
+    {ic:"🗓️", nm:"カレンダー\n形式でみる", g:"apply", url:B+"first-support/schedule.html"}
   ]},
   {ic:"🐣", nm:"サポーターの\n部屋", g:"sup", need:"sup", kids:[
     {ic:"💌", nm:"新規の方への\n最初のメッセージ", g:"sup", url:B+"ikusei/first-message.html"},
@@ -520,7 +548,9 @@ function tap(n, e){
   const it = n.it;
   if(it.join){ openJoin(n); return; }
   if(it.back){ goBack(n); return; }
-  if(it.url){
+  if(it.url || it.link){
+    const url = linkOf(it);
+    if(!url){ showToast("このリンク先は、まだ決まっていません"); return; }
     /* その色が画面いっぱいに広がってから、ページへ */
     const r = n.el.querySelector(".ball").getBoundingClientRect();
     const sp = document.getElementById("spread");
@@ -531,17 +561,17 @@ function tap(n, e){
     document.getElementById("spreadIc").textContent = it.ic;
     document.getElementById("spreadNm").textContent = it.nm;
     n.ts = 1.3;
-    const ext = /^https?:\/\//.test(it.url);
+    const ext = /^https?:\/\//.test(url);
     if(ext){
       /* ほかのサイト（申込みシートなど）は、別のタブで開きます（押したその場で開きます） */
       const a = document.createElement("a");
-      a.href = it.url; a.target = "_blank"; a.rel = "noopener"; a.hidden = true;
+      a.href = url; a.target = "_blank"; a.rel = "noopener"; a.hidden = true;
       document.body.appendChild(a); a.click(); a.remove();
     }
     sp.className = "spread"; sp.hidden = false;
     requestAnimationFrame(()=>requestAnimationFrame(()=> sp.classList.add("go")));
     setTimeout(()=>{
-      if(!ext){ location.href = it.url; return; }
+      if(!ext){ location.href = url; return; }
       sp.classList.add("out"); n.ts = 1;
       setTimeout(()=>{ sp.hidden = true; sp.className = "spread"; }, 380);
     }, reduce ? 0 : 650);
@@ -585,7 +615,7 @@ function frame(t){
       if(moon && n !== moon && n !== earth && n !== drag && n.hx != null){
         /* 月が近づいたら、ほかのアイコンは少しよけます */
         const dx = n.x - moon.x, dy = n.y - (moon.y + 14), d = Math.hypot(dx,dy) || 1, R = 150;
-        if(d < R){ const f = (R-d)/R*7; ax += dx/d*f; ay += dy/d*f; }
+        if(d < R){ const f = (R-d)/R*7; ax += dx/d*f; ay += dy/d*f; n.dodge = true; } else n.dodge = false;
       }
       if(drag && n.hx != null){
         /* つまんだアイコンが近づくと、よけながら混ざる */
@@ -596,7 +626,15 @@ function frame(t){
       }
       n.vx = (n.vx + ax)*.84; n.vy = (n.vy + ay)*.84;
       n.x += n.vx; n.y += n.vy;
-      if(moon && n.hx != null){ n.x = Math.min(Math.max(n.x, 44), W - 44); }   /* よけても、画面の外へは出ません */
+      if(moon && n.hx != null){
+        /* よけるのは、もとの場所から少しだけ（となりのアイコンまで押し出さないように） */
+        const ox = n.x - n.hx, oy = n.y - n.hy, od = Math.hypot(ox, oy), MAXD = 56;
+        if(n.dodge && !drag && od > MAXD){ n.x = n.hx + ox/od*MAXD; n.y = n.hy + oy/od*MAXD; }
+        /* よけても、画面の外へは出ません（名前が長いアイコンは、名前の幅まで見ます） */
+        if(n.lw == null){ const nm = n.el.querySelector(".nm"); n.lw = nm ? nm.offsetWidth : 0; }
+        const lim = Math.max(44, n.lw/2 + 6);
+        n.x = Math.min(Math.max(n.x, lim), W - lim);
+      }
     }
     const wait = t - n.born < n.delay;
     if(!wait){ n.s += (n.ts - n.s)*.2; n.o += (n.to - n.o)*.2; }
@@ -922,6 +960,10 @@ async function loadPoint(){
   try{
     const r = await fetch(`${GAS_URL}?action=home&id=${encodeURIComponent(me.id)}&pin=${encodeURIComponent(me.pin)}&apps=${encodeURIComponent(POINT_ORDER.map(o=>o.app).join(","))}`);
     const j = await r.json();
+    if(j && j.ok === true && j.links && typeof j.links === "object"){
+      LINKS = j.links;
+      try{ localStorage.setItem(LINKS_KEY, JSON.stringify(j.links)); }catch(e){}
+    }
     if(!j || j.ok !== true || !j.progress) return;
     const done = {};
     POINT_ORDER.forEach(o=>{ done[o.app] = !!(j.progress[o.app] && j.progress[o.app].done); });
@@ -931,6 +973,15 @@ async function loadPoint(){
   }catch(e){}
 }
 loadPoint();
+
+/* 短いお知らせ（下に少し出て消えます） */
+let toastT = 0;
+function showToast(msg){
+  let t = document.getElementById("toast");
+  if(!t){ t = document.createElement("div"); t.id = "toast"; t.className = "toast"; t.setAttribute("role","status"); document.body.appendChild(t); }
+  t.textContent = msg; t.classList.add("show");
+  clearTimeout(toastT); toastT = setTimeout(()=> t.classList.remove("show"), 2600);
+}
 
 /* メニューの「ログインする」から来たときは、ログインの画面をそのまま開きます */
 function openLoginFromMenu(){
