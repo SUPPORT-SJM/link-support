@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<script src="../config.js"></script>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>翔子さんの予定カレンダー｜Skyarc</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../beta.css">
+<meta name="theme-color" content="#FF7043">
+<script src="../loading.js"></script>
+<script src="../login.js"></script>
+<style>
+  :root{
+    --ink:#3E2F28; --main:#FF7043; --deep:#E65100; --leaf:#3FA98A;
+    --mist:#FFF3EC; --paper:#FFFBF7; --line:#FFE0CC;
+    --shadow:0 3px 14px rgba(230,81,0,.10);
+    --shoko:#D81B60; --clash:#E53935;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{font-family:"Zen Kaku Gothic New",sans-serif;color:var(--ink);line-height:1.8;font-size:15px;background:var(--paper);}
+  button,input,select,textarea{font-family:inherit;}
+  button{cursor:pointer;border:none;}
+  .wrap{max-width:640px;margin:0 auto;padding:0 16px;}
+
+  #skyNav{position:sticky;top:0;z-index:30;background:rgba(230,81,0,.96);
+    backdrop-filter:blur(6px);color:#fff;}
+  #skyNav .inner{max-width:640px;margin:0 auto;padding:10px 16px;
+    display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px;}
+  #skyNav .who{opacity:.92;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  #skyNav a{background:rgba(255,255,255,.2);color:#fff;font-size:11.5px;font-weight:700;
+    border-radius:999px;padding:6px 13px;text-decoration:none;flex-shrink:0;}
+
+  .hero{background:linear-gradient(150deg,#FFB74D,#FF7043 55%,#E65100);color:#fff;
+    padding:24px 0 20px;text-align:center;}
+  .hero .em{font-size:32px;line-height:1;}
+  .hero h1{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:20px;margin:7px 0 4px;}
+  .hero p{font-size:12.5px;opacity:.94;line-height:1.8;}
+
+  main{padding:16px 0 60px;}
+
+  /* 被りのお知らせ */
+  .clashbox{background:#FFF0F0;border:2px solid var(--clash);border-radius:14px;padding:12px 14px;margin-bottom:14px;}
+  .clashbox h2{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:14px;color:var(--clash);margin-bottom:6px;}
+  .clashbox button{display:block;width:100%;text-align:left;background:#fff;border-radius:10px;
+    padding:8px 11px;margin-top:6px;font-size:12.5px;color:var(--ink);line-height:1.7;}
+  .clashbox button b{color:var(--clash);}
+  .okbox{background:#EEF8F3;border-radius:14px;padding:10px 14px;margin-bottom:14px;font-size:12.5px;color:#2E7D5B;font-weight:700;}
+
+  /* 月の切りかえ */
+  .monthbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+  .monthbar h2{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:19px;color:var(--deep);}
+  .monthbar button{background:#fff;box-shadow:var(--shadow);border-radius:999px;padding:7px 14px;
+    font-size:12.5px;font-weight:700;color:#A0603A;}
+  .monthbar button:disabled{opacity:.35;}
+
+  /* カレンダー */
+  .cal{background:#fff;border-radius:15px;box-shadow:var(--shadow);overflow:hidden;}
+  .cal .wk{display:grid;grid-template-columns:repeat(7,1fr);background:var(--mist);}
+  .cal .wk span{text-align:center;font-size:11px;font-weight:700;color:#A0603A;padding:5px 0;}
+  .cal .wk span:first-child{color:#D84315;} .cal .wk span:last-child{color:#3A6FB0;}
+  .cal .days{display:grid;grid-template-columns:repeat(7,1fr);}
+  .day{min-height:74px;border-top:1px solid #F5E6DC;border-left:1px solid #F5E6DC;padding:3px 3px 4px;
+    background:#fff;text-align:left;display:flex;flex-direction:column;gap:2px;position:relative;min-width:0;}
+  .day:nth-child(7n+1){border-left:none;}
+  .day.out{background:#FBF8F6;}
+  .day.out .dn{color:#D3C6BD;}
+  .day .dn{font-size:11.5px;font-weight:700;color:var(--ink);line-height:1.3;}
+  .day.sun .dn{color:#D84315;} .day.sat .dn{color:#3A6FB0;}
+  .day.today .dn{background:var(--main);color:#fff;border-radius:999px;padding:0 6px;align-self:flex-start;}
+  .day.sel{outline:2.5px solid var(--deep);outline-offset:-2.5px;z-index:1;}
+  .day.clash{background:#FFF0F0;}
+  .day.clash::after{content:"被り";position:absolute;top:2px;right:2px;font-size:9px;font-weight:900;
+    color:#fff;background:var(--clash);border-radius:5px;padding:0 4px;line-height:1.5;}
+  .chip{font-size:9.5px;line-height:1.35;border-radius:4px;padding:1px 3px;color:#fff;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .chip.plan{background:#fff !important;border:1.5px dashed currentColor;padding:0 2px;}
+  .more{font-size:9.5px;color:#A9917F;}
+
+  /* 色（申込みの画面と同じ色です） */
+  .c-shoko{background:var(--shoko);color:#fff;}
+  .c-support{background:#FF7043;} .c-kouryu-on,.c-kouryu-re{background:#5E8FD8;}
+  .c-douga{background:#9575CD;} .c-event{background:#26A69A;} .c-crie{background:#7CB342;}
+  .chip.plan.c-support{color:#E64A19;} .chip.plan.c-kouryu-on,.chip.plan.c-kouryu-re{color:#3A6FB0;}
+  .chip.plan.c-douga{color:#6A4CAF;} .chip.plan.c-event{color:#1E8277;} .chip.plan.c-crie{color:#558B2F;}
+
+  .legend{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:11px;color:#8A6A57;margin:10px 2px 0;}
+  .legend span{display:inline-flex;align-items:center;gap:4px;}
+  .legend i{display:inline-block;width:12px;height:12px;border-radius:3px;}
+  .legend i.plan{background:#fff;border:1.5px dashed #8A6A57;}
+
+  /* えらんだ日 */
+  .dayhead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:18px 0 8px;}
+  .dayhead h3{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:16px;color:var(--deep);}
+  .addbtn{background:var(--main);color:#fff;border-radius:999px;padding:8px 15px;font-size:12.5px;font-weight:700;flex-shrink:0;}
+  .clashnote{background:#FFF0F0;color:var(--clash);font-weight:700;font-size:12.5px;border-radius:10px;padding:8px 12px;margin-bottom:8px;}
+  .item{background:#fff;border-radius:13px;box-shadow:var(--shadow);padding:11px 14px;margin-bottom:9px;
+    border-left:6px solid #ccc;}
+  .item.k-shoko{border-left-color:var(--shoko);}
+  .item.k-support{border-left-color:#FF7043;} .item.k-kouryu-on,.item.k-kouryu-re{border-left-color:#5E8FD8;}
+  .item.k-douga{border-left-color:#9575CD;} .item.k-event{border-left-color:#26A69A;} .item.k-crie{border-left-color:#7CB342;}
+  .item .tag{display:inline-block;font-size:10.5px;font-weight:700;border-radius:999px;padding:0 8px;margin-right:6px;
+    background:var(--mist);color:#A0603A;}
+  .item.k-shoko .tag{background:#FCE4EC;color:var(--shoko);}
+  .item .tm{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:14px;}
+  .item .tt{font-size:13.5px;font-weight:700;margin-top:2px;word-break:break-word;}
+  .item .mm{font-size:11.5px;color:#8A6A57;margin-top:3px;white-space:pre-wrap;word-break:break-word;}
+  .item .acts{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
+  .item .acts a,.item .acts button{font-size:11.5px;font-weight:700;border-radius:9px;padding:6px 11px;
+    background:var(--mist);color:#A0603A;text-decoration:none;}
+  .item .acts .del{background:#FDECEC;color:#C62828;}
+  .none{text-align:center;color:#A9917F;font-size:12.5px;padding:16px;background:#fff;border-radius:13px;box-shadow:var(--shadow);}
+
+  .empty{text-align:center;padding:40px 20px;color:#A9917F;font-size:13.5px;line-height:2;
+    background:#fff;border-radius:15px;box-shadow:var(--shadow);}
+  .note{background:var(--mist);border-radius:13px;padding:12px 15px;font-size:11.5px;
+    color:#8A6A57;line-height:1.9;margin-top:14px;}
+  .note b{color:var(--deep);}
+  .verTag{display:block;text-align:center;font-size:9.5px;color:#C4B8B0;
+    font-family:monospace;padding:18px 0 24px;}
+
+  /* 予定を入れる画面 */
+  .ov{position:fixed;inset:0;z-index:9000;background:rgba(62,47,40,.6);backdrop-filter:blur(3px);
+    display:none;align-items:center;justify-content:center;padding:16px;}
+  .ov.show{display:flex;}
+  .ov .card{background:#fff;border-radius:20px;padding:22px 20px;max-width:380px;width:100%;
+    max-height:calc(100vh - 32px);overflow:auto;box-shadow:0 14px 40px rgba(0,0,0,.28);}
+  .ov h3{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:17px;
+    color:var(--deep);text-align:center;margin-bottom:12px;}
+  .ov label{display:block;font-size:12px;font-weight:700;color:var(--deep);margin:11px 0 5px;}
+  .ov input,.ov select,.ov textarea{width:100%;font-size:16px;border:1.5px solid var(--line);border-radius:10px;
+    padding:9px 11px;background:#fff;color:var(--ink);}
+  .ov textarea{min-height:60px;resize:vertical;}
+  .ov .two{display:flex;gap:8px;} .ov .two > div{flex:1;min-width:0;}
+  .ov .kinds{display:flex;gap:6px;}
+  .ov .kinds button{flex:1;padding:10px 6px;border-radius:10px;background:#fff;border:1.5px solid var(--line);
+    color:#A97B62;font-size:13px;font-weight:700;}
+  .ov .kinds button.on{background:var(--main);border-color:var(--main);color:#fff;}
+  .ov .kinds button.on[data-k="shoko"]{background:var(--shoko);border-color:var(--shoko);}
+  .ov .warn{display:none;background:#FFF0F0;border:1.5px solid var(--clash);color:var(--clash);
+    border-radius:10px;padding:9px 11px;font-size:12.5px;font-weight:700;margin-top:12px;line-height:1.7;}
+  .ov .warn.show{display:block;}
+  .ov .warn span{display:block;font-weight:400;color:var(--ink);font-size:12px;}
+  .ov .msg{font-size:12.5px;color:var(--clash);font-weight:700;margin-top:10px;min-height:1em;}
+  .ov .go{width:100%;padding:13px;border-radius:12px;background:var(--main);color:#fff;
+    font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:15px;margin-top:12px;}
+  .ov .go.warnbtn{background:var(--clash);}
+  .ov .go:disabled{background:#E8E0DA;color:#A9917F;}
+  .ov .cancel{display:block;width:100%;text-align:center;font-size:12.5px;color:#A9917F;
+    padding:11px;margin-top:4px;background:none;}
+  .ov .opt{font-weight:400;color:#A9917F;font-size:11px;}
+
+  /* 右上のメニューのボタンと重ならないようにします */
+  @media (max-width:700px){ #skyNav .inner{padding-right:74px;} }
+  @media (max-width:420px){
+    .day{min-height:62px;padding:2px 2px 3px;}
+    .chip{font-size:8.5px;padding:0 2px;}
+    .monthbar h2{font-size:17px;}
+  }
+</style>
+</head>
+<body>
+
+<div id="skyNav"><div class="inner">
+  <span class="who" id="navWho"></span>
+  <a class="sky-home" href="../index.html">🏠 ホーム</a>
+</div></div>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="em">🗓️</div>
+    <h1>翔子さんの予定カレンダー</h1>
+    <p>翔子さんの予定と、チームの予定を1つにまとめています<br>同じ日に重なると「被り」とお知らせします</p>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <div id="firstLoad" class="empty">読み込んでいます…</div>
+
+    <div id="body" style="display:none;">
+      <div id="clashBox"></div>
+
+      <div class="monthbar">
+        <button id="prevM" onclick="moveMonth(-1)">‹ 前の月</button>
+        <h2 id="monthTitle"></h2>
+        <button id="nextM" onclick="moveMonth(1)">次の月 ›</button>
+      </div>
+
+      <div class="cal">
+        <div class="wk"><span>日</span><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span></div>
+        <div class="days" id="days"></div>
+      </div>
+      <div class="legend">
+        <span><i class="c-shoko"></i>翔子さん</span>
+        <span><i class="c-support"></i>ユーザーサポート会</span>
+        <span><i class="c-kouryu-on"></i>交流会</span>
+        <span><i class="c-douga"></i>動画視聴会</span>
+        <span><i class="c-event"></i>そのほかの催し</span>
+        <span><i class="c-crie"></i>クリエ以上</span>
+        <span><i class="plan"></i>これから入れたいチームの予定</span>
+      </div>
+
+      <div class="dayhead">
+        <h3 id="dayTitle"></h3>
+        <button class="addbtn" id="addBtn" style="display:none;" onclick="openForm(null)">＋ 予定を入れる</button>
+      </div>
+      <div id="dayList"></div>
+
+      <div class="note">
+        <b>このカレンダーについて</b><br>
+        ・<b>翔子さんの予定</b>と、<b>これから入れたいチームの予定</b>は、管理者が入れます。<br>
+        ・<b>申込みシートにある予定</b>（ユーザーサポート会・交流会・動画視聴会など）は、自動で出ます。これからの約4か月分です。<br>
+        ・翔子さんの予定とチームの予定が<b>同じ日</b>にあると、「被り」とお知らせします。
+      </div>
+    </div>
+
+    <div class="verTag"></div>
+  </div>
+</main>
+
+<!-- 予定を入れる・変える画面（管理者だけ） -->
+<div class="ov" id="ov">
+  <div class="card">
+    <h3 id="fTitle">予定を入れる</h3>
+    <label>だれの予定ですか</label>
+    <div class="kinds" id="fKinds">
+      <button data-k="shoko" onclick="setKind('shoko')">翔子さん</button>
+      <button data-k="team" onclick="setKind('team')">チーム</button>
+    </div>
+    <label for="fDate">日付</label>
+    <input type="date" id="fDate">
+    <div class="two">
+      <div><label for="fStart">はじまり <span class="opt">（なくてもよい）</span></label><input type="time" id="fStart"></div>
+      <div><label for="fEnd">おわり <span class="opt">（なくてもよい）</span></label><input type="time" id="fEnd"></div>
+    </div>
+    <div id="fCatWrap">
+      <label for="fCat">チームの予定の種類</label>
+      <select id="fCat"></select>
+    </div>
+    <label for="fText" id="fTextLabel">内容</label>
+    <input type="text" id="fText" maxlength="200">
+    <label for="fMemo">メモ <span class="opt">（なくてもよい）</span></label>
+    <textarea id="fMemo" maxlength="500"></textarea>
+    <div class="warn" id="fWarn"></div>
+    <div class="msg" id="fMsg"></div>
+    <button class="go" id="fGo" onclick="saveForm()">この内容で入れる</button>
+    <button class="cancel" onclick="closeForm()">とじる</button>
+  </div>
+</div>
+
+<script>
+const GAS_URL = window.SKY_GAS_URL;
+const WD = ["日","月","火","水","木","金","土"];
+const CAT_NAME = {
+  "support":"ユーザーサポート会", "kouryu-on":"交流会(オンライン)", "kouryu-re":"交流会(リアル)",
+  "douga":"動画視聴会", "event":"そのほかの催し", "crie":"クリエ以上の申込み"
+};
+const ERR = {
+  pin:"パスコードが違います。ログインし直してください。", nomember:"会員番号が見つかりません。",
+  noperm:"このページは、管理者とクリエイターズ以上の方だけがご覧いただけます。",
+  email:"Googleアカウントが登録と違います。", busy:"ほかの方が保存中です。少しおいてお試しください。",
+  badkind:"「だれの予定か」を選んでください。", baddate:"日付を入れてください。",
+  badtime:"時間を確かめてください（おわりが、はじまりより前になっています）。",
+  notitle:"チームの予定は、内容を入れてください。", nokey:"その予定が見つかりませんでした。読み込み直してください。",
+  unknown_action:"GASがまだ新しい版になっていません（v1.159 以上が必要です）。"
+};
+
+let member = null, data = null, canEdit = false;
+let viewY, viewM, selDate = "", editing = null, fKind = "shoko";
+
+function $(q){ return document.querySelector(q); }
+function esc(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function pad(n){ return ("0" + n).slice(-2); }
+function ymd(d){ return d.getFullYear() + "/" + pad(d.getMonth() + 1) + "/" + pad(d.getDate()); }
+function mdw(s){ const d = new Date(s.replace(/\//g, "-") + "T00:00:00"); return (d.getMonth() + 1) + "/" + d.getDate() + "(" + WD[d.getDay()] + ")"; }
+
+/* ---------- 読み込み ---------- */
+(function(){
+  try{
+    const raw = localStorage.getItem("skyarc_member");
+    if(raw && raw !== "null" && raw !== "undefined") member = JSON.parse(raw);
+  }catch(e){}
+  if(member && !member.id) member = null;
+  const now = new Date(); viewY = now.getFullYear(); viewM = now.getMonth(); selDate = ymd(now);
+  if(!member){
+    $("#firstLoad").innerHTML = 'このページを見るには、ログインが必要です。<br><br>' +
+      '<button onclick="skyLoginRequired(function(){ location.reload(); })" ' +
+      'style="background:#FF7043;color:#fff;border-radius:11px;padding:12px 26px;font-weight:700;font-size:14px;">🌱 ログインする</button>';
+    return;
+  }
+  $("#navWho").textContent = (member.name ? member.name + "さん" : "会員番号 " + member.id)
+    + (member.keiretsu ? "｜" + member.keiretsu : "");
+  load(false);
+})();
+
+function withLimit(promise, ms){
+  return new Promise(function(ok, ng){
+    const t = setTimeout(function(){ ng(new Error("timeout")); }, ms);
+    promise.then(function(v){ clearTimeout(t); ok(v); }, function(e){ clearTimeout(t); ng(e); });
+  });
+}
+
+async function load(fresh){
+  if(typeof skyLoading === "function") skyLoading("カレンダーを読み込んでいます");
+  try{
+    const q = "id=" + encodeURIComponent(member.id) + "&pin=" + encodeURIComponent(member.pin) + (fresh ? "&fresh=1" : "");
+    const r = await withLimit(fetch(GAS_URL + "?action=calList&" + q), 60000);
+    const j = await r.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
+    if(typeof skyLoadingDone === "function") skyLoadingDone();
+    take(j, true);
+  }catch(e){
+    if(typeof skyLoadingDone === "function") skyLoadingDone();
+    $("#firstLoad").innerHTML = '通信できませんでした。電波のよい場所で、もう一度お試しください。<br><br>' +
+      '<button onclick="load(false)" style="background:#FF7043;color:#fff;border-radius:11px;padding:10px 22px;font-weight:700;">もう一度読み込む</button>';
+  }
+}
+function take(j, first){
+  if(!j || j.ok !== true){
+    const m = ERR[j && j.error] || "うまく読み込めませんでした。少しおいてお試しください。";
+    if(first){ $("#firstLoad").style.display = "block"; $("#firstLoad").textContent = m; $("#body").style.display = "none"; }
+    return m;
+  }
+  data = j; canEdit = j.canEdit === true;
+  $("#firstLoad").style.display = "none";
+  $("#body").style.display = "block";
+  $("#addBtn").style.display = canEdit ? "inline-block" : "none";
+  draw();
+  return "";
+}
+
+/* ---------- 日ごとにまとめます ---------- */
+function byDay(){
+  const map = {};
+  const put = (d, x) => { (map[d] = map[d] || []).push(x); };
+  (data.items || []).forEach(it => put(it.date, {
+    src:"own", kind:it.kind, cat:it.kind === "shoko" ? "shoko" : (it.cat || "event"),
+    start:it.start || "", end:it.end || "", title:it.title || "", memo:it.memo || "", item:it
+  }));
+  (data.events || []).forEach(e => {
+    const w = String(e.when || ""); const d = w.slice(0, 10);
+    if(!/^\d{4}\/\d{2}\/\d{2}$/.test(d)) return;
+    put(d, { src:"sheet", kind:"team", cat:e.cat || e.book || "event", start:w.slice(11, 16), end:"",
+             title:e.title || e.label || "", label:e.label || "", url:e.url || "" });
+  });
+  Object.keys(map).forEach(d => map[d].sort((a, b) => {
+    if(a.kind !== b.kind) return a.kind === "shoko" ? -1 : 1;
+    return (a.start || "99").localeCompare(b.start || "99");
+  }));
+  return map;
+}
+/* 翔子さんの予定とチームの予定が同じ日にあれば「被り」 */
+function isClash(list){
+  return !!list && list.some(x => x.kind === "shoko") && list.some(x => x.kind === "team");
+}
+
+function draw(){
+  const map = byDay();
+  const today = ymd(new Date());
+
+  /* 被りの一覧（今日から先） */
+  const cl = Object.keys(map).filter(d => d >= today && isClash(map[d])).sort();
+  if(cl.length){
+    $("#clashBox").innerHTML = '<div class="clashbox"><h2>⚠️ 翔子さんの予定と被っている日が ' + cl.length + ' 日あります</h2>' +
+      cl.map(d => {
+        const s = map[d].filter(x => x.kind === "shoko").map(x => (x.start ? x.start + " " : "") + (x.title || "翔子さんの予定")).join("・");
+        const t = map[d].filter(x => x.kind === "team").map(x => (x.start ? x.start + " " : "") + (x.title || CAT_NAME[x.cat] || "")).join("・");
+        return '<button onclick="jumpTo(\'' + d + '\')"><b>' + mdw(d) + '</b>　翔子さん：' + esc(s) + '<br>　　チーム：' + esc(t) + '</button>';
+      }).join("") + '</div>';
+  }else{
+    $("#clashBox").innerHTML = '<div class="okbox">✅ これから先、翔子さんの予定と被っている日はありません</div>';
+  }
+
+  /* 月の表 */
+  $("#monthTitle").textContent = viewY + "年" + (viewM + 1) + "月";
+  const now = new Date();
+  $("#prevM").disabled = (viewY * 12 + viewM) <= (now.getFullYear() * 12 + now.getMonth() - 1);
+  const first = new Date(viewY, viewM, 1);
+  const start = new Date(viewY, viewM, 1 - first.getDay());
+  const cells = [];
+  for(let i = 0; i < 42; i++){
+    const d = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
+    if(i >= 35 && d.getMonth() !== viewM) break;
+    const key = ymd(d), list = map[key] || [];
+    const cls = ["day"];
+    if(d.getMonth() !== viewM) cls.push("out");
+    if(d.getDay() === 0) cls.push("sun");
+    if(d.getDay() === 6) cls.push("sat");
+    if(key === today) cls.push("today");
+    if(key === selDate) cls.push("sel");
+    if(isClash(list)) cls.push("clash");
+    const max = 3;
+    const chips = list.slice(0, max).map(x => '<span class="chip c-' + esc(x.cat) + (x.src === "own" && x.kind === "team" ? " plan" : "") + '">' +
+      esc(x.kind === "shoko" ? (x.title || "翔子さん") : (x.title || CAT_NAME[x.cat] || "")) + '</span>').join("");
+    const more = list.length > max ? '<span class="more">ほか' + (list.length - max) + '件</span>' : "";
+    cells.push('<button class="' + cls.join(" ") + '" data-d="' + key + '" onclick="pickDay(\'' + key + '\')" aria-label="' + mdw(key) + ' ' + list.length + '件">' +
+      '<span class="dn">' + d.getDate() + '</span>' + chips + more + '</button>');
+  }
+  $("#days").innerHTML = cells.join("");
+  drawDay(map);
+}
+
+function drawDay(map){
+  map = map || byDay();
+  const list = map[selDate] || [];
+  $("#dayTitle").textContent = mdw(selDate) + " の予定";
+  let h = "";
+  if(isClash(list)) h += '<div class="clashnote">⚠️ この日は、翔子さんの予定とチームの予定が被っています</div>';
+  if(!list.length) h += '<div class="none">この日の予定はありません</div>';
+  h += list.map(x => {
+    const tm = x.start ? x.start + (x.end ? "〜" + x.end : "〜") : "時間の指定なし";
+    const tag = x.kind === "shoko" ? "翔子さん" : (x.src === "sheet" ? "申込みシート｜" + (CAT_NAME[x.cat] || x.label) : "これから入れたい｜" + (CAT_NAME[x.cat] || ""));
+    let acts = "";
+    if(x.src === "sheet" && x.url) acts += '<a href="' + esc(x.url) + '" target="_blank" rel="noopener">📋 申込みシートを開く</a>';
+    if(x.src === "own" && canEdit) acts += '<button onclick="openForm(\'' + esc(x.item.cid) + '\')">✏️ 変える</button><button class="del" onclick="delItem(\'' + esc(x.item.cid) + '\')">🗑 消す</button>';
+    return '<div class="item k-' + esc(x.cat) + '"><span class="tag">' + esc(tag) + '</span><span class="tm">' + esc(tm) + '</span>' +
+      '<div class="tt">' + esc(x.title || (x.kind === "shoko" ? "翔子さんの予定" : "")) + '</div>' +
+      (x.memo ? '<div class="mm">' + esc(x.memo) + '</div>' : "") +
+      (acts ? '<div class="acts">' + acts + '</div>' : "") + '</div>';
+  }).join("");
+  $("#dayList").innerHTML = h;
+}
+
+function pickDay(d){
+  selDate = d;
+  const y = Number(d.slice(0, 4)), m = Number(d.slice(5, 7)) - 1;
+  if(y !== viewY || m !== viewM){ viewY = y; viewM = m; }
+  draw();
+}
+function jumpTo(d){ pickDay(d); const el = $("#dayTitle"); if(el && el.scrollIntoView) el.scrollIntoView({behavior:"smooth", block:"start"}); }
+function moveMonth(n){
+  const d = new Date(viewY, viewM + n, 1);
+  viewY = d.getFullYear(); viewM = d.getMonth();
+  const now = new Date();
+  selDate = (viewY === now.getFullYear() && viewM === now.getMonth()) ? ymd(now) : ymd(d);
+  draw();
+}
+
+/* ---------- 予定を入れる・変える（管理者だけ） ---------- */
+function setKind(k){
+  fKind = k;
+  document.querySelectorAll("#fKinds button").forEach(b => b.classList.toggle("on", b.dataset.k === k));
+  $("#fCatWrap").style.display = k === "team" ? "block" : "none";
+  $("#fTextLabel").innerHTML = k === "team" ? "内容" : '内容 <span class="opt">（なくてもよい）</span>';
+  checkWarn();
+}
+function openForm(cid){
+  if(!canEdit) return;
+  const it = cid ? (data.items || []).find(x => x.cid === cid) : null;
+  editing = it || null;
+  $("#fTitle").textContent = it ? "予定を変える" : "予定を入れる";
+  $("#fCat").innerHTML = Object.keys(data.cats || CAT_NAME).map(k => '<option value="' + esc(k) + '">' + esc((data.cats || CAT_NAME)[k]) + '</option>').join("");
+  $("#fDate").value = (it ? it.date : selDate).replace(/\//g, "-");
+  $("#fStart").value = it ? it.start : "";
+  $("#fEnd").value = it ? it.end : "";
+  $("#fText").value = it ? it.title : "";
+  $("#fMemo").value = it ? it.memo : "";
+  $("#fCat").value = it && it.cat ? it.cat : "support";
+  $("#fMsg").textContent = "";
+  $("#fGo").disabled = false;
+  setKind(it ? it.kind : "shoko");
+  $("#ov").classList.add("show");
+}
+function closeForm(){ $("#ov").classList.remove("show"); editing = null; }
+
+/* 入れようとしている日に、被る予定があるかを先にお知らせします */
+function checkWarn(){
+  const d = String($("#fDate").value || "").replace(/-/g, "/");
+  const list = (byDay()[d] || []).filter(x => !(editing && x.src === "own" && x.item.cid === editing.cid));
+  const other = list.filter(x => fKind === "shoko" ? x.kind === "team" : x.kind === "shoko");
+  const w = $("#fWarn"), go = $("#fGo");
+  if(d && other.length){
+    w.innerHTML = "⚠️ この日は、" + (fKind === "shoko" ? "チームの予定" : "翔子さんの予定") + "と被ります" +
+      other.map(x => '<span>・' + esc((x.start ? x.start + " " : "") + (x.title || (x.kind === "shoko" ? "翔子さんの予定" : CAT_NAME[x.cat] || ""))) + '</span>').join("");
+    w.classList.add("show");
+    go.textContent = "被っていますが、入れる";
+    go.classList.add("warnbtn");
+  }else{
+    w.classList.remove("show"); w.innerHTML = "";
+    go.textContent = editing ? "この内容に変える" : "この内容で入れる";
+    go.classList.remove("warnbtn");
+  }
+}
+["#fDate"].forEach(s => { const el = $(s); el.addEventListener("change", checkWarn); el.addEventListener("input", checkWarn); });
+
+async function post(params){
+  const body = Object.assign({ id:member.id, pin:member.pin }, params);
+  const r = await withLimit(fetch(GAS_URL, { method:"POST", body:new URLSearchParams(body) }), 60000);
+  return r.json();
+}
+async function saveForm(){
+  const date = String($("#fDate").value || "");
+  if(!date){ $("#fMsg").textContent = ERR.baddate; return; }
+  if(fKind === "team" && !$("#fText").value.trim()){ $("#fMsg").textContent = ERR.notitle; return; }
+  const p = { action:"calSave", kind:fKind, date:date.replace(/-/g, "/"), start:$("#fStart").value, end:$("#fEnd").value,
+              title:$("#fText").value.trim(), memo:$("#fMemo").value, cat:fKind === "team" ? $("#fCat").value : "" };
+  if(editing) p.cid = editing.cid;
+  $("#fGo").disabled = true; $("#fMsg").textContent = "保存しています…";
+  try{
+    const j = await post(p);
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
+    const m = take(j, false);
+    if(m){ $("#fMsg").textContent = m; $("#fGo").disabled = false; return; }
+    selDate = p.date;
+    viewY = Number(p.date.slice(0, 4)); viewM = Number(p.date.slice(5, 7)) - 1;
+    closeForm(); draw();
+  }catch(e){
+    $("#fMsg").textContent = "通信できませんでした。電波のよい場所でお試しください。";
+    $("#fGo").disabled = false;
+  }
+}
+async function delItem(cid){
+  if(!canEdit) return;
+  const it = (data.items || []).find(x => x.cid === cid);
+  if(!it) return;
+  if(!confirm(mdw(it.date) + "「" + (it.title || (it.kind === "shoko" ? "翔子さんの予定" : "")) + "」を消します。よろしいですか？")) return;
+  try{
+    const j = await post({ action:"calDelete", cid:cid });
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
+    const m = take(j, false);
+    if(m) alert(m);
+  }catch(e){ alert("通信できませんでした。電波のよい場所でお試しください。"); }
+}
+$("#ov").addEventListener("click", e => { if(e.target.id === "ov") closeForm(); });
+</script>
+<script src="../track.js"></script>
+<script src="../menu.js"></script>
+</body>
+</html>

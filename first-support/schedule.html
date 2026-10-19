@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<script src="../config.js"></script>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>カレンダー形式でみる｜Skyarc</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../beta.css">
+<meta name="theme-color" content="#FF7043">
+<script src="../loading.js"></script>
+<script src="../login.js"></script>
+<style>
+  :root{
+    --ink:#3E2F28; --main:#FF7043; --deep:#E65100; --leaf:#3FA98A;
+    --mist:#FFF3EC; --paper:#FFFBF7; --line:#FFE0CC;
+    --shadow:0 3px 14px rgba(230,81,0,.10);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{font-family:"Zen Kaku Gothic New",sans-serif;color:var(--ink);line-height:1.8;font-size:15px;background:var(--paper);}
+  button,input{font-family:inherit;}
+  button{cursor:pointer;border:none;}
+  .wrap{max-width:640px;margin:0 auto;padding:0 16px;}
+
+  #skyNav{position:sticky;top:0;z-index:30;background:rgba(230,81,0,.96);
+    backdrop-filter:blur(6px);color:#fff;}
+  #skyNav .inner{max-width:640px;margin:0 auto;padding:10px 16px;
+    display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px;}
+  #skyNav .who{opacity:.92;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  #skyNav a{background:rgba(255,255,255,.2);color:#fff;font-size:11.5px;font-weight:700;
+    border-radius:999px;padding:6px 13px;text-decoration:none;flex-shrink:0;}
+  /* 右上のメニューのボタンと重ならないようにします */
+  @media (max-width:700px){ #skyNav .inner{padding-right:74px;} }
+
+  .hero{background:linear-gradient(150deg,#FFB74D,#FF7043 55%,#E65100);color:#fff;
+    padding:24px 0 20px;text-align:center;}
+  .hero .em{font-size:32px;line-height:1;}
+  .hero h1{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:20px;margin:7px 0 4px;}
+  .hero p{font-size:12.5px;opacity:.94;line-height:1.8;}
+
+  main{padding:16px 0 60px;}
+
+  /* どの予定を出すか（チェック） */
+  .layers{background:#fff;border-radius:15px;box-shadow:var(--shadow);padding:12px 14px;margin-bottom:14px;}
+  .layers h2{font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:13.5px;color:var(--deep);margin-bottom:6px;}
+  .layers label{display:flex;align-items:center;gap:9px;padding:7px 2px;border-top:1px dashed #F5E6DC;cursor:pointer;font-size:13.5px;}
+  .layers label:first-of-type{border-top:none;}
+  .layers input{width:20px;height:20px;accent-color:var(--main);flex-shrink:0;}
+  .layers .nm{flex:1;font-weight:700;}
+  .layers .st{font-size:11px;border-radius:999px;padding:1px 9px;flex-shrink:0;}
+  .layers .st.ok{background:#E8F5EE;color:#2E7D5B;}
+  .layers .st.look{background:#F3EFEC;color:#9A8676;}
+
+  /* 月の切りかえ */
+  .monthbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+  .monthbar h2{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:19px;color:var(--deep);}
+  .monthbar button{background:#fff;box-shadow:var(--shadow);border-radius:999px;padding:7px 14px;
+    font-size:12.5px;font-weight:700;color:#A0603A;}
+  .monthbar button:disabled{opacity:.35;}
+
+  /* カレンダー */
+  .cal{background:#fff;border-radius:15px;box-shadow:var(--shadow);overflow:hidden;}
+  .cal .wk{display:grid;grid-template-columns:repeat(7,1fr);background:var(--mist);}
+  .cal .wk span{text-align:center;font-size:11px;font-weight:700;color:#A0603A;padding:5px 0;}
+  .cal .wk span:first-child{color:#D84315;} .cal .wk span:last-child{color:#3A6FB0;}
+  .cal .days{display:grid;grid-template-columns:repeat(7,1fr);}
+  .day{min-height:74px;border-top:1px solid #F5E6DC;border-left:1px solid #F5E6DC;padding:3px 3px 4px;
+    background:#fff;text-align:left;display:flex;flex-direction:column;gap:2px;position:relative;min-width:0;}
+  .day:nth-child(7n+1){border-left:none;}
+  .day.out{background:#FBF8F6;}
+  .day.out .dn{color:#D3C6BD;}
+  .day .dn{font-size:11.5px;font-weight:700;color:var(--ink);line-height:1.3;}
+  .day.sun .dn{color:#D84315;} .day.sat .dn{color:#3A6FB0;}
+  .day.today .dn{background:var(--main);color:#fff;border-radius:999px;padding:0 6px;align-self:flex-start;}
+  .day.sel{outline:2.5px solid var(--deep);outline-offset:-2.5px;z-index:1;}
+  .chip{font-size:9.5px;line-height:1.35;border-radius:4px;padding:1px 3px;color:#fff;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  /* まだ入れない予定は、うすく出します */
+  .chip.look{opacity:.38;}
+  .more{font-size:9.5px;color:#A9917F;}
+
+  /* 色（申込みの画面と同じ色です） */
+  .c-support{background:#FF7043;} .c-kouryu-on,.c-kouryu-re{background:#5E8FD8;}
+  .c-douga{background:#9575CD;} .c-event{background:#26A69A;} .c-crie{background:#7CB342;}
+
+  .legend{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:11px;color:#8A6A57;margin:10px 2px 0;}
+  .legend span{display:inline-flex;align-items:center;gap:4px;}
+  .legend i{display:inline-block;width:12px;height:12px;border-radius:3px;}
+  .legend i.look{background:#FF7043;opacity:.38;}
+
+  /* えらんだ日 */
+  .dayhead{margin:18px 0 8px;}
+  .dayhead h3{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:16px;color:var(--deep);}
+  .item{background:#fff;border-radius:13px;box-shadow:var(--shadow);padding:11px 14px;margin-bottom:9px;
+    border-left:6px solid #ccc;}
+  .item.k-support{border-left-color:#FF7043;} .item.k-kouryu-on,.item.k-kouryu-re{border-left-color:#5E8FD8;}
+  .item.k-douga{border-left-color:#9575CD;} .item.k-event{border-left-color:#26A69A;} .item.k-crie{border-left-color:#7CB342;}
+  .item.look{opacity:.55;}
+  .item .tag{display:inline-block;font-size:10.5px;font-weight:700;border-radius:999px;padding:0 8px;margin-right:6px;
+    background:var(--mist);color:#A0603A;}
+  .item .aud{display:inline-block;font-size:10.5px;font-weight:700;border-radius:999px;padding:0 8px;margin-right:6px;
+    background:#EEF6E6;color:#4F7A2A;}
+  .item .tm{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:14px;}
+  .item .tt{font-size:13.5px;font-weight:700;margin-top:2px;word-break:break-word;}
+  .item .acts{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
+  .item .acts a{font-size:11.5px;font-weight:700;border-radius:9px;padding:6px 11px;
+    background:var(--mist);color:#A0603A;text-decoration:none;}
+  .item .lock{font-size:11.5px;color:#7A6A5E;margin-top:6px;}
+  .none{text-align:center;color:#A9917F;font-size:12.5px;padding:16px;background:#fff;border-radius:13px;box-shadow:var(--shadow);}
+
+  .empty{text-align:center;padding:40px 20px;color:#A9917F;font-size:13.5px;line-height:2;
+    background:#fff;border-radius:15px;box-shadow:var(--shadow);}
+  .note{background:var(--mist);border-radius:13px;padding:12px 15px;font-size:11.5px;
+    color:#8A6A57;line-height:1.9;margin-top:14px;}
+  .note b{color:var(--deep);}
+  .verTag{display:block;text-align:center;font-size:9.5px;color:#C4B8B0;
+    font-family:monospace;padding:18px 0 24px;}
+
+  @media (max-width:420px){
+    .day{min-height:62px;padding:2px 2px 3px;}
+    .chip{font-size:8.5px;padding:0 2px;}
+    .monthbar h2{font-size:17px;}
+  }
+</style>
+</head>
+<body>
+
+<div id="skyNav"><div class="inner">
+  <span class="who" id="navWho"></span>
+  <a class="sky-home" href="../index.html">🏠 ホーム</a>
+</div></div>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="em">🗓️</div>
+    <h1>カレンダー形式でみる</h1>
+    <p>チームの予定を、カレンダーでまとめて見られます</p>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <div id="firstLoad" class="empty">読み込んでいます…</div>
+
+    <div id="body" style="display:none;">
+      <div class="layers">
+        <h2>出す予定をえらぶ</h2>
+        <div id="layers"></div>
+      </div>
+
+      <div class="monthbar">
+        <button id="prevM" onclick="moveMonth(-1)">‹ 前の月</button>
+        <h2 id="monthTitle"></h2>
+        <button id="nextM" onclick="moveMonth(1)">次の月 ›</button>
+      </div>
+
+      <div class="cal">
+        <div class="wk"><span>日</span><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span></div>
+        <div class="days" id="days"></div>
+      </div>
+      <div class="legend">
+        <span><i class="c-support"></i>ユーザーサポート会</span>
+        <span><i class="c-kouryu-on"></i>交流会</span>
+        <span><i class="c-douga"></i>動画視聴会</span>
+        <span><i class="c-event"></i>そのほかの催し</span>
+        <span><i class="c-crie"></i>クリエ以上の申込み</span>
+        <span><i class="look"></i>うすい色＝まだ参加できない予定</span>
+      </div>
+
+      <div class="dayhead"><h3 id="dayTitle"></h3></div>
+      <div id="dayList"></div>
+
+      <div class="note">
+        <b>このカレンダーについて</b><br>
+        ・チームの申込みシートにある予定が、自動で出ます（これからの約4か月分）。<br>
+        ・<b>うすい色</b>の予定は、段階が上がると参加できるようになる予定です。<br>
+        ・上のチェックで、出す予定をえらべます。えらんだものは、このブラウザに覚えておきます。
+      </div>
+    </div>
+
+    <div class="verTag"></div>
+  </div>
+</main>
+
+<script>
+const GAS_URL = window.SKY_GAS_URL;
+const WD = ["日","月","火","水","木","金","土"];
+const CAT_NAME = {
+  "support":"ユーザーサポート会", "kouryu-on":"交流会(オンライン)", "kouryu-re":"交流会(リアル)",
+  "douga":"動画視聴会", "event":"そのほかの催し", "crie":"クリエ以上の申込み"
+};
+/* 段階（レイヤー）。上から順に、だんだん上の方向けになります */
+const LAYERS = [
+  { key:"all",  nm:"全員向け" },
+  { key:"sup",  nm:"サポーター以上向け",   need:"サポーター以上" },
+  { key:"crie", nm:"クリエイターズ以上向け", need:"クリエイターズ以上" },
+  { key:"adv",  nm:"アドバンス以上向け",   need:"アドバンス以上" }
+];
+const COOKIE = "sky_sched_layers";
+const ERR = {
+  pin:"パスコードが違います。ログインし直してください。", nomember:"会員番号が見つかりません。",
+  unknown_action:"GASがまだ新しい版になっていません（v1.159 以上が必要です）。"
+};
+
+let member = null, data = null, shown = loadLayers();
+let viewY, viewM, selDate = "";
+
+function $(q){ return document.querySelector(q); }
+function esc(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function pad(n){ return ("0" + n).slice(-2); }
+function ymd(d){ return d.getFullYear() + "/" + pad(d.getMonth() + 1) + "/" + pad(d.getDate()); }
+function mdw(s){ const d = new Date(s.replace(/\//g, "-") + "T00:00:00"); return (d.getMonth() + 1) + "/" + d.getDate() + "(" + WD[d.getDay()] + ")"; }
+
+/* ---------- チェックの覚え方（クッキー。このブラウザだけに残ります） ---------- */
+function loadLayers(){
+  const all = LAYERS.map(l => l.key);
+  try{
+    const m = document.cookie.match(new RegExp("(?:^|; )" + COOKIE + "=([^;]*)"));
+    if(!m) return all;
+    const v = decodeURIComponent(m[1]);
+    if(v === "-") return [];
+    return v.split(".").filter(k => all.indexOf(k) >= 0);
+  }catch(e){ return all; }
+}
+function saveLayers(){
+  try{
+    document.cookie = COOKIE + "=" + encodeURIComponent(shown.length ? shown.join(".") : "-")
+      + "; max-age=" + (60 * 60 * 24 * 365) + "; path=/; SameSite=Lax";
+  }catch(e){}
+}
+function canLayer(k){ return k === "all" || !!(data && data.me && data.me[k]); }
+
+/* ---------- 読み込み ---------- */
+(function(){
+  try{
+    const raw = localStorage.getItem("skyarc_member");
+    if(raw && raw !== "null" && raw !== "undefined") member = JSON.parse(raw);
+  }catch(e){}
+  if(member && !member.id) member = null;
+  const now = new Date(); viewY = now.getFullYear(); viewM = now.getMonth(); selDate = ymd(now);
+  if(!member){
+    $("#firstLoad").innerHTML = 'このページを見るには、ログインが必要です。<br><br>' +
+      '<button onclick="skyLoginRequired(function(){ location.reload(); })" ' +
+      'style="background:#FF7043;color:#fff;border-radius:11px;padding:12px 26px;font-weight:700;font-size:14px;">🌱 ログインする</button>';
+    return;
+  }
+  $("#navWho").textContent = (member.name ? member.name + "さん" : "会員番号 " + member.id)
+    + (member.keiretsu ? "｜" + member.keiretsu : "");
+  load();
+})();
+
+function withLimit(promise, ms){
+  return new Promise(function(ok, ng){
+    const t = setTimeout(function(){ ng(new Error("timeout")); }, ms);
+    promise.then(function(v){ clearTimeout(t); ok(v); }, function(e){ clearTimeout(t); ng(e); });
+  });
+}
+async function load(){
+  if(typeof skyLoading === "function") skyLoading("カレンダーを読み込んでいます");
+  try{
+    const q = "id=" + encodeURIComponent(member.id) + "&pin=" + encodeURIComponent(member.pin);
+    const r = await withLimit(fetch(GAS_URL + "?action=scheduleList&" + q), 60000);
+    const j = await r.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
+    if(typeof skyLoadingDone === "function") skyLoadingDone();
+    if(!j || j.ok !== true){
+      $("#firstLoad").textContent = ERR[j && j.error] || "うまく読み込めませんでした。少しおいてお試しください。";
+      return;
+    }
+    data = j;
+    $("#firstLoad").style.display = "none";
+    $("#body").style.display = "block";
+    drawLayers(); draw();
+  }catch(e){
+    if(typeof skyLoadingDone === "function") skyLoadingDone();
+    $("#firstLoad").innerHTML = '通信できませんでした。電波のよい場所で、もう一度お試しください。<br><br>' +
+      '<button onclick="load()" style="background:#FF7043;color:#fff;border-radius:11px;padding:10px 22px;font-weight:700;">もう一度読み込む</button>';
+  }
+}
+
+function drawLayers(){
+  $("#layers").innerHTML = LAYERS.map(l =>
+    '<label><input type="checkbox" data-k="' + l.key + '"' + (shown.indexOf(l.key) >= 0 ? " checked" : "") + '>' +
+    '<span class="nm">' + esc(l.nm) + '</span>' +
+    (canLayer(l.key) ? '<span class="st ok">参加できます</span>' : '<span class="st look">見るだけ</span>') + '</label>'
+  ).join("");
+  document.querySelectorAll("#layers input").forEach(el => el.addEventListener("change", () => {
+    shown = LAYERS.map(l => l.key).filter(k => { const c = document.querySelector('#layers input[data-k="' + k + '"]'); return c && c.checked; });
+    saveLayers(); draw();
+  }));
+}
+
+/* ---------- 日ごとにまとめます（チェックしている段階だけ） ---------- */
+function byDay(){
+  const map = {};
+  (data.events || []).forEach(e => {
+    const aud = e.aud || "all";
+    if(shown.indexOf(aud) < 0) return;
+    const w = String(e.when || ""); const d = w.slice(0, 10);
+    if(!/^\d{4}\/\d{2}\/\d{2}$/.test(d)) return;
+    (map[d] = map[d] || []).push({ cat:e.cat || e.book || "event", aud:aud, start:w.slice(11, 16),
+      title:e.title || e.label || "", label:e.label || "", url:e.url || "", can:e.can === true });
+  });
+  Object.keys(map).forEach(d => map[d].sort((a, b) => a.start.localeCompare(b.start)));
+  return map;
+}
+
+function draw(){
+  const map = byDay();
+  const today = ymd(new Date());
+  $("#monthTitle").textContent = viewY + "年" + (viewM + 1) + "月";
+  const now = new Date();
+  $("#prevM").disabled = (viewY * 12 + viewM) <= (now.getFullYear() * 12 + now.getMonth());
+  const first = new Date(viewY, viewM, 1);
+  const start = new Date(viewY, viewM, 1 - first.getDay());
+  const cells = [];
+  for(let i = 0; i < 42; i++){
+    const d = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
+    if(i >= 35 && d.getMonth() !== viewM) break;
+    const key = ymd(d), list = map[key] || [];
+    const cls = ["day"];
+    if(d.getMonth() !== viewM) cls.push("out");
+    if(d.getDay() === 0) cls.push("sun");
+    if(d.getDay() === 6) cls.push("sat");
+    if(key === today) cls.push("today");
+    if(key === selDate) cls.push("sel");
+    const max = 3;
+    const chips = list.slice(0, max).map(x => '<span class="chip c-' + esc(x.cat) + (x.can ? "" : " look") + '">' +
+      esc(x.title || CAT_NAME[x.cat] || "") + '</span>').join("");
+    const more = list.length > max ? '<span class="more">ほか' + (list.length - max) + '件</span>' : "";
+    cells.push('<button class="' + cls.join(" ") + '" data-d="' + key + '" onclick="pickDay(\'' + key + '\')" aria-label="' + mdw(key) + ' ' + list.length + '件">' +
+      '<span class="dn">' + d.getDate() + '</span>' + chips + more + '</button>');
+  }
+  $("#days").innerHTML = cells.join("");
+  drawDay(map);
+}
+
+function drawDay(map){
+  map = map || byDay();
+  const list = map[selDate] || [];
+  $("#dayTitle").textContent = mdw(selDate) + " の予定";
+  if(!shown.length){ $("#dayList").innerHTML = '<div class="none">出す予定が1つもえらばれていません。上のチェックを入れてください</div>'; return; }
+  if(!list.length){ $("#dayList").innerHTML = '<div class="none">この日の予定はありません</div>'; return; }
+  $("#dayList").innerHTML = list.map(x => {
+    const L = LAYERS.find(l => l.key === x.aud) || LAYERS[0];
+    const audTag = x.aud !== "all" ? '<span class="aud">' + esc(L.nm) + '</span>' : "";
+    const acts = x.can && x.url ? '<div class="acts"><a href="' + esc(x.url) + '" target="_blank" rel="noopener">📋 申込みシートを開く</a></div>' : "";
+    const lock = x.can ? "" : '<div class="lock">🌱 ' + esc(L.need || "") + 'になると参加できます</div>';
+    return '<div class="item k-' + esc(x.cat) + (x.can ? "" : " look") + '">' + audTag +
+      '<span class="tag">' + esc(CAT_NAME[x.cat] || x.label) + '</span><span class="tm">' + esc(x.start ? x.start + "〜" : "") + '</span>' +
+      '<div class="tt">' + esc(x.title) + '</div>' + acts + lock + '</div>';
+  }).join("");
+}
+
+function pickDay(d){
+  selDate = d;
+  viewY = Number(d.slice(0, 4)); viewM = Number(d.slice(5, 7)) - 1;
+  draw();
+}
+function moveMonth(n){
+  const d = new Date(viewY, viewM + n, 1);
+  viewY = d.getFullYear(); viewM = d.getMonth();
+  const now = new Date();
+  selDate = (viewY === now.getFullYear() && viewM === now.getMonth()) ? ymd(now) : ymd(d);
+  draw();
+}
+</script>
+<script src="../track.js"></script>
+<script src="../menu.js"></script>
+</body>
+</html>
