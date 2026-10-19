@@ -353,6 +353,37 @@
 #evbModal .ev-msg{display:none;border-radius:10px;padding:10px 12px;font-size:12.5px;margin:8px 0;line-height:1.8;}
 #evbModal .ev-msg.err{display:block;background:#FDEBEB;color:#B3352F;}
 #evbModal .ev-msg.ok{display:block;background:#EAF7F0;color:#2F7A5C;}
+#lnkModal{display:none;position:fixed;inset:0;z-index:79;background:rgba(30,26,50,.55);align-items:center;justify-content:center;padding:14px;}
+#lnkModal.show{display:flex;}
+#lnkModal .sheet{background:#fff;border-radius:18px;width:100%;max-width:640px;max-height:92vh;overflow-y:auto;padding:20px 18px;}
+#lnkModal h3{font-size:16px;font-weight:900;color:#4A3F7A;margin-bottom:6px;}
+#lnkModal h4{font-size:14px;font-weight:900;color:#4A3F7A;margin-bottom:4px;}
+#lnkModal .lead{font-size:12.5px;color:#6A6480;line-height:1.9;margin-bottom:10px;}
+#lnkModal .ev-card{border:1.5px solid #E4E0F0;border-radius:12px;padding:10px 12px;margin-top:8px;}
+#lnkModal .ev-card.off{background:#F7F6FA;opacity:.75;}
+#lnkModal .ev-nm{font-weight:700;font-size:14px;color:#2A2438;}
+#lnkModal .ev-sub{font-size:11.5px;color:#7A7390;line-height:1.7;margin-top:2px;word-break:break-all;}
+#lnkModal .ev-sub a{color:#5E8FD8;}
+#lnkModal .ev-badge{display:inline-block;font-size:10.5px;font-weight:700;border-radius:99px;padding:1px 8px;margin-left:6px;vertical-align:1px;}
+#lnkModal .ev-badge.on{background:#EAF7F0;color:#2F7A5C;}
+#lnkModal .ev-badge.off{background:#EEE;color:#8A84A0;}
+#lnkModal .ev-badge.base{background:#F0EDF9;color:#6E5FB5;}
+#lnkModal .ev-acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+#lnkModal .ev-acts button{padding:7px 12px;border-radius:9px;border:1.5px solid #D9D3EF;background:#fff;color:#4A3F7A;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;}
+#lnkModal .ev-acts button.del{border-color:#F2C3BE;color:#B3352F;}
+#lnkModal .ev-form{background:#F6F3FE;border:1.5px solid #D9D2F3;border-radius:12px;padding:12px 13px;margin:12px 0;}
+#lnkModal .ev-form label{display:block;font-size:12px;font-weight:700;color:#4A3F7A;margin:9px 0 4px;}
+#lnkModal .ev-form input,#lnkModal .ev-form select{width:100%;padding:9px 10px;border-radius:9px;border:1.5px solid #D9D3EF;font-size:14px;font-family:inherit;background:#fff;}
+#lnkModal .ev-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
+#lnkModal .ev-btn{padding:11px 16px;border-radius:11px;border:none;background:#6E5FB5;color:#fff;font-weight:700;font-size:13.5px;cursor:pointer;font-family:inherit;}
+#lnkModal .ev-btn.sub{background:#F0EDF9;color:#6E5FB5;}
+#lnkModal .ev-btn:disabled{opacity:.5;}
+#lnkModal .ev-close{display:block;width:100%;margin-top:12px;padding:12px;border-radius:11px;border:none;background:#F4F2F8;color:#6A6480;font-weight:700;font-size:13.5px;cursor:pointer;font-family:inherit;}
+#lnkModal .ev-msg{display:none;border-radius:10px;padding:10px 12px;font-size:12.5px;margin:8px 0;line-height:1.8;}
+#lnkModal .ev-msg.err{display:block;background:#FDEBEB;color:#B3352F;}
+#lnkModal .ev-msg.ok{display:block;background:#EAF7F0;color:#2F7A5C;}
+#lnkModal .ln-url{font-size:11.5px;word-break:break-all;margin-top:3px;}
+#lnkModal .ln-none{color:#B3352F;font-weight:700;}
 #treeModal{display:none;position:fixed;inset:0;z-index:79;background:rgba(30,26,50,.55);align-items:center;justify-content:center;padding:14px;}
 #treeModal.show{display:flex;}
 #treeModal .sheet{background:#fff;border-radius:18px;width:100%;max-width:720px;max-height:92vh;overflow-y:auto;padding:20px 18px;}
@@ -505,6 +536,7 @@
         <button class="btn-add" id="btnBulk" onclick="openBulk()" style="display:none;background:#5E8FD8;">📥 まとめて登録／更新</button>
         <button class="btn-add" id="btnTree" onclick="openTree()" style="display:none;background:#8A6FD1;">🌳 系列のつながり</button>
         <button class="btn-add" id="btnEvb" onclick="openEvb()" style="display:none;background:#5E8FD8;">📅 申込みシート</button>
+        <button class="btn-add" id="btnLnk" onclick="openLnk()" style="display:none;background:#26A69A;">🔗 リンク先の変更</button>
         <button class="btn-add" id="btnSupport" onclick="goLeave(()=>location.href='shoki-support-k5w2.html')" style="background:#3DAA6E;">🌱 初期サポートマネジメント</button>
         <button id="btnStats" onclick="openStats()" style="display:none;">📊 アクセス</button>
         <button id="btnBackPortal" onclick="backToPortal()">‹ ポータルへ</button>
@@ -679,6 +711,18 @@
 <!-- ================================================================
      申込みシート（管理者だけ）：「日程から選ぶ」で読むスプレッドシートを足す・止める
 ================================================================ -->
+<div id="lnkModal" onclick="if(event.target===this)closeLnk()">
+  <div class="sheet">
+    <h3>🔗 リンク先の変更</h3>
+    <p class="lead">トップページの「各種スケジュール情報 → チーム独自」のアイコンが開く先です。管理者だけが変えられます。<br>
+      ・URLを空にすると、そのアイコンを押したときに「まだ決まっていません」と出ます<br>
+      ・「もとにもどす」で、はじめのリンク先にもどります<br>
+      ・変えた内容は、みなさんがトップページを開き直したときに届きます</p>
+    <div class="ev-msg" id="lnkMsg"></div>
+    <div id="lnkList"><p class="lead">読みこんでいます…</p></div>
+    <button class="ev-close" onclick="closeLnk()">とじる</button>
+  </div>
+</div>
 <div id="evbModal" onclick="if(event.target===this)closeEvb()">
   <div class="sheet">
     <h3>📅 申込みシート</h3>
@@ -1597,6 +1641,7 @@ async function load(isLogin){
     $("#btnBulk").style.display = (j.isFull || j.isKeiRep || j.isAdv) ? "inline-block" : "none";
     $("#btnTree").style.display = j.isFull ? "inline-block" : "none";
     $("#btnEvb").style.display = j.isAdmin ? "inline-block" : "none";      /* 管理者だけ */
+    $("#btnLnk").style.display = j.isAdmin ? "inline-block" : "none";      /* 管理者だけ */
 
     const lvl = j.isFull ? "全体管理"
               : j.isKeiRep ? "系列代表"
@@ -2396,6 +2441,54 @@ const EVB_ERR = {
 };
 const evbEsc = t => String(t == null ? "" : t).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function evbSay(t, kind){ const m = document.getElementById("evbMsg"); m.className = "ev-msg" + (t ? " " + (kind || "ok") : ""); m.textContent = t || ""; }
+/* ================================================================
+   🔗 リンク先の変更（管理者だけ）
+================================================================ */
+let lnkRows = [], lnkEditKey = null;
+const LNK_ERR = { noperm:"管理者だけが変えられます。", badurl:"https:// ではじまるURLを入れてください。", nokey:"その項目が見つかりません。", busy:"ほかの方が保存中です。少しおいてお試しください。", email:"Googleアカウントが登録と違います。", unknown_action:"GASがまだ新しい版になっていません（v1.159 以上が必要です）。" };
+function lnkSay(t, cls){ const m = document.getElementById("lnkMsg"); m.textContent = t; m.className = "ev-msg" + (t ? " " + (cls || "ok") : ""); }
+function lnkTake(j){
+  if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return false;
+  if(!j || j.ok !== true){ lnkSay(LNK_ERR[j && j.error] || "うまくいきませんでした。少しおいてお試しください。", "err"); return false; }
+  lnkRows = j.links || []; drawLnk(); return true;
+}
+async function openLnk(){
+  if(!data || !data.isAdmin) return;
+  lnkSay(""); lnkEditKey = null;
+  document.getElementById("lnkModal").classList.add("show");
+  document.getElementById("lnkList").innerHTML = '<p class="lead">読みこんでいます…</p>';
+  try{ lnkTake(await evbCall({ action:"linkList" })); }
+  catch(e){ lnkSay("通信できませんでした。電波のよい場所でお試しください。", "err"); }
+}
+function closeLnk(){ document.getElementById("lnkModal").classList.remove("show"); }
+function drawLnk(){
+  document.getElementById("lnkList").innerHTML = lnkRows.map(r => {
+    const editing = lnkEditKey === r.key;
+    return `<div class="ev-card" data-key="${evbEsc(r.key)}">
+      <div class="ev-nm">${evbEsc(r.name)}${r.changed ? '<span class="ev-badge on">変えてある</span>' : '<span class="ev-badge base">もとのまま</span>'}</div>
+      <div class="ev-sub ln-url">${r.url ? `<a href="${evbEsc(r.url)}" target="_blank" rel="noopener">${evbEsc(r.url)}</a>` : '<span class="ln-none">まだ決まっていません</span>'}</div>
+      ${r.changed && r.by ? `<div class="ev-sub">変えた方：${evbEsc(r.by)}${r.at ? "　" + evbEsc(r.at) : ""}</div>` : ""}
+      ${editing ? `<div class="ev-form"><label>新しいURL</label><input id="lnkUrl" type="url" inputmode="url" value="${evbEsc(r.url)}" placeholder="https://docs.google.com/spreadsheets/d/…">
+        <div class="ev-row"><button class="ev-btn" id="lnkSave" onclick="saveLnk('${evbEsc(r.key)}')">この内容で保存</button><button class="ev-btn sub" onclick="lnkEditKey=null;drawLnk()">やめる</button></div></div>`
+      : `<div class="ev-acts"><button onclick="lnkEditKey='${evbEsc(r.key)}';lnkSay('');drawLnk()">✏️ 変える</button>${r.changed ? `<button class="del" onclick="resetLnk('${evbEsc(r.key)}')">↩️ もとにもどす</button>` : ""}</div>`}
+    </div>`;
+  }).join("");
+}
+async function saveLnk(key){
+  const url = String(document.getElementById("lnkUrl").value || "").trim();
+  if(url && !/^https:\/\//.test(url)){ lnkSay(LNK_ERR.badurl, "err"); return; }
+  document.getElementById("lnkSave").disabled = true;
+  try{
+    if(lnkTake(await evbCall({ action:"linkSave", key:key, url:url }))){ lnkEditKey = null; drawLnk(); lnkSay("保存しました。", "ok"); }
+    else { const b = document.getElementById("lnkSave"); if(b) b.disabled = false; }
+  }catch(e){ lnkSay("通信できませんでした。電波のよい場所でお試しください。", "err"); const b = document.getElementById("lnkSave"); if(b) b.disabled = false; }
+}
+async function resetLnk(key){
+  const r = lnkRows.find(x => x.key === key);
+  if(!r || !confirm("「" + r.name + "」を、もとのリンク先にもどします。よろしいですか？")) return;
+  try{ if(lnkTake(await evbCall({ action:"linkSave", key:key, reset:"1" }))) lnkSay("もとにもどしました。", "ok"); }
+  catch(e){ lnkSay("通信できませんでした。電波のよい場所でお試しください。", "err"); }
+}
 async function evbCall(params){
   const body = Object.assign({ id:admin.id, pin:admin.pin, email:admin.email }, params);
   const res = await fetch(GAS_URL, { method:"POST", body:new URLSearchParams(body) });
