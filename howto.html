@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<script src="config.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>使い方｜Skyarc LINKサポート</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="beta.css">
+<meta name="theme-color" content="#6E5FB5">
+<style>
+:root{
+  --ink:#2A2438; --sub:#7A7390; --deep:#6E5FB5; --mist:#F0EDF9; --paper:#FCFBFF; --line:#E4E0F0; --card:#FFFFFF;
+  --g-member:#3FA98A; --g-apply:#E8873A; --g-team:#4E86D6; --g-sup:#D9A21E; --g-crie:#8A6FD6; --g-common:#9A93B0; --g-join:#5FB8E6; --join-ink:#3A9BD0;
+  --rainbow:#F49AC1,#F5A97A,#F5D06A,#8FD9A8,#6FC7D9,#7BA3E8,#A88BE0,#F49AC1;
+  --shadow:0 6px 18px rgba(60,42,110,.13);
+  --f-head:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Yu Gothic",sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;height:100%;}
+body{font-family:"Zen Kaku Gothic New",sans-serif;color:var(--ink);background:var(--paper);overflow:hidden;}
+button{font-family:inherit;cursor:pointer;border:none;}
+
+/* 上の帯 */
+.bar{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;justify-content:space-between;
+  padding:calc(12px + env(safe-area-inset-top)) 16px 10px;max-width:560px;margin:0 auto;}
+.bar .ttl{font-family:var(--f-head);font-weight:900;color:var(--deep);font-size:15px;}
+.bar .skip{background:var(--mist);color:var(--deep);font-family:var(--f-head);font-weight:700;font-size:13px;
+  border-radius:999px;padding:7px 14px;text-decoration:none;}
+@media (max-width:700px){ .bar{padding-right:78px;} }   /* 右上のメニューのボタンと重ならないように */
+
+/* 1枚ずつのカード */
+.deck{position:fixed;inset:0;display:flex;transition:transform .45s cubic-bezier(.25,1,.4,1);touch-action:pan-y;}
+.slide{flex:0 0 100vw;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:calc(64px + env(safe-area-inset-top)) 20px calc(130px + env(safe-area-inset-bottom));}
+.stage{position:relative;flex-shrink:0;width:min(340px,86vw);height:min(300px,40vh);min-height:220px;display:grid;place-items:center;}
+.cap{max-width:420px;text-align:center;margin-top:18px;}
+.cap .step{display:inline-block;font-family:var(--f-head);font-weight:700;font-size:12px;color:#fff;background:var(--deep);
+  border-radius:999px;padding:3px 12px;margin-bottom:8px;}
+.cap h2{font-family:var(--f-head);font-weight:900;font-size:22px;line-height:1.45;margin:0 0 6px;color:var(--ink);text-wrap:balance;}
+.cap p{margin:0;font-size:14.5px;line-height:1.85;color:var(--sub);text-wrap:pretty;}
+.cap p b{color:var(--deep);}
+
+/* 下の操作 */
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:12px 20px calc(18px + env(safe-area-inset-bottom));
+  max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:12px;align-items:center;}
+.dots{display:flex;gap:7px;}
+.dots i{width:8px;height:8px;border-radius:99px;background:#D9D3EF;transition:width .3s,background .3s;}
+.dots i.on{width:22px;background:var(--deep);}
+.btns{display:flex;gap:10px;width:100%;}
+.btns button,.btns a{flex:1;padding:14px;border-radius:14px;font-family:var(--f-head);font-weight:700;font-size:15px;text-align:center;text-decoration:none;}
+.prev{background:var(--mist);color:var(--deep);}
+.next{background:var(--deep);color:#fff;box-shadow:0 6px 16px rgba(110,95,181,.35);}
+.prev[hidden],.next[hidden]{display:none;}
+
+/* ---- 絵の部品（トップページのアイコンと同じ形） ---- */
+.ball{width:68px;height:68px;border-radius:50%;display:grid;place-items:center;font-size:30px;background:#fff;
+  border:3px solid var(--c,#9A93B0);box-shadow:var(--shadow);}
+.bubble{display:flex;flex-direction:column;align-items:center;gap:5px;}
+.bubble .nm{font-family:var(--f-head);font-weight:700;font-size:12px;line-height:1.3;text-align:center;white-space:pre;}
+.join .ball{width:88px;height:88px;border:5px solid transparent;font-size:34px;
+  background:radial-gradient(circle at 38% 32%, #F2FCFF 0%, #BDE9FA 22%, #82CBEC 52%, #4BA4D4 80%, #3A8DC0 100%) padding-box,
+             conic-gradient(var(--rainbow)) border-box;}
+.join .nm{font-size:14px;font-weight:900;color:var(--join-ink);}
+.finger{position:absolute;font-size:34px;pointer-events:none;filter:drop-shadow(0 3px 4px rgba(0,0,0,.18));}
+.float{animation:float 3s ease-in-out infinite;}
+@keyframes float{0%,100%{translate:0 0;}50%{translate:0 -7px;}}
+.on .tap{animation:tap 1.6s ease-in-out infinite;}
+@keyframes tap{0%,100%{transform:translate(10px,12px);}40%{transform:translate(0,0);}50%{transform:translate(0,0) scale(.88);}60%{transform:translate(0,0);}}
+.pop{opacity:0;transform:scale(.6);}
+.on .pop{animation:pop .5s cubic-bezier(.3,1.5,.5,1) forwards;animation-delay:var(--d,0s);}
+@keyframes pop{to{opacity:1;transform:none;}}
+
+/* 1：ようこそ */
+.phone{width:150px;height:250px;border-radius:28px;background:#2A2438;padding:9px;box-shadow:0 14px 30px rgba(60,42,110,.25);}
+.phone .scr{width:100%;height:100%;border-radius:20px;background:var(--paper);position:relative;overflow:hidden;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;}
+.phone .rainbow{width:62px;height:62px;border-radius:16px;overflow:hidden;box-shadow:var(--shadow);}
+.phone .rainbow img{width:100%;height:100%;display:block;}
+.phone .mini{font-family:var(--f-head);font-weight:900;font-size:12px;color:var(--deep);}
+.spark{position:absolute;font-size:22px;}
+
+/* 2：登録 */
+.form{background:#fff;border-radius:18px;box-shadow:var(--shadow);padding:14px 14px 10px;width:230px;}
+.form .row{display:flex;align-items:center;gap:9px;padding:7px 4px;border-bottom:1px dashed var(--line);font-size:13px;font-weight:700;}
+.form .row:last-child{border-bottom:none;}
+.form .row .ic{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;background:var(--mist);font-size:15px;flex:none;}
+.form .row .ck{margin-left:auto;color:#3FA98A;font-size:16px;opacity:0;}
+.on .form .row .ck{animation:pop .4s forwards;animation-delay:var(--d);}
+.match{position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);white-space:nowrap;background:#EAF7F0;color:#2F7A5C;
+  font-family:var(--f-head);font-weight:700;font-size:12.5px;border-radius:999px;padding:5px 12px;box-shadow:var(--shadow);}
+
+/* 3：できること */
+.cards{display:flex;flex-direction:column;gap:10px;width:260px;}
+.cardx{background:#fff;border-radius:16px;box-shadow:var(--shadow);padding:12px 14px;display:flex;align-items:center;gap:12px;}
+.cardx .ic{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;font-size:22px;flex:none;}
+.cardx b{font-family:var(--f-head);font-size:14.5px;display:block;}
+.cardx span{font-size:11.5px;color:var(--sub);}
+.bar2{height:8px;border-radius:99px;background:#EEE;margin-top:5px;overflow:hidden;width:130px;}
+.bar2 i{display:block;height:100%;width:0;background:var(--g-member);border-radius:99px;}
+.on .bar2 i{animation:grow 1.6s .6s ease-out forwards;}
+@keyframes grow{to{width:70%;}}
+
+/* 4：まずはこの3つ */
+.trio{display:flex;align-items:flex-start;gap:6px;}
+.arrow{font-size:20px;color:#C9C2E6;margin-top:22px;}
+.walk{position:absolute;font-size:32px;top:6px;filter:drop-shadow(0 3px 4px rgba(0,0,0,.18));}
+.on .walk{animation:walk 4.5s ease-in-out infinite;}
+@keyframes walk{0%,8%{left:6%;}30%,40%{left:39%;}62%,72%{left:72%;}92%,100%{left:6%;}}
+.on .lit1{animation:lit 4.5s infinite;} .on .lit2{animation:lit 4.5s 1.5s infinite;} .on .lit3{animation:lit 4.5s 3s infinite;}
+@keyframes lit{0%,30%{box-shadow:0 0 0 6px rgba(63,169,138,.25),var(--shadow);}31%,100%{box-shadow:var(--shadow);}}
+.hint{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);white-space:nowrap;background:#fff;border-radius:12px;
+  box-shadow:var(--shadow);padding:6px 12px;font-size:12px;font-weight:700;color:var(--sub);}
+
+/* 5：3つ終わったらOK */
+.done .ball{position:relative;}
+.done .ok{position:absolute;right:-6px;bottom:-4px;width:26px;height:26px;border-radius:50%;background:#3FA98A;color:#fff;
+  display:grid;place-items:center;font-size:14px;font-weight:900;border:2px solid #fff;}
+.medal{font-family:var(--f-head);font-weight:900;font-size:20px;color:#fff;border-radius:999px;padding:10px 22px;margin-top:22px;
+  background:linear-gradient(135deg,#F5A97A,#E8873A);box-shadow:0 8px 18px rgba(232,135,58,.35);}
+.confetti{position:absolute;inset:0;pointer-events:none;overflow:hidden;}
+.confetti i{position:absolute;top:-10px;width:8px;height:12px;border-radius:2px;opacity:0;}
+.on .confetti i{animation:fall 2.6s linear infinite;}
+@keyframes fall{0%{opacity:1;transform:translateY(0) rotate(0);}100%{opacity:0;transform:translateY(300px) rotate(540deg);}}
+
+/* 6：紹介したい人の道 */
+.road{display:flex;flex-direction:column;gap:6px;width:290px;}
+.road .st{display:flex;align-items:center;gap:10px;background:#fff;border-radius:14px;box-shadow:var(--shadow);padding:9px 12px;font-size:13px;font-weight:700;}
+.road .st .ic{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:17px;flex:none;border:2.5px solid var(--c);}
+.road .dn{text-align:center;color:#C9C2E6;font-size:14px;line-height:1;}
+.road .st.goal{background:#FFF8E6;}
+.note{margin-top:10px;background:var(--mist);border-radius:12px;padding:9px 12px;font-size:12.5px;color:var(--deep);font-weight:700;text-align:center;}
+
+/* 7：さあ、はじめよう */
+.go .join .ball{animation:beat 1.6s ease-in-out infinite;}
+@keyframes beat{0%,100%{transform:scale(1);}50%{transform:scale(1.07);}}
+.endbtns{display:flex;flex-direction:column;gap:10px;width:min(300px,80vw);margin-top:18px;}
+.endbtns a{display:block;text-align:center;text-decoration:none;font-family:var(--f-head);font-weight:900;font-size:16px;border-radius:14px;padding:14px;}
+.endbtns .reg{color:#fff;background:linear-gradient(135deg,#6FC7D9,#5FB8E6 50%,#7BA3E8);box-shadow:0 8px 18px rgba(95,184,230,.4);}
+.endbtns .login{background:#fff;color:var(--join-ink);border:2px solid #BFE3F5;}
+
+@media (max-height:640px){
+  .stage{height:min(240px,36vh);min-height:190px;}
+  .cap h2{font-size:19px;} .cap p{font-size:13.5px;}
+}
+/* 画面の低いスマホでは、「紹介していきたい方は」の道を小さめに */
+@media (max-height:720px){
+  .road{gap:4px;}
+  .road .dn{display:none;}
+  .road .st{padding:6px 10px;font-size:12.5px;}
+  .road .st .ic{width:28px;height:28px;font-size:14px;}
+  .note{margin-top:4px;padding:6px 10px;font-size:11.5px;}
+  .slide[data-i="5"] .cap{margin-top:10px;}
+  .slide[data-i="5"] .cap .step{margin-bottom:4px;}
+}
+@media (prefers-reduced-motion: reduce){
+  .deck{transition:none;}
+  *{animation:none !important;}
+  .pop{opacity:1;transform:none;}
+  .form .row .ck{opacity:1;}
+}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <span class="ttl">📖 使い方</span>
+  <a class="skip sky-home" href="index.html">とじる</a>
+</div>
+
+<div class="deck" id="deck">
+
+  <!-- 1 ようこそ -->
+  <section class="slide" data-i="0">
+    <div class="stage">
+      <div class="phone float"><div class="scr">
+        <div class="rainbow"><img src="img/app-icon-180.png" alt=""></div>
+        <span class="mini">Skyarc LINKサポート</span>
+      </div></div>
+      <span class="spark pop" style="--d:.3s;left:12%;top:18%;">✨</span>
+      <span class="spark pop" style="--d:.5s;right:12%;top:30%;">🌈</span>
+      <span class="spark pop" style="--d:.7s;left:16%;bottom:16%;">💡</span>
+    </div>
+    <div class="cap">
+      <span class="step">ようこそ</span>
+      <h2>LINKを、もっと使いやすくする<br>あなたのためのサイトです</h2>
+      <p>やることが順番にわかり、<br><b>あなたの進み具合</b>もひと目でわかります。</p>
+    </div>
+  </section>
+
+  <!-- 2 登録 -->
+  <section class="slide" data-i="1">
+    <div class="stage">
+      <div class="form pop">
+        <div class="row" style="--d:.6s"><span class="ic">🔢</span>会員番号<span class="ck">✔</span></div>
+        <div class="row" style="--d:.9s"><span class="ic">🙂</span>お名前<span class="ck">✔</span></div>
+        <div class="row" style="--d:1.2s"><span class="ic">✉️</span>メールアドレス<span class="ck">✔</span></div>
+        <div class="row" style="--d:1.5s"><span class="ic">🔑</span>パスコード（数字4けた）<span class="ck">✔</span></div>
+      </div>
+      <span class="match pop" style="--d:1.9s">🔗 名簿とつながりました</span>
+    </div>
+    <div class="cap">
+      <span class="step">STEP 1</span>
+      <h2>トップの「登録」から、<br>4つを入れるだけ</h2>
+      <p>会員番号・お名前・メールアドレスが<br>名簿と合うと、<b>あなたの記録とつながります</b>。</p>
+    </div>
+  </section>
+
+  <!-- 3 できること -->
+  <section class="slide" data-i="2">
+    <div class="stage">
+      <div class="cards">
+        <div class="cardx pop" style="--d:.2s"><span class="ic" style="background:#E8F6F1">📈</span><div><b>進み具合がわかる</b><div class="bar2"><i></i></div></div></div>
+        <div class="cardx pop" style="--d:.45s"><span class="ic" style="background:#FDF0E5">🗓️</span><div><b>日々の情報を整理</b><span>予定や申込みをまとめて見られる</span></div></div>
+        <div class="cardx pop" style="--d:.7s"><span class="ic" style="background:#EEF3FC">🧭</span><div><b>迷わず進める</b><span>次にやることを指でお知らせ</span></div></div>
+      </div>
+    </div>
+    <div class="cap">
+      <span class="step">登録すると</span>
+      <h2>こんなことが<br>できるようになります</h2>
+      <p>あなたが、より<b>LINKを使いやすく</b><br>なるための道具です。</p>
+    </div>
+  </section>
+
+  <!-- 4 まずはこの3つ -->
+  <section class="slide" data-i="3">
+    <div class="stage">
+      <div class="trio">
+        <div class="bubble"><span class="ball lit1" style="--c:var(--g-member)">👋</span><span class="nm">はじめの一歩</span></div>
+        <span class="arrow">›</span>
+        <div class="bubble"><span class="ball lit2" style="--c:var(--g-member)">📘</span><span class="nm">初期サポート
+ガイド</span></div>
+        <span class="arrow">›</span>
+        <div class="bubble"><span class="ball lit3" style="--c:var(--g-member)">🚀</span><span class="nm">活用の
+1stステップ</span></div>
+      </div>
+      <span class="walk">👉</span>
+      <span class="hint">👉 の指が、次に行くところを教えてくれます</span>
+    </div>
+    <div class="cap">
+      <span class="step">STEP 2</span>
+      <h2>登録したら、<br>この3つを順番にどうぞ</h2>
+      <p>トップページにある、緑のアイコンです。<br>1つずつ、中にあることを終わらせていきます。</p>
+    </div>
+  </section>
+
+  <!-- 5 3つ終わったらOK -->
+  <section class="slide" data-i="4">
+    <div class="stage">
+      <div class="confetti" id="confetti"></div>
+      <div style="display:flex;flex-direction:column;align-items:center;">
+        <div class="trio done">
+          <div class="bubble pop" style="--d:.1s"><span class="ball" style="--c:var(--g-member)">👋<span class="ok">✓</span></span></div>
+          <div class="bubble pop" style="--d:.35s"><span class="ball" style="--c:var(--g-member)">📘<span class="ok">✓</span></span></div>
+          <div class="bubble pop" style="--d:.6s"><span class="ball" style="--c:var(--g-member)">🚀<span class="ok">✓</span></span></div>
+        </div>
+        <span class="medal pop" style="--d:1s">🎉 初期サポート、ぜんぶOK！</span>
+      </div>
+    </div>
+    <div class="cap">
+      <span class="step">STEP 3</span>
+      <h2>3つ終われば、ひとまずOK！</h2>
+      <p>入ったばかりの方でも、<br><b>最低限の使い方</b>がわかる状態になります。<br>指のマークも、そこで消えます。</p>
+    </div>
+  </section>
+
+  <!-- 6 紹介したい人の道 -->
+  <section class="slide" data-i="5">
+    <div class="stage" style="height:auto;">
+      <div class="road">
+        <div class="st pop" style="--d:.1s"><span class="ic" style="--c:var(--g-member)">🙋</span>LINKを人に紹介していきたい</div>
+        <div class="dn pop" style="--d:.25s">▼</div>
+        <div class="st pop" style="--d:.4s"><span class="ic" style="--c:var(--g-team)">💬</span>サポートしてくれている先輩に伝える</div>
+        <div class="dn pop" style="--d:.55s">▼</div>
+        <div class="st pop" style="--d:.7s"><span class="ic" style="--c:var(--g-sup)">🐣</span>サポーターのチェックに合格</div>
+        <div class="dn pop" style="--d:.85s">▼</div>
+        <div class="st goal pop" style="--d:1s"><span class="ic" style="--c:var(--g-sup)">🔓</span>「サポーターの部屋」が開きます</div>
+        <div class="note pop" style="--d:1.3s">くわしい条件は、サポートしてくれている先輩に確かめてください</div>
+      </div>
+    </div>
+    <div class="cap">
+      <span class="step">その先へ</span>
+      <h2>紹介していきたい方は</h2>
+      <p>先輩に直接連絡して、<br><b>サポーター</b>の道に進むこともできます。</p>
+    </div>
+  </section>
+
+  <!-- 7 はじめよう -->
+  <section class="slide go" data-i="6">
+    <div class="stage">
+      <div class="bubble join float"><span class="ball"></span><span class="nm">登録</span></div>
+      <span class="finger tap" style="left:58%;top:54%;">👆</span>
+    </div>
+    <div class="cap">
+      <span class="step">さあ、はじめよう</span>
+      <h2>まずは「登録」から</h2>
+      <p>もう登録した方は、「ログイン」から入れます。</p>
+      <div class="endbtns" style="margin-left:auto;margin-right:auto;">
+        <a class="reg" href="index.html#join">🌱 登録する</a>
+        <a class="login" href="index.html#login">ログインする</a>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="nav">
+  <div class="dots" id="dots"></div>
+  <div class="btns">
+    <button class="prev" id="prev" onclick="go(cur-1)">‹ もどる</button>
+    <button class="next" id="next" onclick="go(cur+1)">つぎへ ›</button>
+  </div>
+</div>
+
+<script>
+const deck = document.getElementById("deck");
+const slides = [...document.querySelectorAll(".slide")];
+const N = slides.length;
+let cur = 0;
+document.getElementById("dots").innerHTML = slides.map(()=>"<i></i>").join("");
+const dots = [...document.querySelectorAll("#dots i")];
+
+/* 紙ふぶき */
+(function(){
+  const box = document.getElementById("confetti");
+  const cs = ["#F49AC1","#F5A97A","#F5D06A","#8FD9A8","#6FC7D9","#7BA3E8","#A88BE0"];
+  let h = "";
+  for(let i=0;i<22;i++) h += `<i style="left:${Math.round(Math.random()*100)}%;background:${cs[i%cs.length]};animation-delay:${(Math.random()*2.6).toFixed(2)}s"></i>`;
+  box.innerHTML = h;
+})();
+
+function go(i){
+  cur = Math.max(0, Math.min(N-1, i));
+  deck.style.transform = `translateX(${-cur*100}vw)`;
+  slides.forEach((s,k)=>{
+    s.classList.toggle("on", k === cur);
+    s.setAttribute("aria-hidden", k === cur ? "false" : "true");
+  });
+  dots.forEach((d,k)=>d.classList.toggle("on", k === cur));
+  document.getElementById("prev").hidden = cur === 0;
+  document.getElementById("next").hidden = cur === N-1;
+  try{ history.replaceState(null, "", "#" + (cur+1)); }catch(e){}
+}
+/* もう一度アニメーションが動くように、表示のたびに付けなおします */
+const startAt = parseInt((location.hash || "").slice(1), 10);
+go(isNaN(startAt) ? 0 : startAt - 1);
+
+/* 指でめくる */
+let sx = null, sy = null;
+deck.addEventListener("touchstart", e=>{ sx = e.touches[0].clientX; sy = e.touches[0].clientY; }, {passive:true});
+deck.addEventListener("touchend", e=>{
+  if(sx == null) return;
+  const dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
+  if(Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) go(cur + (dx < 0 ? 1 : -1));
+  sx = sy = null;
+});
+document.addEventListener("keydown", e=>{
+  if(e.key === "ArrowRight") go(cur+1);
+  if(e.key === "ArrowLeft") go(cur-1);
+});
+window.addEventListener("resize", ()=>{ deck.style.transition = "none"; go(cur); requestAnimationFrame(()=>{ deck.style.transition = ""; }); });
+</script>
+<script src="track.js"></script>
+<script src="menu.js"></script>
+</body>
+</html>

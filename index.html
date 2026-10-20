@@ -101,6 +101,14 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body)
   background:rgba(62,47,40,.92);color:#fff;font-size:13.5px;font-weight:700;border-radius:999px;padding:11px 20px;
   max-width:calc(100vw - 32px);text-align:center;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;}
 .toast.show{opacity:1;transform:translate(-50%,0);}
+/* 「登録」の右下の、小さな「使い方」 */
+.howto{position:absolute;left:0;top:0;z-index:4;width:44px;display:flex;flex-direction:column;align-items:center;gap:2px;
+  text-decoration:none;will-change:transform;}
+.howto .hb{width:30px;height:30px;border-radius:50%;background:#fff;border:2.5px solid var(--deep);display:grid;place-items:center;
+  font-size:14px;box-shadow:var(--shadow);}
+.howto .ht{font-family:var(--f-head);font-weight:900;font-size:10.5px;color:var(--deep);background:rgba(255,255,255,.92);
+  border-radius:6px;padding:0 5px;white-space:nowrap;}
+.howto:focus-visible{outline:3px solid var(--deep);outline-offset:3px;border-radius:12px;}
 /* 押したとき、その色が画面いっぱいに広がる */
 .spread{position:fixed;inset:0;z-index:50;pointer-events:none;background:var(--c);
   clip-path:circle(0px at var(--x) var(--y));display:grid;place-items:center;}
@@ -647,6 +655,7 @@ function frame(t){
     n.el.style.transform = `translate(${n.x - hw + fx}px, ${n.y - hh + fy}px) scale(${n.s})`;
     n.el.style.opacity = n.o;
   }
+  placeHowto(t);
   leaving = leaving.filter(n=>{
     if(t - n.dying > 420){ n.el.remove(); return false; }
     return true;
@@ -654,6 +663,27 @@ function frame(t){
   requestAnimationFrame(frame);
 }
 
+
+/* ================================================================
+   「登録」の右下に、小さな「使い方」を浮かべます（押すと使い方のページへ）
+================================================================ */
+let howtoEl = null;
+function placeHowto(t){
+  const j = (path.length === 0) ? nodes.find(n=>n.it.join) : null;
+  if(!j){ if(howtoEl) howtoEl.style.display = "none"; return; }
+  if(!howtoEl){
+    howtoEl = document.createElement("a");
+    howtoEl.className = "howto"; howtoEl.href = B + "howto.html";
+    howtoEl.setAttribute("aria-label", "使い方を見る");
+    howtoEl.innerHTML = '<span class="hb">📖</span><span class="ht">使い方</span>';
+    stage.appendChild(howtoEl);
+  }
+  howtoEl.style.display = "";
+  const fy = reduce ? 0 : Math.sin(t/520 + 1.3)*4;          /* 少し浮いて、ゆれます */
+  /* 「登録」の丸の右下（丸の中心から右へ44・下へ34） */
+  howtoEl.style.transform = `translate(${j.x + 44*j.s - 22}px, ${j.y + 28*j.s - 15 + fy}px) scale(${j.s})`;
+  howtoEl.style.opacity = j.o;
+}
 
 /* ================================================================
    登録・ログインの画面
@@ -987,10 +1017,11 @@ function showToast(msg){
 
 /* メニューの「ログインする」から来たときは、ログインの画面をそのまま開きます */
 function openLoginFromMenu(){
-  if(me || location.hash !== "#login") return;
+  if(me || (location.hash !== "#login" && location.hash !== "#join")) return;
+  const want = location.hash === "#join" ? "new" : "login";   /* 使い方のページの「登録する」からは、登録の画面 */
   const openMenu = document.querySelector(".skym.on");      /* 開いているメニューは閉じてから */
   if(openMenu){ const bg = document.querySelector(".skym-bg"); if(bg) bg.click(); }
-  joinMode = "login";
+  joinMode = want;
   setTimeout(()=>{ showSheet(); try{ history.replaceState(null, "", location.pathname + location.search); }catch(e){} }, 350);
 }
 openLoginFromMenu();
