@@ -38,6 +38,8 @@ button{font-family:inherit;cursor:pointer;border:none;}
   padding:calc(64px + env(safe-area-inset-top)) 20px calc(130px + env(safe-area-inset-bottom));}
 .stage{position:relative;flex-shrink:0;width:min(340px,86vw);height:min(300px,40vh);min-height:220px;display:grid;place-items:center;}
 .cap{max-width:420px;text-align:center;margin-top:18px;}
+/* 絵と文字のまとまり：画面が低いときは、まとめて小さくして収めます */
+.fit{display:flex;flex-direction:column;align-items:center;flex-shrink:0;transform-origin:50% 0;}
 .cap .step{display:inline-block;font-family:var(--f-head);font-weight:700;font-size:12px;color:#fff;background:var(--deep);
   border-radius:999px;padding:3px 12px;margin-bottom:8px;}
 .cap h2{font-family:var(--f-head);font-weight:900;font-size:22px;line-height:1.45;margin:0 0 6px;color:var(--ink);text-wrap:balance;}
@@ -70,9 +72,8 @@ button{font-family:inherit;cursor:pointer;border:none;}
 @keyframes float{0%,100%{translate:0 0;}50%{translate:0 -7px;}}
 .on .tap{animation:tap 1.6s ease-in-out infinite;}
 @keyframes tap{0%,100%{transform:translate(10px,12px);}40%{transform:translate(0,0);}50%{transform:translate(0,0) scale(.88);}60%{transform:translate(0,0);}}
-.pop{opacity:0;transform:scale(.6);}
-.on .pop{animation:pop .5s cubic-bezier(.3,1.5,.5,1) forwards;animation-delay:var(--d,0s);}
-@keyframes pop{to{opacity:1;transform:none;}}
+.on .pop{animation:pop .5s cubic-bezier(.3,1.5,.5,1) both;animation-delay:var(--d,0s);}
+@keyframes pop{from{opacity:0;transform:scale(.6);}to{opacity:1;transform:none;}}
 
 /* 1：ようこそ */
 .phone{width:150px;height:250px;border-radius:28px;background:#2A2438;padding:9px;box-shadow:0 14px 30px rgba(60,42,110,.25);}
@@ -107,9 +108,9 @@ button{font-family:inherit;cursor:pointer;border:none;}
 /* 4：まずはこの3つ */
 .trio{display:flex;align-items:flex-start;gap:6px;}
 .arrow{font-size:20px;color:#C9C2E6;margin-top:22px;}
-.walk{position:absolute;font-size:32px;top:6px;filter:drop-shadow(0 3px 4px rgba(0,0,0,.18));}
+.walk{position:absolute;font-size:30px;left:var(--x1,0);top:var(--wy,0);line-height:1;filter:drop-shadow(0 3px 4px rgba(0,0,0,.18));}
 .on .walk{animation:walk 4.5s ease-in-out infinite;}
-@keyframes walk{0%,8%{left:6%;}30%,40%{left:39%;}62%,72%{left:72%;}92%,100%{left:6%;}}
+@keyframes walk{0%,26%{left:var(--x1);}33%,59%{left:var(--x2);}66%,92%{left:var(--x3);}100%{left:var(--x1);}}
 .on .lit1{animation:lit 4.5s infinite;} .on .lit2{animation:lit 4.5s 1.5s infinite;} .on .lit3{animation:lit 4.5s 3s infinite;}
 @keyframes lit{0%,30%{box-shadow:0 0 0 6px rgba(63,169,138,.25),var(--shadow);}31%,100%{box-shadow:var(--shadow);}}
 .hint{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);white-space:nowrap;background:#fff;border-radius:12px;
@@ -140,14 +141,14 @@ button{font-family:inherit;cursor:pointer;border:none;}
 .four{display:grid;grid-template-columns:repeat(2,auto);gap:12px 22px;justify-content:center;}
 .orb{position:relative;width:96px;height:96px;border-radius:50%;background:#fff;border:3px solid #BFE3F5;box-shadow:var(--shadow);
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-align:center;}
-.on .orb{animation:pop .5s cubic-bezier(.3,1.5,.5,1) forwards, bob 3s ease-in-out infinite;animation-delay:var(--d), calc(var(--d) + var(--fd));}
+.on .orb{animation:pop .5s cubic-bezier(.3,1.5,.5,1) both, bob 3s ease-in-out infinite;animation-delay:var(--d), calc(var(--d) + var(--fd));}
 @keyframes bob{0%,100%{translate:0 0;}50%{translate:0 -7px;}}
 .orb .oi{font-size:24px;line-height:1;}
 .orb .ot{font-family:var(--f-head);font-weight:700;font-size:12px;line-height:1.3;color:var(--ink);}
 .orb .ot small{font-size:9.5px;color:var(--sub);font-weight:500;}
 .orb .ok2{position:absolute;right:-2px;top:-2px;width:24px;height:24px;border-radius:50%;background:#3FA98A;color:#fff;font-size:13px;font-weight:900;
-  display:grid;place-items:center;border:2px solid #fff;opacity:0;}
-.on .orb .ok2{animation:pop .35s forwards;animation-delay:calc(var(--d) + .9s);}
+  display:grid;place-items:center;border:2px solid #fff;}
+.on .orb .ok2{animation:pop .35s both;animation-delay:calc(var(--d) + .9s);}
 /* 5・6：人のイラスト */
 .person{display:block;}
 .cheerwrap{display:flex;align-items:flex-end;gap:2px;margin-top:6px;}
@@ -161,6 +162,7 @@ button{font-family:inherit;cursor:pointer;border:none;}
 .say{font-family:var(--f-head);font-weight:900;font-size:13px;color:var(--deep);background:#fff;border-radius:14px;padding:5px 10px;
   box-shadow:var(--shadow);margin-bottom:56px;line-height:1.35;}
 .slide[data-i="4"] .stage{height:auto;min-height:0;}
+.slide[data-i="0"] .stage{height:auto;min-height:0;padding:6px 0;}
 .slide[data-i="2"] .stage{height:auto;min-height:0;}
 .cheerwrap{align-items:center;gap:8px;}
 .cheerside{display:flex;flex-direction:column;align-items:flex-start;gap:8px;}
@@ -183,6 +185,7 @@ button{font-family:inherit;cursor:pointer;border:none;}
 .endbtns a{display:block;text-align:center;text-decoration:none;font-family:var(--f-head);font-weight:900;font-size:16px;border-radius:14px;padding:14px;}
 .endbtns .reg{color:#fff;background:linear-gradient(135deg,#6FC7D9,#5FB8E6 50%,#7BA3E8);box-shadow:0 8px 18px rgba(95,184,230,.4);}
 .endbtns .login{background:#fff;color:var(--join-ink);border:2px solid #BFE3F5;}
+.endbtns .home{background:#fff;color:var(--deep);border:2px solid #DCD5F3;}
 
 @media (max-height:640px){
   .stage{height:min(240px,36vh);min-height:190px;}
@@ -376,6 +379,7 @@ button{font-family:inherit;cursor:pointer;border:none;}
       <div class="endbtns" style="margin-left:auto;margin-right:auto;">
         <a class="reg" href="index.html#join">🌱 登録する</a>
         <a class="login" href="index.html#login">ログインする</a>
+        <a class="home" href="index.html">🏠 トップページに戻る</a>
       </div>
     </div>
   </section>
@@ -406,6 +410,37 @@ const dots = [...document.querySelectorAll("#dots i")];
   box.innerHTML = h;
 })();
 
+/* 絵と文字を、1つのまとまりにします */
+slides.forEach(sl=>{
+  const f = document.createElement("div"); f.className = "fit";
+  [...sl.children].forEach(c=>f.appendChild(c)); sl.appendChild(f);
+});
+/* 画面の高さ・幅に収まらないときは、まとまりごと小さくします（上の見出しや下のボタンと重ならないように） */
+function fit(){
+  slides.forEach(sl=>{
+    const f = sl.querySelector(".fit");
+    f.style.transform = ""; f.style.marginBottom = "";
+    const cs = getComputedStyle(sl);
+    const ah = sl.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+    const aw = sl.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    const h = f.scrollHeight, w = f.scrollWidth;
+    const k = Math.min(1, ah / h, aw / w);
+    if(k < 1){ f.style.transform = `scale(${k})`; f.style.marginBottom = (-(h * (1 - k))) + "px"; }
+  });
+  /* 3つの丸の、光っている丸の左に指を合わせます */
+  const sl3 = slides[3], walk = sl3.querySelector(".walk");
+  if(walk){
+    const st = sl3.querySelector(".stage"), balls = [...sl3.querySelectorAll(".trio .ball")];
+    const k = st.getBoundingClientRect().width / st.offsetWidth || 1;
+    const sr = st.getBoundingClientRect();
+    balls.forEach((b,i)=>{
+      const r = b.getBoundingClientRect();
+      walk.style.setProperty("--x" + (i+1), ((r.left - sr.left)/k - 30) + "px");
+      if(i === 0) walk.style.setProperty("--wy", ((r.top - sr.top)/k + r.height/k/2 - 16) + "px");
+    });
+  }
+}
+addEventListener("resize", fit);
 function go(i){
   cur = Math.max(0, Math.min(N-1, i));
   deck.style.transform = `translateX(${-cur*100}vw)`;
@@ -421,6 +456,9 @@ function go(i){
 /* もう一度アニメーションが動くように、表示のたびに付けなおします */
 const startAt = parseInt((location.hash || "").slice(1), 10);
 go(isNaN(startAt) ? 0 : startAt - 1);
+fit();
+if(document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
+addEventListener("load", fit);
 
 /* 指でめくる */
 let sx = null, sy = null;
