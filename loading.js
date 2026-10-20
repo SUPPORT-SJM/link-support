@@ -95,6 +95,22 @@
     }, 1000);
   };
 
+  /* 1秒待たずに、すぐ出します（Googleアカウントを選んだ直後の確認など） */
+  window.skyLoadingNow = function (message, subMessage) {
+    window.skyLoading(message, subMessage);
+    clearTimeout(showTimer);
+    build();
+    showing = true;
+    document.getElementById("sklCard").className = "skl-card";
+    document.getElementById("sklMsg").textContent = message || "読み込んでいます";
+    document.getElementById("sklSub").textContent = subMessage || "しばらくお待ちください";
+    document.getElementById("sklDots").textContent = "";
+    document.getElementById("sklBtn").className = "skl-btn";
+    box.classList.add("show");
+    clearInterval(tick);
+    startTick();
+  };
+
   /* ページを開くまで、ぐるぐるを出したままにします */
   window.skyGoTo = function (url, label) {
     window.skyLoading(label || "ひらいています", "もうすぐです");

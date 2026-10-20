@@ -513,10 +513,21 @@ window.onload = function(){
 };
 
 /* すでに登録済みの内容を呼び出す */
+/* Googleアカウントを選んだ直後の確認中は、画面にお知らせを出します（終わるまで入力を待っていただきます） */
+function gLookStart(){ if(typeof skyLoadingNow === "function") skyLoadingNow("Googleアカウントの登録を確かめています", "このアカウントで登録されている内容を呼び出しています。終わるまで、そのままお待ちください（20秒ほどかかることがあります）"); }
+function gLookEnd(){ if(typeof skyLoadingDone === "function") skyLoadingDone(); }
+function gLookFetch(url){
+  return new Promise(function(ok, ng){
+    const t = setTimeout(function(){ ng(new Error("timeout")); }, 45000);
+    fetch(url).then(function(r){ clearTimeout(t); ok(r); }, function(e){ clearTimeout(t); ng(e); });
+  });
+}
 async function prefill(email){
+  gLookStart();
   try{
-    const res = await fetch(`${GAS_URL}?action=byEmail&email=${encodeURIComponent(email)}`);
+    const res = await gLookFetch(`${GAS_URL}?action=byEmail&email=${encodeURIComponent(email)}`);
     const j = await res.json();
+    gLookEnd();
     if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
     if(j.ok && j.members && j.members.length >= 1){
       const m = j.members[0];
@@ -566,7 +577,7 @@ async function prefill(email){
       $("#pinHint").textContent = "空欄のままなら、今のパスコードが続けて使えます";
       show("すでにご登録いただいています。追加・変更したい項目があれば、書き直して下のボタンを押してください。","ok");
     }
-  }catch(e){}
+  }catch(e){ gLookEnd(); }
 }
 
 /* ================================================================
