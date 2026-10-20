@@ -267,13 +267,24 @@ function onGoogleCredential(response){
   fillFromEmail(info.email);
 }
 
+/* Googleアカウントを選んだ直後の確認中は、画面にお知らせを出します（終わるまで入力を待っていただきます） */
+function gLookStart(){ if(typeof skyLoadingNow === "function") skyLoadingNow("Googleアカウントの登録を確かめています", "このアカウントで登録されている会員番号をさがしています。終わるまで、そのままお待ちください（20秒ほどかかることがあります）"); }
+function gLookEnd(){ if(typeof skyLoadingDone === "function") skyLoadingDone(); }
+function gLookFetch(url){
+  return new Promise(function(ok, ng){
+    const t = setTimeout(function(){ ng(new Error("timeout")); }, 45000);
+    fetch(url).then(function(r){ clearTimeout(t); ok(r); }, function(e){ clearTimeout(t); ng(e); });
+  });
+}
 /* Googleアカウントに紐づく会員情報を呼び出して自動入力する
    (パスコードは自動で入りません。ご自身で入力していただきます) */
 async function fillFromEmail(email){
   const hint = document.getElementById("welcomeBack");
+  gLookStart();
   try{
-    const res = await fetch(`${gasUrlFor("")}?action=byEmail&email=${encodeURIComponent(email)}`);
+    const res = await gLookFetch(`${gasUrlFor("")}?action=byEmail&email=${encodeURIComponent(email)}`);
     const j = await res.json();
+    gLookEnd();
     if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
     if(!j.ok || !j.members || j.members.length === 0) return;
 
@@ -297,7 +308,11 @@ async function fillFromEmail(email){
       }
       window.__memberChoices = j.members;
     }
-  }catch(e){ /* 取得できなくても手入力で進めます */ }
+  }catch(e){
+    /* 取得できなくても手入力で進めます */
+    gLookEnd();
+    if(hint){ hint.style.display = "block"; hint.textContent = "登録を確かめられませんでした（通信が混んでいるようです）。会員番号を入れてください。"; }
+  }
 }
 
 function pickMember(i){

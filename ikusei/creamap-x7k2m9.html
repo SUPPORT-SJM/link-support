@@ -149,6 +149,29 @@
   .tchildren.open{display:block;}
 
   .empty{text-align:center;padding:50px 20px;color:#8B889E;}
+  /* 見る範囲（全体／系列ごと／個人） */
+  .head .seg{display:inline-flex;background:rgba(255,255,255,.12);border-radius:999px;padding:2px;}
+  .head .seg button{background:none;border-radius:999px;}
+  .head .seg button.on{background:var(--leaf);}
+  .head button.back:disabled{opacity:.35;cursor:default;}
+  /* 家系図：見ている方 */
+  .card.focus{outline:3px solid var(--amber);outline-offset:2px;}
+  .card.side{opacity:.82;}
+  .trow.focus{outline:2.5px solid var(--amber);}
+  /* 直すところ */
+  #editBox{max-width:560px;margin:0 auto 14px;}
+  .ed{background:#fff;border-radius:14px;box-shadow:0 2px 10px rgba(0,0,0,.08);padding:14px 16px;border-left:5px solid var(--amber);}
+  .ed h3{font-family:"Zen Maru Gothic",sans-serif;font-size:14.5px;color:var(--deep);margin-bottom:8px;}
+  .ed label{display:block;font-size:12px;font-weight:700;color:var(--deep);margin:8px 0 4px;}
+  .ed select{width:100%;padding:9px 10px;border-radius:9px;border:1.5px solid var(--line);font-size:14px;font-family:inherit;background:#fff;}
+  .ed .ck{display:flex;align-items:center;gap:8px;font-size:13.5px;margin-top:10px;}
+  .ed .ck input{width:18px;height:18px;}
+  .ed .row{display:flex;gap:8px;margin-top:12px;}
+  .ed .row button{padding:10px 16px;border-radius:10px;background:var(--deep);color:#fff;font-weight:700;font-size:13.5px;}
+  .ed .row button.sub{background:var(--mist);color:var(--deep);}
+  .ed .note{font-size:11.5px;color:#77748A;margin-top:8px;line-height:1.7;}
+  .ed .msg{font-size:12.5px;margin-top:8px;font-weight:700;}
+  .ed .msg.err{color:#B3352F;} .ed .msg.ok{color:#2F7A5C;}
   .legend{font-size:11px;color:#8B889E;margin-top:18px;line-height:1.9;}
   .legend .dot{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:3px;vertical-align:-1px;}
   #toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;font-size:13px;border-radius:999px;padding:10px 20px;opacity:0;transition:all .3s;z-index:50;}
@@ -206,7 +229,12 @@
         <div class="me" id="meLine"></div>
       </div>
       <div class="tools">
-        <select id="rootSel" onchange="changeRoot(this.value)"></select>
+        <button id="btnBack" class="back" onclick="goBack()" disabled>‹ もどる</button>
+        <span class="seg" role="group" aria-label="見る範囲">
+          <button id="mAll" class="on" onclick="setMode('all')">全体</button><button id="mKei" onclick="setMode('kei')">系列ごと</button><button id="mPerson" onclick="setMode('person')">個人</button>
+        </span>
+        <select id="keiSel" onchange="pickKei(this.value)" style="display:none;"></select>
+        <select id="rootSel" onchange="pickPerson(this.value)" style="display:none;"></select>
         <button id="btnChart" class="on" onclick="setView('chart')">組織図</button>
         <button id="btnTree" onclick="setView('tree')">ツリー</button>
         <select id="depthSel" onchange="setDepth(this.value)">
@@ -237,6 +265,7 @@
       </div>
       <p class="zoom-hint">マウスホイールで拡大縮小／ドラッグで上下左右に動かせます</p>
 
+      <div id="editBox"></div>
       <div id="chartArea"><div id="zoomWrap"></div></div>
       <div id="treeArea"></div>
       <div class="legend">
@@ -247,7 +276,7 @@
         <span><span class="dot" style="background:#F5C452;"></span>チーム代表</span>　
         <span><span class="dot" style="background:#E8788A;"></span>管理者</span><br>
         ①🎓=ぴよぴよ卒業 ／ ②の数字=グルコンリーダー育成の先生の丸<br>
-        カードをクリックすると、その方から下だけを表示します。会員名簿の「アップの会員番号」欄でつながりを設定してください。
+        カードを押すと、その方の上のつながりと枝分かれ（家系図）を表示します。つながりは「直アップクリエ」（会員名簿のアップの欄）で決まります。
       </div>
       <div class="verTag"></div>
     </div>
@@ -279,6 +308,7 @@ let admin = null, googleEmail = "";
 let members = [], byId = {}, children = {};
 let rootId = null, view = "chart", maxDepth = 5;
 let crumbs = [];
+let mode = "all", selKei = "", keiOrder = [], canEdit = false, hist = [];
 
 /* ---------- 保存されたログイン情報で表示します ---------- */
 (function(){
@@ -319,6 +349,8 @@ async function load(isLogin){
       return false;
     }
     members = j.members || [];
+    keiOrder = (j.keiOrder || []).map(x=>x.kei).filter(Boolean);
+    canEdit = j.canEdit === true;
     buildIndex();
     $("#meLine").textContent = (j.viewerName||"") + "さん｜クリエイターズ全体図";
 
@@ -334,59 +366,106 @@ async function load(isLogin){
 
 /* ---------- 家系図の組み立て ---------- */
 const norm = (v)=> String(v==null?"":v).trim().replace(/^0+/,"") || String(v||"");
+const esc = (t)=> String(t==null?"":t).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+/* 並べ方：チーム代表がいちばん上 → 系列の並び順（タブ「系列のつながり」）→ お名前 */
+function keiIdx(k){
+  const list = keiOrder.length ? keiOrder : (window.SKY_KEIRETSU || []);
+  const i = list.indexOf(String(k||""));
+  return i < 0 ? 999 : i;
+}
+const isRep = m => String(m.role||"").indexOf("チーム代表") >= 0;
+function cmp(a, b){
+  if(isRep(a) !== isRep(b)) return isRep(a) ? -1 : 1;
+  const d = keiIdx(a.keiretsu) - keiIdx(b.keiretsu);
+  if(d) return d;
+  return (a.name||"").localeCompare(b.name||"", "ja");
+}
 
 function buildIndex(){
   byId = {}; children = {};
   members.forEach(m=>{ byId[norm(m.id)] = m; });
   members.forEach(m=>{
     const up = norm(m.upline);
-    if(up && byId[up]){
+    if(up && byId[up] && up !== norm(m.id)){
       (children[up] = children[up] || []).push(m);
     }
   });
-  // 名前順に整える
-  Object.keys(children).forEach(k=> children[k].sort((a,b)=> (a.name||"").localeCompare(b.name||"","ja")));
+  Object.keys(children).forEach(k=> children[k].sort(cmp));
 }
 
 function roots(){
-  // アップが未設定、またはアップが一覧にいない人がルート
+  // アップが未設定、またはアップが一覧にいない人がいちばん上
   return members.filter(m=>{
     const up = norm(m.upline);
     return !up || !byId[up];
-  }).sort((a,b)=> (a.keiretsu||"").localeCompare(b.keiretsu||"","ja"));
+  }).sort(cmp);
+}
+
+/* 系列ごと：その系列の方だけで組み立てます */
+function keiMembers(k){ return members.filter(m=> (m.keiretsu||"") === k); }
+function keiChildren(id, k){ return (children[id]||[]).filter(c=> (c.keiretsu||"") === k); }
+function keiRoots(k){
+  return keiMembers(k).filter(m=>{
+    const up = norm(m.upline);
+    return !up || !byId[up] || (byId[up].keiretsu||"") !== k;
+  }).sort(cmp);
 }
 
 function buildRootSelect(){
+  /* 個人：全員（並べ方は上と同じ） */
   const sel = $("#rootSel");
-  const rs = roots();
-  sel.innerHTML = '<option value="">全体を表示</option>'
-    + rs.map(m=>`<option value="${norm(m.id)}">${m.name||m.id}(${m.keiretsu||"系列なし"})</option>`).join("");
+  sel.innerHTML = '<option value="">お名前をえらぶ</option>'
+    + members.slice().sort(cmp).map(m=>`<option value="${norm(m.id)}">${esc(m.name||m.id)}（${esc(m.keiretsu||"系列なし")}）</option>`).join("");
+  /* 系列ごと：系列の並び順 */
+  const ks = [];
+  (keiOrder.length ? keiOrder : (window.SKY_KEIRETSU||[])).forEach(k=>{ if(members.some(m=>m.keiretsu===k)) ks.push(k); });
+  members.forEach(m=>{ const k = m.keiretsu||""; if(k && ks.indexOf(k) < 0) ks.push(k); });
+  $("#keiSel").innerHTML = '<option value="">系列をえらぶ</option>'
+    + ks.map(k=>`<option value="${esc(k)}">${esc(k)}（${keiMembers(k).length}名）</option>`).join("");
 }
 
-function changeRoot(id){
-  rootId = (id && id !== "") ? id : null;
-  crumbs = [];
-  if(id && byId[id]) crumbs = buildCrumbs(id);
+/* ---------- 見る範囲と、もどる ---------- */
+function state(){ return { mode, selKei, rootId }; }
+function pushHist(){ hist.push(state()); if(hist.length > 50) hist.shift(); }
+function goBack(){
+  const st = hist.pop();
+  if(!st) return;
+  mode = st.mode; selKei = st.selKei; rootId = st.rootId;
   render();
 }
+function setMode(m){
+  if(m === mode) return;
+  pushHist();
+  mode = m;
+  if(m === "kei" && !selKei){
+    /* 見ている方の系列、なければいちばん上の系列 */
+    const cur = rootId && byId[rootId];
+    selKei = (cur && cur.keiretsu) || ($("#keiSel").options[1] ? $("#keiSel").options[1].value : "");
+  }
+  if(m === "person" && !rootId){
+    const r = roots()[0];
+    rootId = r ? norm(r.id) : null;
+  }
+  render();
+}
+function pickKei(k){ if(!k) return; pushHist(); mode = "kei"; selKei = k; render(); }
+function pickPerson(id){ if(!id || !byId[id]) return; pushHist(); mode = "person"; rootId = id; render(); }
+/* 互換：前の呼び名 */
+function changeRoot(id){ if(id) pickPerson(id); else { pushHist(); mode = "all"; render(); } }
+function drill(id){ if(mode === "person" && rootId === id) return; pickPerson(id); }
 
 function buildCrumbs(id){
   const path = [];
   let cur = byId[id];
   let guard = 0;
-  while(cur && guard++ < 20){
+  while(cur && guard++ < 50){
     path.unshift(cur);
     const up = norm(cur.upline);
     cur = (up && byId[up]) ? byId[up] : null;
+    if(cur && path.indexOf(cur) >= 0) break;
   }
   return path;
-}
-
-function drill(id){
-  rootId = id;
-  crumbs = buildCrumbs(id);
-  $("#rootSel").value = "";
-  render();
 }
 
 function setView(v){
@@ -417,42 +496,72 @@ function progText(m){
   const p2 = m.grDone ? '<span class="g">②🎓</span>' : (m.grMark ? `②${m.grMark}/${m.grItems||"–"}` : "②–");
   return p1 + "　" + p2;
 }
-function countAll(id){
+function countAll(id, seen){
+  seen = seen || {};
+  if(seen[id]) return 0;
+  seen[id] = 1;
   let n = 0;
-  (children[id]||[]).forEach(c=>{ n += 1 + countAll(norm(c.id)); });
+  (children[id]||[]).forEach(c=>{ n += 1 + countAll(norm(c.id), seen); });
   return n;
 }
 
 function render(){
+  if(mode === "person" && (!rootId || !byId[rootId])) mode = "all";
+  crumbs = mode === "person" ? buildCrumbs(rootId) : [];
+  /* 上のボタン */
+  $("#mAll").classList.toggle("on", mode === "all");
+  $("#mKei").classList.toggle("on", mode === "kei");
+  $("#mPerson").classList.toggle("on", mode === "person");
+  $("#keiSel").style.display = mode === "kei" ? "" : "none";
+  $("#rootSel").style.display = mode === "person" ? "" : "none";
+  $("#keiSel").value = mode === "kei" ? selKei : "";
+  $("#rootSel").value = mode === "person" ? rootId : "";
+  $("#btnBack").disabled = hist.length === 0;
+
   const crumbEl = $("#crumbLine");
-  if(crumbs.length){
+  if(mode === "person"){
     crumbEl.innerHTML = '<a onclick="changeRoot()">全体</a>'
       + crumbs.map((m,i)=> `<span class="sep">›</span>` +
-          (i===crumbs.length-1 ? `<span class="now">${m.name||m.id}</span>`
-                               : `<a onclick="drill('${norm(m.id)}')">${m.name||m.id}</a>`)).join("")
-      + `<span class="cnt">配下 ${countAll(norm(crumbs[crumbs.length-1].id))} 名</span>`;
+          (i===crumbs.length-1 ? `<span class="now">${esc(m.name||m.id)}</span>`
+                               : `<a onclick="drill('${norm(m.id)}')">${esc(m.name||m.id)}</a>`)).join("")
+      + `<span class="cnt">配下 ${countAll(rootId)} 名</span>`;
+  }else if(mode === "kei"){
+    crumbEl.innerHTML = '<a onclick="changeRoot()">全体</a><span class="sep">›</span>'
+      + `<span class="now">${esc(selKei || "系列をえらんでください")}</span>`
+      + `<span class="cnt">${selKei ? "この系列のクリエイターズ以上 " + keiMembers(selKei).length + " 名" : ""}</span>`;
   }else{
     crumbEl.innerHTML = `<span class="now">全体</span><span class="cnt">クリエイターズ以上 ${members.length} 名</span>`;
   }
-
+  renderEdit();
   if(view === "chart") renderChart(); else renderTree();
 }
+
+/* 見る範囲ごとの、いちばん上の方たち */
+function topList(){
+  if(mode === "kei") return selKei ? keiRoots(selKei) : [];
+  if(mode === "person") return crumbs.length ? [crumbs[0]] : [];
+  return roots();
+}
+const emptyMsg = ()=> mode === "kei" && !selKei
+  ? '<div class="empty">上の「系列をえらぶ」から、系列をえらんでください。</div>'
+  : '<div class="empty">表示する方がいません。<br>会員名簿の「アップのクリエ会員番号」欄を設定してください。</div>';
 
 /* 組織図 */
 function renderChart(){
   const area = $("#zoomWrap");
-  const list = rootId ? [byId[rootId]] : roots();
+  const list = topList();
   const bar = document.getElementById("zoomBar");
   const hint = document.querySelector(".zoom-hint");
   if(!list.length || !list[0]){
-    area.innerHTML = '<div class="empty">表示する方がいません。<br>会員名簿の「アップのクリエ会員番号」欄を設定してください。</div>';
+    area.innerHTML = emptyMsg();
     if(bar) bar.style.display = "none";
     if(hint) hint.style.display = "none";
     return;
   }
   if(bar) bar.style.display = "flex";
   if(hint) hint.style.display = "block";
-  area.innerHTML = '<div class="org">' + list.map(m=>nodeHtml(m,1)).join("") + '</div>';
+  const html = mode === "person" ? lineageHtml(list[0], 1) : list.map(m=>nodeHtml(m,1)).join("");
+  area.innerHTML = '<div class="org">' + html + '</div>';
   // 描画が終わってから線を引きます
   requestAnimationFrame(()=>{ drawLines(); applyZoom(); });
 }
@@ -483,59 +592,163 @@ function drawLines(){
   });
 }
 
-function nodeHtml(m, depth){
+function kidsOf(id){ return mode === "kei" ? keiChildren(id, selKei) : (children[id] || []); }
+
+function cardHtml(m, extra){
   const id = norm(m.id);
-  const kids = children[id] || [];
   const total = countAll(id);
-  const card = `<div class="card ${roleClass(m.role)}" onclick="drill('${id}')">
-      <div class="nm">${m.name || "(名前未登録)"}</div>
-      <div class="kei-s">${m.keiretsu || "–"}</div>
+  return `<div class="card ${roleClass(m.role)} ${extra||""}" onclick="drill('${id}')" data-id="${id}">
+      <div class="nm">${esc(m.name || "(名前未登録)")}</div>
+      <div class="kei-s">${esc(m.keiretsu || "–")}</div>
       <div class="prog">${progText(m)}</div>
       ${total ? `<span class="child">配下 ${total}</span>` : ""}
     </div>`;
+}
 
+function nodeHtml(m, depth, extra, seen){
+  seen = seen || {};
+  const id = norm(m.id);
+  if(seen[id]) return "";
+  seen[id] = 1;
+  const kids = kidsOf(id);
+  const card = cardHtml(m, extra);
   if(!kids.length) return `<div class="org-node">${card}</div>`;
-
   if(depth >= maxDepth){
     return `<div class="org-node">${card}
       <div class="org-row"><svg class="lines"></svg>
-        <div class="more" onclick="drill('${id}')">▼ この先 ${total} 名<br>クリックで表示</div>
+        <div class="more" onclick="drill('${id}')">▼ この先 ${countAll(id)} 名<br>クリックで表示</div>
       </div>
     </div>`;
   }
   return `<div class="org-node">${card}
-    <div class="org-row"><svg class="lines"></svg>${kids.map(k=>nodeHtml(k, depth+1)).join("")}</div>
+    <div class="org-row"><svg class="lines"></svg>${kids.map(k=>nodeHtml(k, depth+1, "", seen)).join("")}</div>
+  </div>`;
+}
+
+/* 家系図：いちばん上の方から、見ている方までの道すじ。
+   道すじの方は下を広げ、枝分かれしている方はカードだけ（押すとその方へ）。
+   見ている方は、そこから下を広げます */
+function lineageHtml(m, depth){
+  const id = norm(m.id);
+  const target = rootId;
+  if(id === target) return nodeHtml(m, 1, "focus");
+  const onPath = crumbs.map(c=>norm(c.id));
+  const kids = children[id] || [];
+  const parts = kids.map(k=>{
+    const kid = norm(k.id);
+    return onPath.indexOf(kid) >= 0 ? lineageHtml(k, depth+1) : `<div class="org-node">${cardHtml(k, "side")}</div>`;
+  }).join("");
+  return `<div class="org-node">${cardHtml(m)}
+    ${kids.length ? `<div class="org-row"><svg class="lines"></svg>${parts}</div>` : ""}
   </div>`;
 }
 
 /* ツリー */
 function renderTree(){
   const area = $("#treeArea");
-  const list = rootId ? [byId[rootId]] : roots();
-  if(!list.length || !list[0]){
-    area.innerHTML = '<div class="empty">表示する方がいません。<br>会員名簿の「アップの会員番号」欄を設定してください。</div>';
-    return;
-  }
-  area.innerHTML = list.map(m=>treeHtml(m,1)).join("");
+  const list = topList();
+  if(!list.length || !list[0]){ area.innerHTML = emptyMsg(); return; }
+  area.innerHTML = mode === "person" ? lineageTree(list[0], 1) : list.map(m=>treeHtml(m,1)).join("");
 }
 
-function treeHtml(m, depth){
+function trowHtml(m, kids, open, extra){
   const id = norm(m.id);
-  const kids = children[id] || [];
   const total = countAll(id);
-  const open = depth <= 2;
-  return `<div class="tnode">
-    <div class="trow">
+  return `<div class="trow ${extra||""}">
       ${kids.length
         ? `<button class="tbtn" onclick="toggleTree(this)">${open?"−":"+"}</button>`
         : `<button class="tbtn empty">・</button>`}
-      <span class="nm" onclick="drill('${id}')">${m.name || "(名前未登録)"}</span>
-      <span class="kei-s">${m.keiretsu || "–"}</span>
+      <span class="nm" onclick="drill('${id}')">${esc(m.name || "(名前未登録)")}</span>
+      <span class="kei-s">${esc(m.keiretsu || "–")}</span>
       ${total ? `<span class="badge">配下 ${total}</span>` : ""}
       <span class="prog">${progText(m)}</span>
-    </div>
-    ${kids.length ? `<div class="tchildren ${open?'open':''}">${kids.map(k=>treeHtml(k, depth+1)).join("")}</div>` : ""}
+    </div>`;
+}
+function treeHtml(m, depth, extra, seen){
+  seen = seen || {};
+  const id = norm(m.id);
+  if(seen[id]) return "";
+  seen[id] = 1;
+  const kids = kidsOf(id);
+  const open = depth <= 2;
+  return `<div class="tnode">
+    ${trowHtml(m, kids, open, extra)}
+    ${kids.length ? `<div class="tchildren ${open?'open':''}">${kids.map(k=>treeHtml(k, depth+1, "", seen)).join("")}</div>` : ""}
   </div>`;
+}
+function lineageTree(m, depth){
+  const id = norm(m.id);
+  if(id === rootId) return treeHtml(m, 1, "focus");
+  const onPath = crumbs.map(c=>norm(c.id));
+  const kids = children[id] || [];
+  return `<div class="tnode">
+    ${trowHtml(m, kids, true)}
+    ${kids.length ? `<div class="tchildren open">${kids.map(k=>{
+        const kid = norm(k.id);
+        return onPath.indexOf(kid) >= 0 ? lineageTree(k, depth+1)
+          : `<div class="tnode">${trowHtml(k, [], false)}</div>`;
+      }).join("")}</div>` : ""}
+  </div>`;
+}
+
+/* ---------- 直す（直アップクリエ・クリエイターズかどうか） ---------- */
+function descendantsOf(id, out){
+  out = out || {};
+  (children[id]||[]).forEach(c=>{ const k = norm(c.id); if(!out[k]){ out[k] = 1; descendantsOf(k, out); } });
+  return out;
+}
+function renderEdit(){
+  const box = $("#editBox");
+  const m = mode === "person" && rootId ? byId[rootId] : null;
+  if(!m || !m.edit){ box.innerHTML = ""; return; }
+  const id = norm(m.id);
+  const bad = descendantsOf(id); bad[id] = 1;
+  const cands = members.filter(x=> !bad[norm(x.id)]).sort(cmp);
+  const cur = norm(m.upline);
+  const curIn = !cur || cands.some(x=> norm(x.id) === cur);
+  box.innerHTML = `<div class="ed">
+    <h3>✏️ ${esc(m.name || m.id)}さんの情報を直す</h3>
+    <label for="edUp">直アップクリエ（この方の、すぐ上のクリエイター）</label>
+    <select id="edUp">
+      <option value="">（なし：いちばん上）</option>
+      ${!curIn ? `<option value="${esc(m.upline)}" selected>今の番号：${esc(m.upline)}（マップにいない方）</option>` : ""}
+      ${cands.map(x=>`<option value="${norm(x.id)}" ${norm(x.id)===cur?"selected":""}>${esc(x.name||x.id)}（${esc(x.keiretsu||"系列なし")}）</option>`).join("")}
+    </select>
+    <label class="ck"><input type="checkbox" id="edCrie" ${m.crie ? "checked" : ""}>クリエイターズ</label>
+    <div class="row"><button onclick="saveEdit('${id}')" id="edSave">この内容で保存</button></div>
+    <p class="note">・クリエイターズを外すと、このマップには出なくなります（役職のある方は出たままです）。<br>・ご本人や、この方の下の方は、アップにえらべません。</p>
+    <div class="msg" id="edMsg"></div>
+  </div>`;
+}
+const ED_ERR = { noperm:"この方を直す権限がありません。", selfedit:"ご自身のことは、ご自身では直せません（管理者にお願いしてください）。", self:"ご本人をアップにはできません。", loop:"この方の下の方をアップにすると、つながりが輪になってしまいます。",
+  noperson:"その会員番号の方が名簿にいません。", badid:"会員番号を確かめてください。", notfound:"この方が名簿に見つかりませんでした。", busy:"ほかの方が保存中です。少しおいてお試しください。",
+  email:"Googleアカウントが登録と違います。", unknown_action:"GASが古い版のままです。GASを新しい版に貼り替えてください。" };
+async function saveEdit(id){
+  const m = byId[id]; if(!m) return;
+  const up = $("#edUp").value, crie = $("#edCrie").checked ? "1" : "0";
+  const msg = $("#edMsg"), btn = $("#edSave");
+  btn.disabled = true; msg.className = "msg"; msg.textContent = "保存しています…";
+  try{
+    const body = new URLSearchParams({ action:"creaMapSet", id:admin.id, pin:admin.pin, email:admin.email || "", target:m.id, upline:up, crie:crie });
+    const res = await fetch(GAS_URL, { method:"POST", body });
+    const j = await res.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
+    if(!j || j.ok !== true){
+      const code = j && j.error ? String(j.error) : "";
+      msg.className = "msg err";
+      msg.textContent = ED_ERR[code] || ("うまくいきませんでした。" + (code ? "（理由：" + code.slice(0,100) + "）" : ""));
+      btn.disabled = false; return;
+    }
+    members = j.members || [];
+    keiOrder = (j.keiOrder || []).map(x=>x.kei).filter(Boolean);
+    buildIndex(); buildRootSelect();
+    if(!byId[id]){ mode = "all"; rootId = null; toast("クリエイターズから外したので、マップから外れました"); }
+    else toast("保存しました");
+    render();
+  }catch(e){
+    msg.className = "msg err"; msg.textContent = "通信できませんでした。電波のよい場所でお試しください。";
+    btn.disabled = false;
+  }
 }
 
 function toggleTree(btn){

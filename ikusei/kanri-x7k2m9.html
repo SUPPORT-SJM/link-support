@@ -1152,11 +1152,22 @@ function onGoogleCredential(response){
   fillFromEmail(googleEmail);
 }
 
+/* Googleアカウントを選んだ直後の確認中は、画面にお知らせを出します（終わるまで入力を待っていただきます） */
+function gLookStart(){ if(typeof skyLoadingNow === "function") skyLoadingNow("Googleアカウントの登録を確かめています", "このアカウントで登録されている会員番号をさがしています。終わるまで、そのままお待ちください（20秒ほどかかることがあります）"); }
+function gLookEnd(){ if(typeof skyLoadingDone === "function") skyLoadingDone(); }
+function gLookFetch(url){
+  return new Promise(function(ok, ng){
+    const t = setTimeout(function(){ ng(new Error("timeout")); }, 45000);
+    fetch(url).then(function(r){ clearTimeout(t); ok(r); }, function(e){ clearTimeout(t); ng(e); });
+  });
+}
 /* Googleアカウントに紐づく会員番号を自動で入れる(パスコードは手入力) */
 async function fillFromEmail(email){
+  gLookStart();
   try{
-    const res = await fetch(`${GAS_URL}?action=byEmail&email=${encodeURIComponent(email)}`);
+    const res = await gLookFetch(`${GAS_URL}?action=byEmail&email=${encodeURIComponent(email)}`);
     const j = await res.json();
+    gLookEnd();
     if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
     const list = (j && j.ok && j.members) || [];
     const pick = document.getElementById("gPick");
@@ -1180,7 +1191,12 @@ async function fillFromEmail(email){
       pick.style.display = "block";
       document.getElementById("inId").focus();
     }
-  }catch(e){}
+  }catch(e){
+    gLookEnd();
+    const pick = document.getElementById("gPick");
+    if(pick){ pick.textContent = "登録を確かめられませんでした（通信が混んでいるようです）。会員番号を入れてください。"; pick.style.display = "block"; }
+    document.getElementById("inId").focus();
+  }
 }
 function resetGoogle(){
   googleEmail = "";
@@ -1960,7 +1976,7 @@ async function saveRolesPart(){
         if(r.role !== undefined) m.role = r.role;
       }else{
         bad.push((m && m.name ? m.name + "さん" : r.target) + "の「" + r.flag + "」："
-          + ({ outofscope:"担当系列外の方です", noperm:"この権限は操作できません", notfound:"見つかりませんでした" }[r.error] || "保存できませんでした"));
+          + ({ outofscope:"担当系列外の方です", noperm:"この権限は操作できません", notfound:"見つかりませんでした", self:"ご自身の印は、ご自身では変えられません（管理者にお願いしてください）" }[r.error] || "保存できませんでした"));
       }
       if(p){ delete p[r.flag]; if(!Object.keys(p).length) delete pendingRoles[r.target]; }
     });
@@ -2060,6 +2076,7 @@ async function saveScope(){
     if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
     if(j.ok === false){
       toast({outofscope:"担当系列外の方は操作できません",
+             self:"ご自身の印は、ご自身では変えられません（管理者にお願いしてください）",
              scopelimit:"自分の担当系列の範囲でのみ設定できます",
              noperm:"権限がありません"}[j.error] || "変更できませんでした");
       return;
