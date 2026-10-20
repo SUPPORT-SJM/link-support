@@ -22,6 +22,9 @@
     { ic:"💌", nm:"新規の方への最初のメッセージ",
       sub:"新しく入会した方に、このサイトを教える",
       url: up+"ikusei/first-message.html", need:"" },
+    { ic:"📖", nm:"チュートリアル",
+      sub:"このサイトの使い方を、絵で見る",
+      url: up+"howto.html", need:"" },
 
     { sec: "まなぶ" },
     { ic:"👋", nm:"はじめの一歩",        url: up+"first-support/",            need:"" },

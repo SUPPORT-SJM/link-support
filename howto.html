@@ -90,7 +90,7 @@ button{font-family:inherit;cursor:pointer;border:none;}
 .form .row .ic{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;background:var(--mist);font-size:15px;flex:none;}
 .form .row .ck{margin-left:auto;color:#3FA98A;font-size:16px;opacity:0;}
 .on .form .row .ck{animation:pop .4s forwards;animation-delay:var(--d);}
-.match{position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);white-space:nowrap;background:#EAF7F0;color:#2F7A5C;
+.match{position:absolute;bottom:-8px;left:0;right:0;margin:0 auto;width:max-content;white-space:nowrap;background:#EAF7F0;color:#2F7A5C;
   font-family:var(--f-head);font-weight:700;font-size:12.5px;border-radius:999px;padding:5px 12px;box-shadow:var(--shadow);}
 
 /* 3：できること */
@@ -134,6 +134,48 @@ button{font-family:inherit;cursor:pointer;border:none;}
 .road .st.goal{background:#FFF8E6;}
 .note{margin-top:10px;background:var(--mist);border-radius:12px;padding:9px 12px;font-size:12.5px;color:var(--deep);font-weight:700;text-align:center;}
 
+/* 1：仲間限定 */
+.cap .only{display:inline-block;margin-top:4px;font-size:12.5px;font-weight:700;color:var(--deep);background:var(--mist);border-radius:999px;padding:2px 12px;}
+/* 2：4つを丸で浮かべる */
+.four{display:grid;grid-template-columns:repeat(2,auto);gap:12px 22px;justify-content:center;}
+.orb{position:relative;width:96px;height:96px;border-radius:50%;background:#fff;border:3px solid #BFE3F5;box-shadow:var(--shadow);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-align:center;}
+.on .orb{animation:pop .5s cubic-bezier(.3,1.5,.5,1) forwards, bob 3s ease-in-out infinite;animation-delay:var(--d), calc(var(--d) + var(--fd));}
+@keyframes bob{0%,100%{translate:0 0;}50%{translate:0 -7px;}}
+.orb .oi{font-size:24px;line-height:1;}
+.orb .ot{font-family:var(--f-head);font-weight:700;font-size:12px;line-height:1.3;color:var(--ink);}
+.orb .ot small{font-size:9.5px;color:var(--sub);font-weight:500;}
+.orb .ok2{position:absolute;right:-2px;top:-2px;width:24px;height:24px;border-radius:50%;background:#3FA98A;color:#fff;font-size:13px;font-weight:900;
+  display:grid;place-items:center;border:2px solid #fff;opacity:0;}
+.on .orb .ok2{animation:pop .35s forwards;animation-delay:calc(var(--d) + .9s);}
+/* 5・6：人のイラスト */
+.person{display:block;}
+.cheerwrap{display:flex;align-items:flex-end;gap:2px;margin-top:6px;}
+.cheer{width:96px;height:104px;}
+.on .cheer .armL{transform-origin:38px 70px;animation:waveL 1s ease-in-out infinite;}
+.on .cheer .armR{transform-origin:82px 70px;animation:waveR 1s ease-in-out infinite;}
+@keyframes waveL{0%,100%{transform:rotate(0);}50%{transform:rotate(-12deg);}}
+@keyframes waveR{0%,100%{transform:rotate(0);}50%{transform:rotate(12deg);}}
+.on .cheer{animation:jump 1s ease-in-out infinite;}
+@keyframes jump{0%,100%{translate:0 0;}50%{translate:0 -6px;}}
+.say{font-family:var(--f-head);font-weight:900;font-size:13px;color:var(--deep);background:#fff;border-radius:14px;padding:5px 10px;
+  box-shadow:var(--shadow);margin-bottom:56px;line-height:1.35;}
+.slide[data-i="4"] .stage{height:auto;min-height:0;}
+.slide[data-i="2"] .stage{height:auto;min-height:0;}
+.cheerwrap{align-items:center;gap:8px;}
+.cheerside{display:flex;flex-direction:column;align-items:flex-start;gap:8px;}
+.cheerside .say{margin-bottom:0;}
+.cheerside .medal{margin-top:0;font-size:15px;padding:8px 16px;line-height:1.4;}
+.slide[data-i="4"] .trio .ball{width:62px;height:62px;font-size:28px;}
+.cardx{padding:9px 13px;}
+.cardx .ic{width:38px;height:38px;font-size:20px;}
+.cards{width:min(290px,84vw);gap:8px;}
+.bar2{height:5px;margin-top:4px;}
+.thinkrow{display:flex;align-items:flex-end;justify-content:center;gap:6px;}
+.think{width:76px;height:82px;}
+.on .think .glow{animation:glow 1.6s ease-in-out infinite;}
+@keyframes glow{0%,100%{opacity:.25;}50%{opacity:.95;}}
+.thinkrow .say{margin-bottom:34px;font-size:12px;}
 /* 7：さあ、はじめよう */
 .go .join .ball{animation:beat 1.6s ease-in-out infinite;}
 @keyframes beat{0%,100%{transform:scale(1);}50%{transform:scale(1.07);}}
@@ -155,6 +197,16 @@ button{font-family:inherit;cursor:pointer;border:none;}
   .note{margin-top:4px;padding:6px 10px;font-size:11.5px;}
   .slide[data-i="5"] .cap{margin-top:10px;}
   .slide[data-i="5"] .cap .step{margin-bottom:4px;}
+}
+@media (max-height:600px){
+  .stage{height:min(210px,36vh);min-height:170px;}
+  .phone{width:122px;height:200px;}
+  .orb{width:80px;height:80px;}
+  .orb .oi{font-size:20px;} .orb .ot{font-size:11px;}
+  .four{gap:8px 18px;}
+  .cap{margin-top:10px;} .cap h2{font-size:18px;} .cap p{font-size:13px;line-height:1.7;}
+  .go .cap .btns a,.go .cap a{padding:11px;}
+  .go .stage{height:150px;min-height:150px;}
 }
 @media (prefers-reduced-motion: reduce){
   .deck{transition:none;}
@@ -180,32 +232,29 @@ button{font-family:inherit;cursor:pointer;border:none;}
         <div class="rainbow"><img src="img/app-icon-180.png" alt=""></div>
         <span class="mini">Skyarc LINKサポート</span>
       </div></div>
-      <span class="spark pop" style="--d:.3s;left:12%;top:18%;">✨</span>
-      <span class="spark pop" style="--d:.5s;right:12%;top:30%;">🌈</span>
-      <span class="spark pop" style="--d:.7s;left:16%;bottom:16%;">💡</span>
     </div>
     <div class="cap">
       <span class="step">ようこそ</span>
       <h2>LINKを、もっと使いやすくする<br>あなたのためのサイトです</h2>
-      <p>やることが順番にわかり、<br><b>あなたの進み具合</b>もひと目でわかります。</p>
+      <p>やることが順番にわかり、<br><b>あなたの進み具合</b>もひと目でわかります。<br><span class="only">（Skyarcの仲間限定です）</span></p>
     </div>
   </section>
 
   <!-- 2 登録 -->
   <section class="slide" data-i="1">
     <div class="stage">
-      <div class="form pop">
-        <div class="row" style="--d:.6s"><span class="ic">🔢</span>会員番号<span class="ck">✔</span></div>
-        <div class="row" style="--d:.9s"><span class="ic">🙂</span>お名前<span class="ck">✔</span></div>
-        <div class="row" style="--d:1.2s"><span class="ic">✉️</span>メールアドレス<span class="ck">✔</span></div>
-        <div class="row" style="--d:1.5s"><span class="ic">🔑</span>パスコード（数字4けた）<span class="ck">✔</span></div>
+      <div class="four">
+        <div class="orb pop" style="--d:.2s;--fd:0s"><span class="oi">🔢</span><span class="ot">会員番号</span><span class="ok2">✓</span></div>
+        <div class="orb pop" style="--d:.5s;--fd:.6s"><span class="oi">🙂</span><span class="ot">お名前</span><span class="ok2">✓</span></div>
+        <div class="orb pop" style="--d:.8s;--fd:1.2s"><span class="oi">✉️</span><span class="ot">メール<br>アドレス</span><span class="ok2">✓</span></div>
+        <div class="orb pop" style="--d:1.1s;--fd:1.8s"><span class="oi">🔑</span><span class="ot">パスコード<br><small>数字4けた</small></span><span class="ok2">✓</span></div>
       </div>
       <span class="match pop" style="--d:1.9s">🔗 名簿とつながりました</span>
     </div>
     <div class="cap">
       <span class="step">STEP 1</span>
-      <h2>トップの「登録」から、<br>4つを入れるだけ</h2>
-      <p>会員番号・お名前・メールアドレスが<br>名簿と合うと、<b>あなたの記録とつながります</b>。</p>
+      <h2>トップの「登録」から、<br>この4つを入れるだけ</h2>
+      <p><b>会員番号・お名前</b><br><b>メールアドレス・パスコード</b>の4つです。<br>名簿と合うと、あなたの記録とつながります。</p>
     </div>
   </section>
 
@@ -213,9 +262,9 @@ button{font-family:inherit;cursor:pointer;border:none;}
   <section class="slide" data-i="2">
     <div class="stage">
       <div class="cards">
-        <div class="cardx pop" style="--d:.2s"><span class="ic" style="background:#E8F6F1">📈</span><div><b>進み具合がわかる</b><div class="bar2"><i></i></div></div></div>
-        <div class="cardx pop" style="--d:.45s"><span class="ic" style="background:#FDF0E5">🗓️</span><div><b>日々の情報を整理</b><span>予定や申込みをまとめて見られる</span></div></div>
-        <div class="cardx pop" style="--d:.7s"><span class="ic" style="background:#EEF3FC">🧭</span><div><b>迷わず進める</b><span>次にやることを指でお知らせ</span></div></div>
+        <div class="cardx pop" style="--d:.2s"><span class="ic" style="background:#E8F6F1">🗺️</span><div><b>活用のロードマップを確認</b><span>自分がどこまでできているかがわかる</span><div class="bar2"><i></i></div></div></div>
+        <div class="cardx pop" style="--d:.45s"><span class="ic" style="background:#EEF3FC">🤝</span><div><b>仲間の進み具合もわかる</b><span>チームが広がった方は、仲間の様子を見てサポートしやすく</span></div></div>
+        <div class="cardx pop" style="--d:.7s"><span class="ic" style="background:#FDF0E5">🗓️</span><div><b>日々の情報を整理</b><span>予定や申込みをまとめて見られる</span></div></div>
       </div>
     </div>
     <div class="cap">
@@ -257,7 +306,20 @@ button{font-family:inherit;cursor:pointer;border:none;}
           <div class="bubble pop" style="--d:.35s"><span class="ball" style="--c:var(--g-member)">📘<span class="ok">✓</span></span></div>
           <div class="bubble pop" style="--d:.6s"><span class="ball" style="--c:var(--g-member)">🚀<span class="ok">✓</span></span></div>
         </div>
-        <span class="medal pop" style="--d:1s">🎉 初期サポート、ぜんぶOK！</span>
+        <div class="cheerwrap pop" style="--d:.8s"><svg class="person cheer" viewBox="0 0 120 130" aria-hidden="true">
+          <g class="armL"><path d="M38 70 L18 34" stroke="#F6C7A6" stroke-width="10" stroke-linecap="round"/><circle cx="17" cy="31" r="7" fill="#F6C7A6"/></g>
+          <g class="armR"><path d="M82 70 L102 34" stroke="#F6C7A6" stroke-width="10" stroke-linecap="round"/><circle cx="103" cy="31" r="7" fill="#F6C7A6"/></g>
+          <path d="M34 72 Q60 60 86 72 L92 122 Q60 130 28 122 Z" fill="#7BA3E8"/>
+          <path d="M44 74 Q60 84 76 74" stroke="#fff" stroke-width="3" fill="none" opacity=".7"/>
+          <circle cx="60" cy="44" r="23" fill="#F6C7A6"/>
+          <path d="M37 42 Q38 18 60 18 Q84 18 84 42 Q76 30 60 30 Q46 30 37 42 Z" fill="#5A4636"/>
+          <path d="M50 42 q3 -4 6 0" stroke="#3E2F28" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+          <path d="M64 42 q3 -4 6 0" stroke="#3E2F28" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+          <path d="M50 51 Q60 63 70 51 Z" fill="#C2410C"/>
+          <circle cx="45" cy="51" r="4" fill="#F49AC1" opacity=".55"/><circle cx="75" cy="51" r="4" fill="#F49AC1" opacity=".55"/>
+          <g stroke="#F5A97A" stroke-width="3" stroke-linecap="round"><path d="M8 18 l-6 -6"/><path d="M6 30 l-8 0"/><path d="M112 18 l6 -6"/><path d="M114 30 l8 0"/></g>
+        </svg><div class="cheerside"><span class="say">わーい！</span>
+        <span class="medal pop" style="--d:1.1s">🎉 初期サポート、<br>ぜんぶOK！</span></div></div>
       </div>
     </div>
     <div class="cap">
@@ -271,8 +333,21 @@ button{font-family:inherit;cursor:pointer;border:none;}
   <section class="slide" data-i="5">
     <div class="stage" style="height:auto;">
       <div class="road">
-        <div class="st pop" style="--d:.1s"><span class="ic" style="--c:var(--g-member)">🙋</span>LINKを人に紹介していきたい</div>
-        <div class="dn pop" style="--d:.25s">▼</div>
+        <div class="thinkrow pop" style="--d:.05s"><svg class="person think" viewBox="0 0 120 130" aria-hidden="true">
+          <g class="bulb">
+            <circle cx="88" cy="22" r="18" fill="#FFF3B0" opacity=".9" class="glow"/>
+            <path d="M88 8 a11 11 0 0 1 7 19 q-2 2 -2 6 h-10 q0 -4 -2 -6 a11 11 0 0 1 7 -19 z" fill="#F5D06A" stroke="#E0A92E" stroke-width="2"/>
+            <rect x="83" y="34" width="10" height="5" rx="1.5" fill="#B8A99A"/>
+            <g stroke="#F5B53D" stroke-width="2.5" stroke-linecap="round" class="rays"><path d="M88 -2 v-0"/><path d="M70 10 l-5 -4"/><path d="M106 10 l5 -4"/><path d="M68 26 l-6 1"/><path d="M108 26 l6 1"/></g>
+          </g>
+          <path d="M30 76 Q56 64 82 76 L88 124 Q56 132 24 124 Z" fill="#8FD9A8"/>
+          <circle cx="54" cy="50" r="22" fill="#F6C7A6"/>
+          <path d="M32 48 Q33 25 54 25 Q76 25 77 46 Q70 35 55 35 Q42 35 32 48 Z" fill="#5A4636"/>
+          <circle cx="47" cy="49" r="2.6" fill="#3E2F28"/><circle cx="62" cy="49" r="2.6" fill="#3E2F28"/>
+          <path d="M49 59 q6 4 11 0" stroke="#3E2F28" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+          <path d="M70 92 Q78 80 68 68" stroke="#F6C7A6" stroke-width="9" fill="none" stroke-linecap="round"/>
+          <circle cx="66" cy="66" r="6" fill="#F6C7A6"/>
+        </svg><span class="say">そうだ！<br>紹介していきたい</span></div>
         <div class="st pop" style="--d:.4s"><span class="ic" style="--c:var(--g-team)">💬</span>サポートしてくれている先輩に伝える</div>
         <div class="dn pop" style="--d:.55s">▼</div>
         <div class="st pop" style="--d:.7s"><span class="ic" style="--c:var(--g-sup)">🐣</span>サポーターのチェックに合格</div>

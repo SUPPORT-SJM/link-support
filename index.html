@@ -101,6 +101,14 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body)
   background:rgba(62,47,40,.92);color:#fff;font-size:13.5px;font-weight:700;border-radius:999px;padding:11px 20px;
   max-width:calc(100vw - 32px);text-align:center;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;}
 .toast.show{opacity:1;transform:translate(-50%,0);}
+/* ログイン中のトップの、小さな「チュートリアル」（重なる一瞬は、ほかのアイコンの後ろを通ります） */
+.tut{position:absolute;left:0;top:0;z-index:0;width:80px;display:flex;flex-direction:column;align-items:center;gap:2px;
+  text-decoration:none;will-change:transform;}
+.tut .tb{width:32px;height:32px;border-radius:50%;background:#fff;border:2px solid var(--deep);display:grid;place-items:center;
+  font-size:15px;box-shadow:var(--shadow);}
+.tut .tt{font-family:var(--f-head);font-weight:700;font-size:10px;color:var(--deep);background:rgba(255,255,255,.92);
+  border-radius:6px;padding:0 5px;white-space:nowrap;}
+.tut:focus-visible{outline:3px solid var(--deep);outline-offset:3px;border-radius:12px;}
 /* 「登録」の右下の、小さな「使い方」 */
 .howto{position:absolute;left:0;top:0;z-index:4;width:44px;display:flex;flex-direction:column;align-items:center;gap:2px;
   text-decoration:none;will-change:transform;}
@@ -656,6 +664,7 @@ function frame(t){
     n.el.style.opacity = n.o;
   }
   placeHowto(t);
+  placeTut(t);
   leaving = leaving.filter(n=>{
     if(t - n.dying > 420){ n.el.remove(); return false; }
     return true;
@@ -663,6 +672,67 @@ function frame(t){
   requestAnimationFrame(frame);
 }
 
+
+/* ================================================================
+   ログイン中のトップ：「サポーターの部屋」と「各種スケジュール情報」の間の少し右下に、
+   小さな「チュートリアル」を浮かべます（月のアイコンの3分の2ほどの大きさ）
+================================================================ */
+let tutEl = null, tutPos = null, tutPick = 0;
+/* ほかのアイコンと重ならない場所を、近くからさがします（0.12秒ごと） */
+function tutSpot(bx, by){
+  const sr = stage.getBoundingClientRect();
+  const rects = nodes.filter(n=>!n.it.moon).flatMap(n=>[...n.el.querySelectorAll(".ball,.nm")].map(e=>{
+    const r = e.getBoundingClientRect();
+    return [r.left - sr.left - 6, r.top - sr.top - 6, r.right - sr.left + 6, r.bottom - sr.top + 6];
+  }));
+  const hit = (x, y)=>{
+    const box = [x - 40, y - 16, x + 40, y + 34];          /* 丸＋文字のおおよその大きさ */
+    let a = 0;
+    rects.forEach(r=>{
+      const ox = Math.min(box[2], r[2]) - Math.max(box[0], r[0]);
+      const oy = Math.min(box[3], r[3]) - Math.max(box[1], r[1]);
+      if(ox > 0 && oy > 0) a += ox*oy;
+    });
+    if(x - 40 < 4 || x + 40 > W - 4) a += 99999;
+    return a;
+  };
+  let best = [bx, by], bestA = Infinity;
+  const OFF = [[0,0],[14,10],[-14,10],[0,22],[24,22],[-24,22],[30,0],[-30,0],[0,-16],[36,36],[-36,36],[0,44],[44,10],[-44,10],[20,-26],[-20,-26],[0,64],[52,40],[-52,40],[64,0],[64,30],[70,56],[-64,30],[-70,56],[30,-40],[60,-30]];
+  for(const [dx,dy] of OFF){
+    const a = hit(bx + dx, by + dy) + Math.hypot(dx,dy)*2;
+    if(a < bestA){ bestA = a; best = [bx + dx, by + dy]; }
+  }
+  return best;
+}
+function placeTut(t){
+  const top = path.length === 0 && me;
+  const sch = top ? nodes.find(n=>n.it.g === "apply" && n.it.kids) : null;
+  if(!sch){ if(tutEl) tutEl.style.display = "none"; tutPos = null; return; }
+  if(!tutEl){
+    tutEl = document.createElement("a");
+    tutEl.className = "tut"; tutEl.href = B + "howto.html";
+    tutEl.setAttribute("aria-label", "チュートリアル（このサイトの使い方）を見る");
+    tutEl.innerHTML = '<span class="tb">📖</span><span class="tt">チュートリアル</span>';
+    stage.insertBefore(tutEl, stage.firstChild);      /* ほかのアイコンより後ろに描きます */
+  }
+  tutEl.style.display = "";
+  const sup = nodes.find(n=>n.it.g === "sup" && n.it.kids);
+  /* 2つの間（サポーターの部屋がない方は、各種スケジュール情報の下）から、少し右下へ */
+  let bx, by;
+  if(sup){ bx = (sch.x + sup.x)/2 + 34; by = (sch.y + sup.y)/2 + 22; }
+  else   { bx = sch.x + 30; by = sch.y + 92; }
+  if(!tutPos || t - tutPick > 120){
+    tutPick = t;
+    const target = tutSpot(bx, by);
+    if(!tutPos) tutPos = { x: target[0], y: target[1], tx: target[0], ty: target[1] };
+    else { tutPos.tx = target[0]; tutPos.ty = target[1]; }
+  }
+  tutPos.x += (tutPos.tx - tutPos.x) * .3;      /* なめらかに移ります */
+  tutPos.y += (tutPos.ty - tutPos.y) * .3;
+  const fy = reduce ? 0 : Math.sin(t/600 + 2.1)*3;
+  tutEl.style.transform = `translate(${tutPos.x - 40}px, ${tutPos.y - 16 + fy}px) scale(${sch.s})`;
+  tutEl.style.opacity = sch.o;
+}
 
 /* ================================================================
    「登録」の右下に、小さな「使い方」を浮かべます（押すと使い方のページへ）
@@ -680,8 +750,8 @@ function placeHowto(t){
   }
   howtoEl.style.display = "";
   const fy = reduce ? 0 : Math.sin(t/520 + 1.3)*4;          /* 少し浮いて、ゆれます */
-  /* 「登録」の丸の右下（丸の中心から右へ44・下へ34） */
-  howtoEl.style.transform = `translate(${j.x + 44*j.s - 22}px, ${j.y + 28*j.s - 15 + fy}px) scale(${j.s})`;
+  /* 「登録」の丸の右下（前の位置から、右へ約1cm・下へ約1cm離しています） */
+  howtoEl.style.transform = `translate(${j.x + 82*j.s - 22}px, ${j.y + 66*j.s - 15 + fy}px) scale(${j.s})`;
   howtoEl.style.opacity = j.o;
 }
 
