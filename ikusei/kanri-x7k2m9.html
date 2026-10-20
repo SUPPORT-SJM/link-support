@@ -709,7 +709,7 @@
 </div>
 
 <!-- ================================================================
-     申込みシート（管理者だけ）：「日程から選ぶ」で読むスプレッドシートを足す・止める
+     申込みシート（管理者だけ）：カレンダーやイベントの申込みで読むスプレッドシートを足す・止める
 ================================================================ -->
 <div id="lnkModal" onclick="if(event.target===this)closeLnk()">
   <div class="sheet">
@@ -726,7 +726,7 @@
 <div id="evbModal" onclick="if(event.target===this)closeEvb()">
   <div class="sheet">
     <h3>📅 申込みシート</h3>
-    <p class="lead">「日程から選ぶ」で読むスプレッドシートの一覧です。合同交流会や、クリエ以上の方向けの催しなど、ほかのスプレッドシートも足せます。<br>
+    <p class="lead">カレンダー（カレンダー形式でみる）やイベントの申込みで読むスプレッドシートの一覧です。合同交流会や、クリエ以上の方向けの催しなど、ほかのスプレッドシートも足せます。<br>
       ・「止める」にすると、そのシートは読みません（あとで「読む」に戻せます）<br>
       ・読むのは、名前に年と月の入ったタブ（例：2026年11月）だけです<br>
       ・足すシートは、GASを動かしているGoogleアカウントで開けるように共有しておいてください</p>
@@ -738,7 +738,7 @@
       <input type="text" id="evbUrl" placeholder="https://docs.google.com/spreadsheets/d/…/edit" autocomplete="off">
       <label for="evbName">名前（空なら、スプレッドシートの名前を使います）</label>
       <input type="text" id="evbName" placeholder="例：10月 合同交流会" autocomplete="off">
-      <label for="evbCat">「日程から選ぶ」のどこに出すか</label>
+      <label for="evbCat">出す場所（どの種類の予定として出すか）</label>
       <select id="evbCat"></select>
       <label for="evbAud">見られる方</label>
       <select id="evbAud"></select>
@@ -2437,8 +2437,18 @@ const EVB_ERR = {
   dup:"このスプレッドシートは、すでに一覧にあります。",
   base:"もとからある4つは消せません。読まないときは「止める」を使ってください。",
   busy:"いま混み合っています。少しおいてお試しください。",
-  nokey:"一覧が古くなっています。とじて、もう一度開いてください。"
+  nokey:"一覧が古くなっています。とじて、もう一度開いてください。",
+  badcat:"「出す場所」をえらび直してください。",
+  badaud:"「見られる方」をえらび直してください。",
+  email:"Googleアカウントが登録のものと違います。ログインし直してください。",
+  pin:"パスコードが違います。ログインし直してください。",
+  unknown_action:"GASが古い版のままです。GASを新しい版に貼り替えてください。"
 };
+/* わからない返事のときも、理由をそのまま添えます（あとで原因を調べられるように） */
+function evbErrText(j){
+  const code = j && j.error ? String(j.error) : "";
+  return EVB_ERR[code] || ("うまくいきませんでした。少しおいてお試しください。" + (code ? "（理由：" + code.slice(0, 120) + "）" : "（GASから返事がありませんでした）"));
+}
 const evbEsc = t => String(t == null ? "" : t).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function evbSay(t, kind){ const m = document.getElementById("evbMsg"); m.className = "ev-msg" + (t ? " " + (kind || "ok") : ""); m.textContent = t || ""; }
 /* ================================================================
@@ -2449,7 +2459,7 @@ const LNK_ERR = { noperm:"管理者だけが変えられます。", badurl:"http
 function lnkSay(t, cls){ const m = document.getElementById("lnkMsg"); m.textContent = t; m.className = "ev-msg" + (t ? " " + (cls || "ok") : ""); }
 function lnkTake(j){
   if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return false;
-  if(!j || j.ok !== true){ lnkSay(LNK_ERR[j && j.error] || "うまくいきませんでした。少しおいてお試しください。", "err"); return false; }
+  if(!j || j.ok !== true){ lnkSay(LNK_ERR[j && j.error] || evbErrText(j), "err"); return false; }
   lnkRows = j.links || []; drawLnk(); return true;
 }
 async function openLnk(){
@@ -2496,7 +2506,7 @@ async function evbCall(params){
 }
 function evbTake(j){
   if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return false;
-  if(!j || j.ok !== true){ evbSay(EVB_ERR[j && j.error] || "うまくいきませんでした。少しおいてお試しください。", "err"); return false; }
+  if(!j || j.ok !== true){ evbSay(evbErrText(j), "err"); return false; }
   evbBooks = j.books || []; evbCats = j.cats || {}; evbAuds = j.auds || {};
   drawEvb(); return true;
 }
@@ -2558,7 +2568,7 @@ async function saveEvb(){
       url: document.getElementById("evbUrl").value.trim(), name: document.getElementById("evbName").value.trim(),
       cat: document.getElementById("evbCat").value, aud: document.getElementById("evbAud").value,
       memo: document.getElementById("evbMemo").value.trim(), on: b ? (b.on ? "1" : "0") : "1" }));
-    if(ok){ hideEvbForm(); evbSay(b ? "なおしました。" : "足しました。「日程から選ぶ」に出るまで、少しかかることがあります。", "ok"); }
+    if(ok){ hideEvbForm(); evbSay(b ? "なおしました。" : "足しました。カレンダーやイベントの申込みに出るまで、少しかかることがあります（10分ほど）。", "ok"); }
   }catch(e){ evbSay("通信できませんでした。電波のよい場所でお試しください。", "err"); }
   btn.disabled = false;
 }
