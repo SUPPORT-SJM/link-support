@@ -346,14 +346,6 @@ const TREE = [
     ]},
     {ic:"🗓️", nm:"カレンダー\n形式でみる", g:"apply", url:B+"first-support/schedule.html"}
   ]},
-  {ic:"🐣", nm:"サポーターの\n部屋", g:"sup", need:"sup", kids:[
-    {ic:"💌", nm:"新規の方への\n最初のメッセージ", g:"sup", url:B+"ikusei/first-message.html"},
-    {ic:"🐣", nm:"ぴよぴよ\n脱出クイズ", g:"sup", url:B+"ikusei/piyo-quiz.html"},
-    {ic:"🤝", nm:"サポート\nメンバー状況", g:"sup", url:B+"ikusei/myteam.html"},
-    {ic:"📝", nm:"新規登録の\n依頼", g:"sup", url:B+"ikusei/shinki-irai.html"},
-    {ic:"🔐", nm:"管理ページ", g:"sup", url:B+"ikusei/kanri-x7k2m9.html"},
-    {ic:"🏠", nm:"LINKポータル", g:"sup", url:"https://app.link-event-x.com"}
-  ]},
   {ic:"🌈", nm:"チーム作り", g:"team", kids:[
     {ic:"💬", nm:"紹介・\nビジネス活動", g:"team", url:B+"first-support/skyarc-recruit.html"},
     {ic:"🎪", nm:"サポート会・\n交流会", g:"team", url:B+"first-support/skyarc-community.html"},
@@ -363,6 +355,14 @@ const TREE = [
     {ic:"🌱", nm:"グルコン\nリーダー育成", g:"crie", url:B+"ikusei/gcon-roadmap.html"},
     {ic:"🎓", nm:"学びの\nポータル", g:"crie", url:B+"ikusei/portal-creators.html"},
     {ic:"🗺", nm:"クリエマップ", g:"crie", url:B+"ikusei/creamap-x7k2m9.html"}
+  ]},
+  {ic:"🐣", nm:"サポーターの\n部屋", g:"sup", need:"sup", kids:[
+    {ic:"💌", nm:"新規の方への\n最初のメッセージ", g:"sup", url:B+"ikusei/first-message.html"},
+    {ic:"🐣", nm:"ぴよぴよ\n脱出クイズ", g:"sup", url:B+"ikusei/piyo-quiz.html"},
+    {ic:"🤝", nm:"サポート\nメンバー状況", g:"sup", url:B+"ikusei/myteam.html"},
+    {ic:"📝", nm:"新規登録の\n依頼", g:"sup", url:B+"ikusei/shinki-irai.html"},
+    {ic:"🔐", nm:"管理ページ", g:"sup", url:B+"ikusei/kanri-x7k2m9.html"},
+    {ic:"🏠", nm:"LINKポータル", g:"sup", url:"https://app.link-event-x.com"}
   ]},
   {ic:"👋", nm:"はじめの一歩", g:"member", url:B+"first-support/"}
 ];
@@ -636,6 +636,15 @@ function frame(t){
         /* 月が近づいたら、ほかのアイコンは少しよけます */
         const dx = n.x - moon.x, dy = n.y - (moon.y + 14), d = Math.hypot(dx,dy) || 1, R = 150;
         if(d < R){ const f = (R-d)/R*7; ax += dx/d*f; ay += dy/d*f; n.dodge = true; } else n.dodge = false;
+      }
+      /* 「使い方」の丸をつまんで近づけたときも、ほかのアイコンはよけます */
+      const fd = (tutF && tutF.held && tutF.el.style.display !== "none") ? tutF : ((howF && howF.held && howF.el.style.display !== "none") ? howF : null);
+      if(fd && n.hx != null){
+        /* アイコンをつまんだときと同じ動き：よけながら、まわりでくるくる混ざります（登録・ログインの丸も同じ） */
+        const dx = n.x - fd.x, dy = n.y - fd.y, d = Math.hypot(dx,dy) || 1, R = 140;
+        if(d < R){ const f = (R-d)/R*7; ax += dx/d*f; ay += dy/d*f; }
+        ax += (-dy/d)*.35 + (Math.random()-.5)*.9;
+        ay += ( dx/d)*.35 + (Math.random()-.5)*.9;
       }
       if(drag && n.hx != null){
         /* つまんだアイコンが近づくと、よけながら混ざる */
