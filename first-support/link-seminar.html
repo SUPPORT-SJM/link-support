@@ -52,9 +52,18 @@ body{font-family:"Zen Kaku Gothic New",sans-serif;background:#FFFBF7;padding:16p
 .warn-body{font-size:13px;color:#5D4037;line-height:1.9}
 .warn-body p{margin-bottom:6px}
 
+/* 「見た」のチェック（本人の記録：初期サポートガイド③・活用の1stステップと同じ記録です） */
+.seen{display:flex;align-items:center;gap:9px;margin-top:12px;padding:10px 12px;border-radius:10px;background:#FFFDF8;border:1.5px solid #F2DEC8;font-size:14px;font-weight:700;color:#5D4037;cursor:pointer}
+.seen input{width:22px;height:22px;flex-shrink:0;accent-color:#FF7043}
+.seen.on{background:#F1F8E9;border-color:#A5D6A7;color:#2E7D32}
+.seen small{margin-left:auto;font-size:11px;font-weight:500;color:#A1887F;white-space:nowrap}
+.seen.off{opacity:.55;cursor:default}
+.seen-note{font-size:12.5px;color:#8D6E63;line-height:1.75;margin:-2px 0 10px}
+.seen-note a{color:#FF7043;font-weight:700}
 .back-btn2{display:block;padding:14px;border-radius:12px;background:#FF7043;color:#fff;text-align:center;font-size:15px;font-weight:700;text-decoration:none;margin-top:20px}
 </style>
 <link rel="stylesheet" href="../beta.css">
+<script src="../self-check.js"></script>
 <script src="../loading.js"></script>
 <script src="../login.js"></script>
 </head>
@@ -99,6 +108,7 @@ body{font-family:"Zen Kaku Gothic New",sans-serif;background:#FFFBF7;padding:16p
 
   <div class="section">
     <div class="section-ttl">📋 全LINKセミナーシリーズ詳細</div>
+    <p class="seen-note" id="seenNote">見たセミナーに「見た」のチェックを入れると、その日の日付で記録されます。</p>
 
     <div class="seminar-card">
       <div class="seminar-num">❶ 通常（オールラウンド）編</div>
@@ -108,6 +118,7 @@ body{font-family:"Zen Kaku Gothic New",sans-serif;background:#FFFBF7;padding:16p
         <p>【毎月月末の日曜日】に必ずやっています。</p>
         <p>LINKであなたの目的を果たす為に必要な事が全て凝縮しており、何が大切か見えてきます。</p>
       </div>
+      <label class="seen" data-k="s1"><input type="checkbox" data-k="s1"><span>見た</span><small></small></label>
     </div>
 
     <div class="seminar-card">
@@ -117,6 +128,7 @@ body{font-family:"Zen Kaku Gothic New",sans-serif;background:#FFFBF7;padding:16p
         <p>LINK大橋社長が行なうLINKセミナー。社長からLINKの魅力が聞けたり、LINKの可能性がわかりやすくなっています。</p>
         <p>今後のリンクの展望や基礎的なリンクの事など様々な事が学べます。</p>
       </div>
+      <label class="seen" data-k="s2"><input type="checkbox" data-k="s2"><span>見た</span><small></small></label>
     </div>
 
     <div class="seminar-card">
@@ -126,6 +138,7 @@ body{font-family:"Zen Kaku Gothic New",sans-serif;background:#FFFBF7;padding:16p
         <p>SASAEAIマッチングサイト進化、ファーマーズサポート、支え合いバリュー、LINKイベントアカデミー、LINKベースサイトリニューアル、LINKクラファン、LINK PAY、LINKメタバースが加わっていきます。</p>
         <p>これからのサービスとLINKの可能性がわかります！<strong>必ず参加しましょう✨</strong></p>
       </div>
+      <label class="seen" data-k="s5"><input type="checkbox" data-k="s5"><span>見た</span><small></small></label>
     </div>
 
     <div class="seminar-card">
@@ -136,6 +149,7 @@ body{font-family:"Zen Kaku Gothic New",sans-serif;background:#FFFBF7;padding:16p
         <p>真の集客やパートナー作りは「自分から集客に行かなくても出来る」のです。</p>
         <p>またブランディングしておくと、今後の人生なんでもやりたい事が叶いやすくなります。</p>
       </div>
+      <label class="seen" data-k="s3"><input type="checkbox" data-k="s3"><span>見た</span><small></small></label>
     </div>
 
     <div class="seminar-card">
@@ -146,6 +160,7 @@ body{font-family:"Zen Kaku Gothic New",sans-serif;background:#FFFBF7;padding:16p
         <p>・何が得られるのか<br>・他社MLMとの違いは？<br>・なぜMLMを導入したのか？真意は？</p>
         <p>MLMやグループ作りが好きな人も嫌いな人も全て聞いてみてください。今までと違う感覚を受けるはずです⭐️</p>
       </div>
+      <label class="seen" data-k="s4"><input type="checkbox" data-k="s4"><span>見た</span><small></small></label>
     </div>
   </div>
 
@@ -175,6 +190,53 @@ body{font-family:"Zen Kaku Gothic New",sans-serif;background:#FFFBF7;padding:16p
 
 </div>
 <div style="text-align:center;font-size:9.5px;color:#C4B8B0;font-family:monospace;padding:14px 0 20px;"></div>
+<script>
+/* ================================================================
+   「見た」のチェック
+   ・本人の記録（GAS の selfGet / selfSet）に保存します。初期サポートマネジメントに出ます
+   ・初期サポートガイド③・活用の1stステップ「LINKセミナーに参加した」と同じ記録です
+   ・チェックを入れるとその日の日付が入り、外すと消えます
+================================================================ */
+(function(){
+  const boxes = [...document.querySelectorAll(".seen input")];
+  let vals = {};
+  function paint(){
+    boxes.forEach(i=>{
+      const k = i.dataset.k, lb = i.closest(".seen");
+      i.checked = !!vals[k];
+      lb.classList.toggle("on", !!vals[k]);
+      lb.querySelector("small").textContent = vals[k] ? skySelf.md(vals[k]) + " に記録" : "";
+    });
+  }
+  let m = null;
+  try{ m = JSON.parse(localStorage.getItem("skyarc_member") || "null"); }catch(e){}
+  if(!m || !m.id || !m.pin){
+    boxes.forEach(i=>{ i.disabled = true; i.closest(".seen").classList.add("off"); });
+    document.getElementById("seenNote").innerHTML = "ログインすると、見たセミナーにチェックを入れて記録できます。"
+      + ' <a href="#" id="seenLogin">ログインする ›</a>';
+    document.getElementById("seenLogin").addEventListener("click", e=>{
+      e.preventDefault();
+      if(typeof skyLoginRequired === "function") skyLoginRequired(()=>location.reload());
+      else location.href = "../index.html#login";
+    });
+    return;
+  }
+  skySelf.get().then(v=>{ if(v){ vals = v; paint(); } });
+  boxes.forEach(i=>i.addEventListener("change", async ()=>{
+    const k = i.dataset.k, want = i.checked;
+    boxes.forEach(x=>x.disabled = true);
+    const r = await skySelf.set({ [k]: want });
+    boxes.forEach(x=>x.disabled = false);
+    if(r && r.ok){ vals = r.vals || {}; }
+    else{
+      const n = document.getElementById("seenNote");
+      n.style.color = "#D84315";
+      n.textContent = r && r.error === "net" ? "通信できませんでした。電波のよい場所で、もう一度お試しください。" : "記録できませんでした。もう一度お試しください。";
+    }
+    paint();
+  }));
+})();
+</script>
 <script src="../track.js"></script>
 <script src="../menu.js"></script>
 </body>
