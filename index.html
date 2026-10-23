@@ -92,6 +92,7 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body)
   animation:bloom .42s cubic-bezier(.25,1.3,.5,1) both;}
 @keyframes bloom{from{opacity:0;transform:scale(.5);}to{opacity:1;transform:none;}}
 .info p{margin:0;font-size:14px;line-height:1.9;}
+.info-btn[hidden]{display:none;}
 .info-btn{display:block;padding:14px;border-radius:14px;background:var(--g-apply);color:#fff;text-decoration:none;
   font-family:var(--f-head);font-weight:700;font-size:15px;}
 .info-btn:focus-visible{outline:3px solid var(--deep);outline-offset:3px;}
@@ -327,8 +328,12 @@ const TREE = [
     {ic:"☁️", nm:"チーム独自", g:"apply", kids:[
       {ic:"🙋", nm:"メンバー\n向け", g:"member", kids:[
         {ic:"🧡", nm:"ユーザー\nサポート", g:"member", link:"support"},
+        {ic:"📚", nm:"LINKセミナー\n各種に参加する", g:"member", url:B+"first-support/link-seminar.html"},
         {ic:"💻", nm:"オンライン\n交流会", g:"member", link:"kouryu-on"},
         {ic:"🍽", nm:"リアル交流会", g:"member", link:"kouryu-re"},
+        /* いまは仮：クリエ以上の方にだけ出ます（中身は工事中） */
+        {ic:"📅", nm:"グルコン\n日程確認", g:"member", need:"crie", info:{
+          text:"グルコンの日程だけをまとめて見られるようにする予定です。ただいま工事中です🚧 できあがったら、またお知らせします。"}},
         {ic:"🎬", nm:"動画視聴会", g:"member", link:"douga"}
       ]},
       {ic:"🐣", nm:"サポーター\n向け", g:"sup", need:"sup", kids:[
@@ -340,11 +345,21 @@ const TREE = [
         {ic:"🌟", nm:"月初スペシャル\nミーティング", g:"crie", link:"c-monthly"},
         {ic:"📆", nm:"毎週月曜\nクリエミーティング", g:"crie", wide:true, link:"c-monday"},
         {ic:"🗾", nm:"全国クリエ会議\n（アフター担当）", g:"crie", wide:true, link:"c-zenkoku"},
-        {ic:"🔥", nm:"クリエ特訓\n＆リンカー特訓", g:"crie", link:"c-tokkun"},
-        {ic:"🗓️", nm:"翔子さんの\n予定カレンダー", g:"crie", url:B+"first-support/calendar.html"}
+        {ic:"🔥", nm:"クリエ特訓\n＆リンカー特訓", g:"crie", kids:[
+          {ic:"🔥", nm:"クリエ特訓", g:"crie", link:"c-tokkun-crie"},
+          {ic:"⚡", nm:"リンカー特訓", g:"crie", link:"c-tokkun-linker"}
+        ]},
+        {ic:"🤝", nm:"グルコン予定", g:"crie", link:"c-gcon"},
+        {ic:"✨", nm:"その他", g:"crie", link:"c-sonota"},
+        /* アドバンス以上の方にだけ出ます */
+        {ic:"🗓️", nm:"翔子さんの\n予定カレンダー", g:"crie", need:"adv", info:{
+          text:"こちらは、まだ調整中です。動きの確認用として、参考にご覧ください。",
+          btn:"🗓️ 翔子さんの予定カレンダーを開く", url:B+"first-support/calendar.html"}}
       ]}
     ]},
-    {ic:"🗓️", nm:"カレンダー\n形式でみる", g:"apply", url:B+"first-support/schedule.html"}
+    /* 丸はどなたにも出ます。開けるのはアドバンス以上の方だけ（ほかの方には、お知らせが出ます） */
+    {ic:"🗓️", nm:"カレンダー\n形式でみる", g:"apply", url:B+"first-support/schedule.html", lock:"adv",
+      lockInfo:{text:"カレンダー形式は、まだ調整中です。お見せできるようになったら、またお知らせします。"}}
   ]},
   {ic:"🌈", nm:"チーム作り", g:"team", kids:[
     {ic:"💬", nm:"紹介・\nビジネス活動", g:"team", url:B+"first-support/skyarc-recruit.html"},
@@ -380,9 +395,15 @@ function loadMe(){
   }catch(e){ me = null; }
 }
 loadMe();
+/* アドバンス以上（アドバンス・系列代表・チーム代表・管理者） */
+function isAdv(){
+  if(!me) return false;
+  return /アドバンス|系列代表|チーム代表|管理者/.test(String(me.role || ""));
+}
 function ok(it){
   if(!it.need) return true;
   if(!me) return false;
+  if(it.need === "adv") return isAdv();
   if(String(me.role || "")) return true;
   if(it.need === "sup")  return me.sup === true || me.crie === true;
   if(it.need === "crie") return me.crie === true;
@@ -421,7 +442,7 @@ function homes(n, centered, pair){
   else{
     const ring = centered ? n-1 : n;
     rx = (ring >= 6 || (centered && ring >= 3)) ? Math.max(W*.39, 132) : Math.max(W*.32, 108);
-    ry = rx * .94;
+    ry = rx * (ring >= 7 ? 1.22 : .94);   /* 7つ以上の輪は、たてに広げて重ならないように */
     if(centered) pts.push([0,0]);
     for(let i=0;i<ring;i++){
       const a = (ring === 2 ? Math.PI : -Math.PI/2) + i*2*Math.PI/ring;
@@ -507,7 +528,13 @@ function build(fromX, fromY){
   if(last && last.info){
     document.getElementById("infoText").textContent = last.info.text;
     const ib = document.getElementById("infoBtn");
-    ib.textContent = last.info.btn; ib.href = last.info.url;
+    ib.hidden = !last.info.btn;
+    if(last.info.btn){
+      ib.textContent = last.info.btn; ib.href = last.info.url;
+      /* このサイトの中のページは、同じタブで開きます */
+      if(/^https?:\/\//.test(last.info.url)){ ib.target = "_blank"; ib.rel = "noopener"; }
+      else{ ib.removeAttribute("target"); ib.removeAttribute("rel"); }
+    }
   }
   stage.hidden = items.length === 0;
 }
@@ -568,6 +595,12 @@ function tap(n, e){
   const it = n.it;
   if(it.join){ openJoin(n); return; }
   if(it.back){ goBack(n); return; }
+  /* 開ける方が決まっている丸：ほかの方には、お知らせだけを出します */
+  if(it.lock === "adv" && !isAdv()){
+    const shown = Object.assign({}, it, { url:"", link:"", lock:"", info: it.lockInfo });
+    goTo(()=> path.push(shown), n.x, n.y, n);
+    return;
+  }
   if(it.url || it.link){
     const url = linkOf(it);
     if(!url){ showToast("このリンク先は、まだ決まっていません"); return; }
