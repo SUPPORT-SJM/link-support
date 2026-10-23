@@ -81,7 +81,7 @@ button{font-family:inherit;cursor:pointer;border:none;}
 @keyframes float{0%,100%{translate:0 0;}50%{translate:0 -7px;}}
 .on .tap{animation:tap 1.6s ease-in-out infinite;}
 @keyframes tap{0%,100%{transform:translate(10px,12px);}40%{transform:translate(0,0);}50%{transform:translate(0,0) scale(.88);}60%{transform:translate(0,0);}}
-.on .pop{animation:pop .5s cubic-bezier(.3,1.5,.5,1) both;animation-delay:var(--d,0s);}
+.on .hw-pop{animation:pop .5s cubic-bezier(.3,1.5,.5,1) both;animation-delay:var(--d,0s);}
 @keyframes pop{from{opacity:0;transform:scale(.6);}to{opacity:1;transform:none;}}
 
 /* 1：ようこそ */
@@ -241,11 +241,11 @@ button{font-family:inherit;cursor:pointer;border:none;}
 .intro .swap[hidden]{display:none;}
 /* 確かめ用（?still=1）：動きを止めたときの見え方 */
 .still *{animation:none !important;transition:none !important;}
-.still .pop{opacity:1;transform:none;}
+.still .hw-pop{opacity:1;transform:none;}
 .still .form .row .ck{opacity:1;}
 @media (prefers-reduced-motion: reduce){
   *{animation:none !important;}
-  .pop{opacity:1;transform:none;}
+  .hw-pop{opacity:1;transform:none;}
   .form .row .ck{opacity:1;}
 }
 </style>
@@ -290,12 +290,12 @@ button{font-family:inherit;cursor:pointer;border:none;}
   <section class="slide" data-i="1">
     <div class="stage">
       <div class="four">
-        <div class="orb pop" style="--d:.2s;--fd:0s"><span class="oi">🔢</span><span class="ot">会員番号</span><span class="ok2">✓</span></div>
-        <div class="orb pop" style="--d:.5s;--fd:.6s"><span class="oi">🙂</span><span class="ot">お名前</span><span class="ok2">✓</span></div>
-        <div class="orb pop" style="--d:.8s;--fd:1.2s"><span class="oi">✉️</span><span class="ot">メール<br>アドレス</span><span class="ok2">✓</span></div>
-        <div class="orb pop" style="--d:1.1s;--fd:1.8s"><span class="oi">🔑</span><span class="ot">パスコード<br><small>数字4けた</small></span><span class="ok2">✓</span></div>
+        <div class="orb hw-pop" style="--d:.2s;--fd:0s"><span class="oi">🔢</span><span class="ot">会員番号</span><span class="ok2">✓</span></div>
+        <div class="orb hw-pop" style="--d:.5s;--fd:.6s"><span class="oi">🙂</span><span class="ot">お名前</span><span class="ok2">✓</span></div>
+        <div class="orb hw-pop" style="--d:.8s;--fd:1.2s"><span class="oi">✉️</span><span class="ot">メール<br>アドレス</span><span class="ok2">✓</span></div>
+        <div class="orb hw-pop" style="--d:1.1s;--fd:1.8s"><span class="oi">🔑</span><span class="ot">パスコード<br><small>数字4けた</small></span><span class="ok2">✓</span></div>
       </div>
-      <span class="match pop" style="--d:1.9s">🔗 名簿とつながりました</span>
+      <span class="match hw-pop" style="--d:1.9s">🔗 名簿とつながりました</span>
     </div>
     <div class="cap">
       <span class="step">STEP 1</span>
@@ -308,9 +308,9 @@ button{font-family:inherit;cursor:pointer;border:none;}
   <section class="slide" data-i="2">
     <div class="stage">
       <div class="cards">
-        <div class="cardx pop" style="--d:.2s"><span class="ic" style="background:#E8F6F1">🗺️</span><div><b>活用のロードマップを確認</b><span>自分がどこまでできているかがわかる</span><div class="bar2"><i></i></div></div></div>
-        <div class="cardx pop" style="--d:.45s"><span class="ic" style="background:#EEF3FC">🤝</span><div><b>仲間の進み具合もわかる</b><span>チームが広がった方は、仲間の様子を見てサポートしやすく</span></div></div>
-        <div class="cardx pop" style="--d:.7s"><span class="ic" style="background:#FDF0E5">🗓️</span><div><b>日々の情報を整理</b><span>予定や申込みをまとめて見られる</span></div></div>
+        <div class="cardx hw-pop" style="--d:.2s"><span class="ic" style="background:#E8F6F1">🗺️</span><div><b>活用のロードマップを確認</b><span>自分がどこまでできているかがわかる</span><div class="bar2"><i></i></div></div></div>
+        <div class="cardx hw-pop" style="--d:.45s"><span class="ic" style="background:#EEF3FC">🤝</span><div><b>仲間の進み具合もわかる</b><span>チームが広がった方は、仲間の様子を見てサポートしやすく</span></div></div>
+        <div class="cardx hw-pop" style="--d:.7s"><span class="ic" style="background:#FDF0E5">🗓️</span><div><b>日々の情報を整理</b><span>予定や申込みをまとめて見られる</span></div></div>
       </div>
     </div>
     <div class="cap">
@@ -348,11 +348,11 @@ button{font-family:inherit;cursor:pointer;border:none;}
       <div class="confetti" id="confetti"></div>
       <div style="display:flex;flex-direction:column;align-items:center;">
         <div class="trio done">
-          <div class="bubble pop" style="--d:.1s"><span class="ball" style="--c:var(--g-member)">👋<span class="ok">✓</span></span></div>
-          <div class="bubble pop" style="--d:.35s"><span class="ball" style="--c:var(--g-member)">📘<span class="ok">✓</span></span></div>
-          <div class="bubble pop" style="--d:.6s"><span class="ball" style="--c:var(--g-member)">🚀<span class="ok">✓</span></span></div>
+          <div class="bubble hw-pop" style="--d:.1s"><span class="ball" style="--c:var(--g-member)">👋<span class="ok">✓</span></span></div>
+          <div class="bubble hw-pop" style="--d:.35s"><span class="ball" style="--c:var(--g-member)">📘<span class="ok">✓</span></span></div>
+          <div class="bubble hw-pop" style="--d:.6s"><span class="ball" style="--c:var(--g-member)">🚀<span class="ok">✓</span></span></div>
         </div>
-        <div class="cheerwrap pop" style="--d:.8s"><svg class="person cheer" viewBox="0 0 120 130" aria-hidden="true">
+        <div class="cheerwrap hw-pop" style="--d:.8s"><svg class="person cheer" viewBox="0 0 120 130" aria-hidden="true">
           <g class="armL"><path d="M38 70 L18 34" stroke="#F6C7A6" stroke-width="10" stroke-linecap="round"/><circle cx="17" cy="31" r="7" fill="#F6C7A6"/></g>
           <g class="armR"><path d="M82 70 L102 34" stroke="#F6C7A6" stroke-width="10" stroke-linecap="round"/><circle cx="103" cy="31" r="7" fill="#F6C7A6"/></g>
           <path d="M34 72 Q60 60 86 72 L92 122 Q60 130 28 122 Z" fill="#7BA3E8"/>
@@ -365,7 +365,7 @@ button{font-family:inherit;cursor:pointer;border:none;}
           <circle cx="45" cy="51" r="4" fill="#F49AC1" opacity=".55"/><circle cx="75" cy="51" r="4" fill="#F49AC1" opacity=".55"/>
           <g stroke="#F5A97A" stroke-width="3" stroke-linecap="round"><path d="M8 18 l-6 -6"/><path d="M6 30 l-8 0"/><path d="M112 18 l6 -6"/><path d="M114 30 l8 0"/></g>
         </svg><div class="cheerside"><span class="say">わーい！</span>
-        <span class="medal pop" style="--d:1.1s">🎉 初期サポート、<br>ぜんぶOK！</span></div></div>
+        <span class="medal hw-pop" style="--d:1.1s">🎉 初期サポート、<br>ぜんぶOK！</span></div></div>
       </div>
     </div>
     <div class="cap">
@@ -379,7 +379,7 @@ button{font-family:inherit;cursor:pointer;border:none;}
   <section class="slide" data-i="5">
     <div class="stage" style="height:auto;">
       <div class="road">
-        <div class="thinkrow pop" style="--d:.05s"><svg class="person think" viewBox="0 0 120 130" aria-hidden="true">
+        <div class="thinkrow hw-pop" style="--d:.05s"><svg class="person think" viewBox="0 0 120 130" aria-hidden="true">
           <g class="bulb">
             <circle cx="88" cy="22" r="18" fill="#FFF3B0" opacity=".9" class="glow"/>
             <path d="M88 8 a11 11 0 0 1 7 19 q-2 2 -2 6 h-10 q0 -4 -2 -6 a11 11 0 0 1 7 -19 z" fill="#F5D06A" stroke="#E0A92E" stroke-width="2"/>
@@ -394,12 +394,12 @@ button{font-family:inherit;cursor:pointer;border:none;}
           <path d="M70 92 Q78 80 68 68" stroke="#F6C7A6" stroke-width="9" fill="none" stroke-linecap="round"/>
           <circle cx="66" cy="66" r="6" fill="#F6C7A6"/>
         </svg><span class="say">そうだ！<br>紹介していきたい</span></div>
-        <div class="st pop" style="--d:.4s"><span class="ic" style="--c:var(--g-team)">💬</span>サポートしてくれている先輩に伝える</div>
-        <div class="dn pop" style="--d:.55s">▼</div>
-        <div class="st pop" style="--d:.7s"><span class="ic" style="--c:var(--g-sup)">🐣</span>サポーターのチェックに合格</div>
-        <div class="dn pop" style="--d:.85s">▼</div>
-        <div class="st goal pop" style="--d:1s"><span class="ic" style="--c:var(--g-sup)">🔓</span>「サポーターの部屋」が開きます</div>
-        <div class="note pop" style="--d:1.3s">くわしい条件は、サポートしてくれている先輩に確かめてください</div>
+        <div class="st hw-pop" style="--d:.4s"><span class="ic" style="--c:var(--g-team)">💬</span>サポートしてくれている先輩に伝える</div>
+        <div class="dn hw-pop" style="--d:.55s">▼</div>
+        <div class="st hw-pop" style="--d:.7s"><span class="ic" style="--c:var(--g-sup)">🐣</span>サポーターのチェックに合格</div>
+        <div class="dn hw-pop" style="--d:.85s">▼</div>
+        <div class="st goal hw-pop" style="--d:1s"><span class="ic" style="--c:var(--g-sup)">🔓</span>「サポーターの部屋」が開きます</div>
+        <div class="note hw-pop" style="--d:1.3s">くわしい条件は、サポートしてくれている先輩に確かめてください</div>
       </div>
     </div>
     <div class="cap">
