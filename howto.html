@@ -2,6 +2,10 @@
 <html lang="ja">
 <head>
 <script src="config.js"></script>
+<script>
+/* 確かめ用：URLの後ろに ?still=1 を付けると、動き（アニメーション）を止めて表示します */
+if(/[?&]still=1/.test(location.search)) document.documentElement.classList.add("still");
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
@@ -233,6 +237,12 @@ button{font-family:inherit;cursor:pointer;border:none;}
 .intro .go[hidden]{display:none;}
 .intro .wait{font-size:12.5px;color:var(--sub);}
 .intro .wait[hidden]{display:none;}
+.intro .swap{font-family:var(--f-head);font-weight:700;font-size:14px;color:var(--deep);text-decoration:underline;text-underline-offset:3px;}
+.intro .swap[hidden]{display:none;}
+/* 確かめ用（?still=1）：動きを止めたときの見え方 */
+.still *{animation:none !important;transition:none !important;}
+.still .pop{opacity:1;transform:none;}
+.still .form .row .ck{opacity:1;}
 @media (prefers-reduced-motion: reduce){
   *{animation:none !important;}
   .pop{opacity:1;transform:none;}
@@ -256,6 +266,7 @@ button{font-family:inherit;cursor:pointer;border:none;}
   </div>
   <p class="wait" id="introWait">動画が終わると「つぎへ」が出ます</p>
   <button class="go" id="introGo" type="button" hidden>つぎへ ›</button>
+  <a href="#" class="swap" id="introSwap" hidden>新規の方向けの動画はこちら</a>
 </div>
 
 <div class="deck" id="deck">
@@ -507,8 +518,8 @@ addEventListener("load", fit);
   let m = null;
   try{ m = JSON.parse(localStorage.getItem("skyarc_member") || "null"); }catch(e){}
   const team = !!(m && m.id && (m.sup === true || m.crie === true || String(m.role || "")));
-  const name = team ? "howto-team" : "howto-member";
-  const KEY = "sky_howto_video_" + name;
+  let name = team ? "howto-team" : "howto-member";
+  let KEY = "sky_howto_video_" + name;
   const box = document.getElementById("intro"), v = document.getElementById("introVideo");
   const play = document.getElementById("introPlay"), goBtn = document.getElementById("introGo"), wait = document.getElementById("introWait");
   document.getElementById("introLead").textContent = team ? "チームを育てるあなたへ　まずは動画でご紹介します" : "まずは動画でご紹介します";
@@ -519,6 +530,20 @@ addEventListener("load", fit);
   let seen = false;
   try{ seen = localStorage.getItem(KEY) === "1"; }catch(e){}
   if(seen) ready();
+  /* チーム向けの動画の下に「新規の方向けの動画はこちら」。押すと、メンバー向けの動画に切り替わります */
+  const swap = document.getElementById("introSwap");
+  swap.hidden = !team;
+  swap.addEventListener("click", e=>{
+    e.preventDefault();
+    v.pause(); v.controls = false;
+    name = "howto-member"; KEY = "sky_howto_video_" + name;
+    v.poster = name + ".jpg"; v.src = name + ".mp4";
+    document.getElementById("introLead").textContent = "新規の方向けの動画です";
+    play.hidden = false; swap.hidden = true;
+    let s2 = false;
+    try{ s2 = localStorage.getItem(KEY) === "1"; }catch(e){}
+    if(s2) ready(); else { goBtn.hidden = true; wait.hidden = false; }
+  });
   play.addEventListener("click", ()=>{
     play.hidden = true; v.controls = true;
     const p = v.play(); if(p && p.catch) p.catch(()=>{ play.hidden = false; v.controls = false; });
