@@ -189,6 +189,11 @@ button{font-family:inherit;cursor:pointer;border:none;}
 .thinkrow .say{margin-bottom:34px;font-size:12px;}
 /* 7：さあ、はじめよう */
 .go .join .ball{animation:beat 1.6s ease-in-out infinite;}
+.dragreg{position:relative;display:inline-block;text-decoration:none;color:inherit;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none;
+  transition:transform .6s cubic-bezier(.3,1.8,.45,1);will-change:transform;}
+.dragreg.held{transition:none;cursor:grabbing;}
+.dragreg .finger{left:62%;top:58%;}
+.dragreg:focus-visible{outline:3px solid var(--deep);outline-offset:6px;border-radius:50%;}
 @keyframes beat{0%,100%{transform:scale(1);}50%{transform:scale(1.07);}}
 .endbtns{display:flex;flex-direction:column;gap:10px;width:min(300px,80vw);margin-top:18px;}
 .endbtns a{display:block;text-align:center;text-decoration:none;font-family:var(--f-head);font-weight:900;font-size:16px;border-radius:14px;padding:14px;}
@@ -412,8 +417,11 @@ button{font-family:inherit;cursor:pointer;border:none;}
   <!-- 7 はじめよう -->
   <section class="slide go" data-i="6">
     <div class="stage">
-      <div class="bubble join float"><span class="ball"></span><span class="nm">登録</span></div>
-      <span class="finger tap" style="left:58%;top:54%;">👆</span>
+      <!-- 押すと登録・ログインの画面へ。つまんで動かすと、指と一緒にぐにゃっと動いて、もとの場所へもどります -->
+      <a class="dragreg" id="dragReg" href="index.html#join" draggable="false" aria-label="登録・ログインの画面をひらく">
+        <div class="bubble join float"><span class="ball"></span><span class="nm">登録</span></div>
+        <span class="finger tap">👆</span>
+      </a>
     </div>
     <div class="cap">
       <span class="step">さあ、はじめよう</span>
@@ -551,6 +559,51 @@ addEventListener("load", fit);
   v.addEventListener("ended", ()=>{ try{ localStorage.setItem(KEY, "1"); }catch(e){} ready(); });
   v.addEventListener("error", ready);
   goBtn.addEventListener("click", ()=>{ v.pause(); box.hidden = true; go(0); });
+})();
+
+/* ================================================================
+   最後のページの「登録」の丸
+   ・押すと、登録・ログインの画面（トップの「はじめての方／登録ずみの方」）へ
+   ・つまんで動かすと、指と一緒にぐにゃっと動き、はなすと、ぽよんともとの場所へ
+================================================================ */
+(function(){
+  const el = document.getElementById("dragReg");
+  if(!el) return;
+  let sx = 0, sy = 0, dx = 0, dy = 0, lx = 0, ly = 0, held = false, moved = false, pid = null, lastDrag = -1e9;
+  function draw(){
+    const vx = dx - lx, vy = dy - ly; lx = dx; ly = dy;
+    const sq = Math.min(.22, Math.hypot(vx, vy) / 60);            /* 速く動かすほど、のびる */
+    const ang = Math.atan2(vy, vx) * 180 / Math.PI;
+    el.style.transform = `translate(${dx}px,${dy}px) rotate(${ang}deg) scale(${1 + sq},${1 - sq}) rotate(${-ang}deg)`;
+  }
+  /* リンクとして引っぱられて（ブラウザのドラッグになって）動きが止まらないようにします */
+  el.addEventListener("dragstart", e=>e.preventDefault());
+  el.querySelectorAll("*").forEach(c=>c.setAttribute("draggable","false"));
+  el.addEventListener("pointerdown", e=>{
+    if(e.pointerType === "mouse") e.preventDefault();
+    held = true; moved = false; pid = e.pointerId; sx = e.clientX; sy = e.clientY; dx = dy = lx = ly = 0;
+    el.classList.add("held");
+    try{ el.setPointerCapture(pid); }catch(x){}
+  });
+  el.addEventListener("pointermove", e=>{
+    if(!held || e.pointerId !== pid) return;
+    dx = e.clientX - sx; dy = e.clientY - sy;
+    if(Math.hypot(dx, dy) > 6) moved = true;
+    draw();
+  });
+  function end(e){
+    if(!held) return;
+    held = false; el.classList.remove("held");
+    el.style.transform = "";                                     /* ぽよんと、もとの場所へ */
+    if(moved) lastDrag = performance.now();
+  }
+  el.addEventListener("pointerup", end);
+  el.addEventListener("pointercancel", end);
+  el.addEventListener("click", e=>{
+    if(performance.now() - lastDrag < 400) e.preventDefault();   /* 動かした直後は、ページへは移りません（そのあと押せば移ります） */
+  });
+  /* 丸を動かしているあいだは、ページをめくらないようにします */
+  ["touchstart","touchend"].forEach(t=>el.addEventListener(t, e=>e.stopPropagation(), {passive:true}));
 })();
 
 /* 指でめくる */
