@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<script src="../config.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>グルコン日程確認 | LINK 初期サポート</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Zen Kaku Gothic New",sans-serif;background:#FFFBF7;padding:16px 14px 48px;color:#4E342E}
+.wrap{max-width:420px;margin:0 auto}
+.back-btn{display:flex;align-items:center;gap:6px;color:#FF7043;font-size:13px;font-weight:700;text-decoration:none;margin-bottom:16px}
+.hero{background:linear-gradient(135deg,#FFF9E6,#FFFDE7);border-radius:16px;padding:20px 16px;margin-bottom:16px;border:1px solid #FFD54F;text-align:center}
+.hero h1{font-size:18px;font-family:"Zen Maru Gothic",sans-serif;font-weight:900;color:#F57F17;line-height:1.6}
+.card{background:#fff;border:1px solid #F0E0D0;border-radius:14px;padding:14px 16px;margin-bottom:12px}
+.card p{font-size:14px;line-height:1.9;margin-bottom:6px}
+.card p:last-child{margin-bottom:0}
+.pk{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;font-size:14px;line-height:1.7;margin-top:6px}
+.pk b{white-space:nowrap}
+.warn{background:#FFF3E0;border:2px solid #FFAB76;border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.85;font-weight:700;color:#BF360C;margin-bottom:16px}
+.ttl{font-size:15px;font-weight:700;color:#F57F17;margin:18px 0 10px;padding-bottom:6px;border-bottom:2px solid #FFD54F}
+.mine{background:#F1F8E9;border:1.5px solid #A5D6A7;border-radius:12px;padding:10px 14px;font-size:14px;font-weight:700;color:#2E7D32;margin-bottom:12px;line-height:1.7}
+.day{background:#fff;border:1px solid #FFE082;border-left:4px solid #FFB300;border-radius:14px;padding:14px;margin-bottom:12px}
+.day.on{border-color:#A5D6A7;border-left-color:#43A047;background:#FAFFF7}
+.day h3{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.day h3 small{font-family:"Zen Kaku Gothic New",sans-serif;font-size:13px;font-weight:700;color:#8D6E63}
+.day .tag{font-size:12px;font-weight:700;color:#fff;background:#43A047;border-radius:999px;padding:2px 10px}
+.tl{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:10px 0 4px;font-size:14px;line-height:1.7}
+.tl .k{font-weight:700;color:#8D6E63}
+.tl .k.main{color:#E65100}
+.tl .v.main{font-weight:700}
+.btn{display:block;width:100%;margin-top:10px;padding:12px;border:none;border-radius:12px;font-family:inherit;font-size:14.5px;font-weight:700;cursor:pointer}
+.btn.plan{background:#FF7043;color:#fff}
+.btn.done{background:#E8F5E9;color:#2E7D32;border:1.5px solid #A5D6A7}
+.btn[disabled]{opacity:.6;cursor:default}
+.ask{margin-top:10px;background:#FFF8E1;border-radius:12px;padding:10px 12px;font-size:14px;font-weight:700;text-align:center}
+.ask .row{display:flex;gap:8px;margin-top:8px}
+.ask .row button{flex:1;padding:10px;border:none;border-radius:10px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer}
+.ask .yes{background:#FF7043;color:#fff}
+.ask .no{background:#EFEBE9;color:#5D4037}
+.small{font-size:12px;color:#8D6E63;line-height:1.7;margin-top:6px}
+.msg{font-size:14px;line-height:1.8;text-align:center;color:#8D6E63;padding:16px 8px}
+.msg.err{color:#C62828;font-weight:700}
+.msg a{color:#FF7043;font-weight:700}
+.rec{margin-top:8px;font-size:13px;font-weight:700;color:#2E7D32}
+.back-btn2{display:block;padding:14px;border-radius:12px;background:#FF7043;color:#fff;text-align:center;font-size:15px;font-weight:700;text-decoration:none;margin-top:20px}
+</style>
+<link rel="stylesheet" href="../beta.css">
+<script src="../self-check.js"></script>
+<script src="../loading.js"></script>
+<script src="../login.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <a href="../index.html" class="back-btn">← トップに戻る</a>
+
+  <div class="hero"><h1>📅 グルコン日程確認</h1></div>
+
+  <div class="card">
+    <p>グルコン（グループコンサル）には、<b>ビフォー</b>と<b>アフター</b>があります。3つまとめて1つのパッケージとして受けてください。</p>
+    <div class="pk">
+      <b>① ビフォー</b><span>はじまる30分前。事前準備をして、グルコンの1時間を最大限に活かしましょう。</span>
+      <b>② グルコン</b><span>本番の1時間です。</span>
+      <b>③ アフター</b><span>終わってすぐ。聞いたことを最大限に活かして、LINKをよりよく活用していくための時間です。</span>
+    </div>
+  </div>
+
+  <div class="warn">⚠️ グルコンには、引率の方が必ず必要です。<br>出たい日があったら、クリエイターズ以上の方に日程の依頼をしてください。</div>
+
+  <div id="mine"></div>
+
+  <div class="ttl">これからのグルコン</div>
+  <div id="list"><p class="msg">日程を読みこんでいます…</p></div>
+
+  <div id="pastBox" hidden>
+    <div class="ttl">出席できた方は、チェックしてください</div>
+    <div id="past"></div>
+  </div>
+
+  <a href="../index.html" class="back-btn2">← トップに戻る</a>
+</div>
+<div style="text-align:center;font-size:9.5px;color:#C4B8B0;font-family:monospace;padding:14px 0 20px;"></div>
+<script>
+/* ================================================================
+   グルコン日程確認
+   ・グルコン日程のスプレッドシートから、日付・時間・どなたのグルコンかを出します（GAS の gconDates）
+   ・「この日に出席予定にする」… サポート状況の③グルコンが「参加予定＋その日」になります（GAS の gconPlan）
+     初期サポートマネジメントに出ます。出られたあとの「参加済み」は、アップ・サポートの方がつけます
+   ・「出席できた」… ご本人の記録（本人の記録の g1/g2/g3）。初期サポートマネジメントに「🙋本人」として出ます
+================================================================ */
+const GAS_URL = window.SKY_GAS_URL;
+const $ = s=>document.querySelector(s);
+const esc = t=>String(t == null ? "" : t).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let member = null, data = null, selfVals = {};
+try{ member = JSON.parse(localStorage.getItem("skyarc_member") || "null"); }catch(e){}
+if(member && (!member.id || !member.pin)) member = null;
+
+function md(d){ const m = String(d || "").match(/^\d{4}\/(\d{2})\/(\d{2})/); return m ? Number(m[1]) + "/" + Number(m[2]) : ""; }
+function dayHead(x){ return md(x.date) + "(" + x.wd + ")"; }
+function times(x){
+  return `<div class="tl">
+    <span class="k">ビフォー</span><span class="v">${esc(x.before)}〜${esc(x.start)}</span>
+    <span class="k main">グルコン</span><span class="v main">${esc(x.start)}〜${esc(x.end)}</span>
+    <span class="k">アフター</span><span class="v">${esc(x.afterFrom)}〜${esc(x.afterTo)}</span></div>`;
+}
+const ERR = {
+  unknown_action: "GASがまだ新しい版になっていません（v1.171 以上が必要です）。",
+  gconread: "グルコンの日程を読みこめませんでした。少しおいて、もう一度お開きください。",
+  pin: "パスコードが違います。ログインし直してください。",
+  nomember: "会員番号が見つかりません。",
+  past: "その日は、もう過ぎています。",
+  nodate: "その日のグルコンが見つかりませんでした。ページを開き直してください。",
+  busy: "いま混み合っています。少しおいてお試しください。"
+};
+
+function drawMine(){
+  const box = $("#mine");
+  const m = data && data.mine;
+  if(m && m.s === "参加予定" && m.d && m.d >= data.today){
+    const x = data.items.find(i=>i.date === m.d);
+    box.innerHTML = `<div class="mine">✅ あなたの出席予定：${x ? esc(dayHead(x) + "　" + x.leader) : esc(md(m.d))}<br><span style="font-weight:500;font-size:12.5px;">サポートの方の画面にも出ています。取り消したいときは、サポートの方にお伝えください。</span></div>`;
+  }else box.innerHTML = "";
+}
+function drawList(){
+  const up = data.items.filter(x=>x.date >= data.today);
+  const plan = data.mine && data.mine.s === "参加予定" ? data.mine.d : "";
+  $("#list").innerHTML = up.length ? up.map((x,i)=>{
+    const on = plan === x.date;
+    return `<div class="day${on ? " on" : ""}" data-i="${i}">
+      <h3>${esc(dayHead(x))}<small>${esc(x.leader)}</small>${on ? '<span class="tag">出席予定</span>' : ""}</h3>
+      ${times(x)}
+      ${on ? "" : `<button class="btn plan" data-date="${esc(x.date)}">この日に出席予定にする</button><div class="askbox"></div>`}
+    </div>`;
+  }).join("") + '<p class="small">※ 出席予定にすると、初期サポートマネジメント（サポートの方の画面）に出ます。</p>'
+    : '<p class="msg">いまのところ、予定されているグルコンはありません。</p>';
+  document.querySelectorAll("#list .btn.plan").forEach(b=>b.addEventListener("click", ()=>askPlan(b)));
+}
+function drawPast(){
+  const past = data.items.filter(x=>x.date <= data.today).reverse();
+  $("#pastBox").hidden = !past.length;
+  $("#past").innerHTML = past.map(x=>{
+    const rec = x.lk && selfVals[x.lk] ? skySelf.md(selfVals[x.lk]) : "";
+    return `<div class="day">
+      <h3>${esc(dayHead(x))}<small>${esc(x.leader)}</small></h3>
+      ${times(x)}
+      ${x.lk ? (rec ? `<p class="rec">✅ ${esc(x.leader)}のグルコンに出席できた（${esc(rec)} に記録）</p>`
+                    : `<button class="btn done" data-lk="${esc(x.lk)}">出席できた</button>`) : ""}
+    </div>`;
+  }).join("");
+  document.querySelectorAll("#past .btn.done").forEach(b=>b.addEventListener("click", ()=>markDone(b)));
+}
+/* まちがえて押さないように、ひと声かけてから保存します */
+function askPlan(btn){
+  const box = btn.nextElementSibling;
+  btn.hidden = true;
+  box.innerHTML = `<div class="ask">この日を出席予定にしますか？<div class="row"><button class="yes">はい</button><button class="no">やめる</button></div></div>`;
+  box.querySelector(".no").onclick = ()=>{ box.innerHTML = ""; btn.hidden = false; };
+  box.querySelector(".yes").onclick = ()=>savePlan(btn.dataset.date, box);
+}
+async function savePlan(date, box){
+  box.querySelectorAll("button").forEach(b=>b.disabled = true);
+  try{
+    const r = await fetch(GAS_URL, { method:"POST", body:new URLSearchParams({ action:"gconPlan", id:member.id, pin:member.pin, date }) });
+    const j = await r.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
+    if(!j || !j.ok){ box.innerHTML = `<p class="msg err">${esc(ERR[j && j.error] || "保存できませんでした。少しおいてお試しください。")}</p>`; return; }
+    data.mine = j.mine;
+    drawMine(); drawList();
+    window.scrollTo({ top:0, behavior:"smooth" });
+  }catch(e){
+    box.innerHTML = '<p class="msg err">通信できませんでした。電波のよい場所でお試しください。</p>';
+  }
+}
+async function markDone(btn){
+  btn.disabled = true;
+  const r = await skySelf.set({ [btn.dataset.lk]: true });
+  if(r && r.ok){ selfVals = r.vals || {}; drawPast(); }
+  else{ btn.disabled = false; btn.insertAdjacentHTML("afterend", '<p class="msg err">記録できませんでした。もう一度お試しください。</p>'); }
+}
+
+async function load(){
+  if(!member){
+    $("#list").innerHTML = '<p class="msg">ログインすると、グルコンの日程が見られます。<br><a href="#" id="goLogin">ログインする ›</a></p>';
+    $("#goLogin").addEventListener("click", e=>{
+      e.preventDefault();
+      if(typeof skyLoginRequired === "function") skyLoginRequired(()=>location.reload());
+      else location.href = "../index.html#login";
+    });
+    return;
+  }
+  if(typeof skyLoading === "function") skyLoading("グルコンの日程を読みこんでいます", "しばらくお待ちください");
+  try{
+    const r = await fetch(`${GAS_URL}?action=gconDates&id=${encodeURIComponent(member.id)}&pin=${encodeURIComponent(member.pin)}`);
+    const j = await r.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
+    if(typeof skyLoadingDone === "function") skyLoadingDone();
+    if(!j || !j.ok){ $("#list").innerHTML = `<p class="msg err">${esc(ERR[j && j.error] || "日程を読みこめませんでした。")}</p>`; return; }
+    data = j;
+    drawMine(); drawList(); drawPast();
+    skySelf.get().then(v=>{ if(v){ selfVals = v; drawPast(); } });
+  }catch(e){
+    if(typeof skyLoadingDone === "function") skyLoadingDone();
+    $("#list").innerHTML = '<p class="msg err">通信できませんでした。電波のよい場所でお試しください。</p>';
+  }
+}
+load();
+</script>
+<script src="../track.js"></script>
+<script src="../menu.js"></script>
+</body>
+</html>
