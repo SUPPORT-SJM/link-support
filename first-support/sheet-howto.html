@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<script src="../config.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>スプレッドシートの書き方 | LINK 初期サポート</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* 年配の方にも読みやすいように、文字は大きめ・言葉はやさしくしています */
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Zen Kaku Gothic New",sans-serif;background:#FFFBF7;padding:16px 14px 48px;color:#3E2723;font-size:17px;line-height:1.9}
+.wrap{max-width:460px;margin:0 auto}
+.back-btn{display:inline-block;color:#E64A19;font-size:15px;font-weight:700;text-decoration:none;margin-bottom:14px}
+.hero{background:linear-gradient(135deg,#E8F5E9,#F1F8E9);border:1.5px solid #A5D6A7;border-radius:18px;padding:18px 16px;text-align:center;margin-bottom:16px}
+.hero h1{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:22px;color:#2E7D32;line-height:1.5}
+.hero p{font-size:16px;margin-top:6px}
+h2{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:19px;color:#E65100;margin:24px 0 10px;padding-bottom:6px;border-bottom:3px solid #FFCC80}
+.box{background:#fff;border:1.5px solid #F0E0D0;border-radius:16px;padding:14px 16px;margin-bottom:12px}
+.box b{color:#BF360C}
+/* 機種のえらび方 */
+.dev{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:6px 0 4px}
+.dev button{padding:14px 4px;border-radius:14px;border:2.5px solid #D7CCC8;background:#fff;font-family:inherit;font-size:16px;font-weight:700;color:#5D4037;cursor:pointer;line-height:1.4}
+.dev button .ic{display:block;font-size:26px}
+.dev button.on{border-color:#43A047;background:#E8F5E9;color:#1B5E20}
+.guess{font-size:14px;color:#6D4C41;text-align:center;margin-bottom:8px}
+/* 手順 */
+.steps{list-style:none;counter-reset:st}
+.steps li{counter-increment:st;position:relative;background:#fff;border:1.5px solid #F0E0D0;border-radius:16px;padding:14px 14px 14px 58px;margin-bottom:10px}
+.steps li::before{content:counter(st);position:absolute;left:12px;top:14px;width:34px;height:34px;border-radius:50%;background:#FF7043;color:#fff;font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:18px;display:grid;place-items:center}
+.steps li b{color:#BF360C}
+.key{display:inline-block;border:2px solid #8D6E63;border-radius:8px;padding:0 8px;font-weight:700;background:#FFF8E1;line-height:1.6;margin:0 2px}
+.pane[hidden]{display:none}
+/* よくあるつまずき */
+.qa{background:#fff;border:1.5px solid #FFCDD2;border-left:6px solid #E57373;border-radius:14px;padding:12px 14px;margin-bottom:10px}
+.qa .q{font-weight:700;color:#C62828}
+.qa .a{margin-top:4px}
+/* 動きで見せる例 */
+.demo{background:#fff;border:1.5px solid #C8E6C9;border-radius:18px;padding:12px;margin-bottom:10px}
+.demo .cap{font-size:15px;font-weight:700;text-align:center;color:#2E7D32;min-height:2em}
+.scr{position:relative;margin:8px auto 0;width:100%;max-width:360px;border-radius:22px;background:#2A2438;padding:10px;user-select:none}
+.scr.pc{border-radius:12px;padding:22px 8px 8px}
+.scr.pc::before{content:"● ● ●";position:absolute;top:3px;left:10px;font-size:9px;color:#9E9E9E;letter-spacing:2px}
+.sheet{background:#fff;border-radius:14px;overflow:hidden;position:relative;font-size:12px}
+.scr.pc .sheet{border-radius:6px}
+.bar{display:flex;align-items:center;gap:6px;background:#0F9D58;color:#fff;font-weight:700;font-size:12px;padding:6px 10px}
+.fx{display:flex;align-items:center;gap:6px;border-bottom:1px solid #E0E0E0;padding:5px 8px;font-size:12px;min-height:30px;background:#FAFAFA}
+.fx .fxl{color:#9E9E9E;font-style:italic;font-weight:700}
+.fx .fxv{flex:1;min-height:18px;border-radius:4px;padding:0 4px}
+.fx .fxv.on{background:#E8F0FE;outline:2px solid #1A73E8}
+.fx .ok{display:none;width:24px;height:24px;border-radius:50%;background:#1A73E8;color:#fff;font-weight:900;place-items:center;font-size:14px}
+.fx .ok.on{display:grid}
+.ttl{background:#FFF3E0;font-weight:700;text-align:center;padding:4px;font-size:12px;border-bottom:1px solid #E0E0E0}
+table{border-collapse:collapse;width:100%;table-layout:fixed}
+th,td{border:1px solid #E0E0E0;height:28px;padding:0 4px;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+th{background:#F5F5F5;font-weight:700;font-size:11px}
+td.n{text-align:center;color:#757575;background:#FAFAFA;width:26px}
+th.n{width:26px}
+td.sel{outline:3px solid #1A73E8;outline-offset:-2px;background:#E8F0FE}
+td.typed{color:#1B5E20;font-weight:700}
+.pen{position:absolute;right:12px;bottom:12px;width:44px;height:44px;border-radius:50%;background:#1A73E8;color:#fff;display:grid;place-items:center;font-size:20px;box-shadow:0 4px 10px rgba(0,0,0,.25);transition:transform .2s}
+.pen.glow{animation:glow 1s ease-in-out infinite}
+@keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(26,115,232,.5),0 4px 10px rgba(0,0,0,.25)}50%{box-shadow:0 0 0 10px rgba(26,115,232,0),0 4px 10px rgba(0,0,0,.25)}}
+.kb{position:absolute;left:0;right:0;bottom:0;height:0;background:#D1D5DB;overflow:hidden;transition:height .3s;display:grid;grid-template-columns:repeat(5,1fr);gap:4px;padding:0 6px}
+.kb.on{height:74px;padding:8px 6px}
+.kb i{background:#fff;border-radius:5px;height:26px}
+.hand{position:absolute;left:0;top:0;font-size:30px;pointer-events:none;transition:transform .6s cubic-bezier(.3,.8,.3,1);filter:drop-shadow(0 3px 3px rgba(0,0,0,.25));z-index:5}
+.hand.tap{animation:tap .35s ease-in-out}
+@keyframes tap{50%{scale:.82}}
+.replay{display:block;margin:10px auto 0;padding:10px 18px;border-radius:999px;border:2px solid #A5D6A7;background:#fff;color:#2E7D32;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer}
+/* 右上のメニューのボタンと重ならないように（スマホ） */
+@media (max-width:600px){ .hero{margin-right:58px;} }
+th:nth-child(2){width:30%}
+.back-btn2{display:block;padding:15px;border-radius:14px;background:#FF7043;color:#fff;text-align:center;font-size:17px;font-weight:700;text-decoration:none;margin-top:22px}
+@media (prefers-reduced-motion: reduce){ .hand,.kb{transition:none} .pen.glow{animation:none} }
+</style>
+<link rel="stylesheet" href="../beta.css">
+<script src="../loading.js"></script>
+<script src="../login.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <a href="../index.html" class="back-btn">← トップに戻る</a>
+
+  <div class="hero">
+    <h1>📄 スプレッドシートの書き方</h1>
+    <p>LINKのイベントの申し込みは、ほとんどが<br>「スプレッドシート」という<b>表に、自分で名前を書きこむ</b>やり方です。</p>
+  </div>
+
+  <h2>① お使いの機械をえらんでください</h2>
+  <p class="guess" id="guess"></p>
+  <div class="dev" id="dev">
+    <button type="button" data-d="iphone"><span class="ic">📱</span>iPhone<br>の方</button>
+    <button type="button" data-d="android"><span class="ic">🤖</span>Android<br>の方</button>
+    <button type="button" data-d="pc"><span class="ic">💻</span>パソコン<br>の方</button>
+  </div>
+
+  <h2>② はじめに用意するもの</h2>
+  <div class="box">
+    <p>📧 <b>Googleアカウント</b>（Gmail のメールアドレスとパスワード）</p>
+    <p style="font-size:15px;margin-top:4px;">表に書きこむには、Googleアカウントでログインしている必要があります。分からないときは、サポートの方に聞いてください。</p>
+  </div>
+
+  <!-- iPhone -->
+  <div class="pane" data-d="iphone" hidden>
+    <h2>③ iPhone での書き方</h2>
+    <ol class="steps">
+      <li><b>「App Store」</b>を開いて、<b>「Google スプレッドシート」</b>をさがし、<span class="key">入手</span>を押して入れます。<br><span style="font-size:15px;">（緑色で、白い表のマークのアプリです。無料です）</span></li>
+      <li>スプレッドシートのアプリを開いて、<b>Googleアカウントでログイン</b>します。</li>
+      <li>申し込みのリンクを押します。<b>アプリで開く</b>と、書きこめます。</li>
+      <li>画面の下に並んでいる名前（たとえば<b>「2026年11月」</b>）から、<b>その月</b>をえらびます。</li>
+      <li>出たい日のところで、<b>空いている番号の「お名前」のマス</b>を<b>1回</b>押します。</li>
+      <li>右下の<b>青い ✏️（えんぴつ）</b>を押します。<br><span style="font-size:15px;">（マスを2回続けて押しても、書けるようになります）</span></li>
+      <li>キーボードで名前を入れて、<b>青い ✓（チェック）</b>を押します。これで書きこめました。</li>
+      <li>同じやり方で、<b>アップクリエ・チーム名・パソコン/スマホ</b>のマスも書きます。</li>
+    </ol>
+  </div>
+
+  <!-- Android -->
+  <div class="pane" data-d="android" hidden>
+    <h2>③ Android での書き方</h2>
+    <ol class="steps">
+      <li><b>「Play ストア」</b>を開いて、<b>「Google スプレッドシート」</b>をさがし、<span class="key">インストール</span>を押して入れます。<br><span style="font-size:15px;">（はじめから入っていることもあります。緑色で、白い表のマークのアプリです）</span></li>
+      <li>スプレッドシートのアプリを開いて、<b>Googleアカウントでログイン</b>します。</li>
+      <li>申し込みのリンクを押します。<b>アプリで開く</b>と、書きこめます。</li>
+      <li>画面の下に並んでいる名前（たとえば<b>「2026年11月」</b>）から、<b>その月</b>をえらびます。</li>
+      <li>出たい日のところで、<b>空いている番号の「お名前」のマス</b>を<b>1回</b>押します。</li>
+      <li>右下の<b>青い ✏️（えんぴつ）</b>を押します。<br><span style="font-size:15px;">（マスを2回続けて押しても、書けるようになります）</span></li>
+      <li>キーボードで名前を入れて、<b>青い ✓（チェック）</b>を押します。これで書きこめました。</li>
+      <li>同じやり方で、<b>アップクリエ・チーム名・パソコン/スマホ</b>のマスも書きます。</li>
+    </ol>
+  </div>
+
+  <!-- パソコン -->
+  <div class="pane" data-d="pc" hidden>
+    <h2>③ パソコンでの書き方</h2>
+    <ol class="steps">
+      <li>申し込みのリンクを、<b>Google Chrome</b> などのブラウザで開きます。</li>
+      <li>右上に<span class="key">ログイン</span>と出ていたら、押して<b>Googleアカウントでログイン</b>します。</li>
+      <li>画面の下に並んでいる名前（たとえば<b>「2026年11月」</b>）から、<b>その月</b>をえらびます。</li>
+      <li>出たい日のところで、<b>空いている番号の「お名前」のマス</b>を<b>1回クリック</b>します。</li>
+      <li>そのままキーボードで名前を打って、<span class="key">Enter</span>キーを押します。これで書きこめました。</li>
+      <li>同じやり方で、<b>アップクリエ・チーム名・パソコン/スマホ</b>のマスも書きます。</li>
+    </ol>
+  </div>
+
+  <h2>④ 例：ユーザーサポート会に申し込む</h2>
+  <div class="demo">
+    <p class="cap" id="cap">▶ 動きで見てみましょう</p>
+    <div class="scr" id="scr">
+      <div class="sheet" id="sheetBox">
+        <div class="bar">📊 🌈LINKユーザーサポート会申込</div>
+        <div class="fx"><span class="fxl">fx</span><span class="fxv" id="fxv"></span><span class="ok" id="ok">✓</span></div>
+        <div class="ttl">11/1(日) 9:00〜11:00　ユーザーサポート</div>
+        <table id="tbl">
+          <thead><tr><th class="n"></th><th>お名前</th><th>アップクリエ</th><th>チーム名</th><th>パソコン/スマホ</th></tr></thead>
+          <tbody>
+            <tr><td class="n">1</td><td>やまだ</td><td>すずき</td><td>Skyarc</td><td>スマホ</td></tr>
+            <tr><td class="n">2</td><td>さとう</td><td>たなか</td><td>Skyarc</td><td>パソコン</td></tr>
+            <tr><td class="n">3</td><td></td><td></td><td></td><td></td></tr>
+            <tr><td class="n">4</td><td></td><td></td><td></td><td></td></tr>
+            <tr><td class="n">5</td><td></td><td></td><td></td><td></td></tr>
+          </tbody>
+        </table>
+        <div style="height:60px"></div>
+        <span class="pen" id="pen">✏️</span>
+        <div class="kb" id="kb"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      </div>
+      <span class="hand" id="hand">👆</span>
+    </div>
+    <button type="button" class="replay" id="replay">↻ もう一度見る</button>
+  </div>
+
+  <h2>⑤ うまくいかないとき</h2>
+  <div class="qa"><p class="q">Q. 見えるけれど、書きこめません</p>
+    <p class="a">スマホのブラウザ（Safari や Chrome）や LINE の画面で開くと、<b>見るだけ</b>で書きこめないことがあります。スプレッドシートの<b>アプリで開いて</b>ください。</p></div>
+  <div class="qa"><p class="q">Q. マスを押しても、字が入りません</p>
+    <p class="a">右下の<b>青い ✏️（えんぴつ）</b>を押すか、マスを<b>2回続けて</b>押してください。</p></div>
+  <div class="qa"><p class="q">Q. 書いたのに、消えてしまいました</p>
+    <p class="a">書いたあとに<b>青い ✓（チェック）</b>を押してください（パソコンは <span class="key">Enter</span> キー）。</p></div>
+  <div class="qa"><p class="q">Q. 「表示専用」「閲覧のみ」と出ます</p>
+    <p class="a">その表に書きこむ許可がない状態です。<b>サポートの方</b>に伝えてください。</p></div>
+
+  <a href="../index.html" class="back-btn2">← トップに戻る</a>
+</div>
+<div style="text-align:center;font-size:9.5px;color:#C4B8B0;font-family:monospace;padding:14px 0 20px;"></div>
+<script>
+/* ================================================================
+   スプレッドシートの書き方
+   ・iPhone / Android / パソコンで、手順を分けて出します（はじめは、お使いの機械を見て選んでおきます）
+   ・④ の例は、手と画面の動きで見せます（パソコンのときは、クリックして打つ動き）
+================================================================ */
+const ua = navigator.userAgent || "";
+const guess = /iPhone|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1) ? "iphone"
+            : /Android/.test(ua) ? "android" : "pc";
+let dev = guess;
+try{ const s = localStorage.getItem("sky_sheet_dev"); if(s) dev = s; }catch(e){}
+const NAME = { iphone:"iPhone", android:"Android", pc:"パソコン" };
+document.getElementById("guess").textContent = "（いま見ている機械は「" + NAME[guess] + "」のようです）";
+function setDev(d){
+  dev = d;
+  document.querySelectorAll("#dev button").forEach(b=>b.classList.toggle("on", b.dataset.d === d));
+  document.querySelectorAll(".pane").forEach(p=>p.hidden = p.dataset.d !== d);
+  document.getElementById("scr").classList.toggle("pc", d === "pc");
+  document.getElementById("hand").textContent = d === "pc" ? "🖱️" : "👆";
+  document.getElementById("pen").style.display = d === "pc" ? "none" : "";
+  try{ localStorage.setItem("sky_sheet_dev", d); }catch(e){}
+  play();
+}
+document.querySelectorAll("#dev button").forEach(b=>b.addEventListener("click", ()=>setDev(b.dataset.d)));
+
+/* ---------------- 動きで見せる例 ---------------- */
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const $ = id=>document.getElementById(id);
+const VALS = ["さかい はなこ", "すずき", "Skyarc", "スマホ"];
+let timers = [];
+function later(ms, fn){ timers.push(setTimeout(fn, ms)); }
+function cell(c){ return $("tbl").rows[3].cells[c + 1]; }       /* 3番の行（空いている行） */
+function handTo(el, dx, dy){
+  const r = el.getBoundingClientRect(), s = $("scr").getBoundingClientRect();
+  $("hand").style.transform = `translate(${r.left - s.left + r.width/2 + (dx||0) - 8}px, ${r.top - s.top + r.height/2 + (dy||0) - 4}px)`;
+}
+function tapHand(){ const h = $("hand"); h.classList.remove("tap"); void h.offsetWidth; h.classList.add("tap"); }
+function cap(t){ $("cap").textContent = t; }
+function reset(){
+  timers.forEach(clearTimeout); timers = [];
+  for(let c = 0; c < 4; c++){ const td = cell(c); td.textContent = ""; td.className = ""; }
+  $("fxv").textContent = ""; $("fxv").classList.remove("on"); $("ok").classList.remove("on");
+  $("kb").classList.remove("on"); $("pen").classList.remove("glow");
+  $("hand").style.transform = "translate(260px, 300px)";
+}
+function play(){
+  reset();
+  if(reduce){   /* 動きをひかえる設定の方には、書きおわった形だけを見せます */
+    for(let c = 0; c < 4; c++){ cell(c).textContent = VALS[c]; cell(c).className = "typed"; }
+    cap("3番に、名前・アップクリエ・チーム名・スマホかパソコンかを書きます");
+    return;
+  }
+  const pc = dev === "pc";
+  let t = 400;
+  for(let c = 0; c < 4; c++){
+    const td = cell(c), label = ["お名前","アップクリエ","チーム名","パソコン/スマホ"][c];
+    later(t, ()=>{ cap(`空いている3番の「${label}」のマスを${pc ? "クリック" : "1回押す"}`); handTo(td); });
+    later(t += 900, ()=>{ tapHand(); document.querySelectorAll("#tbl td.sel").forEach(x=>x.classList.remove("sel")); td.classList.add("sel"); });
+    if(!pc){
+      later(t += 700, ()=>{ cap("右下の青い ✏️（えんぴつ）を押す"); $("pen").classList.add("glow"); handTo($("pen")); });
+      later(t += 900, ()=>{ tapHand(); $("pen").classList.remove("glow"); $("kb").classList.add("on"); $("fxv").classList.add("on"); });
+    }else{
+      later(t += 500, ()=>{ $("fxv").classList.add("on"); });
+    }
+    /* 1文字ずつ打つ */
+    const v = VALS[c];
+    later(t += 500, ()=>cap(pc ? "キーボードで打つ" : "キーボードで名前を入れる"));
+    for(let i = 1; i <= v.length; i++){
+      later(t += 160, ()=>{ $("fxv").textContent = v.slice(0, i); td.textContent = v.slice(0, i); });
+    }
+    if(!pc){
+      later(t += 500, ()=>{ cap("青い ✓（チェック）を押して、できあがり"); $("ok").classList.add("on"); handTo($("ok")); });
+      later(t += 900, ()=>{ tapHand(); });
+    }else{
+      later(t += 500, ()=>cap("Enter キーを押して、できあがり"));
+    }
+    later(t += 500, ()=>{ td.classList.remove("sel"); td.classList.add("typed"); $("fxv").textContent = ""; $("fxv").classList.remove("on"); $("ok").classList.remove("on"); $("kb").classList.remove("on"); });
+    t += 600;
+  }
+  later(t, ()=>cap("✅ 書きこめました！ これで申し込みできています"));
+}
+$("replay").addEventListener("click", play);
+setDev(dev);
+</script>
+<script src="../track.js"></script>
+<script src="../menu.js"></script>
+</body>
+</html>
