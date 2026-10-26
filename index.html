@@ -110,6 +110,23 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body)
 .tut .tt{font-family:var(--f-head);font-weight:700;font-size:10px;color:var(--deep);background:rgba(255,255,255,.92);
   border-radius:6px;padding:0 5px;white-space:nowrap;}
 .tut:focus-visible{outline:3px solid var(--deep);outline-offset:3px;border-radius:12px;}
+/* ログイン中のトップの、小さな「会員情報」（左上。使い方と同じように浮いていて、つまんで動かせます） */
+.tut.mem .tb{border-color:var(--g-member);}
+.tut.mem .tt{color:#2E7D62;}
+/* 会員情報の画面 */
+.minfo{margin:6px 0 14px;border:2px solid var(--line);border-radius:16px;overflow:hidden;}
+.minfo .row{display:flex;flex-direction:column;gap:2px;padding:12px 14px;border-bottom:1px dashed var(--line);}
+.minfo .row:last-child{border-bottom:none;}
+.minfo .k{font-size:13px;font-weight:700;color:var(--deep);}
+.minfo .v{font-family:var(--f-head);font-weight:900;font-size:22px;color:var(--ink);word-break:break-all;}
+.minfo .v.none{font-size:15px;font-weight:700;color:var(--sub);}
+.minfo .v.num{letter-spacing:.06em;}
+.pwnote{background:#FFF8E1;border:1.5px solid #FFE08A;border-radius:14px;padding:12px 14px;font-size:14px;line-height:1.85;color:#5D4037;margin-bottom:14px;}
+.pwnote b{color:#BF360C;}
+.mlink{display:block;text-align:center;text-decoration:none;font-family:var(--f-head);font-weight:900;font-size:16px;color:#fff;
+  background:var(--g-member);border-radius:14px;padding:14px;margin-bottom:10px;box-shadow:0 6px 16px rgba(63,169,138,.3);}
+.mclose{display:block;width:100%;padding:12px;border:none;border-radius:14px;background:var(--mist);color:var(--deep);
+  font-family:var(--f-head);font-weight:700;font-size:15px;cursor:pointer;}
 /* 「登録」の右下の、小さな「使い方」 */
 .howto{position:absolute;left:0;top:0;z-index:4;touch-action:none;cursor:grab;width:44px;display:flex;flex-direction:column;align-items:center;gap:2px;
   text-decoration:none;will-change:transform;}
@@ -228,6 +245,23 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body)
   <div class="foot">Presented by Skyarc-team<br><span class="verTag"></span></div>
 </div>
 
+<div class="sheet" id="memSheet" style="z-index:8100;" hidden>
+  <div class="card" role="dialog" aria-labelledby="mTitle">
+    <button type="button" class="close" id="mClose" aria-label="とじる">×</button>
+    <h3 id="mTitle">👤 会員情報</h3>
+    <p class="lead">ユーザーサポート会などで聞かれたら、ここを見せてください</p>
+    <div class="minfo">
+      <div class="row"><span class="k">① 登録名（ニックネーム）</span><span class="v" id="mName"></span></div>
+      <div class="row"><span class="k">② 本名</span><span class="v" id="mReal"></span></div>
+      <div class="row"><span class="k">③ 会員番号</span><span class="v num" id="mId"></span></div>
+    </div>
+    <div class="pwnote">🔑 <b>LINKのサービスを使うためのパスワード</b>は、ここには出しません。<br>
+      ほかの人に分からないように、ご自身でしっかり管理してください。<br>
+      手帳にメモする、LINEのノートに書いておくなど、<b>ご自分がすぐ分かるところ</b>に残しておくと安心です。</div>
+    <a class="mlink" href="./first-support/sheet-howto.html">📄 スプレッドシートの書き方<br><span style="font-size:13px;font-weight:700;">（イベントの申し込みのしかた）</span></a>
+    <button type="button" class="mclose" id="mClose2">とじる</button>
+  </div>
+</div>
 <div class="sheet" id="sheet" hidden>
   <div class="card" role="dialog" aria-labelledby="jTitle">
     <button type="button" class="close" id="jClose" aria-label="とじる">×</button>
@@ -672,7 +706,7 @@ function frame(t){
         if(d < R){ const f = (R-d)/R*7; ax += dx/d*f; ay += dy/d*f; n.dodge = true; } else n.dodge = false;
       }
       /* 「使い方」の丸をつまんで近づけたときも、ほかのアイコンはよけます */
-      const fd = (tutF && tutF.held && tutF.el.style.display !== "none") ? tutF : ((howF && howF.held && howF.el.style.display !== "none") ? howF : null);
+      const fd = [tutF, howF, memF].find(x=>x && x.held && x.el.style.display !== "none") || null;
       if(fd && n.hx != null){
         /* アイコンをつまんだときと同じ動き：よけながら、まわりでくるくる混ざります（登録・ログインの丸も同じ） */
         const dx = n.x - fd.x, dy = n.y - fd.y, d = Math.hypot(dx,dy) || 1, R = 140;
@@ -710,6 +744,7 @@ function frame(t){
   }
   placeHowto(t);
   placeTut(t);
+  placeMem(t);
   leaving = leaving.filter(n=>{
     if(t - n.dying > 420){ n.el.remove(); return false; }
     return true;
@@ -724,11 +759,12 @@ function frame(t){
    ・指でつまんで動かせます（はなすと、元の場所へゆっくり戻ります）
    ・押すと使い方のページへ
 ================================================================ */
-function makeFloater(cls, ph){
+function makeFloater(cls, ph, opt){
   const el = document.createElement("a");
-  el.className = cls; el.href = B + "howto.html";
-  el.setAttribute("aria-label", "使い方（このサイトの使い方）を見る");
-  el.innerHTML = cls === "howto" ? '<span class="hb">📖</span><span class="ht">使い方</span>'
+  el.className = cls; el.href = (opt && opt.href) || (B + "howto.html");
+  el.setAttribute("aria-label", (opt && opt.aria) || "使い方（このサイトの使い方）を見る");
+  el.innerHTML = opt ? `<span class="tb">${opt.ic}</span><span class="tt">${opt.nm}</span>`
+               : cls === "howto" ? '<span class="hb">📖</span><span class="ht">使い方</span>'
                                  : '<span class="tb">📖</span><span class="tt">使い方</span>';
   el.draggable = false;
   const f = { el, x: null, y: null, vx: 0, vy: 0, hx: 0, hy: 0, ph, held: false, moved: false, last: -1e9 };
@@ -760,7 +796,8 @@ function makeFloater(cls, ph){
   el.addEventListener("pointercancel", end);
   el.addEventListener("click", e=>{
     /* つまんで動かしたあとは、ページへは移らずに元の場所へ戻るだけ */
-    if(f.moved || performance.now() - f.last < 400){ e.preventDefault(); e.stopPropagation(); f.moved = false; }
+    if(f.moved || performance.now() - f.last < 400){ e.preventDefault(); e.stopPropagation(); f.moved = false; return; }
+    if(opt && opt.onTap){ e.preventDefault(); opt.onTap(); }
   });
   return f;
 }
@@ -824,6 +861,76 @@ function placeTut(t){
   }
   stepFloater(tutF, t, sch.s, sch.o, 40, 16);
 }
+
+/* ---- ログイン中のトップ：「会員情報」を左上（はじめの一歩と初期サポートガイドの間の、輪の外）に置きます ---- */
+let memF = null, memKey = "";
+function memHome(){
+  const acc = nodes.find(n=>n.it === TREE[0]) || { hx: W/2, hy: H/2 };
+  const a = nodes.find(n=>n.it.url === B + "first-support/");            /* はじめの一歩 */
+  const g = nodes.find(n=>n.it.url === B + "first-support/guide.html");  /* 初期サポートガイド */
+  const hs = nodes.filter(n=>!n.it.moon && n.hx != null);
+  const boxes = hs.map(n=>{
+    const lw = Math.max(70, n.lw || 0);
+    return [n.hx - Math.max(42, lw/2) - 16, n.hy - 48, n.hx + Math.max(42, lw/2) + 16, n.hy + 72];
+  });
+  if(tutF && tutF.hx) boxes.push([tutF.hx - 50, tutF.hy - 30, tutF.hx + 50, tutF.hy + 44]);
+  const inOrbit = (x, y)=>{ const dx = (x - acc.hx)/(ORBIT.rx + 50), dy = (y - acc.hy)/(ORBIT.ry + 50); return dx*dx + dy*dy < 1; };
+  /* 目じるし：2つの丸のまん中から、輪の外へ少し出たところ */
+  let tx = 44, ty = acc.hy - 120;
+  if(a && g){
+    const mx = (a.hx + g.hx)/2, my = (a.hy + g.hy)/2;
+    const dx = mx - acc.hx, dy = my - acc.hy, d = Math.hypot(dx, dy) || 1;
+    tx = mx + dx/d*70; ty = my + dy/d*70;
+  }
+  let best = null, bestS = Infinity;
+  for(let x = 44; x <= W*.55; x += 4){
+    for(let y = Math.max(40, acc.hy - 300); y <= acc.hy + 40; y += 4){
+      const box = [x - 42, y - 18, x + 42, y + 34];
+      let ar = 0;
+      boxes.forEach(r=>{
+        const ox = Math.min(box[2], r[2]) - Math.max(box[0], r[0]);
+        const oy = Math.min(box[3], r[3]) - Math.max(box[1], r[1]);
+        if(ox > 0 && oy > 0) ar += ox*oy;
+      });
+      if(inOrbit(x, y)) ar += 5000;
+      const sc = ar*100 + Math.hypot(x - tx, y - ty);
+      if(sc < bestS){ bestS = sc; best = [x, y]; }
+    }
+  }
+  return best;
+}
+function placeMem(t){
+  const top = path.length === 0 && me;
+  const sch = top ? nodes.find(n=>n.it.g === "apply" && n.it.kids) : null;
+  if(!sch){ if(memF) memF.el.style.display = "none"; memKey = ""; return; }
+  if(!memF){
+    memF = makeFloater("tut mem", 3.4, { ic:"👤", nm:"会員情報", href:"#member", aria:"会員情報（会員番号など）を見る", onTap: openMemInfo });
+    stage.insertBefore(memF.el, stage.firstChild);
+  }
+  memF.el.style.display = "";
+  const key = W + "|" + H + "|" + nodes.map(n=>Math.round(n.hx||0) + "," + Math.round(n.hy||0)).join(";") + "|" + (tutF ? Math.round(tutF.hx) : "");
+  if(key !== memKey){
+    nodes.forEach(n=>{ if(n.lw == null){ const nm = n.el.querySelector(".nm"); n.lw = nm ? nm.offsetWidth : 0; } });
+    const h = memHome(); if(h){ memF.hx = h[0]; memF.hy = h[1]; } memKey = key;
+  }
+  stepFloater(memF, t, sch.s, sch.o, 40, 16);
+}
+/* 会員番号は、LINKの会員番号の形（8けた）で見せます（名簿に頭の0がなくても同じ番号です） */
+function memIdText(id){
+  const t = String(id || "").trim();
+  return /^\d{1,7}$/.test(t) ? t.padStart(8, "0") : t;
+}
+function openMemInfo(){
+  if(!me) return;
+  $("#mName").textContent = me.name || "（ご登録がありません）";
+  $("#mName").classList.toggle("none", !me.name);
+  $("#mReal").textContent = me.realName || "（ご登録がありません）";
+  $("#mReal").classList.toggle("none", !me.realName);
+  $("#mId").textContent = memIdText(me.id);
+  $("#memSheet").hidden = false;
+}
+document.getElementById("mClose").addEventListener("click", ()=>{ document.getElementById("memSheet").hidden = true; });
+document.getElementById("mClose2").addEventListener("click", ()=>{ document.getElementById("memSheet").hidden = true; });
 
 /* ---- まだログインしていない方：「登録（ログイン）」の丸の右下に置きます ---- */
 let howF = null;
