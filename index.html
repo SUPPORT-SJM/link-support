@@ -121,6 +121,11 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body)
 .minfo .v{font-family:var(--f-head);font-weight:900;font-size:22px;color:var(--ink);word-break:break-all;}
 .minfo .v.none{font-size:15px;font-weight:700;color:var(--sub);}
 .minfo .v.num{letter-spacing:.06em;}
+.minfo .idrow{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.cpy{flex:none;padding:10px 14px;border-radius:12px;border:2px solid var(--g-member);background:#fff;color:#2E7D62;
+  font-family:var(--f-head);font-weight:900;font-size:15px;cursor:pointer;}
+.cpy.done{background:var(--g-member);color:#fff;}
+.cpmsg{font-size:13px;font-weight:700;color:#2E7D62;min-height:1.2em;}
 .pwnote{background:#FFF8E1;border:1.5px solid #FFE08A;border-radius:14px;padding:12px 14px;font-size:14px;line-height:1.85;color:#5D4037;margin-bottom:14px;}
 .pwnote b{color:#BF360C;}
 .mlink{display:block;text-align:center;text-decoration:none;font-family:var(--f-head);font-weight:900;font-size:16px;color:#fff;
@@ -253,7 +258,9 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body)
     <div class="minfo">
       <div class="row"><span class="k">① 登録名（ニックネーム）</span><span class="v" id="mName"></span></div>
       <div class="row"><span class="k">② 本名</span><span class="v" id="mReal"></span></div>
-      <div class="row"><span class="k">③ 会員番号</span><span class="v num" id="mId"></span></div>
+      <div class="row"><span class="k">③ 会員番号</span>
+        <div class="idrow"><span class="v num" id="mId"></span><button type="button" class="cpy" id="mCopy">📋 コピー</button></div>
+        <span class="cpmsg" id="mCopyMsg" aria-live="polite"></span></div>
     </div>
     <div class="pwnote">🔑 <b>LINKのサービスを使うためのパスワード</b>は、ここには出しません。<br>
       ほかの人に分からないように、ご自身でしっかり管理してください。<br>
@@ -927,8 +934,26 @@ function openMemInfo(){
   $("#mReal").textContent = me.realName || "（ご登録がありません）";
   $("#mReal").classList.toggle("none", !me.realName);
   $("#mId").textContent = memIdText(me.id);
+  $("#mCopy").classList.remove("done"); $("#mCopy").textContent = "📋 コピー"; $("#mCopyMsg").textContent = "";
   $("#memSheet").hidden = false;
 }
+/* 会員番号をコピーします（新しいやり方が使えないブラウザでは、昔からのやり方でコピーします） */
+async function copyText(t){
+  try{ if(navigator.clipboard && window.isSecureContext){ await navigator.clipboard.writeText(t); return true; } }catch(e){}
+  try{
+    const ta = document.createElement("textarea");
+    ta.value = t; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.top = "-1000px"; ta.style.fontSize = "16px";
+    document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0, t.length);
+    const ok = document.execCommand("copy"); ta.remove(); return ok;
+  }catch(e){ return false; }
+}
+document.getElementById("mCopy").addEventListener("click", async ()=>{
+  const t = document.getElementById("mId").textContent.trim();
+  const ok = await copyText(t);
+  const b = document.getElementById("mCopy"), m = document.getElementById("mCopyMsg");
+  if(ok){ b.classList.add("done"); b.textContent = "✓ コピーしました"; m.textContent = "そのまま、貼りつけて使えます"; }
+  else{ m.textContent = "コピーできませんでした。番号を長押しして、コピーしてください"; }
+});
 document.getElementById("mClose").addEventListener("click", ()=>{ document.getElementById("memSheet").hidden = true; });
 document.getElementById("mClose2").addEventListener("click", ()=>{ document.getElementById("memSheet").hidden = true; });
 
