@@ -106,6 +106,8 @@
   tr:hover td{background:#FAFAFE;}
   .nm{font-weight:700;}
   .nm-link{color:var(--deep);text-decoration:underline;text-underline-offset:2px;}
+  /* 管理者・チーム代表でない方の編集画面では、印・役職・担当系列の欄は出しません（一覧の印のボタンで変えます） */
+  #memModal.lite .mm-full{display:none !important;}
   .need-check{display:inline-block;background:#FFF3D6;color:#8A6D00;border:1.5px solid #F0C86A;
     border-radius:999px;padding:1px 8px;font-size:10px;font-weight:700;margin-left:5px;white-space:nowrap;}
   tr.row-check td{background:#FFFDF5;}
@@ -865,7 +867,7 @@
         <p class="hint" id="mmPinHint">新規は必須。編集のときは、変更する場合だけ入力してください。</p>
       </div>
 
-      <div class="mm-f">
+      <div class="mm-f mm-full">
         <label>サポーター</label>
         <label style="display:flex;align-items:center;gap:8px;padding:9px 11px;border:1.5px solid var(--line);border-radius:9px;cursor:pointer;font-size:13px;" id="mmSupWrap">
           <input type="checkbox" id="mmSup" style="width:17px;height:17px;accent-color:#F5C452;"
@@ -874,7 +876,7 @@
         </label>
       </div>
 
-      <div class="mm-f">
+      <div class="mm-f mm-full">
         <label>クリエイターズ</label>
         <label style="display:flex;align-items:center;gap:8px;padding:9px 11px;border:1.5px solid var(--line);border-radius:9px;cursor:pointer;font-size:13px;" id="mmCrieWrap">
           <input type="checkbox" id="mmCrie" style="width:17px;height:17px;accent-color:var(--leaf);"
@@ -883,7 +885,7 @@
         </label>
       </div>
 
-      <div class="mm-f">
+      <div class="mm-f mm-full">
         <label>役職</label>
         <div class="mm-roles" id="mmRoles"></div>
         <p class="hint">管理画面に入るには「アドバンス」以上が必要です(クリエは①の丸つけのみ)</p>
@@ -929,7 +931,7 @@
         <div id="mmAdvIdFind"></div>
       </div>
 
-      <div class="mm-f" id="mmScopeWrap" style="display:none;">
+      <div class="mm-f mm-full" id="mmScopeWrap" style="display:none;">
         <label>担当系列</label>
         <div id="mmScopeList" style="display:grid;grid-template-columns:1fr 1fr;gap:5px;"></div>
         <p class="hint">アドバンス以上の方が受け持つ系列です(所属系列は自動で含まれます)</p>
@@ -1836,13 +1838,14 @@ function rowsHtml(list){
         /* 要確認・確認待ちのマークは、名前ではなく「編集」の左に置きます
            （名前を押すと進捗の画面なので、取り違えないようにするためです） */
         const open = `onclick='openMember(${JSON.stringify(m).replace(/'/g,"&#39;")})'`;
+        const canEd = canFull || m.edit === true;   /* 系列代表・アドバンス・クリエは、編集できる方だけ（GASが決めます） */
         const marks =
-            (m.needCheck ? `<span class="need-check" ${canFull ? open : ""} title="会員番号の欄にお名前が入っています。編集で直してください">⚠️ 要確認</span>` : "")
+            (m.needCheck ? `<span class="need-check" ${canEd ? open : ""} title="会員番号の欄にお名前が入っています。編集で直してください">⚠️ 要確認</span>` : "")
           + (m.autoFill ? (/まとめて更新/.test(m.autoFill)
-              ? `<span class="auto-fill" ${canFull ? open : ""} title="一部のデータがまとめて更新されています：${m.autoFill}">📝 要確認</span>`
-              : `<span class="auto-fill" ${canFull ? open : ""} title="お名前から自動でうめました：${m.autoFill}">🔎 確認待ち</span>`) : "")
-          + (m.temp ? `<span class="temp-id" ${canFull ? open : ""} title="会員番号が分からないまま登録された方です">🔗 番号まち</span>` : "");
-        const btn = canFull ? `<button class="scope-btn" ${open}>編集</button>` : "";
+              ? `<span class="auto-fill" ${canEd ? open : ""} title="一部のデータがまとめて更新されています：${m.autoFill}">📝 要確認</span>`
+              : `<span class="auto-fill" ${canEd ? open : ""} title="お名前から自動でうめました：${m.autoFill}">🔎 確認待ち</span>`) : "")
+          + (m.temp ? `<span class="temp-id" ${canEd ? open : ""} title="会員番号が分からないまま登録された方です">🔗 番号まち</span>` : "");
+        const btn = canEd ? `<button class="scope-btn" ${open}>編集</button>` : "";
         return (marks || btn) ? `<div class="edit-row">${marks}${btn}</div>` : "";
       })()}</td>
     </tr>`;
@@ -2181,6 +2184,7 @@ function openMember(m){
   const msg = document.getElementById("mmMsg");
   msg.className = "mm-msg";
 
+  document.getElementById("memModal").classList.toggle("lite", !(data && data.isFull));
   document.getElementById("mmTitle").textContent = m ? "会員情報の編集" : "会員を追加";
   document.getElementById("mmSub").textContent = m
     ? "変更したい項目だけ入力してください"
@@ -2189,7 +2193,9 @@ function openMember(m){
   // 系列セレクト
   const ksel = document.getElementById("mmKeiretsu");
   ksel.innerHTML = '<option value="">選択してください</option>'
-    + keiWith(m && m.keiretsu ? [m.keiretsu] : []).map(k=>`<option value="${k}">${k}${keiGoneMark(k)}</option>`).join("");
+    + keiWith(m && m.keiretsu ? [m.keiretsu] : [])
+        .filter(k=> (data && data.isFull) || (m && k === m.keiretsu) || ((data && data.scope) || []).indexOf(k) >= 0)
+        .map(k=>`<option value="${k}">${k}${keiGoneMark(k)}</option>`).join("");
 
   document.getElementById("mmId").value = m ? m.id : "";
   const lw = document.getElementById("mmLinkWrap");
@@ -3387,7 +3393,9 @@ async function saveMember(){
     if(j.ok === false){
       show({noperm:"この操作の権限がありません",
             badpin:"パスコードは4桁の数字で入力してください",
-            missing:"会員番号を入力してください"}[j.error] || "保存できませんでした","err");
+            missing:"会員番号を入力してください",
+            outofscope:"この方の情報は編集できません（ご自分から先の方・サポート担当の方だけ編集できます）",
+            keiscope:"その系列には変えられません（担当の系列の中で選んでください）"}[j.error] || "保存できませんでした","err");
       return;
     }
     toast(j.created ? "会員を登録しました" : "会員情報を更新しました");
