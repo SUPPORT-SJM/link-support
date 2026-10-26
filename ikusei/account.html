@@ -114,6 +114,7 @@
     <div class="card">
       <div class="row"><span class="lb">会員番号</span><span class="vl mono" id="vId">–</span></div>
       <div class="row"><span class="lb">ニックネーム</span><span class="vl" id="vName">–</span></div>
+      <div class="row"><span class="lb">ステータス</span><span class="vl" id="vGrow">–</span></div>
       <div class="row"><span class="lb">本名</span><span class="vl" id="vReal">–</span></div>
       <div class="row"><span class="lb">系列</span><span class="vl" id="vKei">–</span></div>
       <div class="row"><span class="lb">お住まい</span><span class="vl" id="vArea">–</span></div>
@@ -208,7 +209,7 @@ function show(t, cls){ const m = $("#msg"); m.innerHTML = t; m.className = "msg 
     return;
   }
 
-  $("#navWho").textContent = (member.name ? member.name+"さん" : "会員番号 "+member.id);
+  $("#navWho").textContent = (member.name ? (window.skyGrowth ? skyGrowth.selfTag(member.id) : "") + member.name + "さん" : "会員番号 "+member.id);
   fill();
 })();
 
@@ -220,6 +221,12 @@ function fill(){
   };
   set("#vId", member.id);
   set("#vName", member.name);
+  /* 育ちのマーク（はじめの一歩 → 初期サポートガイド → 活用の1stステップ。トップページを開いたときに読んだ進み具合で出します） */
+  if(window.skyGrowth){
+    const g = window.skyGrowth.mine();
+    set("#vGrow", g == null ? "これから" : window.skyGrowth.mark(g) + " " + window.skyGrowth.label(g));   /* まだ記録がないときは「これから」 */
+    if(g != null && member.name) $("#vName").textContent = window.skyGrowth.mark(g) + " " + member.name;   /* ニックネームの左にもマーク */
+  }
   set("#vReal", member.realName);
   set("#vKei", member.keiretsu);
   set("#vArea", member.area);

@@ -416,7 +416,7 @@ function buildRootSelect(){
   /* 個人：全員（並べ方は上と同じ） */
   const sel = $("#rootSel");
   sel.innerHTML = '<option value="">お名前をえらぶ</option>'
-    + members.slice().sort(cmp).map(m=>`<option value="${norm(m.id)}">${esc(m.name||m.id)}（${esc(m.keiretsu||"系列なし")}）</option>`).join("");
+    + members.slice().sort(cmp).map(m=>`<option value="${norm(m.id)}">${window.skyGrowth ? skyGrowth.tag(m.grow) : ""}${esc(m.name||m.id)}（${esc(m.keiretsu||"系列なし")}）</option>`).join("");
   /* 系列ごと：系列の並び順 */
   const ks = [];
   (keiOrder.length ? keiOrder : (window.SKY_KEIRETSU||[])).forEach(k=>{ if(members.some(m=>m.keiretsu===k)) ks.push(k); });
@@ -522,8 +522,8 @@ function render(){
   if(mode === "person"){
     crumbEl.innerHTML = '<a onclick="changeRoot()">全体</a>'
       + crumbs.map((m,i)=> `<span class="sep">›</span>` +
-          (i===crumbs.length-1 ? `<span class="now">${esc(m.name||m.id)}</span>`
-                               : `<a onclick="drill('${norm(m.id)}')">${esc(m.name||m.id)}</a>`)).join("")
+          (i===crumbs.length-1 ? `<span class="now">${window.skyGrowth ? skyGrowth.tag(m.grow) : ""}${esc(m.name||m.id)}</span>`
+                               : `<a onclick="drill('${norm(m.id)}')">${window.skyGrowth ? skyGrowth.tag(m.grow) : ""}${esc(m.name||m.id)}</a>`)).join("")
       + `<span class="cnt">配下 ${countAll(rootId)} 名</span>`;
   }else if(mode === "kei"){
     crumbEl.innerHTML = '<a onclick="changeRoot()">全体</a><span class="sep">›</span>'
@@ -598,7 +598,7 @@ function cardHtml(m, extra){
   const id = norm(m.id);
   const total = countAll(id);
   return `<div class="card ${roleClass(m.role)} ${extra||""}" onclick="drill('${id}')" data-id="${id}">
-      <div class="nm">${esc(m.name || "(名前未登録)")}</div>
+      <div class="nm">${window.skyGrowth ? skyGrowth.tag(m.grow) : ""}${esc(m.name || "(名前未登録)")}</div>
       <div class="kei-s">${esc(m.keiretsu || "–")}</div>
       <div class="prog">${progText(m)}</div>
       ${total ? `<span class="child">配下 ${total}</span>` : ""}
@@ -658,7 +658,7 @@ function trowHtml(m, kids, open, extra){
       ${kids.length
         ? `<button class="tbtn" onclick="toggleTree(this)">${open?"−":"+"}</button>`
         : `<button class="tbtn empty">・</button>`}
-      <span class="nm" onclick="drill('${id}')">${esc(m.name || "(名前未登録)")}</span>
+      <span class="nm" onclick="drill('${id}')">${window.skyGrowth ? skyGrowth.tag(m.grow) : ""}${esc(m.name || "(名前未登録)")}</span>
       <span class="kei-s">${esc(m.keiretsu || "–")}</span>
       ${total ? `<span class="badge">配下 ${total}</span>` : ""}
       <span class="prog">${progText(m)}</span>
@@ -707,7 +707,7 @@ function renderEdit(){
   const cur = norm(m.upline);
   const curIn = !cur || cands.some(x=> norm(x.id) === cur);
   box.innerHTML = `<div class="ed">
-    <h3>✏️ ${esc(m.name || m.id)}さんの情報を直す</h3>
+    <h3>✏️ ${window.skyGrowth ? skyGrowth.tag(m.grow) : ""}${esc(m.name || m.id)}さんの情報を直す</h3>
     <label for="edUp">直アップクリエ（この方の、すぐ上のクリエイター）</label>
     <select id="edUp">
       <option value="">（なし：いちばん上）</option>

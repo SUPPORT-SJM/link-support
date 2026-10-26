@@ -441,7 +441,7 @@ function goTo(member){
   const isCrie = member.crie === true || member.crie === "true";
   $("#formArea").style.display = "none";
   $("#loading").style.display = "block";
-  $("#loadMsg").textContent = (member.name ? member.name + "さん、" : "") + "ようこそ!";
+  $("#loadMsg").textContent = (member.name ? (window.skyGrowth ? skyGrowth.selfTag(member.id) : "") + member.name + "さん、" : "") + "ようこそ!";
   $("#loadSub").textContent = isCrie
     ? "クリエイターズのページをひらいています…"
     : "サポーターのページをひらいています…";
@@ -622,7 +622,7 @@ async function submitPinReset(){
   const hint = document.getElementById("welcomeBack");
   if(hint){
     hint.style.display = "block";
-    hint.textContent = "おかえりなさい" + (m.name ? "、"+m.name+"さん" : "") + "!Googleで本人確認をして、パスコードを入力してください。";
+    hint.textContent = "おかえりなさい" + (m.name ? "、"+(window.skyGrowth ? skyGrowth.selfTag(m.id) : "")+m.name+"さん" : "") + "!Googleで本人確認をして、パスコードを入力してください。";
   }
 })();
 

@@ -131,9 +131,9 @@
     return;
   }
   const who = document.getElementById("navWho");
-  if(who) who.textContent = (m.name ? m.name+"さん" : "会員番号 "+m.id) + (m.keiretsu ? "｜"+m.keiretsu : "");
+  if(who) who.textContent = (m.name ? (window.skyGrowth ? skyGrowth.selfTag(m.id) : "") + m.name + "さん" : "会員番号 "+m.id) + (m.keiretsu ? "｜"+m.keiretsu : "");
   const hw = document.getElementById("heroWho");
-  if(hw) hw.textContent = (m.name ? m.name+"さん、" : "") + "いつもありがとうございます";
+  if(hw) hw.textContent = (m.name ? (window.skyGrowth ? skyGrowth.selfTag(m.id) : "") + m.name + "さん、" : "") + "いつもありがとうございます";
 })();
 
 function skyLogout(){

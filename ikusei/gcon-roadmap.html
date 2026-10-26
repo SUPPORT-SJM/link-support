@@ -537,7 +537,7 @@
   if(back) back.href = isCrie ? "./portal-creators.html" : "./portal-supporter.html";
 
   const who = document.getElementById("navWho");
-  if(who) who.textContent = (m.name ? m.name+"さん" : "会員番号 "+m.id) + (m.keiretsu ? "｜"+m.keiretsu : "");
+  if(who) who.textContent = (m.name ? (window.skyGrowth ? skyGrowth.selfTag(m.id) : "") + m.name + "さん" : "会員番号 "+m.id) + (m.keiretsu ? "｜"+m.keiretsu : "");
   const adminLink = document.getElementById("navAdmin");
   if(adminLink && (m.crie === true || String(m.role||"") !== "")) adminLink.style.display = "inline-block";
 
@@ -563,7 +563,7 @@ window.addEventListener("pageshow", function(e){
     if(typeof skyNotAllowed === "function"){ skyNotAllowed(); return; }
   }
   const who = document.getElementById("navWho");
-  if(who) who.textContent = (mm.name ? mm.name+"さん" : "会員番号 "+mm.id) + (mm.keiretsu ? "｜"+mm.keiretsu : "");
+  if(who) who.textContent = (mm.name ? (window.skyGrowth ? skyGrowth.selfTag(mm.id) : "") + mm.name + "さん" : "会員番号 "+mm.id) + (mm.keiretsu ? "｜"+mm.keiretsu : "");
   const adminLink = document.getElementById("navAdmin");
   if(adminLink && (mm.crie === true || String(mm.role||"") !== "")) adminLink.style.display = "inline-block";
 

@@ -226,7 +226,7 @@ function show(t, cls){
     return;
   }
   $("#navWho").textContent =
-    (member.name ? member.name + "さん" : "会員番号 " + member.id)
+    (member.name ? (window.skyGrowth ? skyGrowth.selfTag(member.id) : "") + member.name + "さん" : "会員番号 " + member.id)
     + (member.keiretsu ? "｜" + member.keiretsu : "");
 })();
 

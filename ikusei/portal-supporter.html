@@ -270,7 +270,7 @@
   }
 
   const who = document.getElementById("navWho");
-  if(who) who.textContent = (m.name ? m.name+"さん" : "会員番号 "+m.id) + (m.keiretsu ? "｜"+m.keiretsu : "");
+  if(who) who.textContent = (m.name ? (window.skyGrowth ? skyGrowth.selfTag(m.id) : "") + m.name + "さん" : "会員番号 "+m.id) + (m.keiretsu ? "｜"+m.keiretsu : "");
   // クリエイターズ以上なら管理画面へのリンクを出す
   const adminLink = document.getElementById("navAdmin");
   /* サポーター以上の方に、管理画面をお出しします */
@@ -304,7 +304,7 @@ window.addEventListener("pageshow", function(e){
     return;
   }
   const who = document.getElementById("navWho");
-  if(who) who.textContent = (mm.name ? mm.name+"さん" : "会員番号 "+mm.id) + (mm.keiretsu ? "｜"+mm.keiretsu : "");
+  if(who) who.textContent = (mm.name ? (window.skyGrowth ? skyGrowth.selfTag(mm.id) : "") + mm.name + "さん" : "会員番号 "+mm.id) + (mm.keiretsu ? "｜"+mm.keiretsu : "");
   const adminLink = document.getElementById("navAdmin");
   if(adminLink && (mm.sup === true || mm.crie === true || String(mm.role||"") !== "")) adminLink.style.display = "inline-block";
 
@@ -413,7 +413,7 @@ const CELEB = {
   document.getElementById("celebBadge").textContent = c.badge;
   document.getElementById("celebMsg").innerHTML = c.msg;
   document.getElementById("celebBtn").textContent = c.btn;
-  document.getElementById("celebName").textContent = m.name ? m.name + "さん" : "";
+  document.getElementById("celebName").textContent = m.name ? (window.skyGrowth ? skyGrowth.selfTag(m.id) : "") + m.name + "さん" : "";
   document.getElementById("celebrate").dataset.kind = kind;
   document.getElementById("celebrate").classList.add("show");
   dropConfetti();

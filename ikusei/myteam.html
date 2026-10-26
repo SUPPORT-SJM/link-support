@@ -168,7 +168,7 @@ let filter = "all";
   }
 
   document.getElementById("navWho").textContent =
-    (member.name ? member.name+"さん" : "会員番号 "+member.id) + (member.keiretsu ? "｜"+member.keiretsu : "");
+    (member.name ? (window.skyGrowth ? skyGrowth.selfTag(member.id) : "") + member.name + "さん" : "会員番号 "+member.id) + (member.keiretsu ? "｜"+member.keiretsu : "");
   load();
 })();
 
@@ -254,7 +254,7 @@ function render(){
 
     return `<div class="card ${helperOnly ? "helper-only" : ""}">
       <div class="top">
-        <span class="nm">${m.name || "(お名前未登録)"}</span>
+        <span class="nm">${window.skyGrowth ? skyGrowth.tag(skyGrowth.fromProgress(m.progress)) : ""}${m.name || "(お名前未登録)"}</span>
         <span class="id">${m.id}</span>
         <span class="tags">
           <span class="tag rank">${rank}</span>

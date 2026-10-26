@@ -1826,7 +1826,7 @@ function rowsHtml(list){
 
     const hidOn = effHidden(m), hidPend = hidOn !== !!hiddenOrig[hk(m.id)];
     return `<tr class="${m.needCheck ? "row-check" : (m.autoFill ? "row-auto" : "")} ${hidOn ? "row-hid" : ""}">
-      <td><a href="#" class="nm nm-link" onclick="openDetail('${m.id}');return false;">${m.name || "(名前未登録)"}</a>${m.realName && m.realName !== m.name ? `<br><span style="font-size:10.5px;color:#A8A4BC;">(${m.realName})</span>` : ""}<br><span class="id">${m.id}</span>
+      <td><a href="#" class="nm nm-link" onclick="openDetail('${m.id}');return false;">${m.grow && window.skyGrowth ? `<span title="${window.skyGrowth.label(window.skyGrowth.stage(m.grow))}" style="text-decoration:none;display:inline-block;margin-right:3px;">${window.skyGrowth.mark(window.skyGrowth.stage(m.grow))}</span>` : ""}${m.name || "(名前未登録)"}</a>${m.realName && m.realName !== m.name ? `<br><span style="font-size:10.5px;color:#A8A4BC;">(${m.realName})</span>` : ""}<br><span class="id">${m.id}</span>
         <br><label class="hidchk ${hidPend ? "pend" : ""}" title="あなたの画面だけで非表示にします"><input type="checkbox" ${hidOn ? "checked" : ""} onchange="toggleHide('${m.id}', this.checked)">非表示</label></td>
       <td class="kei">${m.keiretsu || "–"}${m.area ? `<br><span style="font-size:10px;color:#A8A4BC;">${m.area}</span>` : ""}${hasSup(m) && !hasCrie(m) ? '<br><span style="font-size:10px;color:#B8860B;font-weight:700;">サポーター</span>' : ""}</td>
       <td class="prog">${piyo}</td>
@@ -2041,7 +2041,7 @@ function openScope(id){
   scopeTarget = m;
   const selected = (m.scope || "").split(/[,、\s]+/).filter(x=>x);
   document.getElementById("smWho").textContent =
-    (m.name || "(名前未登録)") + "さん(" + m.id + ")";
+    (window.skyGrowth ? skyGrowth.tag(m.grow) : "") + (m.name || "(名前未登録)") + "さん(" + m.id + ")";
   document.getElementById("smOwn").textContent =
     "所属系列「" + (m.keiretsu || "未設定") + "」は自動で担当に含まれます。その先の系列だけ選んでください。";
   document.getElementById("smList").innerHTML = keiWith(selected).map((k,i)=>{
@@ -3459,7 +3459,7 @@ function gradText(t){
 function renderDetail(){
   const m = detailData.member;
   const canEditSelf = data && data.isFull;
-  document.getElementById("dmName").textContent = (m.name || "(名前未登録)") + "さん";
+  document.getElementById("dmName").textContent = (window.skyGrowth ? skyGrowth.tag((((data && data.members) || []).find(x=>String(x.id) === String(m.id)) || {}).grow) : "") + (m.name || "(名前未登録)") + "さん";
   document.getElementById("dmSub").textContent =
     m.id + "｜" + (m.keiretsu || "系列未設定") + (m.role ? "｜" + m.role : "");
 

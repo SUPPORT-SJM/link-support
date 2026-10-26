@@ -163,7 +163,7 @@ function ready(){
 function gate(){ if(me) $("recBtn").disabled = !ready(); }
 if(me){
   $("who").hidden = false;
-  $("whoMe").textContent = "記録する人：" + (me.name ? me.name + "さん" : "") + "（会員番号 " + me.id + "）";
+  $("whoMe").textContent = "記録する人：" + (me.name ? (window.skyGrowth ? skyGrowth.selfTag(me.id) : "") + me.name + "さん" : "") + "（会員番号 " + me.id + "）";
   /* 系列：はじめは、ログインしている方の系列にしておきます（えらび直せます） */
   const keis = (window.SKY_KEIRETSU || []).slice();
   if(me.keiretsu && keis.indexOf(me.keiretsu) < 0) keis.unshift(me.keiretsu);

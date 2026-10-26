@@ -433,7 +433,7 @@ function draw(){
         <span class="dot ${x.sg[g.key].c}"></span>
         <span><span class="t">${esc(g.title)}</span><br><span class="v">${esc(x.sg[g.key].v)}</span>${selfLine(m, g.key) ? `<span class="me">${esc(selfLine(m, g.key))}</span>` : ""}</span></button>`;
     return `<div class="row ${hidOn ? "hidden-row" : ""}">
-      <div class="who"><div class="nm">${esc(m.name || "(名前未登録)")}</div>
+      <div class="who"><div class="nm">${m.grow && window.skyGrowth ? `<span title="${esc(window.skyGrowth.label(window.skyGrowth.stage(m.grow)))}">${window.skyGrowth.mark(window.skyGrowth.stage(m.grow))}</span> ` : ""}${esc(m.name || "(名前未登録)")}</div>
         <div class="sub">${esc(pad8(m.id))}${m.keiretsu ? "｜" + esc(m.keiretsu) : ""}
           <br><span title="アップクリエ">（ク）${personHtml(m, "upline")}</span>　<span title="サポート担当">（担）${personHtml(m, "helper")}</span>
           <br><span title="紹介者">（紹）${esc(who(m.introName, m.intro))}</span>　<span title="アドバイザー（説明してくださった方）">（説）${esc(who(m.advName, m.advId))}</span>
@@ -720,7 +720,7 @@ function openEd(id, gkey){
   edDraft = {};
   edGroup.items.forEach(k=>{ const it = edMember.items[k] || {}; edDraft[k] = { s: it.s || "", d: it.d || "" }; });
   $("#edTitle").textContent = edGroup.title;
-  $("#edWho").textContent = (edMember.name || "") + "さん（" + edMember.id + "）";
+  $("#edWho").textContent = (window.skyGrowth ? skyGrowth.tag(edMember.grow) : "") + (edMember.name || "") + "さん（" + edMember.id + "）";
   $("#edMsg").className = "msg";
   $("#edUpd").textContent = edMember.updated ? "最後の更新：" + edMember.updated + "　" + (edMember.updatedBy || "") : "";
   drawEd();

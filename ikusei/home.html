@@ -298,7 +298,7 @@ function logout(){
 function enterHome(){
   $("#loginView").style.display = "none";
   $("#homeView").style.display = "block";
-  $("#helloName").textContent = (member.name ? member.name+"さん、" : "") + "こんにちは!";
+  $("#helloName").textContent = (member.name ? (window.skyGrowth ? skyGrowth.selfTag(member.id) : "") + member.name + "さん、" : "") + "こんにちは!";
   $("#metaLine").textContent = "会員番号:" + member.id + (member.keiretsu ? "|" + member.keiretsu : "");
   updateRole();
   render();
