@@ -9,8 +9,8 @@
 ================================================================ */
 
 /* ---------------- ① バージョン ---------------- */
-window.SKY_VERSION = "v1.173";
-window.SKY_VERSION_DATE = "2026/10/26";
+window.SKY_VERSION = "v1.177";
+window.SKY_VERSION_DATE = "2026/10/27";
 
 /* ---------------- ② GASのURL ----------------
    デプロイし直してURLが変わったときは、ここだけ書き換えてください */
@@ -101,6 +101,56 @@ window.SKY_AREAS = [
   "徳島県","香川県","愛媛県","高知県",
   "福岡県","佐賀県","長崎県","熊本県","大分県","宮崎県","鹿児島県","沖縄県"
 ];
+
+/* ================================================================
+   育ちのマーク（名前の左につきます）
+   ----------------------------------------------------------------
+   はじめの一歩 → 初期サポートガイド → 活用の1stステップ の順に、終わったところまでで決まります
+     0：🫘 たね（まだ何も終わっていない）
+     1：🌱 芽が出た（はじめの一歩が終わった）
+     2：🌷 花が咲いた（初期サポートガイドも終わった）
+     3：🌈 ファーストサポート修了認定（活用の1stステップも終わった）
+   ・順番どおりでないとき（ガイドだけ先に終わった など）は、はじめから順に終わったところまでで決めます
+   ・ご本人の進み具合は、トップページを開いたときに読んで、この端末に覚えておきます（skyarc_point）
+================================================================ */
+window.skyGrowth = (function () {
+  var MARK  = ["🫘", "🌱", "🌷", "🌈"];
+  var LABEL = ["たね", "芽が出た", "花が咲いた", "ファーストサポート修了認定"];
+  function stage(done) {
+    done = done || {};
+    var n = 0;
+    ["hajime", "guide", "step1"].some(function (k) { if (done[k] === true) { n++; return false; } return true; });
+    return n;
+  }
+  /* ご本人の段階（分からなければ null） */
+  function mine() {
+    try {
+      var m = JSON.parse(localStorage.getItem("skyarc_member") || "null");
+      var c = JSON.parse(localStorage.getItem("skyarc_point") || "null");
+      if (m && c && c.done && String(c.id).replace(/^0+/, "") === String(m.id).replace(/^0+/, "")) return stage(c.done);
+    } catch (e) {}
+    return null;
+  }
+  function nid(x) { return String(x == null ? "" : x).trim().replace(/^0+/, ""); }
+  /* ご本人の名前の前につける文字（「🌈 」など。分からないとき・別の方のときは空） */
+  function selfTag(id) {
+    try {
+      var m = JSON.parse(localStorage.getItem("skyarc_member") || "null");
+      if (!m || (id != null && nid(id) !== nid(m.id))) return "";
+    } catch (e) { return ""; }
+    var g = mine();
+    return g == null ? "" : MARK[g] + " ";
+  }
+  /* ほかの方の名前の前につける文字（GASから受け取った grow {hajime,guide,step1} から） */
+  function tag(grow) { return grow ? MARK[stage(grow)] + " " : ""; }
+  /* 進捗（{hajime:{done},guide:{done},step1:{done}}）から grow の形にします */
+  function fromProgress(pr) {
+    if (!pr) return null;
+    return { hajime: !!(pr.hajime && pr.hajime.done), guide: !!(pr.guide && pr.guide.done), step1: !!(pr.step1 && pr.step1.done) };
+  }
+  return { stage: stage, mine: mine, selfTag: selfTag, tag: tag, fromProgress: fromProgress,
+           mark: function (s) { return MARK[s] || ""; }, label: function (s) { return LABEL[s] || ""; } };
+})();
 
 /* ================================================================ */
 (function () {

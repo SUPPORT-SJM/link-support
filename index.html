@@ -403,7 +403,8 @@ const TREE = [
     {ic:"🗓️", nm:"カレンダー\n形式でみる", g:"apply", url:B+"first-support/schedule.html", lock:"adv",
       lockInfo:{text:"カレンダー形式は、まだ調整中です。お見せできるようになったら、またお知らせします。"}}
   ]},
-  {ic:"🌈", nm:"チーム作り", g:"team", kids:[
+  /* チーム作りは、サポーターになってから開きます */
+  {ic:"🌈", nm:"チーム作り", g:"team", need:"sup", kids:[
     {ic:"💬", nm:"紹介・\nビジネス活動", g:"team", url:B+"first-support/skyarc-recruit.html"},
     {ic:"🎪", nm:"サポート会・\n交流会", g:"team", url:B+"first-support/skyarc-community.html"},
     {ic:"🏔", nm:"Skyarcチーム", g:"team", url:B+"first-support/skyarc.html"}
@@ -413,6 +414,9 @@ const TREE = [
     {ic:"🎓", nm:"学びの\nポータル", g:"crie", url:B+"ikusei/portal-creators.html"},
     {ic:"🗺", nm:"クリエマップ", g:"crie", url:B+"ikusei/creamap-x7k2m9.html"}
   ]},
+  /* ファーストサポートの3つ（はじめの一歩・ガイド・1stステップ）が終わって、まだサポーターでない方に。
+     サポーターの印がつくと、ここが「サポーターの部屋」に変わります */
+  {ic:"🐣", nm:"サポーター\nとは", g:"sup", need:"grow3", url:B+"first-support/to-supporter.html"},
   {ic:"🐣", nm:"サポーターの\n部屋", g:"sup", need:"sup", kids:[
     {ic:"💌", nm:"新規の方への\n最初のメッセージ", g:"sup", url:B+"ikusei/first-message.html"},
     {ic:"🐣", nm:"ぴよぴよ\n脱出クイズ", g:"sup", url:B+"ikusei/piyo-quiz.html"},
@@ -445,6 +449,11 @@ function isAdv(){
 function ok(it){
   if(!it.need) return true;
   if(!me) return false;
+  if(it.need === "grow3"){
+    let g = null;
+    try{ g = growNow(); }catch(e){ g = window.skyGrowth.mine(); }   /* 読みこみの途中は、この端末の記録で */
+    return g === 3 && me.sup !== true && me.crie !== true && !String(me.role || "");
+  }
   if(it.need === "adv") return isAdv();
   if(String(me.role || "")) return true;
   if(it.need === "sup")  return me.sup === true || me.crie === true;
@@ -459,7 +468,19 @@ const RETURN_KEY = "lsapp_returning";
 function isReturning(){ try{ return localStorage.getItem(RETURN_KEY) === "1"; }catch(e){ return false; } }
 function markReturning(){ try{ localStorage.setItem(RETURN_KEY, "1"); }catch(e){} }
 if(me) markReturning();
-function setHello(t){ document.getElementById("hello").textContent = t || (me && me.name ? me.name + "さん、おかえりなさい" : "ようこそ"); }
+/* 名前の左に、育ちのマーク（🫘 → 🌱 → 🌷 → 🌈）をつけます */
+function growNow(){
+  if(!me) return null;
+  if(typeof pointProg !== "undefined" && pointProg) return window.skyGrowth.stage(pointProg);
+  return window.skyGrowth.mine();
+}
+function setHello(t){
+  if(t){ document.getElementById("hello").textContent = t; return; }
+  let g = null;
+  try{ g = growNow(); }catch(e){}
+  const mk = g == null ? "" : window.skyGrowth.mark(g) + " ";
+  document.getElementById("hello").textContent = me && me.name ? mk + me.name + "さん、おかえりなさい" : "ようこそ";
+}
 setHello();
 
 const stage = document.getElementById("stage");
@@ -1264,6 +1285,7 @@ try{
   const c = JSON.parse(localStorage.getItem(POINT_KEY) || "null");
   if(c && me && c.id === me.id) pointProg = c.done;
 }catch(e){}
+setHello();   /* 前回の記録で、すぐマークを出します（通信を待たない） */
 function pointUrl(){
   if(!me || !pointProg) return "";
   const next = POINT_ORDER.find(o=>pointProg[o.app] !== true);
@@ -1290,20 +1312,39 @@ async function loadPoint(){
     if(!j || j.ok !== true || !j.progress) return;
     const done = {};
     POINT_ORDER.forEach(o=>{ done[o.app] = !!(j.progress[o.app] && j.progress[o.app].done); });
+    const wasG3 = ok({ need:"grow3" });
     pointProg = done;
     try{ localStorage.setItem(POINT_KEY, JSON.stringify({ id: me.id, done: done })); }catch(e){}
+    if(wasG3 !== ok({ need:"grow3" }) && path.length === 0 && !drag) reflow();
     paintPoint();
+    setHello();
+    celebrateGrowth();
   }catch(e){}
 }
 loadPoint();
 
+/* 段階が上がったときに、1回だけお祝いします（この端末に、見た段階を覚えておきます） */
+function celebrateGrowth(){
+  const g = growNow();
+  if(g == null || !me) return;
+  const KEY = "sky_growth_seen";
+  let seen = null;
+  try{ const c = JSON.parse(localStorage.getItem(KEY) || "null"); if(c && c.id === me.id) seen = c.s; }catch(e){}
+  try{ localStorage.setItem(KEY, JSON.stringify({ id: me.id, s: g })); }catch(e){}
+  if(g === 0 || (seen != null && g <= seen)) return;
+  const MSG = ["", "🌱 芽が出ました！ はじめの一歩、おつかれさまでした",
+               "🌷 花が咲きました！ 初期サポートガイド、おつかれさまでした",
+               "🌈 ファーストサポート修了認定！ ここまで、本当におつかれさまでした"];
+  showToast(MSG[g], 5200);
+}
+
 /* 短いお知らせ（下に少し出て消えます） */
 let toastT = 0;
-function showToast(msg){
+function showToast(msg, ms){
   let t = document.getElementById("toast");
   if(!t){ t = document.createElement("div"); t.id = "toast"; t.className = "toast"; t.setAttribute("role","status"); document.body.appendChild(t); }
   t.textContent = msg; t.classList.add("show");
-  clearTimeout(toastT); toastT = setTimeout(()=> t.classList.remove("show"), 2600);
+  clearTimeout(toastT); toastT = setTimeout(()=> t.classList.remove("show"), ms || 2600);
 }
 
 /* メニューの「ログインする」から来たときは、ログインの画面をそのまま開きます */

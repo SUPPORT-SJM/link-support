@@ -30,6 +30,9 @@
     { ic:"👋", nm:"はじめの一歩",        url: up+"first-support/",            need:"" },
     { ic:"📘", nm:"初期サポートガイド",    url: up+"first-support/guide.html",  need:"" },
     { ic:"🚀", nm:"活用の1stステップ",    url: up+"first-support/step1.html",  need:"" },
+    { ic:"🐣", nm:"サポーターとは",
+      sub:"🌈 ファーストサポート修了認定の方へ",
+      url: up+"first-support/to-supporter.html", need:"grow3" },
     { ic:"🐣", nm:"ぴよぴよ脱出クイズ",    url: up+"ikusei/piyo-quiz.html",     need:"sup" },
     { ic:"🌱", nm:"グルコンリーダー育成",  url: up+"ikusei/gcon-roadmap.html",  need:"crie" },
 
@@ -67,6 +70,11 @@
   function allowed(need, m) {
     if (!need) return true;
     if (!m) return false;
+    /* 🌈 になった方で、まだサポーターでない方だけ */
+    if (need === "grow3") {
+      var g = window.skyGrowth ? window.skyGrowth.mine() : null;
+      return g === 3 && m.sup !== true && m.crie !== true && !String(m.role || "");
+    }
     if (String(m.role || "")) return true;             // 役職をお持ちの方
     if (need === "sup")  return m.sup === true || m.crie === true;
     if (need === "crie") return m.crie === true;
@@ -183,10 +191,17 @@
                   || (m.crie === true ? "クリエイターズ"
                   : (m.sup === true ? "サポーター" : "メンバー")));
 
+      /* 名前の左は、育ちのマーク（分からないときは、これまでどおり） */
+      function avatar(m) {
+        if (!m) return "🌱";
+        var g = window.skyGrowth ? window.skyGrowth.mine() : null;
+        return g == null ? "🐣" : window.skyGrowth.mark(g);
+      }
       var html = '<div class="grip"></div>'
-        + '<div class="me"><span class="av">' + (m ? "🐣" : "🌱") + '</span><div>'
+        + '<div class="me"><span class="av">' + avatar(m) + '</span><div>'
         + '<div class="nm">' + (m && m.name ? m.name + " さん" : "ようこそ") + '</div>'
         + '<div class="sb">' + (m && m.keiretsu ? m.keiretsu + "　" : "") + rank + '</div>'
+        + (m && window.skyGrowth && window.skyGrowth.mine() === 3 ? '<div class="sb">🌈 ファーストサポート修了認定</div>' : "")
         + '</div></div>';
 
       var buf = "", shown = 0;
