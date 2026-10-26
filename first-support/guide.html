@@ -541,7 +541,7 @@ let saveTimer = null;
 
   if(member && member.id){
     bar.className = "login-bar on";
-    who.textContent = (member.name ? member.name + "さん" : "会員番号 " + member.id) + " でログイン中";
+    who.textContent = (member.name ? (window.skyGrowth ? skyGrowth.selfTag(member.id) : "") + member.name + "さん" : "会員番号 " + member.id) + " でログイン中";
     link.textContent = "育成プログラム";
     link.href = "../ikusei/";
     note.textContent = "✅ 進捗は保存されます。どの端末からでも続きが見られます。";

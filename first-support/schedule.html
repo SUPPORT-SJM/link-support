@@ -248,7 +248,7 @@ function canLayer(k){ return k === "all" || !!(data && data.me && data.me[k]); }
       'style="background:#FF7043;color:#fff;border-radius:11px;padding:12px 26px;font-weight:700;font-size:14px;">🌱 ログインする</button>';
     return;
   }
-  $("#navWho").textContent = (member.name ? member.name + "さん" : "会員番号 " + member.id)
+  $("#navWho").textContent = (member.name ? (window.skyGrowth ? skyGrowth.selfTag(member.id) : "") + member.name + "さん" : "会員番号 " + member.id)
     + (member.keiretsu ? "｜" + member.keiretsu : "");
   load();
 })();

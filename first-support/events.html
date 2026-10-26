@@ -327,7 +327,7 @@ function $(q){ return document.querySelector(q); }
     return;
   }
   $("#navWho").textContent =
-    (member.name ? member.name + "さん" : "会員番号 " + member.id)
+    (member.name ? (window.skyGrowth ? skyGrowth.selfTag(member.id) : "") + member.name + "さん" : "会員番号 " + member.id)
     + (member.keiretsu ? "｜" + member.keiretsu : "");
   load();
 })();
@@ -586,7 +586,7 @@ function pick(i){
   if(!picked) return;
   $("#cKind").textContent = picked.label;
   $("#cWhen").textContent = picked.dateText;
-  $("#cName").textContent = member.name || "(お名前未登録)";
+  $("#cName").textContent = member.name ? (window.skyGrowth ? skyGrowth.selfTag(member.id) : "") + member.name : "(お名前未登録)";
   $("#cTeam").textContent = member.keiretsu || "(未設定)";
   $("#cCopyName").textContent = (member.name || "") + (member.keiretsu ? "　" + member.keiretsu : "");
 
