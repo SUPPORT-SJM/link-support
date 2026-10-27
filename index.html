@@ -397,12 +397,10 @@ const TREE = [
         ]},
         {ic:"🤝", nm:"グルコン予定", g:"crie", link:"c-gcon"},
         {ic:"✨", nm:"その他", g:"crie", link:"c-sonota"},
-        /* アドバンス以上の方にだけ出ます */
-        {ic:"🗓️", nm:"翔子さんの\n予定カレンダー", g:"crie", need:"adv", info:{
-          text:"こちらは、まだ調整中です。動きの確認用として、参考にご覧ください。",
-          btn:"🗓️ 翔子さんの予定カレンダーを開く", url:B+"first-support/calendar.html"}}
       ]}
     ]},
+    /* 予定のかぶりチェック：管理者・チーム代表と、サポーター以上で部門に入っている方にだけ出ます */
+    {ic:"🔎", nm:"予定の\nかぶりチェック", g:"apply", need:"cal", url:B+"first-support/calendar.html"},
     /* 丸はどなたにも出ます。開けるのはアドバンス以上の方だけ（ほかの方には、お知らせが出ます） */
     {ic:"🗓️", nm:"カレンダー\n形式でみる", g:"apply", url:B+"first-support/schedule.html", lock:"adv",
       lockInfo:{text:"カレンダー形式は、まだ調整中です。お見せできるようになったら、またお知らせします。"}}
@@ -461,6 +459,11 @@ function ok(it){
     return g === 3 && me.sup !== true && me.crie !== true && !String(me.role || "");
   }
   if(it.need === "adv") return isAdv();
+  if(it.need === "cal"){
+    const r = String(me.role || "");
+    if(/管理者|チーム代表/.test(r)) return true;
+    return (me.sup === true || me.crie === true || r !== "") && !!(me.dept || me.deptLead === true || me.schedIn === true);
+  }
   if(String(me.role || "")) return true;
   if(it.need === "sup")  return me.sup === true || me.crie === true;
   if(it.need === "crie") return me.crie === true;
@@ -1136,6 +1139,7 @@ function saveMe(j, pin, fallbackId){
     sup: j.sup === true, crie: j.crie === true,
     nick: j.nick || "", keiChat: j.keiChat || "", refUrl: j.refUrl || "", linkJoin: j.linkJoin || "",
     badges: j.badges || [], celebrate: j.celebrate || "", helper: j.helper || "",
+    dept: j.dept || "", deptLead: j.deptLead === true, schedIn: j.schedIn === true,
     needPin: j.needPin === true
   };
   localStorage.setItem("skyarc_member", JSON.stringify(m));
@@ -1274,18 +1278,19 @@ $("#lForgot").addEventListener("click", e=>{
     const r = await fetch(`${GAS_URL}?action=loginFast&id=${encodeURIComponent(me.id)}&pin=${encodeURIComponent(me.pin)}`);
     const j = await r.json();
     if(!j || j.ok !== true) return;
-    const before = [me.id, me.sup, me.crie, me.role, me.name].join("|");
+    const before = [me.id, me.sup, me.crie, me.role, me.name, me.dept, me.deptLead, me.schedIn].join("|");
     const keep = me;
     const m = Object.assign({}, keep, {
       id: j.id || keep.id, name: j.name || keep.name || "", realName: j.realName || "",
       area: j.area || "", keiretsu: j.keiretsu || "", role: j.role || "",
       sup: j.sup === true, crie: j.crie === true, email: j.email || keep.email || "",
       nick: j.nick || "", keiChat: j.keiChat || "", refUrl: j.refUrl || "", linkJoin: j.linkJoin || "", helper: j.helper || "",
+      dept: j.dept || "", deptLead: j.deptLead === true, schedIn: j.schedIn === true,
       needPin: j.needPin === true
     });
     localStorage.setItem("skyarc_member", JSON.stringify(m));
     me = m;
-    if(before !== [me.id, me.sup, me.crie, me.role, me.name].join("|")){
+    if(before !== [me.id, me.sup, me.crie, me.role, me.name, me.dept, me.deptLead, me.schedIn].join("|")){
       setHello();
       if(path.length === 0 && !drag) reflow();
     }

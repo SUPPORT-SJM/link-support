@@ -83,7 +83,7 @@
 
   function build() {
     /* 管理ページとクリエマップでは、上のナビがあるので出しません */
-    if (here.indexOf("kanri-x7k2m9") >= 0 || here.indexOf("creamap-x7k2m9") >= 0) return;
+    if (here.indexOf("creamap-x7k2m9") >= 0) return;   /* 管理ページにも出します（v1.185） */
 
     var css = document.createElement("style");
     css.textContent = ''

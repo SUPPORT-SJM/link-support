@@ -121,6 +121,7 @@
         nick: j.nick || "", keiChat: j.keiChat || "", refUrl: j.refUrl || "", linkJoin: j.linkJoin || "",
         badges: j.badges || [], celebrate: j.celebrate || "",
         email: j.email || "", helper: j.helper || "",
+        dept: j.dept || "", deptLead: j.deptLead === true, schedIn: j.schedIn === true,
         needPin: j.needPin === true
       };
       /* 保存できたかを確かめます(ブラウザの設定で保存できない場合があります) */
