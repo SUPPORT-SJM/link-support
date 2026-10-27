@@ -9,7 +9,7 @@
 ================================================================ */
 
 /* ---------------- ① バージョン ---------------- */
-window.SKY_VERSION = "v1.192";
+window.SKY_VERSION = "v1.194";
 window.SKY_VERSION_DATE = "2026/10/27";
 
 /* ---------------- ② GASのURL ----------------
@@ -332,6 +332,9 @@ window.skyDebug = (function () {
       + '#skyDbgBtn.adm{background:#3C3557;}'
       + 'body{padding-bottom:calc(env(safe-area-inset-bottom) + 50px) !important;}'   /* いちばん下の中身が、ボタンに隠れないように */
       + '#skyDbgBtn.cus{background:#F57C00;}'
+      + '#skyDbgBtn.adm,#skyDbgBtn.cus{animation:skyDbgPulse 2.4s ease-in-out infinite;}'   /* オンのあいだは、オレンジ色にゆっくり明滅 */
+      + '@keyframes skyDbgPulse{0%,100%{box-shadow:0 4px 14px rgba(0,0,0,.22),0 0 0 0 rgba(245,124,0,0);}50%{box-shadow:0 4px 14px rgba(0,0,0,.22),0 0 0 7px rgba(245,124,0,.35),0 0 18px 6px rgba(245,124,0,.45);}}'
+      + '@media (prefers-reduced-motion: reduce){#skyDbgBtn.adm,#skyDbgBtn.cus{animation:none;}}'
       + '#skyDbgOv{display:none;position:fixed;inset:0;z-index:9700;background:rgba(30,26,50,.55);align-items:center;justify-content:center;padding:14px;}'
       + '#skyDbgOv.show{display:flex;}'
       + '#skyDbgOv .c{background:#fff;border-radius:18px;width:100%;max-width:410px;max-height:calc(100vh - 28px);overflow:auto;padding:18px 16px;color:#3E3A50;'
@@ -387,6 +390,9 @@ window.skyDebug = (function () {
         + '<div class="lb">その先の進み具合</div><div class="g">'
         + chip(st.prog.p, "ぴよぴよ卒業", "p:p") + chip(st.prog.r, "グルコンリーダー修了", "p:r") + '</div>'
         + '<button type="button" class="go" data-a="go">この状態で試す</button>'
+        + '<div class="lb" style="margin-top:16px;">🎉 お祝いを見てみる（トップページで出るお祝いの見本。記録はしません）</div><div class="g">'
+        + (window.skyCelebrate ? window.skyCelebrate.keys.map(function (k) { return '<button type="button" data-a="cel:' + k + '">' + window.skyCelebrate.label(k) + '</button>'; }).join("") : '')
+        + '</div>'
         + (d ? '<button type="button" class="off" data-a="off">管理者モードをオフにする（ふだんに戻す）</button>' : '')
         + '<button type="button" class="x" data-a="x">とじる</button></div>';
     }
@@ -407,6 +413,12 @@ window.skyDebug = (function () {
       else if (a === "go") { st.mode = "custom"; set(st); return; }
       else if (a === "off") { set(null); return; }
       else if (a === "x") { ov.classList.remove("show"); return; }
+      else if (a.indexOf("cel:") === 0) {
+        ov.classList.remove("show");
+        var me = parse(rawGet("skyarc_member")) || {};
+        window.skyCelebrate(a.slice(4), { preview:true, name: me.name || "" });
+        return;
+      }
       draw();
     });
     ov.addEventListener("change", function (e) { if (e.target.getAttribute("data-a") === "dept") st.dept = e.target.value; });
@@ -417,4 +429,109 @@ window.skyDebug = (function () {
 
   return { get: get, set: set, realAdmin: realAdmin, label: function () { return labelOf(get()); },
            open: function () { if (!openFn) ui(); if (openFn) openFn(); } };
+})();
+
+/* ================================================================
+   お祝い（トップページで出します）
+   ----------------------------------------------------------------
+   skyCelebrate("hajime")  … 画面いっぱいの演出と、ひとことのカード
+     はじめの一歩        … 花吹雪
+     初期サポートガイド  … 花吹雪＋クラッカー
+     活用の1stステップ   … 花吹雪＋クラッカー＋流れ星
+     サポーター・ぴよぴよ卒業 … 花吹雪＋クラッカー
+     クリエ・アドバンス  … 流れ星＋花吹雪（おめでとう、ではなく「ようこそ」）
+     系列代表・チーム代表 … 流れ星（覚悟を持って、一緒に）
+     グルコンリーダー修了 … 花吹雪＋クラッカー＋流れ星
+   ・とじると、お返しの Promise が終わります（つぎのお祝いを順番に出すため）
+================================================================ */
+window.skyCelebrate = (function () {
+  var C = {
+    hajime: { fx:["petal"], em:"🌱", title:"はじめの一歩、<br>おつかれさまでした！", msg:"芽が出ました。ここからが、はじまりです。", btn:"ありがとう！" },
+    guide:  { fx:["petal","cracker"], em:"🌷", title:"初期サポートガイド、<br>コンプリートおめでとうございます！", msg:"花が咲きました。いい調子です！", btn:"ありがとう！" },
+    step1:  { fx:["petal","cracker","star"], em:"🌈", title:"活用の1stステップまで、<br>すべてコンプリート！", msg:"ファーストサポート修了認定です。<br>本当におつかれさまでした。<br>おめでとうございます！", btn:"ありがとう！" },
+    sup:    { fx:["petal","cracker"], em:"🐣", title:"サポーター認定、<br>おめでとうございます！", msg:"これから、チームのみなさんのサポートを<br>一緒にしていきましょう。", btn:"よろしくお願いします！" },
+    piyo:   { fx:["petal","cracker"], em:"🐔", title:"ぴよぴよ卒業、<br>おめでとうございます！", msg:"サポートの基本が身につきました。", btn:"ありがとう！" },
+    crie:   { fx:["star","petal"], em:"🌱", title:"クリエイターズへ、<br>ようこそ。", msg:"ここからがスタートです。<br>これからよろしくお願いします。<br>一緒に走っていきましょう！", btn:"よろしくお願いします！" },
+    gr:     { fx:["petal","cracker","star"], em:"🌳", title:"グルコンリーダー育成、<br>修了おめでとうございます！", msg:"場をつくり、人を導く力が育ちました。", btn:"ありがとう！" },
+    adv:    { fx:["star","petal"], em:"🗝️", title:"アドバンスへ、<br>ようこそ。", msg:"これからよろしくお願いします。<br>一緒に走っていきましょう！", btn:"よろしくお願いします！" },
+    keirep: { fx:["star"], em:"🔥", title:"系列代表として、<br>よろしくお願いします。", msg:"覚悟を持って、一緒にやっていきましょう。", btn:"一緒にやっていきます！" },
+    team:   { fx:["star"], em:"👑", title:"チーム代表として、<br>よろしくお願いします。", msg:"覚悟を持って、一緒にやっていきましょう。", btn:"一緒にやっていきます！" }
+  };
+  var LABEL = { hajime:"はじめの一歩", guide:"初期サポートガイド", step1:"活用の1stステップ", sup:"サポーター", piyo:"ぴよぴよ卒業",
+                crie:"クリエイターズ", gr:"グルコンリーダー修了", adv:"アドバンス", keirep:"系列代表", team:"チーム代表" };
+  var reduce = false; try { reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) {}
+  function css() {
+    if (document.getElementById("skyCelebCss")) return;
+    var st = document.createElement("style"); st.id = "skyCelebCss";
+    st.textContent = ''
+      + '#skyCeleb{position:fixed;inset:0;z-index:9800;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(40,30,70,.45);}'
+      + '#skyCeleb canvas{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;}'
+      + '#skyCeleb .cc{position:relative;background:#fff;border-radius:22px;max-width:360px;width:100%;padding:26px 20px 20px;text-align:center;'
+      +   'box-shadow:0 18px 50px rgba(0,0,0,.3);animation:skyCelebPop .55s cubic-bezier(.22,1.4,.44,1) both;font-family:inherit;color:#3E3A50;}'
+      + '@keyframes skyCelebPop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}'
+      + '#skyCeleb .em{font-size:52px;line-height:1;margin-bottom:8px;}'
+      + '#skyCeleb h2{font-weight:900;font-size:19px;line-height:1.5;color:#4A3F7A;margin:0 0 8px;}'
+      + '#skyCeleb .who{font-weight:700;font-size:14px;color:#2E7D62;margin:0 0 10px;}'
+      + '#skyCeleb p.m{font-size:13.5px;line-height:1.9;color:#5A566E;margin:0 0 16px;word-break:keep-all;overflow-wrap:anywhere;}'
+      + '#skyCeleb button{border:none;border-radius:999px;padding:12px 26px;font-size:15px;font-weight:900;font-family:inherit;cursor:pointer;'
+      +   'background:linear-gradient(135deg,#F5A97A,#F49AC1);color:#fff;box-shadow:0 6px 16px rgba(244,154,193,.45);}'
+      + '#skyCeleb .pv{display:inline-block;font-size:11px;font-weight:700;color:#C25E00;background:#FFF1E0;border-radius:999px;padding:2px 10px;margin-bottom:8px;}';
+    document.head.appendChild(st);
+  }
+  /* ---------- 演出（キャンバスに描きます） ---------- */
+  function run(cv, fx) {
+    var ctx = cv.getContext("2d"), dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var Wd = cv.width = innerWidth * dpr, Hd = cv.height = innerHeight * dpr;
+    var parts = [], t0 = performance.now(), stop = false;
+    var PET = ["#F9C5D5", "#F49AC1", "#FBD3E0", "#FFE4EC", "#F7B2C4"];
+    var CON = ["#F49AC1", "#F5A97A", "#F5D06A", "#8FD9A8", "#6FC7D9", "#7BA3E8", "#A88BE0"];
+    if (fx.indexOf("petal") >= 0) for (var i = 0; i < 70; i++) parts.push({ k:"p", x:Math.random()*Wd, y:-Math.random()*Hd*.9, vx:(Math.random()-.5)*.8*dpr, vy:(1+Math.random()*1.4)*dpr,
+      r:(5+Math.random()*5)*dpr, a:Math.random()*6.28, va:(Math.random()-.5)*.08, c:PET[i % PET.length], d:0 });
+    if (fx.indexOf("cracker") >= 0) [[0, Hd], [Wd, Hd]].forEach(function (o, s) {
+      for (var j = 0; j < 80; j++) { var ang = (s ? -2.2 : -0.95) + (Math.random()-.5)*.9, sp = (9+Math.random()*9)*dpr;
+        parts.push({ k:"c", x:o[0], y:o[1], vx:Math.cos(ang)*sp, vy:Math.sin(ang)*sp, w:(4+Math.random()*4)*dpr, h:(8+Math.random()*6)*dpr,
+          a:Math.random()*6.28, va:(Math.random()-.5)*.3, c:CON[j % CON.length], d:250 + s*120 }); } });
+    if (fx.indexOf("star") >= 0) for (var k = 0; k < 14; k++) parts.push({ k:"s", x:Wd*(.2+Math.random()*.9), y:-Hd*.1*Math.random(), vx:-(7+Math.random()*5)*dpr, vy:(4+Math.random()*3)*dpr,
+      len:(60+Math.random()*80)*dpr, d:400 + k*260 });
+    function frame(now) {
+      if (stop) return;
+      var el = now - t0;
+      ctx.clearRect(0, 0, Wd, Hd);
+      parts.forEach(function (p) {
+        if (el < p.d) return;
+        if (p.k === "p") { p.x += p.vx + Math.sin((el + p.r*40)/500)*.6*dpr; p.y += p.vy; p.a += p.va;
+          ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.a); ctx.fillStyle = p.c; ctx.beginPath();
+          ctx.ellipse(0, 0, p.r, p.r*.55, 0, 0, 6.283); ctx.fill(); ctx.restore(); }
+        else if (p.k === "c") { p.vy += .32*dpr; p.vx *= .985; p.x += p.vx; p.y += p.vy; p.a += p.va;
+          ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.a); ctx.fillStyle = p.c; ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h); ctx.restore(); }
+        else if (p.k === "s") { p.x += p.vx; p.y += p.vy;
+          var gx = p.x - p.vx/Math.hypot(p.vx, p.vy)*p.len, gy = p.y - p.vy/Math.hypot(p.vx, p.vy)*p.len;
+          var g = ctx.createLinearGradient(p.x, p.y, gx, gy); g.addColorStop(0, "rgba(255,248,200,1)"); g.addColorStop(1, "rgba(255,248,200,0)");
+          ctx.strokeStyle = g; ctx.lineWidth = 3*dpr; ctx.lineCap = "round"; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(gx, gy); ctx.stroke();
+          ctx.fillStyle = "#FFF6C8"; ctx.beginPath(); ctx.arc(p.x, p.y, 3.2*dpr, 0, 6.283); ctx.fill();
+          if (p.y > Hd + 50 || p.x < -200) { p.x = Wd*(.3+Math.random()*.8); p.y = -20; } }
+      });
+      if (el < 7000) requestAnimationFrame(frame); else ctx.clearRect(0, 0, Wd, Hd);
+    }
+    requestAnimationFrame(frame);
+    return function () { stop = true; };
+  }
+  function show(key, opt) {
+    opt = opt || {};
+    return new Promise(function (resolve) {
+      var c = C[key]; if (!c || !document.body) { resolve(); return; }
+      css();
+      var old = document.getElementById("skyCeleb"); if (old) old.remove();
+      var ov = document.createElement("div"); ov.id = "skyCeleb";
+      ov.innerHTML = '<canvas></canvas><div class="cc">' + (opt.preview ? '<div class="pv">🛠 お祝いの見本</div>' : '')
+        + '<div class="em">' + c.em + '</div><h2>' + c.title + '</h2>'
+        + (opt.name ? '<p class="who">' + String(opt.name).replace(/[<>&]/g, "") + 'さん</p>' : '')
+        + '<p class="m">' + c.msg + '</p><button type="button">' + c.btn + '</button></div>';
+      document.body.appendChild(ov);
+      var stopFx = reduce ? function () {} : run(ov.querySelector("canvas"), c.fx);
+      ov.querySelector("button").addEventListener("click", function () { stopFx(); ov.remove(); resolve(); });
+    });
+  }
+  show.keys = Object.keys(C); show.label = function (k) { return LABEL[k] || k; };
+  return show;
 })();

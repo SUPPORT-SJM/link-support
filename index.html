@@ -125,6 +125,11 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body)
 .tut.dbg.on .tt{color:#3C3557;}
 .tut.dbg.cus .tb{border-color:#F57C00;background:#FFF1E0;}
 .tut.dbg.cus .tt{color:#C25E00;}
+/* 管理者モードがオンのあいだは、オレンジ色にゆっくり明滅します */
+.tut.dbg.on .tb,.tut.dbg.cus .tb{animation:dbgPulse 2.4s ease-in-out infinite;}
+@keyframes dbgPulse{0%,100%{box-shadow:0 0 0 0 rgba(245,124,0,.0),0 2px 6px rgba(0,0,0,.12);border-color:#F57C00;}
+  50%{box-shadow:0 0 0 7px rgba(245,124,0,.28),0 0 16px 4px rgba(245,124,0,.45);border-color:#FFB74D;}}
+@media (prefers-reduced-motion: reduce){ .tut.dbg.on .tb,.tut.dbg.cus .tb{animation:none;box-shadow:0 0 0 4px rgba(245,124,0,.3);} }
 /* 会員情報の画面 */
 .minfo{margin:6px 0 14px;border:2px solid var(--line);border-radius:16px;overflow:hidden;}
 .minfo .row{display:flex;flex-direction:column;gap:2px;padding:12px 14px;border-bottom:1px dashed var(--line);}
@@ -550,7 +555,8 @@ function homesPair(n){
   H = Math.max(2*ry + 150, 170);
   stage.style.height = H + "px";
   const k = W/360;
-  return pts.map((p,i)=>[cx + p[0] + (i<2 ? 0 : WOBBLE[i%10][0]*k*.6), H/2 + p[1] + (i<2 ? 0 : WOBBLE[i%10][1]*k*.6)]);
+  /* いちばん上の段の輪は、左右対称に並べます（アカウントのまん中から、同じ楕円の上に。ゆらしはつけません） */
+  return pts.map(p=>[cx + p[0], H/2 + p[1]]);
 }
 
 /* ---------- アイコンをひとつ作る ---------- */
@@ -794,13 +800,22 @@ function frame(t){
         if(n.lw == null){ const nm = n.el.querySelector(".nm"); n.lw = nm ? nm.offsetWidth : 0; }
         const lim = Math.max(44, n.lw/2 + 6);
         n.x = Math.min(Math.max(n.x, lim), W - lim);
+        /* 管理者モードの丸のすぐ上・すぐ下の丸は、月をよけるときも、その丸のほうへは寄りません（重ならないように） */
+        n.calm = false;
+        if(dbgF && dbgF.hy != null && dbgF.el.style.display !== "none" && Math.abs(n.hx - dbgF.hx) < n.lw/2 + 70){
+          n.calm = Math.abs(n.hy - dbgF.hy) < 140;   /* すぐとなりの丸は、ふわふわを小さく */
+          if(n.hy < dbgF.hy) n.y = Math.min(n.y, n.hy + 3);
+          else n.y = Math.max(n.y, n.hy - 3);
+          if(Math.abs(n.hy - dbgF.hy) < 60) n.x = n.hx < dbgF.hx ? Math.min(n.x, n.hx + 3) : Math.max(n.x, n.hx - 3);
+        }
       }
     }
     const wait = t - n.born < n.delay;
     if(!wait){ n.s += (n.ts - n.s)*.2; n.o += (n.to - n.o)*.2; }
     if(reduce){ n.s = n.ts; n.o = n.to; }
-    const fy = reduce || n === drag ? 0 : Math.sin(t/650 + n.ph)*5;
-    const fx = reduce || n === drag ? 0 : Math.cos(t/900 + n.ph)*2.5;
+    const amp = n.calm ? .3 : 1;
+    const fy = reduce || n === drag ? 0 : Math.sin(t/650 + n.ph)*5*amp;
+    const fx = reduce || n === drag ? 0 : Math.cos(t/900 + n.ph)*2.5*amp;
     const hw = n.it.join ? 55 : 48, hh = n.it.join ? 50 : (n.it.moon ? 28 : 40);
     n.el.style.transform = `translate(${n.x - hw + fx}px, ${n.y - hh + fy}px) scale(${n.s})`;
     n.el.style.opacity = n.o;
@@ -866,14 +881,15 @@ function makeFloater(cls, ph, opt){
   return f;
 }
 /* ばねで元の場所へ戻りながら、ふわふわ揺れます */
-function stepFloater(f, t, s, o, hw, hh){
+function stepFloater(f, t, s, o, hw, hh, amp){
+  if(amp == null) amp = 1;
   if(f.x == null){ f.x = f.hx; f.y = f.hy; }
   if(!f.held){
     f.vx = (f.vx + (f.hx - f.x)*.05)*.85; f.vy = (f.vy + (f.hy - f.y)*.05)*.85;
     f.x += f.vx; f.y += f.vy;
   }
-  const fy = reduce || f.held ? 0 : Math.sin(t/700 + f.ph)*5;
-  const fx = reduce || f.held ? 0 : Math.cos(t/1100 + f.ph)*3;
+  const fy = reduce || f.held ? 0 : Math.sin(t/700 + f.ph)*5*amp;
+  const fx = reduce || f.held ? 0 : Math.cos(t/1100 + f.ph)*3*amp;
   f.el.style.transform = `translate(${f.x - hw + fx}px, ${f.y - hh + fy}px) scale(${f.held ? s*1.12 : s})`;
   f.el.style.opacity = o;
 }
@@ -979,30 +995,70 @@ function placeMem(t){
   }
   stepFloater(memF, t, sch.s, sch.o, 40, 16);
 }
-/* ---- 管理者の方だけ：「管理者モード」の丸を、左下（サポーターの部屋とクリエの部屋の間の、輪の外）に置きます ---- */
+/* ---- 管理者の方だけ：「管理者モード」の丸を、アカウントから見て「使い方」と左右反対の場所に置きます ---- */
 window.SKY_DBG_FLOATER = true;   /* config.js の左下のボタンのかわりに、この丸を出します */
 let dbgF = null, dbgKey = "";
 function dbgHome(){
+  /* アカウントの丸のまん中から見て、「使い方」と左右反対の場所に置きます。
+     重なるときだけ、そのまわりで重ならないところをさがします */
   const acc = nodes.find(n=>n.it === TREE[0]) || { hx: W/2, hy: H/2 };
-  const s = nodes.find(n=>n.it.g === "sup" && n.it.need === "sup" && n.it.kids);   /* サポーターの部屋 */
-  const c = nodes.find(n=>n.it.g === "crie" && n.it.need === "crie" && n.it.kids); /* クリエの部屋 */
   const hs = nodes.filter(n=>!n.it.moon && n.hx != null);
+  /* ほかの丸は、丸と名前の大きさだけを見ます（左右対称の場所に入りやすいように） */
   const boxes = hs.map(n=>{
     const lw = Math.max(70, n.lw || 0);
-    return [n.hx - Math.max(42, lw/2) - 16, n.hy - 48, n.hx + Math.max(42, lw/2) + 16, n.hy + 72];
+    return [n.hx - Math.max(40, lw/2) - 8, n.hy - 44, n.hx + Math.max(40, lw/2) + 8, n.hy + 64];
   });
   [tutF, memF].forEach(f=>{ if(f && f.hx) boxes.push([f.hx - 50, f.hy - 30, f.hx + 50, f.hy + 44]); });
   const inOrbit = (x, y)=>{ const dx = (x - acc.hx)/(ORBIT.rx + 50), dy = (y - acc.hy)/(ORBIT.ry + 50); return dx*dx + dy*dy < 1; };
   const maxY = Math.max(...hs.map(n=>n.hy));
-  /* 目じるし：2つの部屋のまん中から、輪の外へ少し出たところ（部屋がないときは、左下） */
-  let tx = 44, ty = maxY + 40;
-  if(s && c){
-    const mx = (s.hx + c.hx)/2, my = (s.hy + c.hy)/2;
-    const dx = mx - acc.hx, dy = my - acc.hy, d = Math.hypot(dx, dy) || 1;
-    tx = mx + dx/d*70; ty = my + dy/d*70;
+  /* 「使い方」から左へまっすぐのばした線（底辺）と、「会員情報」から真下へおろした線が交わるところ
+     （使い方・会員情報と結ぶと、直角三角形の直角の角になる場所） */
+  /* アカウントの丸のまん中から見て、「使い方」と左右反対の場所（横のはなれ方は同じ・高さも同じ） */
+  let tx = 60, ty = maxY;
+  if(tutF && tutF.hx){ tx = acc.hx - (tutF.hx - acc.hx); ty = tutF.hy; }
+  const sl0 = Math.max(0, stage.getBoundingClientRect().left);
+  const twh = (dbgF && dbgF.el.querySelector(".tt") ? dbgF.el.querySelector(".tt").offsetWidth : 80) / 2;
+  const minX0 = Math.max(10, twh + 4 - sl0);   /* 名前が画面の左はしから出ないところまで */
+  /* 同じ高さでさがすときは、丸と名前を別々の四角で見ます（すき間に入りやすいように） */
+  const fine = [];
+  hs.forEach(n=>{
+    const lw = Math.max(60, n.lw || 0);
+    fine.push([n.hx - 40, n.hy - 44, n.hx + 40, n.hy + 32]);                 /* 丸（ふわふわ揺れる分も少し見ます） */
+    fine.push([n.hx - lw/2 - 6, n.hy + 30, n.hx + lw/2 + 6, n.hy + 66]);     /* 名前 */
+  });
+  [tutF, memF].forEach(f=>{ if(f && f.hx) fine.push([f.hx - 46, f.hy - 22, f.hx + 46, f.hy + 40]); });
+  const area = (x, y, P)=>{
+    /* この丸の、小さな丸と2行の名前の場所（じっさいの大きさで見ます） */
+    const mine = [".tb", ".tt"].map(sel=>{
+      const e = dbgF && dbgF.el.querySelector(sel);
+      if(!e || !e.offsetWidth) return sel === ".tb" ? [x - 18, y - 14, x + 18, y + 22] : [x - 40, y + 22, x + 40, y + 50];
+      const l = x - 52 + e.offsetLeft, t = y - 16 + e.offsetTop;
+      return [l - 2, t - 2, l + e.offsetWidth + 2, t + e.offsetHeight + 2];
+    });
+    let ar = 0;
+    mine.forEach(b=>fine.forEach(r0=>{
+      const r = [r0[0] - P, r0[1] - P, r0[2] + P, r0[3] + P];
+      const ox = Math.min(b[2], r[2]) - Math.max(b[0], r[0]);
+      const oy = Math.min(b[3], r[3]) - Math.max(b[1], r[1]);
+      if(ox > 0 && oy > 0) ar += ox*oy;
+    }));
+    return ar + (inOrbit(x, y) ? 5000 : 0);
+  };
+  /* まず「使い方」と同じ高さのまま、左右だけでさがします（高さはずらしません） */
+  /* すき間（ふわふわ揺れる分）を8とって入れば、それ。だめなら、すき間なしで入るところ */
+  for(const P of [8, 5, 3, 0]){
+    let bx = null;
+    for(let x = minX0; x <= W*.5; x += 2){
+      if(area(x, ty, P) === 0 && (bx == null || Math.abs(x - tx) < Math.abs(bx - tx))) bx = x;
+    }
+    if(bx != null) return [bx, ty];
   }
+  /* どうしても入らないときだけ、上下にもずらします */
   let best = null, bestS = Infinity;
-  for(let x = 44; x <= W*.55; x += 4){
+  /* 名前（2行）が画面の外に出ないところまで、左へ寄せられます */
+  const sl = Math.max(0, stage.getBoundingClientRect().left);
+  const minX = Math.max(10, 58 - sl);
+  for(let x = minX; x <= W*.5; x += 2){
     for(let y = acc.hy - 40; y <= Math.min(H + 30, maxY + 90); y += 4){
       const box = [x - 52, y - 18, x + 52, y + 46];   /* 名前が2行なので、少し大きめに見ます */
       let ar = 0;
@@ -1033,9 +1089,10 @@ function placeDbg(t){
   const key = W + "|" + H + "|" + nodes.map(n=>Math.round(n.hx||0) + "," + Math.round(n.hy||0)).join(";") + "|" + (tutF ? Math.round(tutF.hx) : "") + "|" + (memF ? Math.round(memF.hx) : "");
   if(key !== dbgKey){
     nodes.forEach(n=>{ if(n.lw == null){ const nm = n.el.querySelector(".nm"); n.lw = nm ? nm.offsetWidth : 0; } });
-    const h = dbgHome(); if(h){ dbgF.hx = h[0]; dbgF.hy = h[1]; } dbgKey = key;
+    const h = dbgHome(); if(h){ dbgF.hx = h[0]; dbgF.hy0 = h[1]; } dbgKey = key;
   }
-  stepFloater(dbgF, t, sch.s, sch.o, 52, 16);
+  dbgF.hy = dbgF.hy0;
+  stepFloater(dbgF, t, sch.s, sch.o, 52, 16, .4);   /* となりの丸に近いので、ふわふわは小さめ */
 }
 
 /* 会員番号は、LINKの会員番号の形（8けた）で見せます（名簿に頭の0がなくても同じ番号です） */
@@ -1415,12 +1472,32 @@ async function loadPoint(){
     if(wasG3 !== ok({ need:"grow3" }) && path.length === 0 && !drag) reflow();
     paintPoint();
     setHello();
-    celebrateGrowth();
+    celebrateQueue(j.celebrate);
   }catch(e){}
 }
 loadPoint();
 
 /* 段階が上がったときに、1回だけお祝いします（この端末に、見た段階を覚えておきます） */
+/* ================================================================
+   トップページのお祝い（v1.194〜）
+   ・GASが「まだ見ていないお祝い」を順番に返します（はじめの一歩〜チーム代表）
+   ・1つずつ出して、とじたら「見た」と記録します（機種を変えても一度きり）
+   ・管理者モードで状態をえらんで試しているときは、GASが返しません
+================================================================ */
+let celebBusy = false;
+async function celebrateQueue(list){
+  if(celebBusy || !Array.isArray(list) || !list.length || !window.skyCelebrate || !me) return;
+  celebBusy = true;
+  for(const k of list){
+    await window.skyCelebrate(k, { name: me.name || "" });
+    try{
+      await fetch(GAS_URL, { method:"POST", body:new URLSearchParams({ action:"seenCelebration", id:me.id, pin:me.pin, kind:k }) });
+    }catch(e){}
+  }
+  celebBusy = false;
+  try{ localStorage.setItem("sky_growth_seen", JSON.stringify({ id: me.id, s: growNow() })); }catch(e){}
+}
+/* （v1.193まで：段階が上がったときの短いお知らせ。いまは上の celebrateQueue でお祝いします） */
 function celebrateGrowth(){
   const g = growNow();
   if(g == null || !me) return;
