@@ -120,6 +120,19 @@
   .prog .done{color:var(--leaf);font-weight:700;}
   .prog .wip{color:#8B889E;}
   .flags{display:flex;gap:5px;flex-wrap:wrap;}
+  /* 一覧の「部門」：押すと選べます（管理者・チーム代表・系列代表） */
+  .dept-chip{margin-top:5px;background:#F3F1F8;color:#8A84A0;border:1.5px dashed #CFC9E3;border-radius:999px;padding:3px 10px;font-size:11px;font-weight:700;font-family:inherit;cursor:pointer;text-align:left;line-height:1.5;max-width:180px;white-space:nowrap;}
+  .dept-chip.has{background:#EAF7F0;color:#2F7A5C;border:1.5px solid #BFE3D1;}
+  #deptPick{display:none;position:fixed;inset:0;z-index:85;background:rgba(30,26,50,.5);align-items:center;justify-content:center;padding:16px;}
+  #deptPick.show{display:flex;}
+  #deptPick .dp-card{background:#fff;border-radius:18px;width:100%;max-width:360px;padding:18px 16px;box-shadow:0 14px 40px rgba(0,0,0,.3);}
+  #deptPick h3{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:15.5px;color:var(--deep);margin-bottom:4px;}
+  #deptPick .dp-sub{font-size:11.5px;color:#8A84A0;margin-bottom:10px;}
+  #deptPick .dp-list{display:flex;flex-direction:column;gap:6px;}
+  #deptPick .dp-list button{display:flex;justify-content:space-between;align-items:center;width:100%;padding:10px 13px;border-radius:11px;border:1.5px solid #E4E0F0;background:#fff;color:#4A3F7A;font-size:13.5px;font-weight:700;font-family:inherit;cursor:pointer;}
+  #deptPick .dp-list button.on{background:#EAF7F0;border-color:#7BC6A2;color:#2F7A5C;}
+  #deptPick .dp-list button:disabled{opacity:.5;}
+  #deptPick .dp-close{display:block;width:100%;margin-top:10px;padding:10px;background:none;border:none;color:#8A84A0;font-size:12.5px;font-family:inherit;cursor:pointer;}
   /* 一覧の表は、この中だけで横に動きます（ページ全体がはみ出して、上の帯が途切れないように） */
   .tblwrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:12px;box-shadow:0 1px 6px rgba(0,0,0,.06);}
   .tblwrap table{box-shadow:none;}
@@ -816,6 +829,17 @@
   </div>
 </div>
 
+<!-- 一覧から部門を選ぶ -->
+<div id="deptPick" onclick="if(event.target===this)closeDeptPick()">
+  <div class="dp-card">
+    <h3 id="dpTitle">部門</h3>
+    <p class="dp-sub">押すと、すぐに保存されます（もう一度押すと外れます）</p>
+    <div class="dp-list" id="dpList"></div>
+    <p class="dp-sub" id="dpMsg" style="margin:8px 0 0;min-height:1em;"></p>
+    <button type="button" class="dp-close" onclick="closeDeptPick()">とじる</button>
+  </div>
+</div>
+
 <div id="memModal" onclick="if(event.target===this)closeMember()">
   <div class="mm-card">
     <div class="mm-head">
@@ -902,15 +926,18 @@
         <p class="hint">管理画面に入るには「アドバンス」以上が必要です(クリエは①の丸つけのみ)</p>
       </div>
 
-      <!-- 部門（管理者だけが入れます） -->
+      <!-- 部門（管理者・チーム代表・系列代表が決めます。部門統括・スケジュール入力担当の印は管理者だけ） -->
       <div class="mm-f" id="mmDeptWrap" style="display:none;">
-        <label>部門 <span style="font-weight:400;font-size:11px;color:#77748A;">(複数のときは「,」で区切ります)</span></label>
-        <input type="text" id="mmDept" placeholder="例:イベント部門,広報部門">
-        <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;font-size:13px;">
+        <label>部門 <span style="font-weight:400;font-size:11px;color:#77748A;">(いくつでも入れられます)</span></label>
+        <div id="mmDeptChips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:7px;"></div>
+        <select id="mmDeptSel" onchange="addDept(this.value)"></select>
+        <input type="hidden" id="mmDept">
+        <p class="hint">ご本人の意向と適材適所を見て、管理者・チーム代表・系列代表が決めます（ご本人は変えられません）。</p>
+        <div id="mmDeptFlags" style="display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;font-size:13px;">
           <label style="display:flex;align-items:center;gap:6px;font-weight:500;margin:0;"><input type="checkbox" id="mmDeptLead" style="width:17px;height:17px;">部門統括</label>
           <label style="display:flex;align-items:center;gap:6px;font-weight:500;margin:0;"><input type="checkbox" id="mmSchedIn" style="width:17px;height:17px;">スケジュール入力担当</label>
         </div>
-        <p class="hint">部門に入っているサポーター以上の方は「予定のかぶりチェック」を見られます。<br>
+        <p class="hint">部門に入っているクリエ・サポーターの方は「予定のかぶりチェック」を見られます（アドバンス以上は部門がなくても見られます）。<br>
         スケジュール入力担当の方は、公式公認の予定を入れられます。</p>
       </div>
 
@@ -1861,7 +1888,8 @@ function rowsHtml(list){
     const hidOn = effHidden(m), hidPend = hidOn !== !!hiddenOrig[hk(m.id)];
     return `<tr class="${m.needCheck ? "row-check" : (m.autoFill ? "row-auto" : "")} ${hidOn ? "row-hid" : ""}">
       <td><a href="#" class="nm nm-link" onclick="openDetail('${m.id}');return false;">${m.grow && window.skyGrowth ? `<span title="${window.skyGrowth.label(window.skyGrowth.stage(m.grow))}" style="text-decoration:none;display:inline-block;margin-right:3px;">${window.skyGrowth.mark(window.skyGrowth.stage(m.grow))}</span>` : ""}${m.name || "(名前未登録)"}</a>${m.realName && m.realName !== m.name ? `<br><span style="font-size:10.5px;color:#A8A4BC;">(${m.realName})</span>` : ""}<br><span class="id">${m.id}</span>
-        <br><label class="hidchk ${hidPend ? "pend" : ""}" title="あなたの画面だけで非表示にします"><input type="checkbox" ${hidOn ? "checked" : ""} onchange="toggleHide('${m.id}', this.checked)">非表示</label></td>
+        <br><label class="hidchk ${hidPend ? "pend" : ""}" title="あなたの画面だけで非表示にします"><input type="checkbox" ${hidOn ? "checked" : ""} onchange="toggleHide('${m.id}', this.checked)">非表示</label>
+        <br><button type="button" class="dept-chip ${m.dept ? "has" : ""}" onclick="openDeptPick('${m.id}')" title="部門">🏷 ${m.dept ? String(m.dept).split(",").join("・") : "部門：未所属"}</button></td>
       <td class="kei">${m.keiretsu || "–"}${m.area ? `<br><span style="font-size:10px;color:#A8A4BC;">${m.area}</span>` : ""}${hasSup(m) && !hasCrie(m) ? '<br><span style="font-size:10px;color:#B8860B;font-weight:700;">サポーター</span>' : ""}</td>
       <td class="prog">${piyo}</td>
       <td class="prog">${gr}</td>
@@ -2203,6 +2231,8 @@ async function submitPinReset(){
 
 /* ================= 会員の登録・編集 ================= */
 const ROLE_LIST = ["アドバンス","系列代表","チーム代表","管理者"];
+/* 部門の一覧（増えたら、ここに足します） */
+const DEPT_LIST = ["アドバイザー部門","ユーザーサポート部門","動画視聴会部門","アポ部屋部門","Bトレ部門","交流部門","マルシェ応援部門","交通整備課"];
 let memEditing = null;   // null=新規 / オブジェクト=編集
 let memClearEmail = false;
 
@@ -2336,6 +2366,74 @@ function openMember(m){
    ・系列の変更、パスコードの変え直し、連絡先のリセットは、管理者・チーム代表だけ
    ・新しく追加するときは、系列は担当の系列の中から選びます
 ================================================================ */
+/* ---------- 部門：プルダウンで足して、×で外します ---------- */
+function deptNow(){ return String(document.getElementById("mmDept").value || "").split(/[,、，]/).map(x=>x.trim()).filter(x=>x); }
+function drawDept(){
+  const cur = deptNow();
+  document.getElementById("mmDeptChips").innerHTML = cur.length
+    ? cur.map((k,i)=>`<span style="display:inline-flex;align-items:center;gap:4px;background:#EAF7F0;color:#2F7A5C;border-radius:999px;padding:4px 6px 4px 11px;font-size:12.5px;font-weight:700;">${k}<button type="button" onclick="delDept(${i})" title="外す" style="background:#fff;color:#2F7A5C;border-radius:999px;width:20px;height:20px;line-height:18px;font-size:12px;padding:0;">×</button></span>`).join("")
+    : '<span style="font-size:12px;color:#A8A4BC;">まだ部門がありません</span>';
+  const rest = DEPT_LIST.filter(k=>cur.indexOf(k) < 0);
+  const sel = document.getElementById("mmDeptSel");
+  sel.innerHTML = '<option value="">＋ 部門を選んで足す</option>' + rest.map(k=>`<option value="${k}">${k}</option>`).join("");
+  sel.value = ""; sel.disabled = !rest.length;
+}
+function addDept(k){
+  if(!k) return;
+  const cur = deptNow(); if(cur.indexOf(k) < 0) cur.push(k);
+  document.getElementById("mmDept").value = cur.join(","); drawDept();
+}
+function delDept(i){
+  const cur = deptNow(); cur.splice(i, 1);
+  document.getElementById("mmDept").value = cur.join(","); drawDept();
+}
+/* ---------- 一覧から、ワンタッチで部門を決めます ----------
+   ・決められるのは、管理者・チーム代表・系列代表
+   ・ほかの方には、依頼のご案内を出します */
+let dpTarget = null, dpBusy = false;
+function openDeptPick(id){
+  const m = ((data && data.members) || []).find(x=>String(x.id) === String(id));
+  if(!m) return;
+  if(!(data && (data.isFull || data.isKeiRep))){
+    alert("部門の設定は、系列代表かアップの方に依頼してください。\n（部門は、ご本人の意向と適材適所を見て、系列代表・チーム代表・管理者が決めます）");
+    return;
+  }
+  dpTarget = m;
+  document.getElementById("dpTitle").textContent = (m.name || m.id) + "さんの部門";
+  document.getElementById("dpMsg").textContent = "";
+  drawDeptPick();
+  document.getElementById("deptPick").classList.add("show");
+}
+function closeDeptPick(){ document.getElementById("deptPick").classList.remove("show"); dpTarget = null; }
+function drawDeptPick(){
+  const cur = String(dpTarget.dept || "").split(/[,、，]/).map(x=>x.trim()).filter(x=>x);
+  const all = DEPT_LIST.concat(cur.filter(x=>DEPT_LIST.indexOf(x) < 0));
+  document.getElementById("dpList").innerHTML = all.map(k=>
+    `<button type="button" class="${cur.indexOf(k) >= 0 ? "on" : ""}" ${dpBusy ? "disabled" : ""} onclick="toggleDeptPick(this.dataset.k)" data-k="${k}"><span>${k}</span><span>${cur.indexOf(k) >= 0 ? "✓ 入っています" : "＋"}</span></button>`).join("");
+}
+async function toggleDeptPick(k){
+  if(!dpTarget || dpBusy) return;
+  const cur = String(dpTarget.dept || "").split(/[,、，]/).map(x=>x.trim()).filter(x=>x);
+  const next = cur.indexOf(k) >= 0 ? cur.filter(x=>x !== k) : cur.concat([k]);
+  const msg = document.getElementById("dpMsg");
+  dpBusy = true; drawDeptPick(); msg.textContent = "保存しています…";
+  try{
+    const res = await fetch(GAS_URL, {method:"POST", body:new URLSearchParams({
+      action:"adminUpsertMember", id:admin.id, pin:admin.pin, email:admin.email || "",
+      targetId:dpTarget.id, dept:next.join(",") })});
+    const j = await res.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
+    if(!j || j.ok === false){
+      msg.textContent = j && j.error === "outofscope" ? "この方の部門は決められません（担当の範囲の外です）" : "保存できませんでした";
+    }else{
+      dpTarget.dept = next.join(",");
+      msg.textContent = "✓ 保存しました";
+      render();
+    }
+  }catch(e){ msg.textContent = "通信できませんでした"; }
+  dpBusy = false; if(dpTarget) drawDeptPick();
+}
+
 function openSelfEdit(){
   const me = ((data && data.members) || []).find(x=>String(x.id).replace(/^0+/, "") === String(admin && admin.id || "").replace(/^0+/, ""));
   if(me) openMember(me);
@@ -2357,10 +2455,13 @@ function applyEditLimits(m){
   document.getElementById("mmKeiretsu").disabled = !full && !!m;                 /* 系列の変更は管理者・チーム代表だけ */
   document.getElementById("mmPinWrap").style.display = (full || !m) ? "" : "none";   /* パスコードの変え直しも */
   document.getElementById("mmEmailReset").style.display = full ? "" : "none";      /* 連絡先のリセットも */
-  /* 部門・部門統括・スケジュール入力担当：管理者だけ（追加のときは、保存したあとに編集で入れます） */
-  const isAdm = !!(data && data.isAdmin) && !!m;
-  document.getElementById("mmDeptWrap").style.display = isAdm ? "block" : "none";
+  /* 部門：管理者・チーム代表・系列代表（追加のときは、保存したあとに編集で入れます）
+     部門統括・スケジュール入力担当の印：管理者だけ */
+  const canDept = !!m && !!(data && (data.isFull || data.isKeiRep));
+  document.getElementById("mmDeptWrap").style.display = canDept ? "block" : "none";
+  document.getElementById("mmDeptFlags").style.display = (data && data.isAdmin) ? "flex" : "none";
   document.getElementById("mmDept").value = m ? (m.dept || "") : "";
+  drawDept();
   document.getElementById("mmDeptLead").checked = !!(m && m.deptLead);
   document.getElementById("mmSchedIn").checked = !!(m && m.schedIn);
 }
@@ -3457,8 +3558,10 @@ async function saveMember(){
     };
     if(pin) params.newPin = pin;
     if(memClearEmail) params.clearEmail = "1";
+    if(data && (data.isFull || data.isKeiRep) && memEditing){
+      params.dept = document.getElementById("mmDept").value;    /* 部門：管理者・チーム代表・系列代表 */
+    }
     if(data && data.isAdmin && memEditing){
-      params.dept = document.getElementById("mmDept").value.trim();
       params.deptLead = document.getElementById("mmDeptLead").checked ? "1" : "0";
       params.schedIn = document.getElementById("mmSchedIn").checked ? "1" : "0";
     }
