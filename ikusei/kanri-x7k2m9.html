@@ -106,8 +106,7 @@
   tr:hover td{background:#FAFAFE;}
   .nm{font-weight:700;}
   .nm-link{color:var(--deep);text-decoration:underline;text-underline-offset:2px;}
-  /* 管理者・チーム代表でない方の編集画面では、印・役職・担当系列の欄は出しません（一覧の印のボタンで変えます） */
-  #memModal.lite .mm-full{display:none !important;}
+  .mm-role:disabled{opacity:.4;cursor:not-allowed;}
   .need-check{display:inline-block;background:#FFF3D6;color:#8A6D00;border:1.5px solid #F0C86A;
     border-radius:999px;padding:1px 8px;font-size:10px;font-weight:700;margin-left:5px;white-space:nowrap;}
   tr.row-check td{background:#FFFDF5;}
@@ -121,6 +120,21 @@
   .prog .done{color:var(--leaf);font-weight:700;}
   .prog .wip{color:#8B889E;}
   .flags{display:flex;gap:5px;flex-wrap:wrap;}
+  /* 一覧の表は、この中だけで横に動きます（ページ全体がはみ出して、上の帯が途切れないように） */
+  .tblwrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:12px;box-shadow:0 1px 6px rgba(0,0,0,.06);}
+  .tblwrap table{box-shadow:none;}
+  .fbtn .fs{display:none;}
+  @media (max-width:600px){
+    /* スマホでは、印のボタンを1文字に（サ・ク・ア）。系列代表・チーム代表・管理者はそのまま */
+    .fbtn .fl.ab{display:none;} .fbtn .fs{display:inline;}
+    .fbtn{padding:4px 9px;}
+    .flags{gap:4px;max-width:170px;}
+    td{padding:8px 6px;font-size:12.5px;}
+    th{padding:8px 6px;}
+    .head{padding:12px 0;}
+    .head .wrap.row{padding-right:62px;}   /* 右上のメニューのボタンと重ならないように */
+    .head h1{font-size:15.5px;}
+  }
   .fbtn{
     border:1.5px solid var(--line);background:#fff;color:#8B889E;
     border-radius:999px;padding:4px 11px;font-size:11.5px;font-weight:700;
@@ -517,6 +531,7 @@
       <div>
         <h1>🔐 育成システム 管理画面</h1>
         <div class="me" id="meLine"></div>
+        <button type="button" id="btnSelfEdit" onclick="openSelfEdit()" style="display:none;margin-top:6px;background:rgba(255,255,255,.22);color:#fff;border:1.5px solid rgba(255,255,255,.55);border-radius:999px;padding:5px 13px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;">✏️ 自分の会員情報を編集する</button>
       </div>
       <div class="tools">
         <input class="search" id="search" placeholder="名前・番号で検索" oninput="render()">
@@ -541,13 +556,9 @@
         <button class="btn-add" id="btnLnk" onclick="openLnk()" style="display:none;background:#26A69A;">🔗 リンク先の変更</button>
         <button class="btn-add" id="btnSupport" onclick="goLeave(()=>location.href='shoki-support-k5w2.html')" style="background:#3DAA6E;">🌱 初期サポートマネジメント</button>
         <button id="btnStats" onclick="openStats()" style="display:none;">📊 アクセス</button>
-        <button id="btnBackPortal" onclick="backToPortal()">‹ ポータルへ</button>
-        <button id="btnHome" onclick="goLeave(()=>location.href='../index.html')">🏠 ホーム</button>
+        <button id="btnHome" class="sky-home" onclick="goLeave(()=>location.href='../index.html')">🏠 ホーム</button>
         <button onclick="goLeave(()=>location.href='./creamap-x7k2m9.html')">🗺 クリエマップ</button>
-        <button onclick="load()">🔄 更新</button>
-        <button onclick="backToPortal()">‹ 育成プログラムへ戻る</button>
         <button id="btnShowHid" onclick="toggleShowHidden()">🙈 非表示：ON</button>
-        <button onclick="logout()" style="background:#FDEBEB;color:#B3352F;">ログアウト</button>
       </div>
     </div>
   </div>
@@ -575,7 +586,7 @@
     </div>
 
     <div class="wrap" id="listArea">
-      <table>
+      <div class="tblwrap"><table>
         <thead>
           <tr>
             <th>会員</th>
@@ -587,7 +598,7 @@
           </tr>
         </thead>
         <tbody id="tbody"></tbody>
-      </table>
+      </table></div>
       <div class="legend">
         ⭕ = 先生の丸の数 / 🐣 = 本人チェックの数<br>
 「サポーター」を押すと①ぴよぴよが、「クリエ」を押すと②③の教材が解放されます。<br>
@@ -861,7 +872,7 @@
         <input type="text" id="mmAreaOther" placeholder="国名を入力" style="display:none;margin-top:8px;">
       </div>
 
-      <div class="mm-f">
+      <div class="mm-f" id="mmPinWrap">
         <label>パスコード(4桁)</label>
         <input type="text" id="mmPin" inputmode="numeric" maxlength="4" placeholder="例:1234">
         <p class="hint" id="mmPinHint">新規は必須。編集のときは、変更する場合だけ入力してください。</p>
@@ -889,6 +900,18 @@
         <label>役職</label>
         <div class="mm-roles" id="mmRoles"></div>
         <p class="hint">管理画面に入るには「アドバンス」以上が必要です(クリエは①の丸つけのみ)</p>
+      </div>
+
+      <!-- 部門（管理者だけが入れます） -->
+      <div class="mm-f" id="mmDeptWrap" style="display:none;">
+        <label>部門 <span style="font-weight:400;font-size:11px;color:#77748A;">(複数のときは「,」で区切ります)</span></label>
+        <input type="text" id="mmDept" placeholder="例:イベント部門,広報部門">
+        <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;font-size:13px;">
+          <label style="display:flex;align-items:center;gap:6px;font-weight:500;margin:0;"><input type="checkbox" id="mmDeptLead" style="width:17px;height:17px;">部門統括</label>
+          <label style="display:flex;align-items:center;gap:6px;font-weight:500;margin:0;"><input type="checkbox" id="mmSchedIn" style="width:17px;height:17px;">スケジュール入力担当</label>
+        </div>
+        <p class="hint">部門に入っているサポーター以上の方は「予定のかぶりチェック」を見られます。<br>
+        スケジュール入力担当の方は、公式公認の予定を入れられます。</p>
       </div>
 
       <div class="mm-f" id="mmAutoWrap" style="display:none;">
@@ -955,7 +978,7 @@
       <div class="mm-f" id="mmEmailWrap">
         <label>連絡先 <span id="mmAuth" style="font-weight:400;font-size:11px;color:#77748A;"></span></label>
         <input type="text" id="mmEmail" placeholder="未登録(初回ログイン時に自動記録)">
-        <p class="hint">
+        <p class="hint" id="mmEmailReset">
           <a href="#" onclick="clearMemberEmail();return false;" style="color:#B33;">この連絡先の登録をリセットする</a><br>
           ※ 機種変更などで連絡先が変わった方に使います
         </p>
@@ -1655,7 +1678,7 @@ async function load(isLogin){
     /* どの段階の方にも、見える範囲の一覧をお出しします */
     $("#listArea").style.display = "block";
     $("#findArea").style.display = "none";
-    $("#btnAdd").style.display = j.isFull ? "inline-block" : "none";
+    $("#btnAdd").style.display = (j.isFull || j.isKeiRep || j.isAdv) ? "inline-block" : "none";   /* 会員の追加：アドバンス以上 */
     $("#btnBulk").style.display = (j.isFull || j.isKeiRep || j.isAdv) ? "inline-block" : "none";
     $("#btnTree").style.display = j.isFull ? "inline-block" : "none";
     $("#btnEvb").style.display = j.isAdmin ? "inline-block" : "none";      /* 管理者だけ */
@@ -1666,7 +1689,11 @@ async function load(isLogin){
               : j.isAdv ? "アドバンス"
               : j.isCrie ? "クリエイターズ"
               : "サポーター";
-    $("#meLine").textContent = (j.adminName||"") + "さん｜" + lvl;
+    /* ご自身の名前の左にもマーク。ご自身の情報を編集するボタン */
+    const selfM = (j.members || []).find(x=>String(x.id).replace(/^0+/, "") === String(admin && admin.id || "").replace(/^0+/, ""));
+    const selfMark = window.skyGrowth ? (selfM && selfM.grow ? skyGrowth.tag(selfM.grow) : skyGrowth.selfTag(admin && admin.id)) : "";
+    $("#meLine").textContent = selfMark + (j.adminName||"") + "さん｜" + lvl;
+    $("#btnSelfEdit").style.display = (selfM && (j.isFull || selfM.edit === true)) ? "inline-block" : "none";
     const needN = (j.members||[]).filter(x=>x.needCheck).length;
     const autoN = (j.members||[]).filter(x=>x.autoFill && !/まとめて更新/.test(x.autoFill)).length;
     const bulkN = (j.members||[]).filter(x=>x.autoFill && /まとめて更新/.test(x.autoFill)).length;
@@ -1812,13 +1839,18 @@ function rowsHtml(list){
                   : canKei ? ["サポーター","クリエ","アドバンス"]
                   : data.isAdv ? ["サポーター","クリエ"]
                   : ["サポーター"];
+    /* クリエ・サポーターの方の画面では、系列代表・チーム代表・管理者のボタンは出しません */
+    const lowView = !canFull && !canKei && !data.isAdv;
+    const SHORT = { "サポーター":"サ", "クリエ":"ク", "アドバンス":"ア" };   /* スマホでの1文字（カタカナ） */
     const fb = (flag, cls) => {
+      if(lowView && ["系列代表","チーム代表","管理者"].indexOf(flag) >= 0) return "";
       const on = effFlag(m, flag);
       const pend = on !== origFlag(m, flag);
       const disabled = allowed.indexOf(flag) < 0 ? "disabled" : "";
+      const txt = SHORT[flag] ? `<span class="fl ab">${flag}</span><span class="fs">${SHORT[flag]}</span>` : `<span class="fl">${flag}</span>`;
       return `<button class="fbtn ${cls} ${on?'on':''} ${pend?'pend':''}" ${disabled}
-        ${pend ? 'title="まだ保存していません"' : ""}
-        onclick="setFlag('${m.id}','${flag}',${on?0:1})">${flag}</button>`;
+        title="${flag}${pend ? '（まだ保存していません）' : ''}"
+        onclick="setFlag('${m.id}','${flag}',${on?0:1})">${txt}</button>`;
     };
     const scopeBtn = effFlag(m, "アドバンス")
       ? (canFull
@@ -2290,8 +2322,47 @@ function openMember(m){
   }).join("");
   updateScopeVisibility();
   markChecks();
+  applyEditLimits(m);
 
   document.getElementById("memModal").classList.add("show");
+}
+
+/* ================================================================
+   管理者・チーム代表でない方（系列代表・アドバンス・クリエ）の編集画面
+   ----------------------------------------------------------------
+   ・印・役職・担当系列の欄は見えます。変えられるのは、一覧の印のボタンと同じものだけ
+       系列代表：サポーター・クリエ・アドバンス／アドバンス：サポーター・クリエ／クリエ：サポーター
+       （ご自身の印は変えられません）
+   ・系列の変更、パスコードの変え直し、連絡先のリセットは、管理者・チーム代表だけ
+   ・新しく追加するときは、系列は担当の系列の中から選びます
+================================================================ */
+function openSelfEdit(){
+  const me = ((data && data.members) || []).find(x=>String(x.id).replace(/^0+/, "") === String(admin && admin.id || "").replace(/^0+/, ""));
+  if(me) openMember(me);
+}
+function applyEditLimits(m){
+  const full = !!(data && data.isFull);
+  const self = !!(m && admin && String(m.id).replace(/^0+/, "") === String(admin.id).replace(/^0+/, ""));
+  const can = full ? ROLE_LIST.concat(["サポーター","クリエ"])
+            : self ? []
+            : data && data.isKeiRep ? ["サポーター","クリエ","アドバンス"]
+            : data && data.isAdv ? ["サポーター","クリエ"]
+            : data && data.isCrie ? ["サポーター"] : [];
+  const tip = "この印は、あなたの段階では変えられません";
+  const sup = document.getElementById("mmSup"), crie = document.getElementById("mmCrie");
+  sup.disabled = can.indexOf("サポーター") < 0;  sup.title = sup.disabled ? tip : "";
+  crie.disabled = can.indexOf("クリエ") < 0;     crie.title = crie.disabled ? tip : "";
+  document.querySelectorAll("#mmRoles .mm-role").forEach(b=>{ b.disabled = can.indexOf(b.dataset.role) < 0; b.title = b.disabled ? tip : ""; });
+  document.querySelectorAll("#mmScopeList input").forEach(i=>{ i.disabled = !full; });
+  document.getElementById("mmKeiretsu").disabled = !full && !!m;                 /* 系列の変更は管理者・チーム代表だけ */
+  document.getElementById("mmPinWrap").style.display = (full || !m) ? "" : "none";   /* パスコードの変え直しも */
+  document.getElementById("mmEmailReset").style.display = full ? "" : "none";      /* 連絡先のリセットも */
+  /* 部門・部門統括・スケジュール入力担当：管理者だけ（追加のときは、保存したあとに編集で入れます） */
+  const isAdm = !!(data && data.isAdmin) && !!m;
+  document.getElementById("mmDeptWrap").style.display = isAdm ? "block" : "none";
+  document.getElementById("mmDept").value = m ? (m.dept || "") : "";
+  document.getElementById("mmDeptLead").checked = !!(m && m.deptLead);
+  document.getElementById("mmSchedIn").checked = !!(m && m.schedIn);
 }
 
 /* ================================================================
@@ -3386,6 +3457,11 @@ async function saveMember(){
     };
     if(pin) params.newPin = pin;
     if(memClearEmail) params.clearEmail = "1";
+    if(data && data.isAdmin && memEditing){
+      params.dept = document.getElementById("mmDept").value.trim();
+      params.deptLead = document.getElementById("mmDeptLead").checked ? "1" : "0";
+      params.schedIn = document.getElementById("mmSchedIn").checked ? "1" : "0";
+    }
 
     const res = await fetch(GAS_URL, {method:"POST", body:new URLSearchParams(params)});
     const j = await res.json();
@@ -3395,7 +3471,9 @@ async function saveMember(){
             badpin:"パスコードは4桁の数字で入力してください",
             missing:"会員番号を入力してください",
             outofscope:"この方の情報は編集できません（ご自分から先の方・サポート担当の方だけ編集できます）",
-            keiscope:"その系列には変えられません（担当の系列の中で選んでください）"}[j.error] || "保存できませんでした","err");
+            flagscope:"この方の印・役職は変えられません（担当の系列の方だけです）",
+            keiscope:"その系列は選べません（担当の系列の中で選んでください）",
+            self:"ご自身の印・役職は変えられません"}[j.error] || "保存できませんでした","err");
       return;
     }
     toast(j.created ? "会員を登録しました" : "会員情報を更新しました");
