@@ -54,7 +54,9 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body)
 .crumb h2{margin:0;font-family:var(--f-head);font-weight:900;font-size:16px;color:var(--ink);}
 
 /* アイコンの舞台（丸いまとまり） */
-.stage{position:relative;width:100%;max-width:440px;margin:6px auto 0;touch-action:none;user-select:none;-webkit-user-select:none;}
+.stage{position:relative;width:100%;max-width:440px;margin:6px auto 0;touch-action:pan-y;user-select:none;-webkit-user-select:none;}
+/* 何もないところを指で上下になぞると、ページが動きます（下のバージョン情報まで見られるように）。丸は、これまでどおりつまめます */
+.stage .bub{touch-action:none;}
 .stage::before{content:"";position:absolute;left:50%;top:50%;width:92%;aspect-ratio:1;max-height:100%;
   transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,var(--halo) 0%,transparent 70%);
   pointer-events:none;}
@@ -553,7 +555,8 @@ function homesPair(n){
     pts.push([Math.cos(a)*rx, Math.sin(a)*ry]);
   }
   H = Math.max(2*ry + 150, 170);
-  stage.style.height = H + "px";
+  /* いちばん下に「使い方」「管理者モード」の小さな丸が来ても、名前が下の文字に重ならないよう、下に少し余白をとります */
+  stage.style.height = (H + 60) + "px";
   const k = W/360;
   /* いちばん上の段の輪は、左右対称に並べます（アカウントのまん中から、同じ楕円の上に。ゆらしはつけません） */
   return pts.map(p=>[cx + p[0], H/2 + p[1]]);
