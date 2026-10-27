@@ -492,6 +492,7 @@ const CELEB = {
   if(!m || !m.id) return;
   const kind = m.celebrate;
   if(!kind || !CELEB[kind]) return;
+  return;   /* v1.194〜：お祝いはトップページで出します（ここでは出しません） */
 
   const c = CELEB[kind];
   document.getElementById("celebTitle").innerHTML = c.title;
