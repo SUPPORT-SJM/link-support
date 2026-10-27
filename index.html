@@ -117,6 +117,14 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body)
 /* ログイン中のトップの、小さな「会員情報」（左上。使い方と同じように浮いていて、つまんで動かせます） */
 .tut.mem .tb{border-color:var(--g-member);}
 .tut.mem .tt{color:#2E7D62;}
+/* 管理者モードの丸（管理者の方だけ）：オフ＝灰色／オン＝紺／試し中＝オレンジ */
+.tut.dbg .tb{border-color:#8A84A0;}
+.tut.dbg{width:104px;}
+.tut.dbg .tt{color:#6E6890;white-space:pre;text-align:center;line-height:1.25;}
+.tut.dbg.on .tb{border-color:#3C3557;background:#EDEAF7;}
+.tut.dbg.on .tt{color:#3C3557;}
+.tut.dbg.cus .tb{border-color:#F57C00;background:#FFF1E0;}
+.tut.dbg.cus .tt{color:#C25E00;}
 /* 会員情報の画面 */
 .minfo{margin:6px 0 14px;border:2px solid var(--line);border-radius:16px;overflow:hidden;}
 .minfo .row{display:flex;flex-direction:column;gap:2px;padding:12px 14px;border-bottom:1px dashed var(--line);}
@@ -761,7 +769,7 @@ function frame(t){
         if(d < R){ const f = (R-d)/R*7; ax += dx/d*f; ay += dy/d*f; n.dodge = true; } else n.dodge = false;
       }
       /* 「使い方」の丸をつまんで近づけたときも、ほかのアイコンはよけます */
-      const fd = [tutF, howF, memF].find(x=>x && x.held && x.el.style.display !== "none") || null;
+      const fd = [tutF, howF, memF, dbgF].find(x=>x && x.held && x.el.style.display !== "none") || null;
       if(fd && n.hx != null){
         /* アイコンをつまんだときと同じ動き：よけながら、まわりでくるくる混ざります（登録・ログインの丸も同じ） */
         const dx = n.x - fd.x, dy = n.y - fd.y, d = Math.hypot(dx,dy) || 1, R = 140;
@@ -800,6 +808,7 @@ function frame(t){
   placeHowto(t);
   placeTut(t);
   placeMem(t);
+  placeDbg(t);
   leaving = leaving.filter(n=>{
     if(t - n.dying > 420){ n.el.remove(); return false; }
     return true;
@@ -970,6 +979,65 @@ function placeMem(t){
   }
   stepFloater(memF, t, sch.s, sch.o, 40, 16);
 }
+/* ---- 管理者の方だけ：「管理者モード」の丸を、左下（サポーターの部屋とクリエの部屋の間の、輪の外）に置きます ---- */
+window.SKY_DBG_FLOATER = true;   /* config.js の左下のボタンのかわりに、この丸を出します */
+let dbgF = null, dbgKey = "";
+function dbgHome(){
+  const acc = nodes.find(n=>n.it === TREE[0]) || { hx: W/2, hy: H/2 };
+  const s = nodes.find(n=>n.it.g === "sup" && n.it.need === "sup" && n.it.kids);   /* サポーターの部屋 */
+  const c = nodes.find(n=>n.it.g === "crie" && n.it.need === "crie" && n.it.kids); /* クリエの部屋 */
+  const hs = nodes.filter(n=>!n.it.moon && n.hx != null);
+  const boxes = hs.map(n=>{
+    const lw = Math.max(70, n.lw || 0);
+    return [n.hx - Math.max(42, lw/2) - 16, n.hy - 48, n.hx + Math.max(42, lw/2) + 16, n.hy + 72];
+  });
+  [tutF, memF].forEach(f=>{ if(f && f.hx) boxes.push([f.hx - 50, f.hy - 30, f.hx + 50, f.hy + 44]); });
+  const inOrbit = (x, y)=>{ const dx = (x - acc.hx)/(ORBIT.rx + 50), dy = (y - acc.hy)/(ORBIT.ry + 50); return dx*dx + dy*dy < 1; };
+  const maxY = Math.max(...hs.map(n=>n.hy));
+  /* 目じるし：2つの部屋のまん中から、輪の外へ少し出たところ（部屋がないときは、左下） */
+  let tx = 44, ty = maxY + 40;
+  if(s && c){
+    const mx = (s.hx + c.hx)/2, my = (s.hy + c.hy)/2;
+    const dx = mx - acc.hx, dy = my - acc.hy, d = Math.hypot(dx, dy) || 1;
+    tx = mx + dx/d*70; ty = my + dy/d*70;
+  }
+  let best = null, bestS = Infinity;
+  for(let x = 44; x <= W*.55; x += 4){
+    for(let y = acc.hy - 40; y <= Math.min(H + 30, maxY + 90); y += 4){
+      const box = [x - 52, y - 18, x + 52, y + 46];   /* 名前が2行なので、少し大きめに見ます */
+      let ar = 0;
+      boxes.forEach(r=>{
+        const ox = Math.min(box[2], r[2]) - Math.max(box[0], r[0]);
+        const oy = Math.min(box[3], r[3]) - Math.max(box[1], r[1]);
+        if(ox > 0 && oy > 0) ar += ox*oy;
+      });
+      if(inOrbit(x, y)) ar += 5000;
+      const sc = ar*100 + Math.hypot(x - tx, y - ty);
+      if(sc < bestS){ bestS = sc; best = [x, y]; }
+    }
+  }
+  return best;
+}
+function placeDbg(t){
+  const top = path.length === 0 && me && window.skyDebug && window.skyDebug.realAdmin && window.skyDebug.realAdmin();
+  const sch = top ? nodes.find(n=>n.it.g === "apply" && n.it.kids) : null;
+  if(!sch){ if(dbgF) dbgF.el.style.display = "none"; dbgKey = ""; return; }
+  if(!dbgF){
+    const d = window.skyDebug.get();
+    const nm = "管理者モード\n" + (!d ? "オフ" : d.mode === "admin" ? "オン" : window.skyDebug.label());
+    dbgF = makeFloater("tut dbg" + (!d ? "" : d.mode === "admin" ? " on" : " cus"), 4.2,
+      { ic:"🛠", nm:nm, href:"#admin", aria:"管理者モードを切りかえる", onTap: ()=>window.skyDebug.open() });
+    stage.insertBefore(dbgF.el, stage.firstChild);
+  }
+  dbgF.el.style.display = "";
+  const key = W + "|" + H + "|" + nodes.map(n=>Math.round(n.hx||0) + "," + Math.round(n.hy||0)).join(";") + "|" + (tutF ? Math.round(tutF.hx) : "") + "|" + (memF ? Math.round(memF.hx) : "");
+  if(key !== dbgKey){
+    nodes.forEach(n=>{ if(n.lw == null){ const nm = n.el.querySelector(".nm"); n.lw = nm ? nm.offsetWidth : 0; } });
+    const h = dbgHome(); if(h){ dbgF.hx = h[0]; dbgF.hy = h[1]; } dbgKey = key;
+  }
+  stepFloater(dbgF, t, sch.s, sch.o, 52, 16);
+}
+
 /* 会員番号は、LINKの会員番号の形（8けた）で見せます（名簿に頭の0がなくても同じ番号です） */
 function memIdText(id){
   const t = String(id || "").trim();

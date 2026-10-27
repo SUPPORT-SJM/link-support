@@ -9,7 +9,7 @@
 ================================================================ */
 
 /* ---------------- ① バージョン ---------------- */
-window.SKY_VERSION = "v1.191";
+window.SKY_VERSION = "v1.192";
 window.SKY_VERSION_DATE = "2026/10/27";
 
 /* ---------------- ② GASのURL ----------------
@@ -199,8 +199,7 @@ window.skyGrowth = (function () {
    ・左下の「🛠 管理者モード」を押して、
        「管理者（すべて）」をえらぶと、管理者としてすべて見られます
        ほかの状態をえらぶと、その状態だけで見え方を試せます（ご自身の情報は、いったん外します）
-         立場のボタン（メンバー〜チーム代表）を押すと、それに付いてくるものが、いっぺんにつきます
-         そのあと、1つずつ付け外しもできます（例：アドバンスではない系列代表）
+         立場（サポーター〜チーム代表）・部門・進み具合は、どれも1つずつ付け外しするだけです（ほかは自動でつきません）
    ・「管理者モードをオフにする」で、ふだんの状態に戻ります
    ・この端末の中だけの切りかえです。名簿のご自身の情報は変わりません
    ・GASにも、いまの状態（dbg）を一緒に送ります。GASは、本当に管理者の方のときだけ使います
@@ -209,18 +208,6 @@ window.skyDebug = (function () {
   var KEY = "sky_dbg", REAL = "sky_dbg_real";
   var ROLES = ["アドバンス", "系列代表", "チーム代表"];
   var DEPTS = ["アドバイザー部門","ユーザーサポート部門","動画視聴会部門","アポ部屋部門","Bトレ部門","交流部門","マルシェ応援部門","交通整備課"];
-  /* 立場のボタン：押すと、それに付いてくるものがいっぺんにつきます
-     prog … h:はじめの一歩 g:初期サポートガイド s:活用の1stステップ p:ぴよぴよ卒業 r:グルコンリーダー修了
-     ・系列代表はアドバンスを付けません（アドバンスでない系列代表の方もいるため）。チーム代表は付けます */
-  var ALL3 = { h:true, g:true, s:true, p:false, r:false };
-  var PRESET = {
-    member: { label:"メンバー",       sup:false, crie:false, roles:[],                                   prog:{ h:false, g:false, s:false, p:false, r:false } },
-    sup:    { label:"サポーター",     sup:true,  crie:false, roles:[],                                   prog:ALL3 },
-    crie:   { label:"クリエイターズ", sup:true,  crie:true,  roles:[],                                   prog:{ h:true, g:true, s:true, p:true, r:false } },
-    adv:    { label:"アドバンス",     sup:true,  crie:true,  roles:["アドバンス"],                        prog:{ h:true, g:true, s:true, p:true, r:false } },
-    kei:    { label:"系列代表",       sup:true,  crie:true,  roles:["系列代表"],                          prog:{ h:true, g:true, s:true, p:true, r:false } },
-    team:   { label:"チーム代表",     sup:true,  crie:true,  roles:["アドバンス","系列代表","チーム代表"],  prog:{ h:true, g:true, s:true, p:true, r:false } }
-  };
   var LS = null; try { LS = window.localStorage; } catch (e) {}
   if (!LS || typeof Storage === "undefined") return { get:function(){return null;} };
   var origSet = Storage.prototype.setItem;
@@ -250,7 +237,7 @@ window.skyDebug = (function () {
     var o = {}; for (var k in r) o[k] = r[k];
     if (!d) { o.role = strip(r.role); o._dbg = "self"; return o; }
     if (d.mode === "admin") { o._dbg = "admin"; return o; }
-    o.sup = !!d.sup || !!d.crie || (d.roles || []).length > 0; o.crie = !!d.crie; o.role = (d.roles || []).join(",");
+    o.sup = !!d.sup; o.crie = !!d.crie; o.role = (d.roles || []).join(",");   /* えらんだとおり（自動ではつけません） */
     o.dept = d.dept || ""; o.deptLead = !!d.lead; o.schedIn = !!d.sched; o._dbg = "custom";
     return o;
   }
@@ -333,6 +320,7 @@ window.skyDebug = (function () {
   })();
 
   /* ---------- 左下のボタンと、えらぶ画面 ---------- */
+  var openFn = null;
   function ui() {
     if (!realAdmin() || document.getElementById("skyDbgBtn")) return;
     var d = get();
@@ -354,8 +342,7 @@ window.skyDebug = (function () {
       + '#skyDbgOv .g{display:flex;flex-wrap:wrap;gap:6px;}'
       + '#skyDbgOv .g button{border:1.5px solid #DCD7EC;background:#fff;color:#4A3F7A;border-radius:999px;padding:7px 12px;font-size:12.5px;font-weight:700;font-family:inherit;cursor:pointer;}'
       + '#skyDbgOv .g button.on{background:#F57C00;border-color:#F57C00;color:#fff;}'
-      + '#skyDbgOv .g.t button.on{background:#FFF1E0;border-color:#F57C00;color:#C25E00;}'
-      + '#skyDbgOv .g.t button.on::before{content:"✓ ";}'
+      + '#skyDbgOv .g button.on::before{content:"✓ ";}'
       + '#skyDbgOv .adm{display:block;width:100%;padding:11px;border:none;border-radius:12px;background:#3C3557;color:#fff;font-size:14px;font-weight:900;font-family:inherit;cursor:pointer;}'
       + '#skyDbgOv select{width:100%;font-size:15px;padding:7px 9px;border:1.5px solid #DCD7EC;border-radius:9px;font-family:inherit;}'
       + '#skyDbgOv .go{display:block;width:100%;margin-top:14px;padding:12px;border:none;border-radius:12px;background:#F57C00;color:#fff;font-size:14.5px;font-weight:900;font-family:inherit;cursor:pointer;}'
@@ -368,6 +355,8 @@ window.skyDebug = (function () {
     btn.className = !d ? "" : d.mode === "admin" ? "adm" : "cus";
     btn.textContent = !d ? "🛠 管理者モード：オフ" : d.mode === "admin" ? "🛠 管理者モード：オン" : "🛠 管理者モード／" + labelOf(d);
     btn.title = "管理者モード（押すと切りかえられます）";
+    /* トップページでは、ふわふわ浮く丸（使い方・会員情報と同じ形）で出すので、このボタンは隠します */
+    if (window.SKY_DBG_FLOATER) btn.style.display = "none";
     document.body.appendChild(btn);
 
     var st = d && d.mode === "custom" ? JSON.parse(JSON.stringify(d))
@@ -379,30 +368,23 @@ window.skyDebug = (function () {
       var n = 0; ["h", "g", "s"].some(function (k) { if (st.prog[k]) { n++; return false; } return true; });
       return ["🫘 たね", "🌱 芽が出た", "🌷 花が咲いた", "🌈 ファーストサポート修了認定"][n];
     }
-    function presetNow() {
-      for (var k in PRESET) { var p = PRESET[k];
-        if (p.sup === !!st.sup && p.crie === !!st.crie && p.roles.join(",") === st.roles.join(",")) return k; }
-      return "";
-    }
     function draw() {
-      var pn = presetNow();
       ov.innerHTML = '<div class="c">'
         + '<h3>🛠 管理者モード</h3>'
         + '<p class="s">いま：<b>' + (!d ? "オフ（ふだんのご自身の立場）" : d.mode === "admin" ? "オン（管理者としてすべて）" : "オン（" + labelOf(d) + "として試し中）") + '</b><br>'
         + 'この端末の中だけの切りかえです。名簿のご自身の情報は変わりません。</p>'
         + '<button type="button" class="adm" data-a="admin">🔐 管理者としてすべて見る</button>'
-        + '<div class="lb">または、この状態で試す（立場を押すと、付いてくるものがいっぺんにつきます）</div><div class="g">'
-        + Object.keys(PRESET).map(function (k) { return chip(pn === k, PRESET[k].label, "ps:" + k); }).join("") + '</div>'
-        + '<div class="lb">1つずつ付け外し</div><div class="g t">'
-        + chip(st.sup, "サポーター", "f:sup") + chip(st.crie, "クリエ", "f:crie")
+        + '<p class="s" style="margin:12px 0 0;">または、下で状態をえらんで試します。どれも、押すとつく・もう一度押すと外れる、だけです（ほかのものは自動でつきません）。</p>'
+        + '<div class="lb">立場（何もつけない＝メンバー）</div><div class="g">'
+        + chip(st.sup, "サポーター", "f:sup") + chip(st.crie, "クリエイターズ", "f:crie")
         + ROLES.map(function (r) { return chip(st.roles.indexOf(r) >= 0, r, "r:" + r); }).join("") + '</div>'
         + '<div class="lb">部門</div><select data-a="dept"><option value="">なし（未所属）</option>'
         + DEPTS.map(function (k) { return '<option value="' + k + '"' + (st.dept === k ? " selected" : "") + '>' + k + '</option>'; }).join("") + '</select>'
-        + '<div class="g t" style="margin-top:6px;">' + chip(st.lead, "部門統括", "lead") + chip(st.sched, "スケジュール入力担当", "sched") + '</div>'
-        + '<div class="lb">ファーストサポートの3つ（1つずつ押して、終わった・まだを切りかえ）</div><div class="g t">'
+        + '<div class="g" style="margin-top:6px;">' + chip(st.lead, "部門統括", "lead") + chip(st.sched, "スケジュール入力担当", "sched") + '</div>'
+        + '<div class="lb">ファーストサポートの3つ（1つずつ押して、終わった・まだを切りかえ）</div><div class="g">'
         + chip(st.prog.h, "① はじめの一歩", "p:h") + chip(st.prog.g, "② 初期サポートガイド", "p:g") + chip(st.prog.s, "③ 活用の1stステップ", "p:s") + '</div>'
         + '<p class="s" style="margin:6px 0 0;">名前の左のマーク：<b style="font-size:15px;">' + markNow() + '</b>（🫘 → 🌱 → 🌷 → 🌈）</p>'
-        + '<div class="lb">その先の進み具合</div><div class="g t">'
+        + '<div class="lb">その先の進み具合</div><div class="g">'
         + chip(st.prog.p, "ぴよぴよ卒業", "p:p") + chip(st.prog.r, "グルコンリーダー修了", "p:r") + '</div>'
         + '<button type="button" class="go" data-a="go">この状態で試す</button>'
         + (d ? '<button type="button" class="off" data-a="off">管理者モードをオフにする（ふだんに戻す）</button>' : '')
@@ -412,15 +394,11 @@ window.skyDebug = (function () {
       if (e.target === ov) { ov.classList.remove("show"); return; }
       var t = e.target.closest ? e.target.closest("[data-a]") : null; if (!t || t.tagName === "SELECT") return;
       var a = t.getAttribute("data-a");
-      if (a.indexOf("ps:") === 0) {
-        var p = PRESET[a.slice(3)];
-        st.sup = p.sup; st.crie = p.crie; st.roles = p.roles.slice();
-        st.prog = JSON.parse(JSON.stringify(p.prog));
-      }
-      else if (a === "f:sup") { st.sup = !st.sup; if (!st.sup) { st.crie = false; st.roles = []; } }
-      else if (a === "f:crie") { st.crie = !st.crie; if (st.crie) st.sup = true; }
+      /* どれも、押すとつく・もう一度押すと外れる、だけ（ほかのものは自動でつけません） */
+      if (a === "f:sup") st.sup = !st.sup;
+      else if (a === "f:crie") st.crie = !st.crie;
       else if (a.indexOf("r:") === 0) { var r = a.slice(2), i = st.roles.indexOf(r);
-        if (i >= 0) st.roles.splice(i, 1); else { st.roles.push(r); st.sup = true; st.crie = true; }
+        if (i >= 0) st.roles.splice(i, 1); else st.roles.push(r);
         st.roles = ROLES.filter(function (x) { return st.roles.indexOf(x) >= 0; }); }
       else if (a === "lead") st.lead = !st.lead;
       else if (a === "sched") st.sched = !st.sched;
@@ -432,9 +410,11 @@ window.skyDebug = (function () {
       draw();
     });
     ov.addEventListener("change", function (e) { if (e.target.getAttribute("data-a") === "dept") st.dept = e.target.value; });
-    btn.addEventListener("click", function () { draw(); ov.classList.add("show"); });
+    openFn = function () { draw(); ov.classList.add("show"); };
+    btn.addEventListener("click", openFn);
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", ui); else ui();
 
-  return { get: get, set: set, realAdmin: realAdmin, label: function () { return labelOf(get()); } };
+  return { get: get, set: set, realAdmin: realAdmin, label: function () { return labelOf(get()); },
+           open: function () { if (!openFn) ui(); if (openFn) openFn(); } };
 })();
