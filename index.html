@@ -399,7 +399,7 @@ const TREE = [
         {ic:"✨", nm:"その他", g:"crie", link:"c-sonota"},
       ]}
     ]},
-    /* 予定のかぶりチェック：管理者・チーム代表と、サポーター以上で部門に入っている方にだけ出ます */
+    /* 予定のかぶりチェック：アドバンス以上と、部門に入っているクリエ・サポーターにだけ出ます */
     {ic:"🔎", nm:"予定の\nかぶりチェック", g:"apply", need:"cal", url:B+"first-support/calendar.html"},
     /* 丸はどなたにも出ます。開けるのはアドバンス以上の方だけ（ほかの方には、お知らせが出ます） */
     {ic:"🗓️", nm:"カレンダー\n形式でみる", g:"apply", url:B+"first-support/schedule.html", lock:"adv",
@@ -461,7 +461,7 @@ function ok(it){
   if(it.need === "adv") return isAdv();
   if(it.need === "cal"){
     const r = String(me.role || "");
-    if(/管理者|チーム代表/.test(r)) return true;
+    if(/管理者|チーム代表|系列代表|アドバンス/.test(r)) return true;   /* アドバンス以上は部門がなくても */
     return (me.sup === true || me.crie === true || r !== "") && !!(me.dept || me.deptLead === true || me.schedIn === true);
   }
   if(String(me.role || "")) return true;
