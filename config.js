@@ -9,7 +9,7 @@
 ================================================================ */
 
 /* ---------------- ① バージョン ---------------- */
-window.SKY_VERSION = "v1.189";
+window.SKY_VERSION = "v1.191";
 window.SKY_VERSION_DATE = "2026/10/27";
 
 /* ---------------- ② GASのURL ----------------
@@ -209,14 +209,17 @@ window.skyDebug = (function () {
   var KEY = "sky_dbg", REAL = "sky_dbg_real";
   var ROLES = ["アドバンス", "系列代表", "チーム代表"];
   var DEPTS = ["アドバイザー部門","ユーザーサポート部門","動画視聴会部門","アポ部屋部門","Bトレ部門","交流部門","マルシェ応援部門","交通整備課"];
-  /* 立場のボタン：押すと、それに付いてくるものがいっぺんにつきます */
+  /* 立場のボタン：押すと、それに付いてくるものがいっぺんにつきます
+     prog … h:はじめの一歩 g:初期サポートガイド s:活用の1stステップ p:ぴよぴよ卒業 r:グルコンリーダー修了
+     ・系列代表はアドバンスを付けません（アドバンスでない系列代表の方もいるため）。チーム代表は付けます */
+  var ALL3 = { h:true, g:true, s:true, p:false, r:false };
   var PRESET = {
-    member: { label:"メンバー",       sup:false, crie:false, roles:[],                       prog:false },
-    sup:    { label:"サポーター",     sup:true,  crie:false, roles:[],                       prog:true },
-    crie:   { label:"クリエイターズ", sup:true,  crie:true,  roles:[],                       prog:true },
-    adv:    { label:"アドバンス",     sup:true,  crie:true,  roles:["アドバンス"],            prog:true },
-    kei:    { label:"系列代表",       sup:true,  crie:true,  roles:["系列代表"],              prog:true },
-    team:   { label:"チーム代表",     sup:true,  crie:true,  roles:["系列代表","チーム代表"],  prog:true }
+    member: { label:"メンバー",       sup:false, crie:false, roles:[],                                   prog:{ h:false, g:false, s:false, p:false, r:false } },
+    sup:    { label:"サポーター",     sup:true,  crie:false, roles:[],                                   prog:ALL3 },
+    crie:   { label:"クリエイターズ", sup:true,  crie:true,  roles:[],                                   prog:{ h:true, g:true, s:true, p:true, r:false } },
+    adv:    { label:"アドバンス",     sup:true,  crie:true,  roles:["アドバンス"],                        prog:{ h:true, g:true, s:true, p:true, r:false } },
+    kei:    { label:"系列代表",       sup:true,  crie:true,  roles:["系列代表"],                          prog:{ h:true, g:true, s:true, p:true, r:false } },
+    team:   { label:"チーム代表",     sup:true,  crie:true,  roles:["アドバンス","系列代表","チーム代表"],  prog:{ h:true, g:true, s:true, p:true, r:false } }
   };
   var LS = null; try { LS = window.localStorage; } catch (e) {}
   if (!LS || typeof Storage === "undefined") return { get:function(){return null;} };
@@ -352,6 +355,7 @@ window.skyDebug = (function () {
       + '#skyDbgOv .g button{border:1.5px solid #DCD7EC;background:#fff;color:#4A3F7A;border-radius:999px;padding:7px 12px;font-size:12.5px;font-weight:700;font-family:inherit;cursor:pointer;}'
       + '#skyDbgOv .g button.on{background:#F57C00;border-color:#F57C00;color:#fff;}'
       + '#skyDbgOv .g.t button.on{background:#FFF1E0;border-color:#F57C00;color:#C25E00;}'
+      + '#skyDbgOv .g.t button.on::before{content:"✓ ";}'
       + '#skyDbgOv .adm{display:block;width:100%;padding:11px;border:none;border-radius:12px;background:#3C3557;color:#fff;font-size:14px;font-weight:900;font-family:inherit;cursor:pointer;}'
       + '#skyDbgOv select{width:100%;font-size:15px;padding:7px 9px;border:1.5px solid #DCD7EC;border-radius:9px;font-family:inherit;}'
       + '#skyDbgOv .go{display:block;width:100%;margin-top:14px;padding:12px;border:none;border-radius:12px;background:#F57C00;color:#fff;font-size:14.5px;font-weight:900;font-family:inherit;cursor:pointer;}'
@@ -367,10 +371,14 @@ window.skyDebug = (function () {
     document.body.appendChild(btn);
 
     var st = d && d.mode === "custom" ? JSON.parse(JSON.stringify(d))
-           : { mode:"custom", sup:false, crie:false, roles:[], dept:"", lead:false, sched:false, prog:{ h:false, g:false, s:false } };
-    st.prog = st.prog || { h:false, g:false, s:false }; st.roles = st.roles || [];
+           : { mode:"custom", sup:false, crie:false, roles:[], dept:"", lead:false, sched:false, prog:{ h:false, g:false, s:false, p:false, r:false } };
+    st.prog = st.prog || { h:false, g:false, s:false, p:false, r:false }; st.roles = st.roles || [];
     var ov = document.createElement("div"); ov.id = "skyDbgOv"; document.body.appendChild(ov);
     function chip(on, t, act) { return '<button type="button" class="' + (on ? "on" : "") + '" data-a="' + act + '">' + t + '</button>'; }
+    function markNow() {
+      var n = 0; ["h", "g", "s"].some(function (k) { if (st.prog[k]) { n++; return false; } return true; });
+      return ["🫘 たね", "🌱 芽が出た", "🌷 花が咲いた", "🌈 ファーストサポート修了認定"][n];
+    }
     function presetNow() {
       for (var k in PRESET) { var p = PRESET[k];
         if (p.sup === !!st.sup && p.crie === !!st.crie && p.roles.join(",") === st.roles.join(",")) return k; }
@@ -391,8 +399,11 @@ window.skyDebug = (function () {
         + '<div class="lb">部門</div><select data-a="dept"><option value="">なし（未所属）</option>'
         + DEPTS.map(function (k) { return '<option value="' + k + '"' + (st.dept === k ? " selected" : "") + '>' + k + '</option>'; }).join("") + '</select>'
         + '<div class="g t" style="margin-top:6px;">' + chip(st.lead, "部門統括", "lead") + chip(st.sched, "スケジュール入力担当", "sched") + '</div>'
-        + '<div class="lb">進み具合（終わったもの）</div><div class="g t">'
-        + chip(st.prog.h, "はじめの一歩", "p:h") + chip(st.prog.g, "初期サポートガイド", "p:g") + chip(st.prog.s, "活用の1stステップ", "p:s") + '</div>'
+        + '<div class="lb">ファーストサポートの3つ（1つずつ押して、終わった・まだを切りかえ）</div><div class="g t">'
+        + chip(st.prog.h, "① はじめの一歩", "p:h") + chip(st.prog.g, "② 初期サポートガイド", "p:g") + chip(st.prog.s, "③ 活用の1stステップ", "p:s") + '</div>'
+        + '<p class="s" style="margin:6px 0 0;">名前の左のマーク：<b style="font-size:15px;">' + markNow() + '</b>（🫘 → 🌱 → 🌷 → 🌈）</p>'
+        + '<div class="lb">その先の進み具合</div><div class="g t">'
+        + chip(st.prog.p, "ぴよぴよ卒業", "p:p") + chip(st.prog.r, "グルコンリーダー修了", "p:r") + '</div>'
         + '<button type="button" class="go" data-a="go">この状態で試す</button>'
         + (d ? '<button type="button" class="off" data-a="off">管理者モードをオフにする（ふだんに戻す）</button>' : '')
         + '<button type="button" class="x" data-a="x">とじる</button></div>';
@@ -404,7 +415,7 @@ window.skyDebug = (function () {
       if (a.indexOf("ps:") === 0) {
         var p = PRESET[a.slice(3)];
         st.sup = p.sup; st.crie = p.crie; st.roles = p.roles.slice();
-        st.prog = { h:p.prog, g:p.prog, s:p.prog };
+        st.prog = JSON.parse(JSON.stringify(p.prog));
       }
       else if (a === "f:sup") { st.sup = !st.sup; if (!st.sup) { st.crie = false; st.roles = []; } }
       else if (a === "f:crie") { st.crie = !st.crie; if (st.crie) st.sup = true; }
