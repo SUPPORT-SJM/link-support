@@ -9,7 +9,7 @@
 ================================================================ */
 
 /* ---------------- ① バージョン ---------------- */
-window.SKY_VERSION = "v1.202";
+window.SKY_VERSION = "v1.203";
 window.SKY_VERSION_DATE = "2026/10/28";
 
 /* ---------------- ② GASのURL ----------------
@@ -672,12 +672,11 @@ window.skyView = (function () {
       + '#skyView .op.on::before{content:"✓ ";}'
       + '#skyView .op.ud{font-family:"BIZ UDPGothic",sans-serif;}'
       + '#skyView .cl{display:block;width:100%;margin-top:16px;padding:12px;border:none;border-radius:14px;background:#F0EDF9;color:#4A3F7A;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;}'
-      + '#skyView .cf{background:#FFF8E1;border:2px solid #F5C452;border-radius:16px;padding:14px;margin-top:14px;}'
-      + '#skyView .cf p{margin:0 0 12px;font-size:14px;line-height:1.7;}'
-      + '#skyView .cf .bt{display:flex;gap:8px;}'
-      + '#skyView .cf button{flex:1;padding:11px;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;}'
-      + '#skyView .cf .ok{background:#6E5FB5;color:#fff;}'
-      + '#skyView .cf .ng{background:#fff;color:#7A7390;border:1.5px solid #D9D3EA;}';
+      + '#skyView .cl.go{background:#6E5FB5;color:#fff;padding:14px;font-size:15px;}'
+      + '#skyView .wn{position:fixed;inset:0;z-index:9501;background:rgba(30,26,50,.45);display:flex;align-items:center;justify-content:center;padding:24px;}'
+      + '#skyView .wc{background:#fff;border-radius:20px;width:100%;max-width:340px;padding:20px 18px 16px;box-shadow:0 16px 50px rgba(0,0,0,.3);border:2px solid #F5C452;}'
+      + '#skyView .wc p{margin:0 0 14px;font-size:15px;line-height:1.75;color:#2A2438;}'
+      + '#skyView .wc .ok{display:block;width:100%;padding:13px;border:none;border-radius:12px;background:#6E5FB5;color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;}';
     document.head.appendChild(st);
   }
   function open() {
@@ -693,47 +692,42 @@ window.skyView = (function () {
       pre.href = "https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&display=swap";
       document.head.appendChild(pre);
     }
-    var pend = null;
+    /* 選んでいるあいだは、まだ反映しません（えらんだものに印がつくだけ）。
+       「この設定を反映する」を押すと注意書きが出て、「OK」で反映して、とじます */
+    var cur = get(), sel = { size: cur.size, font: cur.font }, warn = false;
     function draw() {
-      var v = get();
       var h = '<div class="vc"><h3>👓 見やすさの設定</h3><p class="ld">この端末で見るときの、文字の大きさと字体を変えられます</p>'
         + '<div class="sec">文字の大きさ</div><div class="ops">';
       SIZES.forEach(function (s) {
-        h += '<button type="button" class="op' + (v.size === s.k ? " on" : "") + '" data-size="' + s.k + '">' + s.nm
+        h += '<button type="button" class="op' + (sel.size === s.k ? " on" : "") + '" data-size="' + s.k + '">' + s.nm
           + (s.k === "m" ? '<small>いまの大きさ</small>' : "") + '</button>';
       });
       h += '</div><div class="sec">字体</div><div class="ops">';
       FONTS.forEach(function (s) {
-        h += '<button type="button" class="op' + (s.k === "ud" ? " ud" : "") + (v.font === s.k ? " on" : "") + '" data-font="' + s.k + '">' + s.nm
+        h += '<button type="button" class="op' + (s.k === "ud" ? " ud" : "") + (sel.font === s.k ? " on" : "") + '" data-font="' + s.k + '">' + s.nm
           + (s.sub ? '<small>' + s.sub + '</small>' : "") + '</button>';
       });
-      h += '</div>';
-      if (pend) {
-        var msg = pend.font
-          ? "字体を変えると見やすさが変わりますが、レイアウトが少し崩れる可能性があります。ご了承ください。"
-          : (pend.size === "xl"
-              ? "「とても大きく」にすると、レイアウトがずれる可能性があります。ご了承ください。"
-              : "文字の大きさを変えると見やすさが変わりますが、レイアウトが少し崩れる可能性があります。ご了承ください。");
-        h += '<div class="cf" role="alertdialog"><p>⚠️ ' + msg + '</p><div class="bt">'
-          + '<button type="button" class="ng" data-act="ng">やめる</button><button type="button" class="ok" data-act="ok">OK</button></div></div>';
+      h += '</div><button type="button" class="cl go" data-act="apply">この設定を反映する</button></div>';
+      if (warn) {
+        h += '<div class="wn"><div class="wc" role="alertdialog"><p>⚠️ 見やすさを変えると、レイアウトが少し崩れる可能性があります。ご了承ください。</p>'
+          + '<button type="button" class="ok" data-act="ok">OK</button></div></div>';
       }
-      h += '<button type="button" class="cl" data-act="close">とじる</button></div>';
       ov.innerHTML = h;
-      if (pend) { var cf = ov.querySelector(".cf"); if (cf && cf.scrollIntoView) cf.scrollIntoView({ block: "nearest" }); }
     }
     ov.addEventListener("click", function (e) {
-      if (e.target === ov) { ov.remove(); return; }
+      if (e.target === ov && !warn) { ov.remove(); return; }   /* まわりの暗いところを押したら、変えずにとじます */
       var b = e.target.closest ? e.target.closest("button") : null; if (!b) return;
-      var v = get();
-      if (b.dataset.size) { pend = b.dataset.size === v.size ? null : { size: b.dataset.size }; draw(); return; }
-      if (b.dataset.font) { pend = b.dataset.font === v.font ? null : { font: b.dataset.font }; draw(); return; }
-      if (b.dataset.act === "ng") { pend = null; draw(); return; }
-      if (b.dataset.act === "ok" && pend) {
-        if (pend.size) v.size = pend.size;
-        if (pend.font) v.font = pend.font;
-        pend = null; save(v); apply(v); draw(); return;
+      if (b.dataset.size) { sel.size = b.dataset.size; draw(); return; }
+      if (b.dataset.font) { sel.font = b.dataset.font; draw(); return; }
+      if (b.dataset.act === "apply") {
+        var v = get();
+        if (v.size === sel.size && v.font === sel.font) { ov.remove(); return; }   /* 何も変えていなければ、そのままとじます */
+        warn = true; draw(); return;
       }
-      if (b.dataset.act === "close") ov.remove();
+      if (b.dataset.act === "ok") {
+        var nv = get(); nv.size = sel.size; nv.font = sel.font;
+        save(nv); apply(nv); ov.remove(); return;
+      }
     });
     draw();
   }
