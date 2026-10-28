@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<script src="../config.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>リストアップとは | LINK 初期サポート</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Zen Kaku Gothic New",sans-serif;background:#FFFBF2;padding:16px 14px 48px;color:#4E342E;font-size:16px;line-height:1.9}
+.wrap{max-width:440px;margin:0 auto}
+.back-btn{display:inline-block;color:#E65100;font-size:14px;font-weight:700;text-decoration:none;margin-bottom:14px}
+.hero{background:linear-gradient(135deg,#E3F2FD,#C8E6FF);border:2px solid #64B5F6;border-radius:18px;padding:18px 16px;text-align:center;margin-bottom:14px}
+.hero .badge{display:inline-block;font-size:13px;font-weight:700;color:#1565C0;background:#fff;border-radius:999px;padding:2px 12px;margin-bottom:6px}
+.hero h1{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:22px;color:#0D47A1;line-height:1.5}
+.hero p{font-size:14px;color:#1E4E8C;margin-top:4px;line-height:1.7}
+.chu{background:#FFF8E1;border:1.5px dashed #F2C94C;border-radius:12px;padding:10px 12px;font-size:13.5px;line-height:1.75;margin-bottom:16px}
+h2{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:18px;color:#1565C0;margin:22px 0 10px;padding-bottom:6px;border-bottom:3px solid #90CAF9}
+.card{background:#fff;border:1.5px solid #E3E8F0;border-radius:14px;padding:12px 14px;margin-bottom:10px}
+.card p{margin-bottom:6px}.card p:last-child{margin-bottom:0}
+b.k{color:#C62828}
+.step{display:inline-block;background:#1565C0;color:#fff;border-radius:999px;padding:1px 12px;font-size:13px;font-weight:700;margin-right:6px;vertical-align:2px}
+.ex{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.ex span{background:#E3F2FD;border-radius:999px;padding:3px 12px;font-size:13.5px;font-weight:700;color:#1565C0}
+/* 3つのポイント */
+.pts{display:grid;gap:8px;margin-top:8px}
+.pt{display:flex;gap:10px;align-items:flex-start;background:#F7FAFF;border:1.5px solid #CFE3FA;border-radius:12px;padding:10px 12px}
+.pt .n{flex-shrink:0;width:30px;height:30px;border-radius:50%;background:#42A5F5;color:#fff;font-weight:900;display:grid;place-items:center;font-size:15px}
+.pt .t{font-size:14.5px;line-height:1.75}
+.pt .t b{color:#0D47A1}
+.score{display:flex;justify-content:space-between;gap:4px;margin-top:10px}
+.score div{flex:1;text-align:center;background:#fff;border:1.5px solid #CFE3FA;border-radius:10px;padding:6px 2px;font-size:12.5px;line-height:1.5}
+.score div b{display:block;font-size:20px;color:#1565C0}
+/* ノートの図 */
+.note{position:relative;background:#fff;border:2px solid #B0BEC5;border-radius:6px 14px 14px 6px;padding:10px 8px 12px 18px;margin-top:6px;
+  box-shadow:0 6px 16px rgba(0,0,0,.08)}
+.note::before{content:"";position:absolute;left:8px;top:0;bottom:0;width:2px;background:#F48FB1;opacity:.7}
+.nrow{display:grid;grid-template-columns:30px 1fr 1.1fr 1.5fr;gap:4px;align-items:center;min-height:34px;font-size:13px;line-height:1.35;padding:6px 0;border-bottom:1px solid #DCE7F3}
+.nrow.hd{border-bottom:none;padding:0}
+.nrow.hd{font-size:11px;font-weight:700;color:#fff;min-height:auto;margin-bottom:6px}
+.nrow.hd span{padding:4px 2px;border-radius:6px;text-align:center}
+.nrow.hd .c1{background:#42A5F5}.nrow.hd .c2{background:#5C6BC0}.nrow.hd .c3{background:#26A69A}.nrow.hd .c4{background:#FF8A65}
+.nrow .sc{font-weight:900;color:#1565C0;font-size:17px;text-align:center}
+.nrow .nm{font-weight:700}
+.nrow .job{color:#00796B}
+.nrow .nd{color:#D84315;font-size:12px}
+.arrow{font-size:12.5px;color:#607D8B;text-align:center;margin-top:8px;line-height:1.7}
+.legend{display:grid;grid-template-columns:auto 1fr;gap:4px 8px;font-size:13px;margin-top:10px;line-height:1.6}
+.legend i{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px}
+.end{background:linear-gradient(135deg,#FFF3E0,#FFE0B2);border:2px solid #FFB74D;border-radius:16px;padding:14px;margin-top:18px;font-size:15px;line-height:1.85}
+.back-btn2{display:block;padding:14px;border-radius:12px;background:#FF7043;color:#fff;text-align:center;font-size:16px;font-weight:700;text-decoration:none;margin-top:22px}
+@media (max-width:600px){ .hero{margin-right:58px;} }   /* 右上のメニューのボタンと重ならないように */
+</style>
+<link rel="stylesheet" href="../beta.css">
+<script src="../loading.js"></script>
+<script src="../login.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <a href="../index.html" class="back-btn">← ホームに戻る</a>
+
+  <div class="hero">
+    <span class="badge">📞 アポ部屋の前に</span>
+    <h1>📝 リストアップとは</h1>
+    <p>これまでご縁をつないできた人たちを、<br>思い出して書き出す作業です</p>
+  </div>
+
+  <p class="chu">※ ここでご紹介するのは、<b>Skyarcで教えているリストアップのやり方</b>です。</p>
+
+  <h2>なんのためにやるの？</h2>
+  <div class="card">
+    <p>まず、<b>自分の知り合いや、連絡できる人がどれくらいいるのか</b>を確かめるためです。</p>
+    <p>頭の中の記憶だけだと、どうしても抜けてしまう人が出てきます。連絡先などを見ながら、<b>これまでご縁をつないできた人たちを思い出す</b>。それがリストアップです。</p>
+  </div>
+
+  <h2><span class="step">ステップ1</span>名前を全部書き出す</h2>
+  <div class="card">
+    <p>10分・20分など<b>時間を決めて</b>、見るもの（媒体）をひとつ決めたら、<b>そこにいる人を全員</b>書き出します。</p>
+    <div class="ex"><span>例：LINEの友だちを全員</span><span>例：SNSのフォロワーを全員</span></div>
+    <p style="margin-top:8px;">多い方だと、<b>200人くらい</b>書き出すこともあります。</p>
+    <p>ノートの<b>左半分くらい</b>に、上から順に名前を書いていきます。このとき、<b>左はしを1〜2文字分あけておきます</b>（ステップ2の点数を書くところです）。</p>
+  </div>
+
+  <h2><span class="step">ステップ2</span>3つのポイントで点数をつける</h2>
+  <div class="card">
+    <p>書き出した一人ひとりに、次の3つが<b>当てはまるかどうか</b>をチェックします。<b>覚えている範囲で大丈夫</b>です。</p>
+    <div class="pts">
+      <div class="pt"><span class="n">1</span><span class="t"><b>人脈がありそう</b><br>いろいろな人とつながっていそうな方</span></div>
+      <div class="pt"><span class="n">2</span><span class="t"><b>コミュニケーション能力が高い</b><br>ただ話が上手・ずっと話せる、ということではありません。目上の方や立場・考え方が違う方にも、<b>けんかにならずに自分の考えを正しく伝えられる</b>、<b>話を上手にまとめられる</b>方のことです。</span></div>
+      <div class="pt"><span class="n">3</span><span class="t"><b>ビジョン・夢を持っている</b><br>ひとつでもいいので、「こういうことをしたい」と言っていた・聞いたことがある方</span></div>
+    </div>
+    <p style="margin-top:10px;">当てはまるものひとつにつき<b>1点</b>。名前の左にあけておいたところに、点数を書きます。</p>
+    <div class="score">
+      <div><b>0</b>あてはまらない</div><div><b>1</b>ひとつ</div><div><b>2</b>ふたつ</div><div><b>3</b>みっつ全部</div>
+    </div>
+  </div>
+
+  <h2><span class="step">ステップ3</span>右側に、職業と予想されるニーズを書く</h2>
+  <div class="card">
+    <p>ノートの<b>右側のあいているところ</b>に、その人の<b>職業や肩書き</b>を書きます。</p>
+    <p>そのさらに右に、「こんなことに困っていそう」「こうなったら嬉しいのでは」という<b>予想されるニーズ</b>を、なんとなくで書いてみます。</p>
+  </div>
+
+  <h2>🖊 書きあがると、こんなノートになります</h2>
+  <div class="note" role="img" aria-label="リストアップのノートの例">
+    <div class="nrow hd"><span class="c1">点数</span><span class="c2">名前</span><span class="c3">職業・肩書き</span><span class="c4">予想されるニーズ</span></div>
+    <div class="nrow"><span class="sc">2</span><span class="nm">〇〇さん</span><span class="job">コーチングの先生</span><span class="nd">最近、生徒が減ったと言っていた → 生徒が増えたら嬉しいのでは</span></div>
+    <div class="nrow"><span class="sc">1</span><span class="nm">△△さん</span><span class="job">主婦</span><span class="nd">旦那さんの給料が下がったと言っていた → 副収入が欲しいのでは</span></div>
+    <div class="nrow"><span class="sc"></span><span class="nm" style="color:#B0BEC5;">…</span><span></span><span></span></div>
+  </div>
+  <div class="legend">
+    <span><i style="background:#42A5F5"></i></span><span><b>点数</b>：ステップ2（左はしの1〜2文字分）</span>
+    <span><i style="background:#5C6BC0"></i></span><span><b>名前</b>：ステップ1（ノートの左半分）</span>
+    <span><i style="background:#26A69A"></i></span><span><b>職業・肩書き</b>：ステップ3（右側）</span>
+    <span><i style="background:#FF8A65"></i></span><span><b>予想されるニーズ</b>：ステップ3（さらに右）</span>
+  </div>
+  <p class="arrow">※ 例の名前・内容は、書き方のイメージです</p>
+
+  <div class="end">
+    💡 <b>覚えている範囲で構いません。</b><br>
+    分からないところは、「どうだったっけ？」と<b>聞いていくところから、アポイントが始まります</b>。
+  </div>
+
+  <a href="../index.html" class="back-btn2">← ホームに戻る</a>
+</div>
+<div style="text-align:center;font-size:9.5px;color:#C4B8B0;font-family:monospace;padding:14px 0 20px;"></div>
+<script src="../track.js"></script>
+<script src="../menu.js"></script>
+</body>
+</html>

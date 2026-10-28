@@ -287,7 +287,7 @@
         ・<b>かぶってOKの公式</b>（BAM・江頭俊文Q&amp;A・アドバイザートレーニング・アドバイザー研修会・スキルアップleader編・事業者グルコン・ママさんグルコン）とは、かぶっても大丈夫です。<br>
         ・<b>つなぐマルシェ inリアル</b>だけは、アポイント勉強会・アポのイロハ実践会・トリプルグルコン・プレミアムダブルグルコン・ロープレ実践会・いとザップとも、かぶっても大丈夫です。<br>
         ・会社やアップの方から日にちのご依頼があって、どうしてもかぶるときは、配慮をお願いします。<br>
-        ・<b>申込みシートにある予定</b>は自動で出ます（これからの約4か月分）。おわりの時間が分からないので、はじまりから1時間として見ます。<br>
+        ・<b>申込みシートにある予定</b>と、<b>スペシャルMTG・クリエ特訓・リンカー特訓</b>、<b>グルコン</b>（ビフォーのはじまり〜アフターのおわり）は、自動で出ます（これからの約4か月分）。おわりの時間はシートに書いてあるものを使います。書いていないときだけ、はじまりから1時間として見ます。<br>
         ・公式公認の予定は、管理者とスケジュール入力担当の方が入れます。翔子さんの予定は管理者が入れます。
       </div>
     </div>
@@ -505,9 +505,10 @@ function byDay(){
   (data.events || []).forEach(e => {
     const w = String(e.when || ""); const d = w.slice(0, 10);
     if(!/^\d{4}\/\d{2}\/\d{2}$/.test(d)) return;
-    const st = w.slice(11, 16);
+    const st = e.allDay ? "" : w.slice(11, 16);
+    const en = e.allDay ? "" : String(e.end || "");   /* シートに書いてある終わりの時間（読めないときは、はじまりから1時間として見ます） */
     const cat = e.cat || e.book || "event";
-    put(d, { src:"sheet", kind:"team", cat:cat, start:st, end:"", s:toMin(st), e:null, date:d,
+    put(d, { src:"sheet", kind:"team", cat:cat, start:st, end:en, s:st ? toMin(st) : null, e:en ? toMin(en) : null, date:d,
              title:e.title || e.label || "", label:e.label || "", url:e.url || "",
              place: cat === "kouryu-re" ? "real" : "online", ba:false, marche:isMarche(e.title || e.label) });
   });

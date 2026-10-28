@@ -37,11 +37,20 @@ body{font-family:"Zen Kaku Gothic New",sans-serif;background:#FFFBF7;padding:16p
 .btn.plan{background:#FF7043;color:#fff}
 .btn.done{background:#E8F5E9;color:#2E7D32;border:1.5px solid #A5D6A7}
 .btn[disabled]{opacity:.6;cursor:default}
+.btn[hidden]{display:none}
 .ask{margin-top:10px;background:#FFF8E1;border-radius:12px;padding:10px 12px;font-size:14px;font-weight:700;text-align:center}
 .ask .row{display:flex;gap:8px;margin-top:8px}
 .ask .row button{flex:1;padding:10px;border:none;border-radius:10px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer}
 .ask .yes{background:#FF7043;color:#fff}
 .ask .no{background:#EFEBE9;color:#5D4037}
+.ask.req{text-align:left}
+.ask.req .rq-lead{font-size:13.5px;margin-bottom:8px;line-height:1.7}
+.ask.req .rq-text{background:#fff;border:2px dashed #F2C94C;border-radius:10px;padding:10px 12px;font-size:14px;font-weight:500;line-height:1.8;-webkit-user-select:text;user-select:text}
+.ask.req .rq-err{margin-top:8px;color:#C62828;font-size:13px;line-height:1.7}
+.ask.req .row:last-child{margin-top:6px}
+.shake{animation:rqShake .5s}
+@keyframes rqShake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.mine .rq-ok{margin-top:8px;background:#fff;border-radius:10px;padding:8px 10px;font-size:13px;font-weight:500;color:#2E7D32;line-height:1.7}
 .small{font-size:12px;color:#8D6E63;line-height:1.7;margin-top:6px}
 .msg{font-size:14px;line-height:1.8;text-align:center;color:#8D6E63;padding:16px 8px}
 .msg.err{color:#C62828;font-weight:700}
@@ -124,7 +133,7 @@ function drawMine(){
   const m = data && data.mine;
   if(m && m.s === "参加予定" && m.d && m.d >= data.today){
     const x = data.items.find(i=>i.date === m.d);
-    box.innerHTML = `<div class="mine">✅ あなたの出席予定：${x ? esc(dayHead(x) + "　" + x.leader) : esc(md(m.d))}<br><span style="font-weight:500;font-size:12.5px;">サポートの方の画面にも出ています。取り消したいときは、サポートの方にお伝えください。</span></div>`;
+    box.innerHTML = `<div class="mine">✅ あなたの出席予定：${x ? esc(dayHead(x) + "　" + x.leader) : esc(md(m.d))}<br><span style="font-weight:500;font-size:12.5px;">サポートの方の画面に通知が出ています。</span></div>`;
   }else box.innerHTML = "";
 }
 function drawList(){
@@ -155,15 +164,61 @@ function drawPast(){
   }).join("");
   document.querySelectorAll("#past .btn.done").forEach(b=>b.addEventListener("click", ()=>markDone(b)));
 }
-/* まちがえて押さないように、ひと声かけてから保存します */
+/* 初期サポートグループLINEに送る、出席のお願いの文面 */
+function reqText(x){
+  return `${dayHead(x)} ${x.start}から始まる、${x.leader}さんのグルコンに出席したいです。\n`
+    + `ビフォー・アフターの時間は、こうなります。\n`
+    + `・ビフォー ${x.before}〜${x.start}\n・グルコン ${x.start}〜${x.end}\n・アフター ${x.afterFrom}〜${x.afterTo}\n`
+    + `この時間帯のグルコンに出たいので、引率できる方、よろしくお願いします。`;
+}
+async function copyText(t){
+  try{ if(navigator.clipboard && window.isSecureContext){ await navigator.clipboard.writeText(t); return true; } }catch(e){}
+  try{
+    const ta = document.createElement("textarea");
+    ta.value = t; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.top = "-1000px"; ta.style.fontSize = "16px";
+    document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0, t.length);
+    const ok = document.execCommand("copy"); ta.remove(); return ok;
+  }catch(e){ return false; }
+}
+/* まちがえて押さないように、ひと声かけてから保存します。
+   「はい」のあとは、初期サポートグループLINEに送る文面を見せて、
+   「文面をコピーして、予定を決定する」で、コピーと保存をいっしょにします */
 function askPlan(btn){
   const box = btn.nextElementSibling;
   btn.hidden = true;
   box.innerHTML = `<div class="ask">この日を出席予定にしますか？<div class="row"><button class="yes">はい</button><button class="no">やめる</button></div></div>`;
   box.querySelector(".no").onclick = ()=>{ box.innerHTML = ""; btn.hidden = false; };
-  box.querySelector(".yes").onclick = ()=>savePlan(btn.dataset.date, box);
+  box.querySelector(".yes").onclick = ()=>{
+    const x = data.items.find(i=>i.date === btn.dataset.date);
+    const t = x ? reqText(x) : "";
+    box.innerHTML = `<div class="ask req">
+      <p class="rq-lead">この文面をコピーして、<b>初期サポートグループLINE</b>に送ってください</p>
+      <div class="rq-text">${esc(t).replace(/\n/g, "<br>")}</div>
+      <p class="rq-err" hidden></p>
+      <div class="row"><button class="yes go">📋 文面をコピーして、予定を決定する</button></div>
+      <div class="row"><button class="no">やめる</button></div></div>`;
+    box.querySelector(".no").onclick = ()=>{ box.innerHTML = ""; btn.hidden = false; };
+    const go = box.querySelector(".go");
+    go.onclick = async ()=>{
+      if(go.dataset.copied !== "1"){
+        const ok = await copyText(t);
+        if(!ok){
+          /* コピーできなかったとき：ブルブルとお知らせして、文面を長押しでコピーしてもらいます */
+          try{ if(navigator.vibrate) navigator.vibrate([200, 100, 200]); }catch(e){}
+          const er = box.querySelector(".rq-err");
+          er.hidden = false;
+          er.textContent = "⚠️ 文面をコピーできませんでした。上の文面を長押ししてコピーしてから、もう一度押してください。";
+          er.classList.remove("shake"); void er.offsetWidth; er.classList.add("shake");
+          go.dataset.copied = "1";
+          go.textContent = "コピーしたので、予定を決定する";
+          return;
+        }
+      }
+      savePlan(btn.dataset.date, box, true);
+    };
+  };
 }
-async function savePlan(date, box){
+async function savePlan(date, box, copied){
   box.querySelectorAll("button").forEach(b=>b.disabled = true);
   try{
     const r = await fetch(GAS_URL, { method:"POST", body:new URLSearchParams({ action:"gconPlan", id:member.id, pin:member.pin, date }) });
@@ -172,6 +227,10 @@ async function savePlan(date, box){
     if(!j || !j.ok){ box.innerHTML = `<p class="msg err">${esc(ERR[j && j.error] || "保存できませんでした。少しおいてお試しください。")}</p>`; return; }
     data.mine = j.mine;
     drawMine(); drawList();
+    if(copied){
+      const mb = $("#mine .mine");
+      if(mb) mb.insertAdjacentHTML("beforeend", '<div class="rq-ok">📋 コピーした文面を、<b>初期サポートグループLINE</b>に貼りつけて、送ってください。</div>');
+    }
     window.scrollTo({ top:0, behavior:"smooth" });
   }catch(e){
     box.innerHTML = '<p class="msg err">通信できませんでした。電波のよい場所でお試しください。</p>';
