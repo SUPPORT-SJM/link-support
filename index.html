@@ -238,6 +238,9 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body)
 .forgot{display:block;text-align:center;margin-top:12px;font-size:12px;color:var(--sub);}
 .go-btn:disabled{opacity:.6;}
 .foot{text-align:center;font-size:11px;color:var(--sub);line-height:2;margin-top:18px;}
+/* いちばん上の段では、「Presented by／バージョン」を、丸の場所のいちばん下（左右の小さな丸のあいだ）に重ねて置きます。
+   そのぶん丸を大きく並べられて、スクロールしなくても最後まで画面に収まります */
+.foot.inStage{position:relative;z-index:0;pointer-events:none;margin-top:-50px;}
 .foot .verTag{font-family:monospace;font-size:9.5px;}
 
 @media (prefers-reduced-motion: reduce){ .bub.join .ball,.sheet .card{animation:none !important;} }
@@ -521,6 +524,7 @@ const WOBBLE = [[0,0],[4,-6],[-5,3],[6,4],[-3,-5],[5,2],[-6,-2],[3,6],[-4,5],[2,
 function homes(n, centered, pair){
   if(centered === undefined) centered = n >= 7;
   if(pair && n >= 4) return homesPair(n);
+  { const ft = document.querySelector(".foot"); if(ft) ft.classList.remove("inStage"); }   /* 中の段では、下の文字はふつうに丸の下に置きます */
   W = Math.min(stage.clientWidth || 360, 440);
   const cx = W/2;
   let pts = [], rx, ry;
@@ -545,10 +549,27 @@ function homes(n, centered, pair){
 /* いちばん上の段：まん中にアカウント、そのまわりを「新しい仲間へ」が月のようにまわります。
    ほかのアイコンは、そのまわりに大きめの輪で並べます */
 const ORBIT = { rx: 112, ry: 102, sec: 16 };      /* 月の通り道の大きさと、1周の秒数 */
+const ORBIT_RY0 = 102;   /* 月の通り道の、もともとのたての大きさ */
+const STAGE_PAD = 60;    /* いちばん下の小さな丸の名前のための余白 */
+const RY_MIN = 185;      /* 輪をたてに縮めるときの下限（これより小さいと丸どうしが重なります） */
 function homesPair(n){
   W = Math.min(stage.clientWidth || 360, 440);
   const cx = W/2, ring = n-2;
-  const rx = Math.max(W*.41, 140), ry = Math.max(W*.64, 235);
+  const rx = Math.max(W*.41, 140);
+  /* 画面の高さに合わせて、たての広がりを決めます。
+     その端末で見えている高さ（innerHeight）から、上の見出しと下の「Presented by／バージョン」の分を引いて、
+     スクロールしなくても最後まで画面に収まる大きさにします。ただし、丸どうしが重ならない大きさより小さくはしません */
+  const ryWant = Math.max(W*.64, 235);
+  const stTop = stage.getBoundingClientRect().top + (window.scrollY || 0);
+  const ft = document.querySelector(".foot");
+  if(ft) ft.classList.add("inStage");
+  /* 下の文字は丸の場所の下の余白に重なるので、はみ出すのは「2行ぶん − 50」だけです（バージョンの文字が入る前でも2行ぶんで考えます） */
+  const footH = Math.max((ft ? Math.max(ft.offsetHeight, 44) : 44) - 50, 0);
+  const avail = (window.innerHeight || 800) - stTop - footH - 8;
+  const ryFit = (avail - STAGE_PAD - 150) / 2;
+  const ry = Math.max(Math.min(ryWant, ryFit), RY_MIN);
+  /* 輪がたてに縮んだぶん、月の通り道も少しだけ小さくします */
+  ORBIT.ry = Math.round(ORBIT_RY0 * Math.max(Math.min(ry / ryWant, 1), .8));
   const pts = [[0, 0], [0, ORBIT.ry]];
   for(let i=0;i<ring;i++){
     const a = -Math.PI/2 + i*2*Math.PI/ring;
@@ -556,7 +577,7 @@ function homesPair(n){
   }
   H = Math.max(2*ry + 150, 170);
   /* いちばん下に「使い方」「管理者モード」の小さな丸が来ても、名前が下の文字に重ならないよう、下に少し余白をとります */
-  stage.style.height = (H + 60) + "px";
+  stage.style.height = (H + STAGE_PAD) + "px";
   const k = W/360;
   /* いちばん上の段の輪は、左右対称に並べます（アカウントのまん中から、同じ楕円の上に。ゆらしはつけません） */
   return pts.map(p=>[cx + p[0], H/2 + p[1]]);
@@ -967,7 +988,7 @@ function memHome(){
   }
   let best = null, bestS = Infinity;
   for(let x = 44; x <= W*.55; x += 4){
-    for(let y = Math.max(40, acc.hy - 300); y <= acc.hy + 40; y += 4){
+    for(let y = Math.max(24, acc.hy - 300); y <= acc.hy + 40; y += 4){   /* 輪がたてに縮んだときも入れるよう、上は24まで探します */
       const box = [x - 42, y - 18, x + 42, y + 34];
       let ar = 0;
       boxes.forEach(r=>{
@@ -1552,6 +1573,16 @@ window.addEventListener("resize", ()=>{
   const hs = homes(nodes.length, path.length === 0 ? true : nodes.length > 1, path.length === 0 && !!me);
   nodes.forEach((n,i)=>{ n.hx = hs[i][0]; n.hy = hs[i][1]; });
 });
+/* 上の「〇〇さん、おかえりなさい」があとから2行になったときも、丸の並びを画面の高さに合わせなおします */
+if(window.ResizeObserver){
+  const topBox = document.querySelector(".top");
+  let topH = topBox ? topBox.offsetHeight : 0;
+  if(topBox) new ResizeObserver(()=>{
+    if(topBox.offsetHeight === topH) return;
+    topH = topBox.offsetHeight;
+    window.dispatchEvent(new Event("resize"));
+  }).observe(topBox);
+}
 build(null, null);
 nodes.forEach(n=>{ n.s = .3; n.o = 0; });
 requestAnimationFrame(frame);
