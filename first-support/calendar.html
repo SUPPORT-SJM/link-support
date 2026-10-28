@@ -239,7 +239,8 @@
         <div class="chk">
           <label><input type="radio" name="qPlace" value="online" checked>オンライン</label>
           <label><input type="radio" name="qPlace" value="real">リアル</label>
-          <label><input type="checkbox" id="qBa">ビフォー・アフターあり</label>
+          <label><input type="checkbox" id="qBef">ビフォーあり</label>
+          <label><input type="checkbox" id="qAft">アフターあり</label>
           <label><input type="checkbox" id="qMarche">つなぐマルシェ inリアル</label>
         </div>
         <button class="go" onclick="askCheck()">かぶっていないか確かめる</button>
@@ -283,7 +284,7 @@
       <div class="note">
         <b>かぶりの決まり</b><br>
         ・チームの予定が、<b>公式公認の予定</b>か<b>翔子さんの予定</b>と時間が重なると「被り」です。時間のない予定は、その日1日として見ます。<br>
-        ・<b>ビフォー・アフターあり</b>の予定は、前後もあけます（オンラインは前後30分、リアルは前後1時間）。<br>
+        ・<b>ビフォーあり</b>の予定は前を、<b>アフターあり</b>の予定は後ろを、あけます（オンラインは30分、リアルは1時間）。<br>
         ・<b>かぶってOKの公式</b>（BAM・江頭俊文Q&amp;A・アドバイザートレーニング・アドバイザー研修会・スキルアップleader編・事業者グルコン・ママさんグルコン）とは、かぶっても大丈夫です。<br>
         ・<b>つなぐマルシェ inリアル</b>だけは、アポイント勉強会・アポのイロハ実践会・トリプルグルコン・プレミアムダブルグルコン・ロープレ実践会・いとザップとも、かぶっても大丈夫です。<br>
         ・会社やアップの方から日にちのご依頼があって、どうしてもかぶるときは、配慮をお願いします。<br>
@@ -323,7 +324,7 @@
     <div class="two">
       <div><label for="fPlace">場所</label>
         <select id="fPlace"><option value="online">オンライン</option><option value="real">リアル</option><option value="">分からない</option></select></div>
-      <div><label>&nbsp;</label><label class="cb"><input type="checkbox" id="fBa">ビフォー・アフターあり</label></div>
+      <div><label>&nbsp;</label><label class="cb"><input type="checkbox" id="fBef">ビフォーあり</label><label class="cb"><input type="checkbox" id="fAft">アフターあり</label></div>
     </div>
     <div id="fOkWrap">
       <label for="fOk">かぶってOK</label>
@@ -461,7 +462,10 @@ function guessOk(title){
   return "";
 }
 function isMarche(title){ return normKey(title).indexOf(normKey("つなぐマルシェ")) >= 0; }
-function padOf(x){ return x.ba ? (x.place === "real" ? 60 : 30) : 0; }
+/* ビフォー・アフターであける時間（オンラインは30分、リアルは1時間）。ビフォーとアフターは別々に見ます */
+function padUnit(x){ return x.place === "real" ? 60 : 30; }
+function padB(x){ return x.bef ? padUnit(x) : 0; }
+function padA(x){ return x.aft ? padUnit(x) : 0; }
 function spanOf(x){
   if(x.s == null) return [0, 24 * 60];
   const e = x.e != null && x.e > x.s ? x.e : x.s + 60;
@@ -472,15 +476,20 @@ function clashOf(t, o){
   if(o.kind === "official" && (o.okFlag === "ok" || (o.okFlag === "marche" && t.marche))) return "";
   const a = spanOf(t), b = spanOf(o);
   if(a[0] < b[1] && b[0] < a[1]) return "time";
-  const pa = padOf(t), pb = padOf(o);
-  if(a[0] - pa < b[1] + pb && b[0] - pb < a[1] + pa) return "pad";
+  if(a[0] - padB(t) < b[1] + padA(o) && b[0] - padB(o) < a[1] + padA(t)) return "pad";
   return "";
 }
 function whyText(w, t, o){
   if(w === "time") return "時間が重なっています";
   const p = [];
-  if(padOf(o)) p.push((o.title || KIND_NAME[o.kind]) + "の前後" + padOf(o) + "分");
-  if(padOf(t)) p.push((t.title || "チームの予定") + "の前後" + padOf(t) + "分");
+  const one = (x, nm) => {
+    const w = [];
+    if(padB(x)) w.push("ビフォー" + padB(x) + "分");
+    if(padA(x)) w.push("アフター" + padA(x) + "分");
+    if(w.length) p.push(nm + "の" + w.join("・"));
+  };
+  one(o, o.title || KIND_NAME[o.kind]);
+  one(t, t.title || "チームの予定");
   return "ビフォー・アフターの時間（" + p.join("・") + "）にかかっています";
 }
 
@@ -497,7 +506,7 @@ function byDay(){
       src:"own", kind:it.kind, cat:it.kind === "team" ? (it.cat || "event") : it.kind,
       start:it.start || "", end:it.end || "", s:toMin(it.start), e:toMin(it.end),
       title:it.title || "", memo:it.memo || "", item:it,
-      place:it.place || "", ba:!!it.ba, okFlag:it.okFlag || "", marche: it.kind === "team" && isMarche(it.title),
+      place:it.place || "", bef: it.bef !== undefined ? !!it.bef : !!it.ba, aft: it.aft !== undefined ? !!it.aft : !!it.ba, okFlag:it.okFlag || "", marche: it.kind === "team" && isMarche(it.title),
       multi: !!(it.endDate && it.endDate !== it.date), endDate: it.endDate || ""
     };
     eachDay(it.date, it.endDate || it.date, d => put(d, Object.assign({}, base, { date:d })));
@@ -510,7 +519,7 @@ function byDay(){
     const cat = e.cat || e.book || "event";
     put(d, { src:"sheet", kind:"team", cat:cat, start:st, end:en, s:st ? toMin(st) : null, e:en ? toMin(en) : null, date:d,
              title:e.title || e.label || "", label:e.label || "", url:e.url || "",
-             place: cat === "kouryu-re" ? "real" : "online", ba:false, marche:isMarche(e.title || e.label) });
+             place: cat === "kouryu-re" ? "real" : "online", bef:false, aft:false, marche:isMarche(e.title || e.label) });
   });
   const ord = { official:0, shoko:1, team:2 };
   Object.keys(map).forEach(d => map[d].sort((a, b) => {
@@ -593,7 +602,7 @@ function drawDay(map){
     const tag = x.kind === "official" ? "公式公認" + (x.okFlag === "ok" ? "｜かぶってOK" : x.okFlag === "marche" ? "｜マルシェだけOK" : "")
       : x.kind === "shoko" ? "翔子さん"
       : (x.src === "sheet" ? "申込みシート｜" + (CAT_NAME[x.cat] || x.label) : "これから入れたい｜" + (CAT_NAME[x.cat] || ""));
-    const fl = [x.place === "real" ? "リアル" : x.place === "online" ? "オンライン" : "", x.ba ? "ビフォー・アフターあり" : "",
+    const fl = [x.place === "real" ? "リアル" : x.place === "online" ? "オンライン" : "", (x.bef && x.aft ? "ビフォー・アフターあり" : x.bef ? "ビフォーあり" : x.aft ? "アフターあり" : ""),
                 x.multi ? "〜" + mdw(x.endDate) + "まで" : ""].filter(Boolean).join("・");
     let acts = "";
     if(x.src === "sheet" && x.url) acts += '<a href="' + esc(x.url) + '" target="_blank" rel="noopener">📋 申込みシートを開く</a>';
@@ -632,7 +641,7 @@ function askCheck(){
   if(st && en && en <= st){ r.className = "res ng"; r.innerHTML = "<b>おわりの時間が、はじまりより前になっています</b>"; return; }
   const t = { kind:"team", title:"これから決めたい予定", s:toMin(st), e:toMin(en),
               place:(document.querySelector('input[name="qPlace"]:checked') || {}).value || "online",
-              ba:$("#qBa").checked, marche:$("#qMarche").checked };
+              bef:$("#qBef").checked, aft:$("#qAft").checked, marche:$("#qMarche").checked };
   const list = byDay()[d] || [];
   const hits = list.filter(x => x.kind !== "team").map(o => ({ o:o, why:clashOf(t, o) })).filter(x => x.why);
   const team = list.filter(x => x.kind === "team");
@@ -673,7 +682,8 @@ function openForm(cid){
   $("#fMemo").value = it ? it.memo : "";
   $("#fCat").value = it && it.cat ? it.cat : "support";
   $("#fPlace").value = it ? (it.place || "") : "online";
-  $("#fBa").checked = it ? !!it.ba : false;
+  $("#fBef").checked = it ? (it.bef !== undefined ? !!it.bef : !!it.ba) : false;
+  $("#fAft").checked = it ? (it.aft !== undefined ? !!it.aft : !!it.ba) : false;
   $("#fOk").value = it ? (it.okFlag || "") : "";
   $("#fOkHint").textContent = "";
   $("#fMsg").textContent = "";
@@ -693,7 +703,7 @@ function autoOk(){
 /* 入れようとしている予定に、かぶる予定があるかを先にお知らせします */
 function formItem(){
   return { kind:fKind, title:$("#fText").value.trim(), s:toMin($("#fStart").value), e:toMin($("#fEnd").value),
-           place:$("#fPlace").value, ba:$("#fBa").checked, okFlag: fKind === "official" ? $("#fOk").value : "",
+           place:$("#fPlace").value, bef:$("#fBef").checked, aft:$("#fAft").checked, okFlag: fKind === "official" ? $("#fOk").value : "",
            marche: fKind === "team" && isMarche($("#fText").value) };
 }
 function checkWarn(){
@@ -721,7 +731,7 @@ function checkWarn(){
     go.classList.remove("warnbtn");
   }
 }
-["#fDate","#fStart","#fEnd","#fPlace","#fBa","#fOk"].forEach(s => { const el = $(s); el.addEventListener("change", checkWarn); el.addEventListener("input", checkWarn); });
+["#fDate","#fStart","#fEnd","#fPlace","#fBef","#fAft","#fOk"].forEach(s => { const el = $(s); el.addEventListener("change", checkWarn); el.addEventListener("input", checkWarn); });
 $("#fText").addEventListener("input", () => { autoOk(); checkWarn(); });
 $("#fOk").addEventListener("change", () => { okTouched = true; $("#fOkHint").textContent = ""; });
 
@@ -739,7 +749,7 @@ async function saveForm(){
   const p = { action:"calSave", kind:fKind, date:date.replace(/-/g, "/"), endDate:endDate.replace(/-/g, "/"),
               start:$("#fStart").value, end:$("#fEnd").value,
               title:$("#fText").value.trim(), memo:$("#fMemo").value, cat:fKind === "team" ? $("#fCat").value : "",
-              place:$("#fPlace").value, ba:$("#fBa").checked ? "1" : "0", okFlag: fKind === "official" ? $("#fOk").value : "" };
+              place:$("#fPlace").value, bef:$("#fBef").checked ? "1" : "0", aft:$("#fAft").checked ? "1" : "0", okFlag: fKind === "official" ? $("#fOk").value : "" };
   if(editing) p.cid = editing.cid;
   $("#fGo").disabled = true; $("#fMsg").textContent = "保存しています…";
   try{
@@ -826,7 +836,7 @@ function readPaste(){
   const have = (data.items || []).filter(x => x.kind === "official");
   pvRows = got.map(x => {
     const dup = have.some(h => h.date === x.date && (h.start || "") === x.start && normKey(h.title) === normKey(x.title));
-    return Object.assign(x, { use: !dup, dup: dup, place:"online", ba:false, okFlag: guessOk(x.title) });
+    return Object.assign(x, { use: !dup, dup: dup, place:"online", bef:false, aft:false, okFlag: guessOk(x.title) });
   });
   $("#pvMsg").textContent = "";
   drawPaste();
@@ -834,7 +844,7 @@ function readPaste(){
 function drawPaste(){
   const opt = (v, cur, t) => '<option value="' + v + '"' + (v === cur ? " selected" : "") + '>' + t + '</option>';
   $("#pvList").innerHTML = '<p class="hint">' + pvRows.length + '件 読みとりました。場所・ビフォー・アフター・かぶってOKを確かめて、入れる予定にチェックしてください。</p>' +
-    '<div class="pvwrap"><table class="pv"><tr><th>入れる</th><th>日付</th><th>おわりの日</th><th>はじまり</th><th>おわり</th><th>名前</th><th>場所</th><th>ビフォー・アフター</th><th>かぶってOK</th></tr>' +
+    '<div class="pvwrap"><table class="pv"><tr><th>入れる</th><th>日付</th><th>おわりの日</th><th>はじまり</th><th>おわり</th><th>名前</th><th>場所</th><th>ビフォー</th><th>アフター</th><th>かぶってOK</th></tr>' +
     pvRows.map((x, i) => '<tr class="' + (x.use ? "" : "skip") + '">' +
       '<td><input type="checkbox" ' + (x.use ? "checked" : "") + ' onchange="pvSet(' + i + ',\'use\',this.checked)">' + (x.dup ? '<div class="dup">すでにあります</div>' : "") + '</td>' +
       '<td><input class="dt" value="' + esc(x.date) + '" onchange="pvSet(' + i + ',\'date\',this.value)"></td>' +
@@ -843,7 +853,8 @@ function drawPaste(){
       '<td><input class="tm" value="' + esc(x.end) + '" placeholder="なし" onchange="pvSet(' + i + ',\'end\',this.value)"></td>' +
       '<td><input class="ti" value="' + esc(x.title) + '" onchange="pvSet(' + i + ',\'title\',this.value)"></td>' +
       '<td><select onchange="pvSet(' + i + ',\'place\',this.value)">' + opt("online", x.place, "オンライン") + opt("real", x.place, "リアル") + opt("", x.place, "分からない") + '</select></td>' +
-      '<td style="text-align:center;"><input type="checkbox" ' + (x.ba ? "checked" : "") + ' onchange="pvSet(' + i + ',\'ba\',this.checked)"></td>' +
+      '<td style="text-align:center;"><input type="checkbox" ' + (x.bef ? "checked" : "") + ' onchange="pvSet(' + i + ',\'bef\',this.checked)"></td>' +
+      '<td style="text-align:center;"><input type="checkbox" ' + (x.aft ? "checked" : "") + ' onchange="pvSet(' + i + ',\'aft\',this.checked)"></td>' +
       '<td><select onchange="pvSet(' + i + ',\'okFlag\',this.value)">' + opt("", x.okFlag, "かぶってはいけない") + opt("ok", x.okFlag, "かぶってOK") + opt("marche", x.okFlag, "マルシェだけOK") + '</select></td>' +
       '</tr>').join("") + '</table></div>';
   const n = pvRows.filter(x => x.use).length;
@@ -867,7 +878,7 @@ async function savePaste(){
   $("#pvGo").disabled = true; $("#pvMsg").textContent = "入れています…";
   try{
     const items = list.map(x => ({ date:x.date, endDate:x.endDate, start:x.start, end:x.end, title:x.title,
-                                   place:x.place, ba: x.ba ? "1" : "0", okFlag:x.okFlag }));
+                                   place:x.place, bef: x.bef ? "1" : "0", aft: x.aft ? "1" : "0", okFlag:x.okFlag }));
     const j = await post({ action:"calSaveMany", items: JSON.stringify(items) });
     if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
     const m = take(j, false);
