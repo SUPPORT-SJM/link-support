@@ -236,6 +236,14 @@
       });
       if (buf && shown) html += buf;
 
+      /* 見やすさの設定（文字の大きさ・字体）。ログアウトのひとつ上 */
+      if (window.skyView) {
+        html += '<div class="sec">設定</div>'
+              + '<a class="it" href="#" id="skymView"><span class="ic">👓</span>'
+              + '<span class="tx">見やすさの設定<span class="sb">文字の大きさ・字体（いま：' + window.skyView.label() + '）</span></span>'
+              + '<span class="ar">›</span></a>';
+      }
+
       if (m) {
         html += '<button class="out" id="skymOut">ログアウト</button>';
       } else {
@@ -243,6 +251,13 @@
               + 'justify-content:center;margin-top:12px;font-weight:700;">🌱 ログインする</a>';
       }
       sheet.innerHTML = html;
+
+      var vw = document.getElementById("skymView");
+      if (vw) vw.addEventListener("click", function (e) {
+        e.preventDefault();
+        toggle();                 /* メニューをとじてから */
+        window.skyView.open();    /* 見やすさの設定をひらきます */
+      });
 
       var out = document.getElementById("skymOut");
       if (out) out.addEventListener("click", function () {

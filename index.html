@@ -122,6 +122,9 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body)
 /* 管理者モードの丸（管理者の方だけ）：オフ＝灰色／オン＝紺／試し中＝オレンジ */
 .tut.dbg .tb{border-color:#8A84A0;}
 .tut.dbg{width:104px;}
+.tut.view{width:104px;}
+.tut.view .tb{border-color:#5E8FD8;}
+.tut.view .tt{color:#3F6DB5;white-space:pre;text-align:center;line-height:1.25;}
 .tut.dbg .tt{color:#6E6890;white-space:pre;text-align:center;line-height:1.25;}
 .tut.dbg.on .tb{border-color:#3C3557;background:#EDEAF7;}
 .tut.dbg.on .tt{color:#3C3557;}
@@ -848,6 +851,7 @@ function frame(t){
   placeTut(t);
   placeMem(t);
   placeDbg(t);
+  placeView(t);
   leaving = leaving.filter(n=>{
     if(t - n.dying > 420){ n.el.remove(); return false; }
     return true;
@@ -1118,6 +1122,73 @@ function placeDbg(t){
   dbgF.hy = dbgF.hy0;
   stepFloater(dbgF, t, sch.s, sch.o, 52, 16, .4);   /* となりの丸に近いので、ふわふわは小さめ */
 }
+
+/* ---- ログイン中のトップ：「見やすさ」の丸を、アカウントの丸のまん中から見て「会員情報」と左右反対の場所（同じ高さ）に置きます ---- */
+let viewF = null, viewKey = "";
+function viewName(){ return "見やすさ\n（" + (window.skyView ? window.skyView.label() : "ふつう") + "）"; }
+function viewHome(){
+  const acc = nodes.find(n=>n.it === TREE[0]) || { hx: W/2, hy: H/2 };
+  let tx = W - 60, ty = memF && memF.hy ? memF.hy : acc.hy - 200;
+  if(memF && memF.hx) tx = acc.hx + (acc.hx - memF.hx);
+  const hs = nodes.filter(n=>!n.it.moon && n.hx != null);
+  const fine = [];
+  hs.forEach(n=>{
+    const lw = Math.max(60, n.lw || 0);
+    fine.push([n.hx - 40, n.hy - 44, n.hx + 40, n.hy + 32]);
+    fine.push([n.hx - lw/2 - 6, n.hy + 30, n.hx + lw/2 + 6, n.hy + 66]);
+  });
+  [tutF, memF].forEach(f=>{ if(f && f.hx) fine.push([f.hx - 46, f.hy - 22, f.hx + 46, f.hy + 40]); });
+  /* 右上の「メニュー」のボタン（画面に固定）にもかからないように */
+  const sr = stage.getBoundingClientRect();
+  fine.push([window.innerWidth - 80 - sr.left, -999, 9999, 92 - sr.top]);
+  const inOrbit = (x, y)=>{ const dx = (x - acc.hx)/(ORBIT.rx + 50), dy = (y - acc.hy)/(ORBIT.ry + 50); return dx*dx + dy*dy < 1; };
+  const area = (x, y)=>{
+    const b = [x - 44, y - 18, x + 44, y + 44];   /* 小さな丸と、2行の名前 */
+    let ar = 0;
+    fine.forEach(r=>{
+      const ox = Math.min(b[2], r[2]) - Math.max(b[0], r[0]);
+      const oy = Math.min(b[3], r[3]) - Math.max(b[1], r[1]);
+      if(ox > 0 && oy > 0) ar += ox*oy;
+    });
+    return ar + (inOrbit(x, y) ? 5000 : 0);
+  };
+  /* まず同じ高さのまま、左右だけでさがします。だめなときだけ上下にもずらします */
+  const maxX = Math.min(W - 46, window.innerWidth - sr.left - 50);
+  let bx = null;
+  for(let x = W*.5; x <= maxX; x += 2){ if(area(x, ty) === 0 && (bx == null || Math.abs(x - tx) < Math.abs(bx - tx))) bx = x; }
+  if(bx != null) return [bx, ty];
+  let best = null, bestS = Infinity;
+  for(let x = W*.5; x <= maxX; x += 2){
+    for(let y = Math.max(24, acc.hy - 300); y <= acc.hy + 40; y += 4){
+      const sc = area(x, y)*100 + Math.hypot(x - tx, y - ty);
+      if(sc < bestS){ bestS = sc; best = [x, y]; }
+    }
+  }
+  return best;
+}
+function placeView(t){
+  const top = path.length === 0 && me && window.skyView;
+  const sch = top ? nodes.find(n=>n.it.g === "apply" && n.it.kids) : null;
+  if(!sch || !memF || memF.el.style.display === "none"){ if(viewF) viewF.el.style.display = "none"; viewKey = ""; return; }
+  if(!viewF){
+    viewF = makeFloater("tut view", 5.3, { ic:"👓", nm:viewName(), href:"#view", aria:"見やすさ（文字の大きさ・字体）を変える", onTap: ()=>window.skyView.open() });
+    stage.insertBefore(viewF.el, stage.firstChild);
+  }
+  viewF.el.style.display = "";
+  const key = W + "|" + H + "|" + nodes.map(n=>Math.round(n.hx||0) + "," + Math.round(n.hy||0)).join(";") + "|" + Math.round(memF.hx || 0) + "," + Math.round(memF.hy || 0);
+  if(key !== viewKey){
+    nodes.forEach(n=>{ if(n.lw == null){ const nm = n.el.querySelector(".nm"); n.lw = nm ? nm.offsetWidth : 0; } });
+    const h = viewHome(); if(h){ viewF.hx = h[0]; viewF.hy = h[1]; } viewKey = key;
+  }
+  stepFloater(viewF, t, sch.s, sch.o, 52, 16, .6);
+}
+/* 見やすさを変えたら：丸の名前を書きかえて、文字の幅が変わったぶん、並びを合わせなおします */
+window.addEventListener("skyview", ()=>{
+  if(viewF){ const tt = viewF.el.querySelector(".tt"); if(tt) tt.textContent = viewName(); }
+  nodes.forEach(n=>{ n.lw = null; });
+  tutKey = memKey = dbgKey = viewKey = "";
+  window.dispatchEvent(new Event("resize"));
+});
 
 /* 会員番号は、LINKの会員番号の形（8けた）で見せます（名簿に頭の0がなくても同じ番号です） */
 function memIdText(id){

@@ -9,7 +9,7 @@
 ================================================================ */
 
 /* ---------------- ① バージョン ---------------- */
-window.SKY_VERSION = "v1.200";
+window.SKY_VERSION = "v1.201";
 window.SKY_VERSION_DATE = "2026/10/28";
 
 /* ---------------- ② GASのURL ----------------
@@ -534,4 +534,219 @@ window.skyCelebrate = (function () {
   }
   show.keys = Object.keys(C); show.label = function (k) { return LABEL[k] || k; };
   return show;
+})();
+
+/* ---------------- ⑩ 見やすさの設定（文字の大きさ・字体） ----------------
+   ・文字の大きさ：小さく／ふつう（今の大きさ）／大きく／とても大きく
+   ・字体：いつもの字体／UDゴシック（BIZ UDPゴシック。Googleの無料フォントから読みこみます）
+   ・この端末に覚えておいて、全ページに効きます（ログアウトしても消えません）
+   ・変えるときは注意書きを出して、「OK」を押したら反映します
+   ・開き方：window.skyView.open()（トップページの「見やすさ」の丸と、メニューの「見やすさの設定」から） */
+window.skyView = (function () {
+  var KEY = "sky_view";
+  var SIZES = [
+    { k: "s",  nm: "小さく",       short: "小",   f: 0.9 },
+    { k: "m",  nm: "ふつう",       short: "ふつう", f: 1 },
+    { k: "l",  nm: "大きく",       short: "大",   f: 1.15 },
+    { k: "xl", nm: "とても大きく", short: "特大", f: 1.3 }
+  ];
+  var FONTS = [
+    { k: "norm", nm: "いつもの字体" },
+    { k: "ud",   nm: "UDゴシック", sub: "だれにでも読みやすい字体" }
+  ];
+  function get() {
+    var v = null;
+    try { v = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) {}
+    v = v || {};
+    if (!SIZES.some(function (s) { return s.k === v.size; })) v.size = "m";
+    if (!FONTS.some(function (s) { return s.k === v.font; })) v.font = "norm";
+    return v;
+  }
+  function save(v) { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch (e) {} }
+  function factor(v) { for (var i = 0; i < SIZES.length; i++) if (SIZES[i].k === v.size) return SIZES[i].f; return 1; }
+  function label(v) {
+    v = v || get();
+    var s = SIZES.filter(function (x) { return x.k === v.size; })[0];
+    return s.short + (v.font === "ud" ? "・UD" : "");
+  }
+
+  /* --- 文字の大きさ：ページの中の「〇〇px」の文字の大きさを、決めた割合でかけ算します（元の大きさは覚えておきます） --- */
+  var F = 1, watching = false;
+  function scaleRules(rules) {
+    if (!rules) return;
+    for (var i = 0; i < rules.length; i++) {
+      var r = rules[i];
+      if (r.cssRules && !r.style) { scaleRules(r.cssRules); continue; }   /* @media など */
+      if (!r.style) continue;
+      if (r.__skyFs === undefined) {
+        var fs = r.style.getPropertyValue("font-size");
+        r.__skyFs = /^\s*[\d.]+px\s*$/.test(fs) ? parseFloat(fs) : null;
+        r.__skyPr = r.style.getPropertyPriority("font-size");
+      }
+      if (r.__skyFs != null) r.style.setProperty("font-size", (r.__skyFs * F).toFixed(2) + "px", r.__skyPr);
+    }
+  }
+  function scaleSheet(sh) {
+    var rules = null;
+    try { rules = sh.cssRules; } catch (e) { return; }   /* ほかのサイトの読みこみ（Googleの字体など）は、さわれないので飛ばします */
+    scaleRules(rules);
+  }
+  function scaleEl(el) {
+    if (!el || el.nodeType !== 1 || !el.style) return;
+    if (el.dataset.skyFs === undefined) {
+      var fs = el.style.getPropertyValue("font-size");
+      if (!/^\s*[\d.]+px\s*$/.test(fs)) return;
+      el.dataset.skyFs = parseFloat(fs);
+    }
+    el.style.setProperty("font-size", (parseFloat(el.dataset.skyFs) * F).toFixed(2) + "px", el.style.getPropertyPriority("font-size"));
+  }
+  function scaleTree(root) {
+    if (!root || root.nodeType !== 1) return;
+    if (root.tagName === "STYLE" || root.tagName === "LINK") {
+      if (root.sheet) scaleSheet(root.sheet);
+      if (root.tagName === "LINK") root.addEventListener("load", function () { if (root.sheet) scaleSheet(root.sheet); });
+      return;
+    }
+    if (root.getAttribute("style")) scaleEl(root);
+    var list = root.querySelectorAll ? root.querySelectorAll('[style*="font-size"]') : [];
+    for (var i = 0; i < list.length; i++) scaleEl(list[i]);
+    var sts = root.querySelectorAll ? root.querySelectorAll("style") : [];
+    for (var j = 0; j < sts.length; j++) if (sts[j].sheet) scaleSheet(sts[j].sheet);
+  }
+  function scaleAll() {
+    for (var i = 0; i < document.styleSheets.length; i++) scaleSheet(document.styleSheets[i]);
+    if (document.body) scaleTree(document.body);
+  }
+  function watch() {
+    if (watching || !window.MutationObserver) return;
+    watching = true;
+    new MutationObserver(function (ms) {
+      if (F === 1 && !anyScaled) return;
+      ms.forEach(function (m) { for (var i = 0; i < m.addedNodes.length; i++) scaleTree(m.addedNodes[i]); });
+    }).observe(document.documentElement, { childList: true, subtree: true });
+  }
+  var anyScaled = false;
+
+  /* --- 字体 --- */
+  function setFont(v) {
+    var on = v.font === "ud";
+    var ln = document.getElementById("skyUdFont"), st = document.getElementById("skyUdCss");
+    if (on && !ln) {
+      ln = document.createElement("link"); ln.id = "skyUdFont"; ln.rel = "stylesheet";
+      ln.href = "https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&display=swap";
+      document.head.appendChild(ln);
+    }
+    if (on && !st) {
+      st = document.createElement("style"); st.id = "skyUdCss";
+      st.textContent = 'body,body *:not(.verTag){font-family:"BIZ UDPGothic","Hiragino Sans","Noto Sans JP",sans-serif !important;}';
+      document.head.appendChild(st);
+    }
+    if (!on) { if (ln) ln.remove(); if (st) st.remove(); }
+  }
+
+  function apply(v) {
+    v = v || get();
+    F = factor(v);
+    document.documentElement.setAttribute("data-sky-size", v.size);
+    document.documentElement.setAttribute("data-sky-font", v.font);
+    if (F !== 1 || anyScaled) { anyScaled = true; scaleAll(); watch(); }
+    setFont(v);
+    try { window.dispatchEvent(new CustomEvent("skyview", { detail: v })); } catch (e) {}
+  }
+
+  /* --- 設定の画面 --- */
+  function css() {
+    if (document.getElementById("skyViewCss")) return;
+    var st = document.createElement("style"); st.id = "skyViewCss";
+    st.textContent =
+      '#skyView{position:fixed;inset:0;z-index:9500;background:rgba(30,26,50,.5);display:flex;align-items:center;justify-content:center;padding:16px;}'
+      + '#skyView .vc{background:#fff;border-radius:22px;width:100%;max-width:380px;max-height:90vh;overflow-y:auto;padding:20px 18px 16px;'
+      + 'box-shadow:0 16px 50px rgba(0,0,0,.3);color:#2A2438;font-family:"Zen Kaku Gothic New","Noto Sans JP",sans-serif;}'
+      + '#skyView h3{margin:0 0 4px;text-align:center;font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:19px;color:#4A3F7A;}'
+      + '#skyView .ld{margin:0 0 14px;text-align:center;font-size:12.5px;color:#7A7390;}'
+      + '#skyView .sec{font-size:13px;font-weight:700;color:#6E5FB5;margin:12px 0 7px;}'
+      + '#skyView .ops{display:grid;grid-template-columns:1fr 1fr;gap:8px;}'
+      + '#skyView .op{border:2px solid #E1DCF2;background:#fff;border-radius:14px;padding:11px 6px;font-size:14px;font-weight:700;color:#4A3F7A;cursor:pointer;font-family:inherit;line-height:1.4;}'
+      + '#skyView .op small{display:block;font-size:10.5px;font-weight:400;color:#8A84A0;}'
+      + '#skyView .op.on{border-color:#6E5FB5;background:#EFEBFA;}'
+      + '#skyView .op.on::before{content:"✓ ";}'
+      + '#skyView .op.ud{font-family:"BIZ UDPGothic",sans-serif;}'
+      + '#skyView .cl{display:block;width:100%;margin-top:16px;padding:12px;border:none;border-radius:14px;background:#F0EDF9;color:#4A3F7A;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;}'
+      + '#skyView .cf{background:#FFF8E1;border:2px solid #F5C452;border-radius:16px;padding:14px;margin-top:14px;}'
+      + '#skyView .cf p{margin:0 0 12px;font-size:14px;line-height:1.7;}'
+      + '#skyView .cf .bt{display:flex;gap:8px;}'
+      + '#skyView .cf button{flex:1;padding:11px;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;}'
+      + '#skyView .cf .ok{background:#6E5FB5;color:#fff;}'
+      + '#skyView .cf .ng{background:#fff;color:#7A7390;border:1.5px solid #D9D3EA;}';
+    document.head.appendChild(st);
+  }
+  function open() {
+    css();
+    var old = document.getElementById("skyView"); if (old) old.remove();
+    var ov = document.createElement("div"); ov.id = "skyView";
+    ov.setAttribute("role", "dialog"); ov.setAttribute("aria-label", "見やすさの設定");
+    document.body.appendChild(ov);
+    /* UDゴシックのボタンは、UDゴシックの字体で見せます */
+    var pre = document.getElementById("skyUdFontPre");
+    if (!pre && !document.getElementById("skyUdFont")) {
+      pre = document.createElement("link"); pre.id = "skyUdFontPre"; pre.rel = "stylesheet";
+      pre.href = "https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&display=swap";
+      document.head.appendChild(pre);
+    }
+    var pend = null;
+    function draw() {
+      var v = get();
+      var h = '<div class="vc"><h3>👓 見やすさの設定</h3><p class="ld">この端末で見るときの、文字の大きさと字体を変えられます</p>'
+        + '<div class="sec">文字の大きさ</div><div class="ops">';
+      SIZES.forEach(function (s) {
+        h += '<button type="button" class="op' + (v.size === s.k ? " on" : "") + '" data-size="' + s.k + '">' + s.nm
+          + (s.k === "m" ? '<small>いまの大きさ</small>' : "") + '</button>';
+      });
+      h += '</div><div class="sec">字体</div><div class="ops">';
+      FONTS.forEach(function (s) {
+        h += '<button type="button" class="op' + (s.k === "ud" ? " ud" : "") + (v.font === s.k ? " on" : "") + '" data-font="' + s.k + '">' + s.nm
+          + (s.sub ? '<small>' + s.sub + '</small>' : "") + '</button>';
+      });
+      h += '</div>';
+      if (pend) {
+        var msg = pend.font
+          ? "字体を変えると見やすさが変わりますが、レイアウトが少し崩れる可能性があります。ご了承ください。"
+          : (pend.size === "xl"
+              ? "「とても大きく」にすると、レイアウトがずれる可能性があります。ご了承ください。"
+              : "文字の大きさを変えると見やすさが変わりますが、レイアウトが少し崩れる可能性があります。ご了承ください。");
+        h += '<div class="cf" role="alertdialog"><p>⚠️ ' + msg + '</p><div class="bt">'
+          + '<button type="button" class="ng" data-act="ng">やめる</button><button type="button" class="ok" data-act="ok">OK</button></div></div>';
+      }
+      h += '<button type="button" class="cl" data-act="close">とじる</button></div>';
+      ov.innerHTML = h;
+      if (pend) { var cf = ov.querySelector(".cf"); if (cf && cf.scrollIntoView) cf.scrollIntoView({ block: "nearest" }); }
+    }
+    ov.addEventListener("click", function (e) {
+      if (e.target === ov) { ov.remove(); return; }
+      var b = e.target.closest ? e.target.closest("button") : null; if (!b) return;
+      var v = get();
+      if (b.dataset.size) { pend = b.dataset.size === v.size ? null : { size: b.dataset.size }; draw(); return; }
+      if (b.dataset.font) { pend = b.dataset.font === v.font ? null : { font: b.dataset.font }; draw(); return; }
+      if (b.dataset.act === "ng") { pend = null; draw(); return; }
+      if (b.dataset.act === "ok" && pend) {
+        if (pend.size) v.size = pend.size;
+        if (pend.font) v.font = pend.font;
+        pend = null; save(v); apply(v); draw(); return;
+      }
+      if (b.dataset.act === "close") ov.remove();
+    });
+    draw();
+  }
+
+  /* ページを開いたときに、覚えている設定を反映します */
+  (function boot() {
+    var v = get();
+    if (v.size === "m" && v.font === "norm") { watch(); return; }   /* ふつうのままなら、何もしません */
+    setFont(v);
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { apply(v); });
+    else apply(v);
+    window.addEventListener("load", function () { if (factor(get()) !== 1) scaleAll(); });
+  })();
+
+  return { get: get, open: open, label: label, apply: apply };
 })();
