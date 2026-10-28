@@ -95,8 +95,8 @@
   <div class="wrap">
 
     <div class="top-cta">
-      <p>いま開かれる予定を見て、<br>そのままお申し込みいただけます。</p>
-      <a href="./events.html">📅 これからの予定を見る</a>
+      <p>サポート会・交流会は、それぞれの<b>申し込みのスプレッドシート</b>からお申し込みいただけます。<br>はじめての方は、まず書き方をご覧ください。</p>
+      <a href="./sheet-howto.html">📄 申し込みのしかたを見る</a>
     </div>
 
     <!-- ① ユーザーサポート会 -->
@@ -119,7 +119,7 @@
       <p>担当の方が日替わりで開いているので、<b>ご都合のよい日を選べます</b>。
         分からないことは、その場で聞いてしまいましょう。</p>
 
-      <a class="go" href="./events.html">🎧 開催日を見る・申し込む</a>
+      <a class="go" data-link="support" href="#" target="_blank" rel="noopener">🎧 開催日を見る・申し込む</a>
     </div>
 
     <!-- ② チーム交流会（オンライン） -->
@@ -137,7 +137,7 @@
         同じチームというだけで、相談しやすくなるものです。
       </div>
 
-      <a class="go" href="./events.html">💻 開催日を見る・申し込む</a>
+      <a class="go" data-link="kouryu-on" href="#" target="_blank" rel="noopener">💻 開催日を見る・申し込む</a>
     </div>
 
     <!-- ③ チーム交流会（リアル） -->
@@ -156,7 +156,7 @@
         ご都合が合うときに、ぜひ足を運んでみてください。
       </div>
 
-      <a class="go" href="./events.html">🤝 開催日を見る・申し込む</a>
+      <a class="go" data-link="kouryu-re" href="#" target="_blank" rel="noopener">🤝 開催日を見る・申し込む</a>
     </div>
 
     <!-- ④ 動画視聴会 -->
@@ -173,15 +173,7 @@
         <b>「見よう見ようと思っていた」を終わらせる場です</b>
       </div>
 
-      <a class="go" href="./events.html">🎬 開催日を見る・申し込む</a>
-    </div>
-
-    <div class="note">
-      <b>お申し込みについて</b><br>
-      ログインされていれば、お名前や系列はご登録の内容が入ります。
-      お選びいただくのは「はじめてかどうか」と「パソコン／スマホ」だけです。<br><br>
-      お申し込みのあとは、<b>Googleカレンダーやスマホのカレンダーに入れる</b>こともできます。<br><br>
-      分からない点は、<b>初期サポートグループLINE</b>でご質問ください❤️
+      <a class="go" data-link="douga" href="#" target="_blank" rel="noopener">🎬 開催日を見る・申し込む</a>
     </div>
 
     <a class="back" href="../index.html">← ホームに戻る</a>
@@ -189,6 +181,26 @@
   </div>
 </main>
 
+<script>
+/* 「開催日を見る・申し込む」は、それぞれの申し込みのスプレッドシートを開きます。
+   リンク先は、トップページと同じもの（管理画面の「🔗 リンク先の変更」で変えたものがあれば、そちら）を使います */
+(function(){
+  const SHEET = id => "https://docs.google.com/spreadsheets/d/" + id + "/edit";
+  const DEF = {
+    "support":   SHEET("1yZ5JO8nX4LlzVM2JMnk8pcrZfOZ6hEbwLes_zTc44Hg"),
+    "kouryu-on": SHEET("1MM-T4y721505YCHRW_D-7c4MycaZB5UjN7loHwIM0GM"),
+    "kouryu-re": SHEET("13qMv4dlEvHODH1bQrUlI1HSQSBgZW0as4y3Om7RORFs"),
+    "douga":     SHEET("1SpCvnlYs2D_mVlO6I5h9yjpRBR2cX7bw-tE-tAeL430")
+  };
+  let L = null;
+  try{ const c = JSON.parse(localStorage.getItem("skyarc_links") || "null"); if(c && typeof c === "object") L = c; }catch(e){}
+  document.querySelectorAll("a[data-link]").forEach(a=>{
+    const k = a.dataset.link;
+    const u = (L && Object.prototype.hasOwnProperty.call(L, k) && L[k]) ? String(L[k]) : DEF[k];
+    if(u) a.href = u;
+  });
+})();
+</script>
 <script src="../loading.js"></script>
 <script src="../login.js"></script>
 <script src="../menu.js"></script>
