@@ -200,6 +200,16 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body)
   66%{box-shadow:0 0 22px 7px rgba(244,154,193,.5),var(--shadow);}
 }
 
+/* 申し込みの前の説明 */
+.sheet .card.note h3{margin:0 30px 12px;}
+.nbody p{margin:0 0 10px;font-size:14px;line-height:1.85;color:var(--ink);}
+.nbody ul{margin:-4px 0 10px;padding-left:1.3em;font-size:14px;line-height:1.85;}
+.nbody .koui{background:#FFF6E5;border-radius:12px;padding:10px 12px;}
+.nbody .nm1{background:#EEF4FF;border-radius:12px;padding:10px 12px;}
+.nbody a.nlink{display:inline-block;color:#1565C0;font-weight:700;text-decoration:underline;}
+.ngo{display:block;margin-top:14px;padding:15px;border-radius:14px;text-align:center;text-decoration:none;color:#fff;
+  background:linear-gradient(135deg,#FF8A50,#F2994A);font-family:var(--f-head);font-weight:900;font-size:16px;box-shadow:0 6px 16px rgba(242,153,74,.35);}
+
 /* 登録の画面 */
 .sheet{position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:16px;
   background:rgba(30,22,52,.35);backdrop-filter:blur(2px);}
@@ -294,6 +304,14 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body)
     <button type="button" class="mclose" id="mClose2">とじる</button>
   </div>
 </div>
+<div class="sheet" id="noteSheet" style="z-index:8100;" hidden>
+  <div class="card note" role="dialog" aria-labelledby="noteTitle">
+    <button type="button" class="close" id="noteClose" aria-label="とじる">×</button>
+    <h3 id="noteTitle"></h3>
+    <div class="nbody" id="noteBody"></div>
+    <a class="ngo" id="noteGo" href="#" target="_blank" rel="noopener"></a>
+  </div>
+</div>
 <div class="sheet" id="sheet" hidden>
   <div class="card" role="dialog" aria-labelledby="jTitle">
     <button type="button" class="close" id="jClose" aria-label="とじる">×</button>
@@ -373,6 +391,16 @@ const LINK_DEF = {
   "apoheya":   SHEET("1HXtpJD21K2vomACuUuT32ZTvGFBS00r6armdCyQgIs4"),
   "c-gcon":    "https://docs.google.com/spreadsheets/d/1MlH5NfYR210zQZh8rA77muqbCYk0qGne8WiCl1FRjtA/edit?gid=1657229561#gid=1657229561"   /* グルコン予定（クリエ以上向け） */
 };
+/* 申し込みのシートを開く前に出す説明（同じ会員の方がご好意で開いている会であること・お名前のことなど） */
+const NOTES = {
+  "support": { title:"🧡 ユーザーサポート会", btn:"🧡 ユーザーサポート会に申し込む", html:"<p class=\"koui\">🤝 同じLINK会員の方が、<b>ご好意（貢献の気持ち）</b>で開いてくださっている会です。会社の方が開いているものではありません。</p><p>はじめての方が、<b>LINKの最低限の使い方</b>が分かる会です。</p><p>ご参加のときは、次のものが<b>すぐ分かる・すぐ開ける</b>状態にしておいてください。</p><ul><li>会員情報（ご自分の会員番号）</li><li>LINKのコンテンツサービスにログインするときのパスワード</li><li>LINKポータルが開ける状態</li></ul><p class=\"nm1\">📝 お知らせが届きやすくなるように、<b>申し込みのお名前は、オープンチャットのお名前と同じ</b>にしてください。</p>" },
+  "douga": { title:"🎬 動画視聴会", btn:"🎬 動画視聴会に申し込む", html:"<p class=\"koui\">🤝 同じLINK会員の方が、<b>ご好意（貢献の気持ち）</b>で開いてくださっている動画視聴会です。会社の方が開いているものではありません。</p><p>大切な動画を、<b>みんなで一緒に見る会</b>です。</p><p class=\"nm1\">📝 お知らせが届きやすくなるように、<b>申し込みのお名前は、オープンチャットのお名前と同じ</b>にしてください。</p>" },
+  "kouryu-on": { title:"💻 オンライン交流会", btn:"💻 オンライン交流会に申し込む", html:"<p class=\"koui\">🤝 同じLINK会員の方が、<b>ご好意（貢献の気持ち）</b>で運営・主催してくださっている、チームの交流会です。会社の方が開いているものではありません。</p><p>オンラインで、<b>クラスメイトとも言えるチームの仲間</b>との絆を深めましょう。</p><p class=\"nm1\">📝 お知らせが届きやすくなるように、<b>申し込みのお名前は、チームのLINE・ユーザーサポート会・オープンチャットなどと同じお名前</b>にしてください。</p>" },
+  "kouryu-re": { title:"🍽 リアル交流会", btn:"🍽 リアル交流会に申し込む", html:"<p class=\"koui\">🤝 同じLINK会員の方が、<b>ご好意（貢献の気持ち）</b>で運営してくださっている、チームの交流会です。会社の方が開いているものではありません。</p><p>画面越しではなく、<b>実際に仲間たちと会える会</b>です。一度お会いしておくと、その後のやりとりがぐっと近くなります。</p><p class=\"nm1\">📝 お知らせが届きやすくなるように、<b>申し込みのお名前は、オープンチャットのお名前と同じ</b>にしてください。</p>" },
+  "btore": { title:"🏋️ Bトレ", btn:"🏋️ Bトレに申し込む", html:"<p class=\"koui\">🤝 同じLINK会員の方が、<b>ご好意（貢献の気持ち）</b>で開いてくださっている会です。会社の方が開いているものではありません。</p><p>おつなぎ役としての<b>「Bさん」のあり方</b>が学べます。全般的に<b>セールスの力も上がります</b>ので、ぜひ受講しましょう。</p><p>ご参加のときは：</p><ul><li>つながる<b>アドバイザーの方のプロフィール</b>を持った状態で来てください</li><li>なるべく、<b>説明会の日取りが決まっている</b>状態で来てください</li></ul><p class=\"nm1\">📝 お知らせが届きやすくなるように、<b>申し込みのお名前は、オープンチャットのお名前と同じ</b>にしてください。</p>" },
+  "apoheya": { title:"📞 アポ部屋", btn:"📞 アポ部屋に申し込む", html:"<p class=\"koui\">🤝 同じLINK会員の方が、<b>ご好意（貢献の気持ち）</b>で開いてくださっている会です。会社の方が開いているものではありません。</p><p>LINKを紹介する<b>アポイントのコツ</b>を教わったり、いろいろなパターンの<b>アポイントへの懸念を解消</b>したりできる会への申し込みになります。</p><p>実際に行動に移していく部分も多いので、<b>リストアップが終わっている状態</b>が望ましいです。</p><p><a class=\"nlink\" href=\"./first-support/listup.html\">📝 リストアップとは？（やり方を見る） ›</a></p><p class=\"nm1\">📝 お知らせが届きやすくなるように、<b>申し込みのお名前は、オープンチャットのお名前と同じ</b>にしてください。</p>" },
+  "douga-sup": { title:"🎬 動画視聴会（サポーター向け）", btn:"🎬 動画視聴会に申し込む", html:"<p class=\"koui\">🤝 同じLINK会員の方が、<b>ご好意（貢献の気持ち）</b>で開いてくださっている動画視聴会です。会社の方が開いているものではありません。</p><p>ここからは、<b>サポートする側としての感覚</b>も身につけていってください。</p><p>動画視聴会の担当の会員さんに、<b>あなたが新しく紹介したメンバーさんの動画視聴会</b>の依頼をかけることができます。</p><p>あなたがサポートできない時間帯を、ほかの会員さんが補ってくださいます。<b>感謝の気持ちを持って</b>依頼をかけましょう。</p><p class=\"nm1\">📝 お知らせが届きやすくなるように、<b>申し込みのお名前は、オープンチャットのお名前と同じ</b>にしてください。</p>" }
+};
 const LINKS_KEY = "skyarc_links";
 let LINKS = null;
 try{ const c = JSON.parse(localStorage.getItem(LINKS_KEY) || "null"); if(c && typeof c === "object") LINKS = c; }catch(e){}
@@ -394,19 +422,21 @@ const TREE = [
       text:"LINK公式・公認のイベントは、LINKのスケジュールサイトにまとまっています。こちらから日程を見て、お申し込みください。",
       btn:"🗓 スケジュールを見る", url:"https://link-event-x.com/"}},
     {ic:"☁️", nm:"チーム独自", g:"apply", kids:[
-      {ic:"🙋", nm:"メンバー\n向け", g:"member", kids:[
-        {ic:"🧡", nm:"ユーザー\nサポート", g:"member", link:"support"},
+      {ic:"🙋", nm:"メンバー\n向け", g:"member", noCrumb:true, kids:[
+        {ic:"🧡", nm:"ユーザー\nサポート会", g:"member", link:"support", note:"support"},
         {ic:"📚", nm:"LINKセミナー\n各種に参加する", g:"member", url:B+"first-support/link-seminar.html"},
-        {ic:"💻", nm:"オンライン\n交流会", g:"member", link:"kouryu-on"},
-        {ic:"🍽", nm:"リアル交流会", g:"member", link:"kouryu-re"},
+        {ic:"💻", nm:"オンライン\n交流会", g:"member", link:"kouryu-on", note:"kouryu-on"},
+        {ic:"🍽", nm:"リアル交流会", g:"member", link:"kouryu-re", note:"kouryu-re"},
         /* いまは仮：クリエ以上の方にだけ出ます */
         {ic:"📅", nm:"グルコン\n日程確認", g:"member", need:"crie", url:B+"first-support/gcon-dates.html"},
-        {ic:"🎬", nm:"動画視聴会", g:"member", link:"douga"}
+        {ic:"🎬", nm:"動画視聴会", g:"member", link:"douga", note:"douga"}
       ]},
       {ic:"🐣", nm:"サポーター\n向け", g:"sup", need:"sup", kids:[
-        {ic:"🏋️", nm:"Bトレ", g:"sup", link:"btore"},
-        {ic:"📞", nm:"アポ部屋", g:"sup", link:"apoheya"},
-        {ic:"🎬", nm:"動画視聴会", g:"sup", link:"douga"}
+        {ic:"🏋️", nm:"Bトレ", g:"sup", link:"btore", note:"btore"},
+        {ic:"📞", nm:"アポ部屋", g:"sup", link:"apoheya", note:"apoheya"},
+        {ic:"🎬", nm:"動画視聴会", g:"sup", link:"douga", note:"douga-sup"},
+        /* 部門のあるサポーターの方も、ここから予定のかぶりチェックを見られます（アドバンス以上・部門のあるクリエの方にも出ます） */
+        {ic:"🔎", nm:"予定の\nかぶりチェック", g:"sup", need:"cal", url:B+"first-support/calendar.html"}
       ]},
       {ic:"🌱", nm:"クリエ以上\n向け", g:"crie", need:"crie", kids:[
         {ic:"🌟", nm:"月初スペシャル\nミーティング", g:"crie", link:"c-monthly"},
@@ -417,14 +447,15 @@ const TREE = [
           {ic:"⚡", nm:"リンカー特訓", g:"crie", link:"c-tokkun-linker"}
         ]},
         {ic:"🤝", nm:"グルコン予定", g:"crie", link:"c-gcon"},
+        /* 予定のかぶりチェック：アドバンス以上と、部門に入っているクリエ・サポーターにだけ出ます */
+        {ic:"🔎", nm:"予定の\nかぶりチェック", g:"crie", need:"cal", url:B+"first-support/calendar.html"},
         {ic:"✨", nm:"その他", g:"crie", link:"c-sonota"},
+        /* カレンダー形式は、ただいま工事中（押すと、お知らせだけが出ます。いつか空き日程の吸い出しもここで） */
+        {ic:"🗓️", nm:"カレンダー\n形式でみる", g:"crie", info:{
+          text:"🚧 カレンダー形式でみる は、ただいま工事中です。できあがったら、またお知らせします。"}},
       ]}
-    ]},
-    /* 予定のかぶりチェック：アドバンス以上と、部門に入っているクリエ・サポーターにだけ出ます */
-    {ic:"🔎", nm:"予定の\nかぶりチェック", g:"apply", need:"cal", url:B+"first-support/calendar.html"},
-    /* 丸はどなたにも出ます。開けるのはアドバンス以上の方だけ（ほかの方には、お知らせが出ます） */
-    {ic:"🗓️", nm:"カレンダー\n形式でみる", g:"apply", url:B+"first-support/schedule.html", lock:"adv",
-      lockInfo:{text:"カレンダー形式は、まだ調整中です。お見せできるようになったら、またお知らせします。"}}
+    ]}
+    /* 各種スケジュール情報は「公式公認」と「チーム独自」だけ。予定のかぶりチェック・カレンダー形式は「クリエ以上向け」に移しました（v1.205） */
   ]},
   /* チーム作りは、サポーターになってから開きます */
   {ic:"🌈", nm:"チーム作り", g:"team", need:"sup", kids:[
@@ -634,7 +665,7 @@ function build(fromX, fromY){
   if(last) items = [BACK].concat(items);                      /* 中の段は、まん中が「もどる」 */
   const hs = homes(items.length, path.length === 0 ? true : items.length > 1, path.length === 0 && !!me);  /* いちばん上は、まん中に上下でアカウントと「新しい仲間へ」 */
   nodes = items.map((it,i)=> makeNode(it, i, hs[i], fromX, fromY));
-  document.getElementById("crumb").hidden = path.length === 0;
+  document.getElementById("crumb").hidden = path.length === 0 || !!(last && last.noCrumb);   /* 「メンバー向け」の段は、左上の名前を出しません */
   document.getElementById("crumbTitle").textContent = (last ? last.nm.replace(/\n/g,"") : "");
   const info = document.getElementById("info");
   info.hidden = !(last && last.info);
@@ -732,6 +763,13 @@ function tap(n, e){
     goTo(()=> path.push(shown), n.x, n.y, n);
     return;
   }
+  /* 説明のある丸：先に説明を出して、「〇〇に申し込む」でシートを開きます */
+  if(it.note && NOTES[it.note]){
+    const url = linkOf(it);
+    if(!url){ showToast("このリンク先は、まだ決まっていません"); return; }
+    openNote(NOTES[it.note], url);
+    return;
+  }
   if(it.url || it.link){
     const url = linkOf(it);
     if(!url){ showToast("このリンク先は、まだ決まっていません"); return; }
@@ -755,7 +793,7 @@ function tap(n, e){
     sp.className = "spread"; sp.hidden = false;
     requestAnimationFrame(()=>requestAnimationFrame(()=> sp.classList.add("go")));
     setTimeout(()=>{
-      if(!ext){ location.href = url; return; }
+      if(!ext){ saveReturn(); location.href = url; return; }
       sp.classList.add("out"); n.ts = 1;
       setTimeout(()=>{ sp.hidden = true; sp.className = "spread"; }, 380);
     }, reduce ? 0 : 650);
@@ -768,6 +806,49 @@ document.addEventListener("click", e=>{
     e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
   }
 }, true);
+/* ---------- 説明のポップアップ ---------- */
+function openNote(nt, url){
+  $("#noteTitle").textContent = nt.title;
+  $("#noteBody").innerHTML = nt.html;
+  const a = $("#noteGo");
+  a.textContent = nt.btn; a.href = url;
+  $("#noteSheet").hidden = false;
+}
+function closeNote(){ $("#noteSheet").hidden = true; }
+document.getElementById("noteClose").addEventListener("click", closeNote);
+document.getElementById("noteGo").addEventListener("click", ()=>setTimeout(closeNote, 300));   /* シートは別の画面で開きます */
+document.getElementById("noteSheet").addEventListener("click", e=>{ if(e.target.id === "noteSheet") closeNote(); });
+/* 説明の中のページへのリンク（リストアップとは など）：戻ってきたら、いまの段に戻れるように覚えておきます */
+document.getElementById("noteBody").addEventListener("click", e=>{ if(e.target.closest && e.target.closest("a.nlink")) saveReturn(); });
+
+/* ---------- 戻ってきたときは、開く直前の段に戻ります ----------
+   丸の段（例：各種スケジュール情報 › チーム独自 › メンバー向け）からページを開いたら、その段を覚えておき、
+   そのページの「ホームに戻る」などでトップに戻ってきたときに、同じ段を出します */
+const RET_KEY = "sky_return";
+function saveReturn(){
+  const idx = []; let list = TREE;
+  for(const p of path){
+    const i = list.indexOf(p);
+    if(i < 0) return;            /* お知らせだけの段などは、覚えません */
+    idx.push(i); list = p.kids || [];
+  }
+  try{ if(idx.length) sessionStorage.setItem(RET_KEY, JSON.stringify({ idx, t: Date.now() })); else sessionStorage.removeItem(RET_KEY); }catch(e){}
+}
+function restoreReturn(){
+  let r = null;
+  try{ r = JSON.parse(sessionStorage.getItem(RET_KEY) || "null"); sessionStorage.removeItem(RET_KEY); }catch(e){}
+  if(!r || !Array.isArray(r.idx) || !me || location.hash) return;
+  if(Date.now() - (r.t || 0) > 2*60*60*1000) return;      /* 2時間より前のものは使いません */
+  let ref = ""; try{ ref = document.referrer ? new URL(document.referrer).origin : ""; }catch(e){}
+  if(ref !== location.origin) return;                      /* このサイトのページから戻ってきたときだけ */
+  let list = TREE;
+  for(const i of r.idx){
+    const it = list[i];
+    if(!it || !it.kids || !ok(it)) { path.length = 0; return; }
+    path.push(it); list = it.kids;
+  }
+}
+
 /* 「もどる」のアイコンを押したら、1つ前の段へ */
 function goBack(n){
   document.getElementById("info").hidden = true;
@@ -819,6 +900,12 @@ function frame(t){
       }
       n.vx = (n.vx + ax)*.84; n.vy = (n.vy + ay)*.84;
       n.x += n.vx; n.y += n.vy;
+      /* 中の段でも、名前が画面の左右の外へ出ないようにします（名前の長い丸のため） */
+      if(!moon && n.hx != null && n !== drag){
+        if(n.lw == null){ const nm = n.el.querySelector(".nm"); n.lw = nm ? nm.offsetWidth : 0; }
+        const lim0 = Math.max(44, n.lw/2 + 4);
+        n.x = Math.min(Math.max(n.x, lim0), W - lim0);
+      }
       if(moon && n.hx != null){
         /* よけるのは、もとの場所から少しだけ（となりのアイコンまで押し出さないように） */
         const ox = n.x - n.hx, oy = n.y - n.hy, od = Math.hypot(ox, oy), MAXD = 56;
@@ -1654,6 +1741,7 @@ if(window.ResizeObserver){
     window.dispatchEvent(new Event("resize"));
   }).observe(topBox);
 }
+restoreReturn();
 build(null, null);
 nodes.forEach(n=>{ n.s = .3; n.o = 0; });
 requestAnimationFrame(frame);
