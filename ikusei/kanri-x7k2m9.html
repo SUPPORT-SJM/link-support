@@ -147,7 +147,18 @@
     .head{padding:12px 0;}
     .head .wrap.row{padding-right:62px;}   /* 右上のメニューのボタンと重ならないように */
     .head h1{font-size:15.5px;}
+    /* 流れていく帯（ボタン類）：上に残る帯と同じ色で、すきまなくつなげます */
+    .head.headFlow{position:static;padding:0 0 12px;margin-top:-1px;}
+    .head.headFlow .wrap{padding-right:62px;}
+    /* ▼ メニュー で出すボタン類の入れもの（上の帯の下にくっついて出ます） */
+    .headDrop{display:none;position:absolute;left:0;right:0;top:100%;background:var(--deep);padding:4px 0 12px;
+      max-height:65vh;overflow-y:auto;box-shadow:0 10px 22px rgba(0,0,0,.28);}
+    .headDrop .wrap{padding-right:16px;}
+    #btnSelfEdit{margin-right:6px;}
+    #toolsToggle{margin:6px 0 0 0;background:#fff !important;color:var(--deep) !important;border:none;}
+    #toolsToggle.on{background:#F5C452 !important;color:#3B2A00 !important;}
   }
+  @media (min-width:601px){ .headDrop,#toolsToggle{display:none !important;} }
   .fbtn{
     border:1.5px solid var(--line);background:#fff;color:#8B889E;
     border-radius:999px;padding:4px 11px;font-size:11.5px;font-weight:700;
@@ -3845,6 +3856,69 @@ function toast(msg){
     </div>
   </div>
 </div>
+<script>
+/* ================================================================
+   スマホ：上の濃い色の帯のうち、「管理画面」の名前と「自分の会員情報を編集する」までは上に残り、
+   その下のボタン類（検索・並べ方・追加・保存など）は、下に読みすすめると上に流れて隠れます。
+   ボタン類が隠れているあいだは「▼ メニュー」のボタンが出ます。押すと、いまの場所のまま、上の帯の下にボタン類がバッと出ます。
+   もう一度押す（▲ とじる）か、ボタン類の中のボタンを押すと、しまいます。
+   （パソコンの幅では、これまでどおり全部上に残ります）
+================================================================ */
+(function(){
+  const head = document.querySelector("#appView .head");
+  const tools = head && head.querySelector(".tools");
+  const keepBox = head && head.querySelector(".row > div");
+  if(!head || !tools || !keepBox) return;
+  const home = tools.parentNode, next = tools.nextSibling;
+  /* 流れていく帯 */
+  const flow = document.createElement("div");
+  flow.className = "head headFlow";
+  flow.innerHTML = '<div class="wrap"></div>';
+  head.parentNode.insertBefore(flow, head.nextSibling);
+  /* 上の帯の下に出す入れもの */
+  const drop = document.createElement("div");
+  drop.className = "headDrop";
+  drop.innerHTML = '<div class="wrap"></div>';
+  head.appendChild(drop);
+  /* ▼ メニュー のボタン */
+  const tg = document.createElement("button");
+  tg.type = "button"; tg.id = "toolsToggle"; tg.textContent = "▼ メニュー";
+  keepBox.appendChild(tg);
+  let isOpen = false, flowSeen = true;
+  function phone(){ return window.innerWidth <= 600; }
+  function openDrop(){
+    flow.style.height = flow.offsetHeight + "px";      /* 下の表が動かないように、元の場所の高さはそのまま */
+    drop.firstChild.appendChild(tools);
+    drop.style.display = "block"; isOpen = true; tg.textContent = "▲ とじる"; tg.classList.add("on");
+  }
+  function closeDrop(){
+    if(phone()) flow.firstChild.appendChild(tools);
+    flow.style.height = "";
+    drop.style.display = "none"; isOpen = false; tg.textContent = "▼ メニュー"; tg.classList.remove("on");
+  }
+  function showTg(){ tg.style.display = (phone() && (!flowSeen || isOpen)) ? "inline-block" : "none"; }
+  tg.addEventListener("click", ()=>{ isOpen ? closeDrop() : openDrop(); showTg(); });
+  /* 出したボタン類の中のボタンを押したら、しまいます（検索の入力や並べ方の選択では、しまいません） */
+  drop.addEventListener("click", e=>{ if(e.target.closest("button")) setTimeout(()=>{ closeDrop(); showTg(); }, 0); });
+  function place(){
+    const ph = phone();
+    if(!ph && isOpen) closeDrop();
+    if(ph && !isOpen && tools.parentNode !== flow.firstChild){ flow.firstChild.appendChild(tools); }
+    if(!ph && tools.parentNode !== home){ home.insertBefore(tools, next); }
+    flow.style.display = ph ? "" : "none";
+    showTg();
+  }
+  /* ボタン類の帯が見えているか（見えていれば▼は出しません。いちばん上に戻ったら、出したものはしまいます） */
+  function check(){
+    if(isOpen && window.scrollY < 5){ closeDrop(); }
+    flowSeen = phone() ? (flow.getBoundingClientRect().bottom - head.getBoundingClientRect().bottom > 40) : true;
+    showTg();
+  }
+  window.addEventListener("resize", ()=>{ place(); check(); });
+  window.addEventListener("scroll", check, { passive:true });
+  place(); check();
+})();
+</script>
 <script src="../track.js"></script>
 <script src="../menu.js"></script>
 </body>
