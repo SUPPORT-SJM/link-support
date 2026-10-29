@@ -1321,7 +1321,11 @@ document.getElementById("mRefCopy").addEventListener("click", async ()=>{
   const b = document.getElementById("mRefCopy"), m = document.getElementById("mRefMsg");
   const url = String((me && me.refUrl) || "").trim();
   if(!url){
-    m.innerHTML = "紹介コードがまだ登録されていません。<br><a href='./ikusei/account.html' style='color:var(--deep);font-weight:700;'>アカウントのページで登録する ›</a>";
+    m.innerHTML = "紹介コードがまだ登録されていません。<br>"
+      + "<span style='font-weight:500;color:var(--ink);'>紹介コード（URL）は、<b>ビジネスマイページ</b>を開いてログインし、右上のメニューの<b>「新規会員紹介」</b>から発行できます。"
+      + "発行したら、アカウントのページに貼りつけて登録してください。</span><br>"
+      + "<a href='https://member.link-platform.jp' target='_blank' rel='noopener' style='color:var(--deep);font-weight:700;'>ビジネスマイページを開く ›</a><br>"
+      + "<a href='./ikusei/account.html' style='color:var(--deep);font-weight:700;'>アカウントのページで登録する ›</a>";
     return;
   }
   const ok = await copyText(url);
