@@ -118,7 +118,8 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body)
 .tut:focus-visible{outline:3px solid var(--deep);outline-offset:3px;border-radius:12px;}
 /* ログイン中のトップの、小さな「会員情報」（左上。使い方と同じように浮いていて、つまんで動かせます） */
 .tut.mem .tb{border-color:var(--g-member);}
-.tut.mem .tt{color:#2E7D62;}
+.tut.mem .tt{color:#2E7D62;white-space:pre;text-align:center;line-height:1.25;}
+.tut.mem{width:96px;}
 /* 管理者モードの丸（管理者の方だけ）：オフ＝灰色／オン＝紺／試し中＝オレンジ */
 .tut.dbg .tb{border-color:#8A84A0;}
 .tut.dbg{width:104px;}
@@ -147,6 +148,7 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body)
 .cpy{flex:none;padding:10px 14px;border-radius:12px;border:2px solid var(--g-member);background:#fff;color:#2E7D62;
   font-family:var(--f-head);font-weight:900;font-size:15px;cursor:pointer;}
 .cpy.done{background:var(--g-member);color:#fff;}
+.cpy.ref{width:100%;margin-top:4px;padding:12px 14px;font-size:15px;}
 .cpmsg{font-size:13px;font-weight:700;color:#2E7D62;min-height:1.2em;}
 .pwnote{background:#FFF8E1;border:1.5px solid #FFE08A;border-radius:14px;padding:12px 14px;font-size:14px;line-height:1.85;color:#5D4037;margin-bottom:14px;}
 .pwnote b{color:#BF360C;}
@@ -296,6 +298,9 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body)
       <div class="row"><span class="k">③ 会員番号</span>
         <div class="idrow"><span class="v num" id="mId"></span><button type="button" class="cpy" id="mCopy">📋 コピー</button></div>
         <span class="cpmsg" id="mCopyMsg" aria-live="polite"></span></div>
+      <div class="row"><span class="k">④ 紹介コード（招待コードのURL）</span>
+        <button type="button" class="cpy ref" id="mRefCopy">🔗 紹介コードをコピーする</button>
+        <span class="cpmsg" id="mRefMsg" aria-live="polite"></span></div>
     </div>
     <div class="pwnote">🔑 <b>LINKのサービスを使うためのパスワード</b>は、ここには出しません。<br>
       ほかの人に分からないように、ご自身でしっかり管理してください。<br>
@@ -1099,7 +1104,7 @@ function placeMem(t){
   const sch = top ? nodes.find(n=>n.it.g === "apply" && n.it.kids) : null;
   if(!sch){ if(memF) memF.el.style.display = "none"; memKey = ""; return; }
   if(!memF){
-    memF = makeFloater("tut mem", 3.4, { ic:"👤", nm:"会員情報", href:"#member", aria:"会員情報（会員番号など）を見る", onTap: openMemInfo });
+    memF = makeFloater("tut mem", 3.4, { ic:"👤", nm:"会員情報\n／紹介コード", href:"#member", aria:"会員情報（会員番号・紹介コード）を見る", onTap: openMemInfo });
     stage.insertBefore(memF.el, stage.firstChild);
   }
   memF.el.style.display = "";
@@ -1290,6 +1295,7 @@ function openMemInfo(){
   $("#mReal").classList.toggle("none", !me.realName);
   $("#mId").textContent = memIdText(me.id);
   $("#mCopy").classList.remove("done"); $("#mCopy").textContent = "📋 コピー"; $("#mCopyMsg").textContent = "";
+  $("#mRefCopy").classList.remove("done"); $("#mRefCopy").textContent = "🔗 紹介コードをコピーする"; $("#mRefMsg").innerHTML = "";
   $("#memSheet").hidden = false;
 }
 /* 会員番号をコピーします（新しいやり方が使えないブラウザでは、昔からのやり方でコピーします） */
@@ -1308,6 +1314,19 @@ document.getElementById("mCopy").addEventListener("click", async ()=>{
   const b = document.getElementById("mCopy"), m = document.getElementById("mCopyMsg");
   if(ok){ b.classList.add("done"); b.textContent = "✓ コピーしました"; m.textContent = "そのまま、貼りつけて使えます"; }
   else{ m.textContent = "コピーできませんでした。番号を長押しして、コピーしてください"; }
+});
+/* 紹介コード（招待コードのURL）：会員名簿の「紹介URL」の列に入っているものをコピーします
+   （アカウントのページで登録したもの。ログインのときに受け取って、この端末に覚えています） */
+document.getElementById("mRefCopy").addEventListener("click", async ()=>{
+  const b = document.getElementById("mRefCopy"), m = document.getElementById("mRefMsg");
+  const url = String((me && me.refUrl) || "").trim();
+  if(!url){
+    m.innerHTML = "紹介コードがまだ登録されていません。<br><a href='./ikusei/account.html' style='color:var(--deep);font-weight:700;'>アカウントのページで登録する ›</a>";
+    return;
+  }
+  const ok = await copyText(url);
+  if(ok){ b.classList.add("done"); b.textContent = "✓ コピーしました"; m.textContent = "招待コードのURLがコピーされました"; }
+  else{ m.textContent = "コピーできませんでした。アカウントのページで、URLを長押ししてコピーしてください"; }
 });
 document.getElementById("mClose").addEventListener("click", ()=>{ document.getElementById("memSheet").hidden = true; });
 document.getElementById("mClose2").addEventListener("click", ()=>{ document.getElementById("memSheet").hidden = true; });
