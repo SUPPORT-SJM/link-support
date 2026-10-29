@@ -98,12 +98,14 @@
   @media (prefers-reduced-motion:reduce){ .shake{animation:none;} }
 
   /* 発行のしかた */
-  .howto{margin:10px 0 12px;padding-left:1.4em;}
+  .howto{margin:10px 0 12px;padding-left:22px;}
   .howto li{font-size:13px;line-height:2;color:#5D4037;margin-bottom:3px;}
   .howto li b{color:#E65100;}
   .howto-link{display:block;padding:13px;border-radius:12px;background:#FF7043;color:#fff;
     text-align:center;text-decoration:none;font-size:14px;font-weight:700;margin-bottom:7px;}
   .howto-note{font-size:11px;color:#A1887F;text-align:center;line-height:1.8;margin-bottom:4px;}
+  /* 番号つきの手順の中にあるボタンも、下のボタンと同じ幅にそろえます（番号の分だけ左へ広げます） */
+  .howto li .howto-link{margin-left:-22px !important;}
 
   /* ニックネーム作成 */
   .gen-box{background:#FFF8F5;border:1px solid #FFD0B0;border-radius:12px;padding:14px;margin-bottom:10px}
@@ -119,6 +121,10 @@
   .kei-result{display:none;background:#FFF3E0;border:1.5px solid #FFCC80;border-radius:10px;padding:12px 14px;font-size:13px;color:#5D4037;line-height:1.9;margin-top:4px}
   .kei-result.show{display:block}
   .kei-result b{color:#E65100}
+  .kei-req{margin-top:12px;padding-top:12px;border-top:1.5px dashed #FFCC80}
+  .kei-req-lead{font-size:13px;line-height:1.8;margin-bottom:8px}
+  .kei-req-warn{font-size:12px;color:#C62828;margin-bottom:6px}
+  .kei-req-text{background:#fff;border:1.5px solid #FFCCBC;border-radius:8px;padding:10px 12px;font-size:14px;line-height:1.8;white-space:pre-wrap;margin-bottom:8px;-webkit-user-select:text;user-select:text}
 
   /* 紹介コード */
   .code-input{width:100%;border:1.5px solid #FFCCBC;border-radius:8px;padding:11px 12px;font-size:15px;font-family:inherit;color:#4E342E;background:#fff;margin-bottom:8px;outline:none}
@@ -342,6 +348,8 @@ function refreshLoginBar(){
     if(member.keiChat){
       document.getElementById("keiSelect").value = member.keiChat;
     }
+    /* 系列が入っていれば、②の案内と依頼の文章も、はじめから出しておきます */
+    if(document.getElementById("keiSelect").value) showKeiLinks(true);
     if(member.refUrl){
       document.getElementById("refUrl").value = member.refUrl;
       showRefUrl(member.refUrl);
@@ -590,7 +598,7 @@ function refreshJoinBtn(){
 }
 
 /* ---------- 系列のオプチャ案内 ---------- */
-function showKeiLinks(){
+function showKeiLinks(noSave){
   const kei = document.getElementById("keiSelect").value;
   const box = document.getElementById("keiResult");
   if(!kei){ box.classList.remove("show"); return; }
@@ -604,12 +612,40 @@ function showKeiLinks(){
       `ご紹介者か担当の方にお尋ねください🙇<br>` +
       `<span style="font-size:12px;color:#8D6E63;">※ 系列によって、ある場合とない場合があります</span>`;
   }
+  /* 系列のオープンチャットに入れてもらう依頼の文章（初期サポートラインに貼りつけて送ります）
+     お名前は、①でユーザーサポートのオープンチャットに入ったときのニックネームを使います */
+  const nk = localStorage.getItem("hajime_nick") || (member && member.nick) || "";
+  box.insertAdjacentHTML("beforeend",
+    `<div class="kei-req">
+      <p class="kei-req-lead">📩 <b>系列のオープンチャットに入れてもらう依頼</b>をしましょう。下の文章をコピーして、<b>初期サポートライン</b>に貼りつけて送ってください。</p>
+      ${nk ? "" : '<p class="kei-req-warn">⚠️ 先に①でニックネームを作ってコピーすると、お名前が入ります</p>'}
+      <div class="kei-req-text" id="keiReqText"></div>
+      <button type="button" class="copy-btn" id="keiReqCopy">📋 依頼の文章をコピーする</button>
+      <div class="copy-hint" id="keiReqHint">コピーして、初期サポートラインに貼りつけてください</div>
+    </div>`);
+  const reqText = `${nk || "（ユーザーサポートのオープンチャットのお名前）"}です。\n${kei}のグループのオープンチャットに誘ってください。\nよろしくお願いします。`;
+  document.getElementById("keiReqText").textContent = reqText;
+  document.getElementById("keiReqCopy").onclick = async ()=>{
+    const hint = document.getElementById("keiReqHint");
+    let ok = false;
+    try{ await navigator.clipboard.writeText(reqText); ok = true; }catch(e){
+      try{
+        const ta = document.createElement("textarea");
+        ta.value = reqText; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.top = "-1000px"; ta.style.fontSize = "16px";
+        document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0, reqText.length);
+        ok = document.execCommand("copy"); ta.remove();
+      }catch(e2){}
+    }
+    hint.textContent = ok ? "✅ コピーしました！初期サポートラインに貼りつけて、送ってください"
+                          : "コピーできませんでした。上の文章を長押ししてコピーしてください";
+  };
   box.classList.add("show");
+  if(noSave === true) return;   /* 開いたときに、前に選んだ系列を出すだけのときは、記録しません */
   // 選んだ系列を記録します
   localStorage.setItem("hajime_keichat", kei);
   saveProfile({ keiChat: kei }, null, "");
 }
-document.getElementById("keiSelect").addEventListener("change", showKeiLinks);
+document.getElementById("keiSelect").addEventListener("change", ()=>showKeiLinks());
 
 /* ---------- 紹介コードの保存 ---------- */
 function saveRefCode(){
