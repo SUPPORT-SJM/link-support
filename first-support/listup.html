@@ -39,13 +39,24 @@ b.k{color:#C62828}
 .note{position:relative;background:#fff;border:2px solid #B0BEC5;border-radius:6px 14px 14px 6px;padding:10px 8px 12px 18px;margin-top:6px;
   box-shadow:0 6px 16px rgba(0,0,0,.08)}
 .note::before{content:"";position:absolute;left:8px;top:0;bottom:0;width:2px;background:#F48FB1;opacity:.7}
-.nrow{display:grid;grid-template-columns:30px 1fr 1.1fr 1.5fr;gap:4px;align-items:center;min-height:34px;font-size:13px;line-height:1.35;padding:6px 0;border-bottom:1px solid #DCE7F3}
+.nrow{display:grid;grid-template-columns:36px 1fr 1.1fr 1.5fr;gap:4px;align-items:center;min-height:34px;font-size:13px;line-height:1.35;padding:6px 0;border-bottom:1px solid #DCE7F3}
 .nrow.hd{border-bottom:none;padding:0}
 .nrow.hd{font-size:11px;font-weight:700;color:#fff;min-height:auto;margin-bottom:6px}
 .nrow.hd span{padding:4px 2px;border-radius:6px;text-align:center}
 .nrow.hd .c1{background:#42A5F5}.nrow.hd .c2{background:#5C6BC0}.nrow.hd .c3{background:#26A69A}.nrow.hd .c4{background:#FF8A65}
 .nrow .sc{font-weight:900;color:#1565C0;font-size:17px;text-align:center}
 .nrow .nm{font-weight:700}
+.nrow .sc .st{font-style:normal;font-size:12px;vertical-align:4px}
+/* ステップ2の追加（押すと開く） */
+.more{margin:2px 0 10px;border:2px solid #FFD54F;border-radius:14px;background:#FFFDE7;overflow:hidden}
+.more summary{list-style:none;cursor:pointer;padding:12px 14px;font-weight:700;color:#8A5A00;font-size:15px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.more summary::-webkit-details-marker{display:none}
+.more summary::after{content:"▼ 開く";font-size:12px;color:#B07F00;background:#fff;border-radius:999px;padding:2px 10px;flex-shrink:0}
+.more[open] summary::after{content:"▲ とじる"}
+.more-body{padding:0 14px 14px}
+.more-body p{margin-bottom:6px;font-size:15px}
+.pt.star{background:#FFF8E1;border-color:#FFE082}
+.pt.star .n{background:#FFC107;font-size:14px}
 .nrow .job{color:#00796B}
 .nrow .nd{color:#D84315;font-size:12px}
 .arrow{font-size:12.5px;color:#607D8B;text-align:center;margin-top:8px;line-height:1.7}
@@ -99,6 +110,19 @@ b.k{color:#C62828}
     </div>
   </div>
 
+  <!-- ステップ2の追加：星マーク人材（押すと開きます） -->
+  <details class="more">
+    <summary>⭐ 星マーク人材のチェックも忘れずに</summary>
+    <div class="more-body">
+      <p>0〜3点とは<b>別に</b>、次のような方には<b>⭐（星マーク）</b>をつけます。</p>
+      <div class="pts">
+        <div class="pt star"><span class="n">⭐</span><span class="t"><b>リーダーシップがある</b><br>リーダーをやっていた経験がある、リーダーシップが取れそう、人を引っ張っていく力がある方</span></div>
+        <div class="pt star"><span class="n">⭐</span><span class="t"><b>サポートの力が高い</b><br>人の手伝いが好きで、それを嬉しそうに、しっかりやってくれる方。マネージャーをやっていた経験がある方など、<b>人の役に立つのが好きそう</b>な方</span></div>
+      </div>
+      <p style="margin-top:10px;">点数と⭐は別々につけるので、<b>「2⭐」</b>の方、<b>「1⭐」</b>の方、<b>「0だけど⭐」</b>の方も出てきます。点数の横に⭐を書いておきましょう。</p>
+    </div>
+  </details>
+
   <h2><span class="step">ステップ3</span>右側に、職業と予想されるニーズを書く</h2>
   <div class="card">
     <p>ノートの<b>右側のあいているところ</b>に、その人の<b>職業や肩書き</b>を書きます。</p>
@@ -110,10 +134,11 @@ b.k{color:#C62828}
     <div class="nrow hd"><span class="c1">点数</span><span class="c2">名前</span><span class="c3">職業・肩書き</span><span class="c4">予想されるニーズ</span></div>
     <div class="nrow"><span class="sc">2</span><span class="nm">〇〇さん</span><span class="job">コーチングの先生</span><span class="nd">最近、生徒が減ったと言っていた → 生徒が増えたら嬉しいのでは</span></div>
     <div class="nrow"><span class="sc">1</span><span class="nm">△△さん</span><span class="job">主婦</span><span class="nd">旦那さんの給料が下がったと言っていた → 副収入が欲しいのでは</span></div>
+    <div class="nrow"><span class="sc">2<i class="st">⭐</i></span><span class="nm">□□さん</span><span class="job">会社員</span><span class="nd">友だちは多いが、いまは会社の人としか関わっていない → 会社の外の人脈を増やしたいのでは<br>昔からボランティア活動によく行っていた → サポート・貢献が好きなのかも（⭐）</span></div>
     <div class="nrow"><span class="sc"></span><span class="nm" style="color:#B0BEC5;">…</span><span></span><span></span></div>
   </div>
   <div class="legend">
-    <span><i style="background:#42A5F5"></i></span><span><b>点数</b>：ステップ2（左はしの1〜2文字分）</span>
+    <span><i style="background:#42A5F5"></i></span><span><b>点数</b>：ステップ2（左はしの1〜2文字分）。⭐は星マーク人材</span>
     <span><i style="background:#5C6BC0"></i></span><span><b>名前</b>：ステップ1（ノートの左半分）</span>
     <span><i style="background:#26A69A"></i></span><span><b>職業・肩書き</b>：ステップ3（右側）</span>
     <span><i style="background:#FF8A65"></i></span><span><b>予想されるニーズ</b>：ステップ3（さらに右）</span>
