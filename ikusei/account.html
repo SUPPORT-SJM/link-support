@@ -50,6 +50,11 @@
   .row .vl{flex:1;font-size:14px;font-weight:500;word-break:break-all;text-align:right;}
   .row .vl.mono{font-family:monospace;font-size:13.5px;}
   .row .vl.empty{color:#B0AAC4;font-weight:400;font-size:13px;}
+  .row .idcopy{flex-shrink:0;padding:6px 11px;border-radius:10px;border:1.5px solid #43A047;background:#fff;color:#2E7D32;font-weight:700;font-size:12.5px;cursor:pointer;font-family:inherit;}
+  .row .idcopy.done{background:#43A047;color:#fff;}
+  .row.refrow{display:block;}
+  .refbtn{display:block;text-align:center;text-decoration:none;}
+  .refrow .hint{font-size:11px;color:#9A93B0;line-height:1.7;text-align:center;}
 
   .edit-card{background:#fff;border-radius:16px;padding:18px;box-shadow:var(--shadow);margin-bottom:12px;}
   .f{margin-bottom:13px;}
@@ -112,15 +117,19 @@
     <!-- ご登録の内容 -->
     <div class="sec">ご登録の内容</div>
     <div class="card">
-      <div class="row"><span class="lb">会員番号</span><span class="vl mono" id="vId">–</span></div>
+      <div class="row"><span class="lb">会員番号</span><span class="vl mono" id="vId">–</span><button type="button" class="idcopy" id="idCopy" onclick="copyId()">📋 コピー</button></div>
       <div class="row"><span class="lb">ニックネーム</span><span class="vl" id="vName">–</span></div>
-      <div class="row"><span class="lb">ステータス</span><span class="vl" id="vGrow">–</span></div>
       <div class="row"><span class="lb">本名</span><span class="vl" id="vReal">–</span></div>
+      <div class="row"><span class="lb">段階</span><span class="vl" id="vRank">–</span></div>
+      <div class="row"><span class="lb">ステータス</span><span class="vl" id="vGrow">–</span></div>
       <div class="row"><span class="lb">系列</span><span class="vl" id="vKei">–</span></div>
       <div class="row"><span class="lb">お住まい</span><span class="vl" id="vArea">–</span></div>
       <div class="row"><span class="lb">連絡先</span><span class="vl" id="vMail">–</span></div>
-      <div class="row"><span class="lb">段階</span><span class="vl" id="vRank">–</span></div>
       <div class="row"><span class="lb">LINK入会日</span><span class="vl" id="vJoin">–</span></div>
+      <div class="row refrow">
+        <a class="btn btn-go refbtn" href="https://member.link-platform.jp/mypage/introduction.php" target="_blank" rel="noopener">🔗 紹介コード発行</a>
+        <p class="hint" style="margin-top:6px;">ビジネスマイページの「新規会員紹介」が開きます（ログインしていないときは、ログイン画面が出ます）</p>
+      </div>
     </div>
 
     <!-- LINK入会日 -->
@@ -176,7 +185,7 @@
       内容が上書きされます。
     </div>
     <a href="../touroku.html" class="btn btn-sub" style="display:block;text-align:center;text-decoration:none;max-width:380px;margin-left:auto;margin-right:auto;">
-      📝 ご登録ページをひらく
+      📝 より細かく登録情報を編集する
     </a>
     <button class="btn btn-out" style="margin-top:9px;" onclick="doLogout()">ログアウト</button>
 
@@ -232,7 +241,8 @@ function fill(){
   set("#vArea", member.area);
   set("#vMail", member.email);
 
-  const rank = member.role ? member.role.split(/[,、\s]+/).filter(x=>x).join(" / ")
+  /* 段階の「アドバンス」は「クリエアドバンス」と出します */
+  const rank = member.role ? member.role.split(/[,、\s]+/).filter(x=>x).map(x=>x === "アドバンス" ? "クリエアドバンス" : x).join(" / ")
              : (member.crie ? "クリエイターズ" : (member.sup ? "サポーター" : "メンバー"));
   set("#vRank", rank);
   set("#vJoin", member.linkJoin);
@@ -243,6 +253,25 @@ function fill(){
     $("#urlShow").textContent = member.refUrl;
     $("#urlBox").style.display = "flex";
   }
+}
+
+/* ---------- 会員番号をコピー（LINKの会員番号の形＝8けたで） ---------- */
+async function copyId(){
+  const t = String(member.id || "").trim();
+  const id = /^\d{1,7}$/.test(t) ? t.padStart(8, "0") : t;
+  let ok = false;
+  try{ if(navigator.clipboard && window.isSecureContext){ await navigator.clipboard.writeText(id); ok = true; } }catch(e){}
+  if(!ok){
+    try{
+      const ta = document.createElement("textarea");
+      ta.value = id; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.top = "-1000px"; ta.style.fontSize = "16px";
+      document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0, id.length);
+      ok = document.execCommand("copy"); ta.remove();
+    }catch(e){}
+  }
+  const b = $("#idCopy");
+  b.classList.toggle("done", ok); b.textContent = ok ? "✓ コピーしました" : "📋 コピー";
+  if(ok) show("✅ 会員番号をコピーしました。", "ok");
 }
 
 /* ---------- LINK入会日 ---------- */
