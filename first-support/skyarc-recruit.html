@@ -88,7 +88,7 @@ body{font-family:"Zen Kaku Gothic New",sans-serif;background:#FFFBF7;padding:16p
     <div class="section-ttl">📅 ② アポ部屋</div>
     <div class="card">
       <p>アポの相談・その場でアポ取りなど</p>
-      <a class="lbtn lbtn-or" href="https://docs.google.com/spreadsheets/d/1HXtpJD21K2vomACuUuT32ZTvGFBS00r6armdCyQgIs4/edit" target="_blank" rel="noopener">📋 アポ部屋の申し込みシートを開く</a>
+      <a class="lbtn lbtn-or" data-link="apoheya" href="https://docs.google.com/spreadsheets/d/1HXtpJD21K2vomACuUuT32ZTvGFBS00r6armdCyQgIs4/edit" target="_blank" rel="noopener">📋 アポ部屋の申し込みシートを開く</a>
     </div>
   </div>
 
@@ -96,7 +96,7 @@ body{font-family:"Zen Kaku Gothic New",sans-serif;background:#FFFBF7;padding:16p
     <div class="section-ttl">📅 ③ Bトレ</div>
     <div class="card">
       <p>Bさんの在り方・ロープレ<br>（持ち物：アドバイザーのプロフィール）</p>
-      <a class="lbtn lbtn-or" href="https://docs.google.com/spreadsheets/d/19ENmRvi1XWAwFkf-HoTSMPdLW-QNghC4yBQCJnNGwJ8/edit" target="_blank" rel="noopener">📋 Bトレの申し込みシートを開く</a>
+      <a class="lbtn lbtn-or" data-link="btore" href="https://docs.google.com/spreadsheets/d/1HXtpJD21K2vomACuUuT32ZTvGFBS00r6armdCyQgIs4/edit" target="_blank" rel="noopener">📋 Bトレの申し込みシートを開く</a>
     </div>
   </div>
 
@@ -188,6 +188,16 @@ $("nameInput").addEventListener("input", updateNick);
 $("seriesSelect").addEventListener("change", updateNick);
 updateNick(); drawWaiwai();
 if(member) skySelf.get().then(v=>{ if(v){ selfVals = v; drawWaiwai(); } });
+</script>
+<script>
+/* アポ部屋・Bトレは同じシートです。トップページと同じリンク先（GASから受け取ったもの）があれば、
+   それぞれのいちばん新しい月のタブが開くURLにします */
+(function(){
+  let L = null;
+  try{ const c = JSON.parse(localStorage.getItem("skyarc_links") || "null"); if(c && typeof c === "object") L = c; }catch(e){}
+  if(!L) return;
+  document.querySelectorAll("a[data-link]").forEach(a=>{ const u = L[a.dataset.link]; if(u) a.href = String(u); });
+})();
 </script>
 <script src="../track.js"></script>
 <script src="../menu.js"></script>

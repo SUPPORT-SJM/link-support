@@ -25,7 +25,14 @@ body{font-family:"Zen Kaku Gothic New",sans-serif;background:#FFFBF7;padding:16p
 .ttl{font-size:15px;font-weight:700;color:#F57F17;margin:18px 0 10px;padding-bottom:6px;border-bottom:2px solid #FFD54F}
 .mine{background:#F1F8E9;border:1.5px solid #A5D6A7;border-radius:12px;padding:10px 14px;font-size:14px;font-weight:700;color:#2E7D32;margin-bottom:12px;line-height:1.7}
 .day{background:#fff;border:1px solid #FFE082;border-left:4px solid #FFB300;border-radius:14px;padding:14px;margin-bottom:12px}
+/* グルコンリーダーごとの色：翔子さんはいまの色、いと・すけさんは青、冨田由起子さんは黄色 */
+.day.g2{border-color:#90CAF9;border-left-color:#1E88E5;background:#F5FAFF}
+.day.g3{border-color:#FFF176;border-left-color:#FDD835;background:#FFFDE7}
 .day.on{border-color:#A5D6A7;border-left-color:#43A047;background:#FAFFF7}
+/* 中止の日 */
+.day.cancel{background:#F5F5F5;border-color:#E0E0E0;border-left-color:#9E9E9E;opacity:.85}
+.day.cancel h3,.day.cancel .tl{color:#9E9E9E;text-decoration:line-through}
+.day .tag.stop{background:#E53935;text-decoration:none}
 .day h3{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .day h3 small{font-family:"Zen Kaku Gothic New",sans-serif;font-size:13px;font-weight:700;color:#8D6E63}
 .day .tag{font-size:12px;font-weight:700;color:#fff;background:#43A047;border-radius:999px;padding:2px 10px}
@@ -125,7 +132,8 @@ const ERR = {
   nomember: "会員番号が見つかりません。",
   past: "その日は、もう過ぎています。",
   nodate: "その日のグルコンが見つかりませんでした。ページを開き直してください。",
-  busy: "いま混み合っています。少しおいてお試しください。"
+  busy: "いま混み合っています。少しおいてお試しください。",
+  cancelled: "その日のグルコンは中止になりました。ほかの日をえらんでください。"
 };
 
 function drawMine(){
@@ -137,25 +145,30 @@ function drawMine(){
   }else box.innerHTML = "";
 }
 function drawList(){
-  const up = data.items.filter(x=>x.date >= data.today);
+  const up = data.items.filter(x=>x.date >= data.today && !x.cancelled);   /* 中止の日は出しません */
   const plan = data.mine && data.mine.s === "参加予定" ? data.mine.d : "";
   $("#list").innerHTML = up.length ? up.map((x,i)=>{
     const on = plan === x.date;
-    return `<div class="day${on ? " on" : ""}" data-i="${i}">
-      <h3>${esc(dayHead(x))}<small>${esc(x.leader)}</small>${on ? '<span class="tag">出席予定</span>' : ""}</h3>
+    const stop = !!x.cancelled;
+    return `<div class="day ${esc(x.lk || "")}${on ? " on" : ""}${stop ? " cancel" : ""}" data-i="${i}">
+      <h3>${esc(dayHead(x))}<small>${esc(x.leader)}</small>${stop ? '<span class="tag stop">中止</span>' : on ? '<span class="tag">出席予定</span>' : ""}</h3>
       ${times(x)}
-      ${on ? "" : `<button class="btn plan" data-date="${esc(x.date)}">この日に出席予定にする</button><div class="askbox"></div>`}
+      ${on || stop ? "" : `<button class="btn plan" data-date="${esc(x.date)}">この日に出席予定にする</button><div class="askbox"></div>`}
     </div>`;
   }).join("") + '<p class="small">※ 出席予定にすると、初期サポートマネジメント（サポートの方の画面）に出ます。</p>'
     : '<p class="msg">いまのところ、予定されているグルコンはありません。</p>';
   document.querySelectorAll("#list .btn.plan").forEach(b=>b.addEventListener("click", ()=>askPlan(b)));
 }
 function drawPast(){
-  const past = data.items.filter(x=>x.date <= data.today).reverse();
+  const past = data.items.filter(x=>x.date <= data.today && !x.cancelled).reverse();   /* 中止の日は出しません */
   $("#pastBox").hidden = !past.length;
   $("#past").innerHTML = past.map(x=>{
     const rec = x.lk && selfVals[x.lk] ? skySelf.md(selfVals[x.lk]) : "";
-    return `<div class="day">
+    if(x.cancelled) return `<div class="day ${esc(x.lk || "")} cancel">
+      <h3>${esc(dayHead(x))}<small>${esc(x.leader)}</small><span class="tag stop">中止</span></h3>
+      ${times(x)}
+    </div>`;
+    return `<div class="day ${esc(x.lk || "")}">
       <h3>${esc(dayHead(x))}<small>${esc(x.leader)}</small></h3>
       ${times(x)}
       ${x.lk ? (rec ? `<p class="rec">✅ ${esc(x.leader)}のグルコンに出席できた（${esc(rec)} に記録）</p>`
@@ -269,6 +282,15 @@ async function load(){
   }
 }
 load();
+</script>
+<script>
+/* 「ホームに戻る」は、ブラウザの「戻る」と同じように、開く前の画面（メンバー向けの段など）に戻ります。
+   このサイトの中から開いたときだけ。いきなり開いたときは、トップへ */
+document.querySelectorAll("a.back-btn, a.back-btn2").forEach(a=>a.addEventListener("click", e=>{
+  let same = false;
+  try{ same = !!document.referrer && new URL(document.referrer).origin === location.origin; }catch(_){}
+  if(same && history.length > 1){ e.preventDefault(); history.back(); }
+}));
 </script>
 <script src="../track.js"></script>
 <script src="../menu.js"></script>
