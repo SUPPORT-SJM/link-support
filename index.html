@@ -423,8 +423,13 @@ const C = {back:"var(--g-back)",join:"var(--g-join)",member:"var(--g-member)",ap
 const TREE = [
   {ic:"👤", nm:"アカウント", g:"common", url:B+"ikusei/account.html"},
   {ic:"💌", nm:"新しい仲間へ\nこのサイトを教える", g:"common", url:B+"ikusei/first-message.html", wide:true, moon:true},
+  /* 2つめの月：「新しい仲間へ」と、アカウントをはさんで反対側を、同じ通り道でまわります */
+  {ic:"🧰", nm:"便利な\n情報一覧", g:"common", url:B+"first-support/benri.html", moon:true},
   {ic:"📘", nm:"初期サポート\nガイド", g:"member", url:B+"first-support/guide.html"},
   {ic:"🚀", nm:"活用の\n1stステップ", g:"member", url:B+"first-support/step1.html"},
+  /* チーム情報：ファーストサポートの3つが終わったら開きます（サポーター・クリエ・役割のある方も）。
+     押すと、スカイアークチームのページへ（v1.216 で「チーム作り」からかわりました） */
+  {ic:"🌈", nm:"チーム情報", g:"team", need:"team", url:B+"first-support/skyarc.html"},
   {ic:"📋", nm:"各種スケジュール情報", g:"apply", wide:true, kids:[
     {ic:"🗓", nm:"公式公認\nイベント", g:"apply", info:{
       text:"LINK公式・公認のイベントは、LINKのスケジュールサイトにまとまっています。こちらから日程を見て、お申し込みください。",
@@ -464,12 +469,6 @@ const TREE = [
       ]}
     ]}
     /* 各種スケジュール情報は「公式公認」と「チーム独自」だけ。予定のかぶりチェック・カレンダー形式は「クリエ以上向け」に移しました（v1.205） */
-  ]},
-  /* チーム作りは、サポーターになってから開きます */
-  {ic:"🌈", nm:"チーム作り", g:"team", need:"sup", kids:[
-    {ic:"💬", nm:"紹介・\nビジネス活動", g:"team", url:B+"first-support/skyarc-recruit.html"},
-    {ic:"🎪", nm:"サポート会・\n交流会", g:"team", url:B+"first-support/skyarc-community.html"},
-    {ic:"🏔", nm:"Skyarcチーム", g:"team", url:B+"first-support/skyarc.html"}
   ]},
   {ic:"🌱", nm:"クリエの部屋", g:"crie", need:"crie", kids:[
     {ic:"🌱", nm:"グルコン\nリーダー育成", g:"crie", url:B+"ikusei/gcon-roadmap.html"},
@@ -517,6 +516,12 @@ function ok(it){
     let g = null;
     try{ g = growNow(); }catch(e){ g = window.skyGrowth.mine(); }   /* 読みこみの途中は、この端末の記録で */
     return g === 3 && me.sup !== true && me.crie !== true && !String(me.role || "");
+  }
+  if(it.need === "team"){
+    if(String(me.role || "") || me.sup === true || me.crie === true) return true;
+    let g = null;
+    try{ g = growNow(); }catch(e){ g = window.skyGrowth.mine(); }
+    return g === 3;
   }
   if(it.need === "adv") return isAdv();
   if(it.need === "cal"){
@@ -596,7 +601,9 @@ const STAGE_PAD = 60;    /* いちばん下の小さな丸の名前のための�
 const RY_MIN = 185;      /* 輪をたてに縮めるときの下限（これより小さいと丸どうしが重なります） */
 function homesPair(n){
   W = Math.min(stage.clientWidth || 360, 440);
-  const cx = W/2, ring = n-2;
+  /* まん中のアカウントと、そのまわりの月（いまは2つ）をのぞいた数が、まわりの輪の丸の数です */
+  const moonN = TREE.filter(it=>it.moon && ok(it)).length;
+  const cx = W/2, ring = n-1-moonN;
   const rx = Math.max(W*.41, 140);
   /* 画面の高さに合わせて、たての広がりを決めます。
      その端末で見えている高さ（innerHeight）から、上の見出しと下の「Presented by／バージョン」の分を引いて、
@@ -612,7 +619,8 @@ function homesPair(n){
   const ry = Math.max(Math.min(ryWant, ryFit), RY_MIN);
   /* 輪がたてに縮んだぶん、月の通り道も少しだけ小さくします */
   ORBIT.ry = Math.round(ORBIT_RY0 * Math.max(Math.min(ry / ryWant, 1), .8));
-  const pts = [[0, 0], [0, ORBIT.ry]];
+  const pts = [[0, 0]];
+  for(let m=0; m<moonN; m++) pts.push([0, m % 2 ? -ORBIT.ry : ORBIT.ry]);
   for(let i=0;i<ring;i++){
     const a = -Math.PI/2 + i*2*Math.PI/ring;
     pts.push([Math.cos(a)*rx, Math.sin(a)*ry]);
@@ -843,6 +851,19 @@ function saveReturn(){
   try{ if(idx.length) sessionStorage.setItem(RET_KEY, JSON.stringify({ idx, t: Date.now() })); else sessionStorage.removeItem(RET_KEY); }catch(e){}
 }
 function restoreReturn(){
+  /* 「交流会・サポート会情報」から（チーム情報のページ・活用の1stステップ）：各種スケジュール情報（公式公認／チーム独自）の段を開きます */
+  if(location.hash === "#sched"){
+    try{ sessionStorage.removeItem(RET_KEY); }catch(e){}
+    try{ history.replaceState(null, "", location.pathname + location.search); }catch(e){}
+    const want = [/^各種スケジュール情報$/];
+    let list = TREE;
+    for(const re of want){
+      const it = list.find(x=>x.kids && re.test(x.nm));
+      if(!it || !ok(it)){ path.length = 0; return; }
+      path.push(it); list = it.kids;
+    }
+    return;
+  }
   let r = null;
   try{ r = JSON.parse(sessionStorage.getItem(RET_KEY) || "null"); sessionStorage.removeItem(RET_KEY); }catch(e){}
   if(!r || !Array.isArray(r.idx) || !me || location.hash) return;
@@ -867,7 +888,8 @@ function goBack(n){
 function frame(t){
   const all = nodes.concat(leaving);
   /* 月：アカウントのまわりを、ゆっくりまわります（つまんでいる間は止まります） */
-  const moon = path.length === 0 ? nodes.find(n=>n.it.moon) : null;
+  const moons = path.length === 0 ? nodes.filter(n=>n.it.moon) : [];
+  const moon = moons[0] || null;
   const earth = moon ? nodes.find(n=>n.it === TREE[0]) : null;
   let orb = document.getElementById("orbit");
   if(!orb){ orb = document.createElement("div"); orb.id = "orbit"; orb.className = "orbit"; orb.style.opacity = 0; stage.prepend(orb); }
@@ -876,19 +898,26 @@ function frame(t){
     orb.style.transform = `translate(${earth.x - ORBIT.rx}px, ${earth.y - ORBIT.ry}px)`;
     orb.style.opacity = earth.o;
   }else orb.style.opacity = 0;
-  if(moon && earth && moon !== drag && earth.hx != null){
-    const a = reduce ? Math.PI/2 : Math.PI/2 + t/1000 * 2*Math.PI/ORBIT.sec;
-    moon.hx = earth.hx + Math.cos(a)*ORBIT.rx;
-    moon.hy = earth.hy + Math.sin(a)*ORBIT.ry;
+  if(moon && earth && earth.hx != null){
+    const a0 = reduce ? Math.PI/2 : Math.PI/2 + t/1000 * 2*Math.PI/ORBIT.sec;
+    moons.forEach((mn, i)=>{
+      if(mn === drag) return;
+      const a = a0 + i*2*Math.PI/moons.length;   /* 2つなら、ちょうど反対側 */
+      mn.hx = earth.hx + Math.cos(a)*ORBIT.rx;
+      mn.hy = earth.hy + Math.sin(a)*ORBIT.ry;
+    });
   }
   for(const n of all){
     if(n !== drag){
       let ax = 0, ay = 0;
       if(n.hx != null){ ax = (n.hx - n.x)*.055; ay = (n.hy - n.y)*.055; }
-      if(moon && n !== moon && n !== earth && n !== drag && n.hx != null){
-        /* 月が近づいたら、ほかのアイコンは少しよけます */
-        const dx = n.x - moon.x, dy = n.y - (moon.y + 14), d = Math.hypot(dx,dy) || 1, R = 150;
-        if(d < R){ const f = (R-d)/R*7; ax += dx/d*f; ay += dy/d*f; n.dodge = true; } else n.dodge = false;
+      if(moon && !n.it.moon && n !== earth && n !== drag && n.hx != null){
+        /* 月が近づいたら、ほかのアイコンは少しよけます（月が2つでも同じ） */
+        n.dodge = false;
+        moons.forEach(mn=>{
+          const dx = n.x - mn.x, dy = n.y - (mn.y + 14), d = Math.hypot(dx,dy) || 1, R = 150;
+          if(d < R){ const f = (R-d)/R*7; ax += dx/d*f; ay += dy/d*f; n.dodge = true; }
+        });
       }
       /* 「使い方」の丸をつまんで近づけたときも、ほかのアイコンはよけます */
       const fd = [tutF, howF, memF, dbgF].find(x=>x && x.held && x.el.style.display !== "none") || null;
@@ -916,7 +945,7 @@ function frame(t){
       }
       if(moon && n.hx != null){
         /* よけるのは、もとの場所から少しだけ（となりのアイコンまで押し出さないように） */
-        const ox = n.x - n.hx, oy = n.y - n.hy, od = Math.hypot(ox, oy), MAXD = 56;
+        const ox = n.x - n.hx, oy = n.y - n.hy, od = Math.hypot(ox, oy), MAXD = 34;   /* 月が2つになったので、よける幅は小さめに */
         if(n.dodge && !drag && od > MAXD){ n.x = n.hx + ox/od*MAXD; n.y = n.hy + oy/od*MAXD; }
         /* よけても、画面の外へは出ません（名前が長いアイコンは、名前の幅まで見ます） */
         if(n.lw == null){ const nm = n.el.querySelector(".nm"); n.lw = nm ? nm.offsetWidth : 0; }
@@ -1674,10 +1703,10 @@ async function loadPoint(){
     if(!j || j.ok !== true || !j.progress) return;
     const done = {};
     POINT_ORDER.forEach(o=>{ done[o.app] = !!(j.progress[o.app] && j.progress[o.app].done); });
-    const wasG3 = ok({ need:"grow3" });
+    const wasG3 = ok({ need:"grow3" }), wasTeam = ok({ need:"team" });
     pointProg = done;
     try{ localStorage.setItem(POINT_KEY, JSON.stringify({ id: me.id, done: done })); }catch(e){}
-    if(wasG3 !== ok({ need:"grow3" }) && path.length === 0 && !drag) reflow();
+    if((wasG3 !== ok({ need:"grow3" }) || wasTeam !== ok({ need:"team" })) && path.length === 0 && !drag) reflow();
     paintPoint();
     setHello();
     celebrateQueue(j.celebrate);
