@@ -48,7 +48,7 @@ body{font-family:"Zen Kaku Gothic New",sans-serif;background:#FFFBF7;padding:16p
 <body>
 <div class="wrap">
 
-  <a href="../index.html" class="back-btn">← ホームに戻る</a>
+  <a href="../index.html" class="back-btn">← 戻る</a>
 
   <div class="hero">
     <h1>🚀 紹介・ビジネス活動サポート</h1>
@@ -104,7 +104,7 @@ body{font-family:"Zen Kaku Gothic New",sans-serif;background:#FFFBF7;padding:16p
     📝 わからない点は<strong>初期サポートグループライン</strong>でご質問ください❤️
   </div>
 
-  <a href="../index.html" class="back-btn2">← ホームに戻る</a>
+  <a href="../index.html" class="back-btn2">← 戻る</a>
 
 </div>
 <div style="text-align:center;font-size:9.5px;color:#C4B8B0;font-family:monospace;padding:14px 0 20px;"><span class="verTag"></span></div>
@@ -201,5 +201,13 @@ if(member) skySelf.get().then(v=>{ if(v){ selfVals = v; drawWaiwai(); } });
 </script>
 <script src="../track.js"></script>
 <script src="../menu.js"></script>
+<script>
+/* 戻るボタンは、ブラウザの「戻る」と同じ動きにします（このサイトから来たとき） */
+document.querySelectorAll("a.back-btn, a.back-btn2").forEach(a=>a.addEventListener("click", e=>{
+  let same = false;
+  try{ same = !!document.referrer && new URL(document.referrer).origin === location.origin; }catch(_){}
+  if(same && history.length > 1){ e.preventDefault(); history.back(); }
+}));
+</script>
 </body>
 </html>

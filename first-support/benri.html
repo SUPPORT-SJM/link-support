@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<script src="../config.js"></script>
+<script src="../nickname.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>便利な情報一覧 | LINK 初期サポート</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Zen Kaku Gothic New",sans-serif;background:#F6FBFF;padding:16px 14px 48px;color:#37474F;font-size:15px;line-height:1.8}
+.wrap{max-width:440px;margin:0 auto}
+.back-btn{display:inline-block;color:#1565C0;font-size:14px;font-weight:700;text-decoration:none;margin-bottom:14px}
+.hero{background:linear-gradient(135deg,#E3F2FD,#E8F5E9);border:2px solid #90CAF9;border-radius:18px;padding:16px;text-align:center;margin-bottom:14px}
+.hero h1{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:21px;color:#0D47A1}
+.hero p{font-size:13.5px;color:#37617F}
+h2{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:17px;color:#1565C0;margin:20px 0 10px;padding-bottom:5px;border-bottom:3px solid #BBDEFB}
+.links{display:grid;gap:9px}
+.lk{display:flex;align-items:center;gap:12px;background:#fff;border:2px solid #BBDEFB;border-radius:14px;padding:12px 14px;text-decoration:none;color:#0D47A1;font-weight:700;font-size:15.5px}
+.lk .ic{font-size:24px;width:30px;text-align:center;flex-shrink:0}
+.lk .tx{flex:1;line-height:1.45}
+.lk .tx small{display:block;font-size:12px;font-weight:500;color:#607D8B}
+.lk::after{content:"›";font-size:22px;color:#90CAF9}
+.lk.portal{background:linear-gradient(135deg,#1E88E5,#42A5F5);border:none;color:#fff}
+.lk.portal .tx small{color:#E3F2FD}.lk.portal::after{color:#fff}
+.card{background:#fff;border:2px solid #E3E8F0;border-radius:14px;padding:12px 14px}
+.row{padding:8px 0;border-bottom:1px dashed #E3E8F0}
+.row:last-child{border-bottom:none}
+.k{font-size:13px;font-weight:700;color:#1565C0}
+.v{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:20px;letter-spacing:.05em}
+.idrow{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.cpy{flex:none;padding:10px 14px;border-radius:12px;border:2px solid #43A047;background:#fff;color:#2E7D32;font-family:inherit;font-weight:700;font-size:14px;cursor:pointer}
+.cpy.done{background:#43A047;color:#fff}
+.cpy.wide{width:100%;margin-top:6px;font-size:15px;padding:12px}
+.cpmsg{display:block;font-size:13px;font-weight:700;color:#2E7D32;margin-top:4px;min-height:1em}
+.cpmsg a{color:#1565C0}
+.gen-label{font-size:13px;font-weight:700;color:#1565C0;margin:4px 0 5px;display:block}
+.gen-input,.gen-select{width:100%;border:1.5px solid #BBDEFB;border-radius:10px;padding:11px 12px;font-size:16px;font-family:inherit;color:#37474F;background:#fff;margin-bottom:10px}
+.result-box{background:#E3F2FD;border:2px solid #42A5F5;border-radius:10px;padding:12px;font-size:17px;font-weight:700;color:#0D47A1;text-align:center;word-break:break-all;margin-bottom:10px}
+.go{display:block;width:100%;padding:13px;border:none;border-radius:12px;background:#1E88E5;color:#fff;font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:16px;cursor:pointer}
+.go.done{background:#43A047}
+.hint{font-size:12.5px;color:#607D8B;text-align:center;margin-top:6px}
+.wip{background:#FFF8E1;border:2px dashed #FFD54F;border-radius:14px;padding:14px;font-size:14px;color:#6D4C41;text-align:center}
+.back-btn2{display:block;padding:14px;border-radius:12px;background:#1E88E5;color:#fff;text-align:center;font-size:16px;font-weight:700;text-decoration:none;margin-top:22px}
+@media (max-width:600px){ .hero{margin-right:58px;} }   /* 右上のメニューのボタンと重ならないように */
+</style>
+<link rel="stylesheet" href="../beta.css">
+<script src="../loading.js"></script>
+<script src="../login.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <a href="../index.html" class="back-btn">← ホームに戻る</a>
+
+  <div class="hero">
+    <h1>🧰 便利な情報一覧</h1>
+    <p>よく使うサイトや、自分の情報が<br>ここにまとまっています</p>
+  </div>
+
+  <!-- LINKのサイト -->
+  <h2>🔗 LINKのサイトをひらく</h2>
+  <div class="links">
+    <a class="lk portal" href="https://app.link-event-x.com" target="_blank" rel="noopener"><span class="ic">🏠</span><span class="tx">LINKポータル<small>LINKのサービスの入り口</small></span></a>
+    <a class="lk" href="https://member.link-platform.jp" target="_blank" rel="noopener"><span class="ic">💼</span><span class="tx">ビジネスマイページ<small>契約の内容・紹介URLの発行など</small></span></a>
+    <a class="lk" href="https://link-event-x.com/" target="_blank" rel="noopener"><span class="ic">🗓</span><span class="tx">LINK公認公式スケジュールサイト<small>LINKセミナー・スキルアップなどの日程</small></span></a>
+    <a class="lk" href="https://sasaeai.link-platform.jp/" target="_blank" rel="noopener"><span class="ic">🤝</span><span class="tx">SASAEAI マッチングサイト</span></a>
+    <a class="lk" href="https://link-base.jp/" target="_blank" rel="noopener"><span class="ic">🏢</span><span class="tx">LINK-BASEサイト</span></a>
+  </div>
+
+  <!-- 会員情報・紹介コード -->
+  <h2>👤 会員情報／紹介コード</h2>
+  <div class="card" id="memCard">
+    <div class="row"><span class="k">会員番号</span>
+      <div class="idrow"><span class="v" id="mId">–</span><button type="button" class="cpy" id="mCopy">📋 コピー</button></div>
+      <span class="cpmsg" id="mMsg" aria-live="polite"></span></div>
+    <div class="row"><span class="k">紹介コード（招待コードのURL）</span>
+      <button type="button" class="cpy wide" id="rCopy">🔗 紹介コードをコピーする</button>
+      <span class="cpmsg" id="rMsg" aria-live="polite"></span></div>
+  </div>
+
+  <!-- オープンチャットの名前 -->
+  <h2>🏷️ オープンチャットの名前づくり</h2>
+  <div class="card">
+    <label class="gen-label" for="nameInput">👤 あなたのお名前</label>
+    <input class="gen-input" id="nameInput" type="text" autocomplete="nickname" placeholder="例：しょうこ">
+    <label class="gen-label" for="seriesSelect">🏷️ 系列</label>
+    <select class="gen-select" id="seriesSelect"></select>
+    <div class="result-box" id="resultBox">👆 お名前と系列を入れてください</div>
+    <button type="button" class="go" id="nickCopy">📋 タップしてコピー</button>
+    <p class="hint" id="nickHint">LINKの中での、あなたのお名前（オープンチャットのニックネーム）です</p>
+  </div>
+
+  <!-- Zoom -->
+  <h2>🎥 LINKセミナー・LINK主催イベントのZoom</h2>
+  <div class="wip">🚧 Zoomの情報は、ただいま準備中です。</div>
+
+  <a href="../index.html" class="back-btn2">← ホームに戻る</a>
+</div>
+<div style="text-align:center;font-size:9.5px;color:#C4B8B0;font-family:monospace;padding:14px 0 20px;"></div>
+<script>
+/* ================================================================
+   便利な情報一覧（トップページの「便利な情報一覧」の丸から開きます）
+   ・LINKのサイト：LINKポータル・ビジネスマイページ・公認公式スケジュールサイト・SASAEAI・LINK-BASE
+   ・会員情報／紹介コード：ログインしている方の会員番号と、紹介URL（会員名簿の「紹介URL」）をコピーできます
+   ・オープンチャットの名前づくり：nickname.js の決まり（20文字）で作ります
+   ・Zoom：準備中
+================================================================ */
+const $ = s => document.querySelector(s);
+let me = null;
+try{ me = JSON.parse(localStorage.getItem("skyarc_member") || "null"); }catch(e){}
+if(me && !me.id) me = null;
+
+async function copyText(t){
+  try{ if(navigator.clipboard && window.isSecureContext){ await navigator.clipboard.writeText(t); return true; } }catch(e){}
+  try{
+    const ta = document.createElement("textarea");
+    ta.value = t; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.top = "-1000px"; ta.style.fontSize = "16px";
+    document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0, t.length);
+    const ok = document.execCommand("copy"); ta.remove(); return ok;
+  }catch(e){ return false; }
+}
+/* 会員番号は、LINKの会員番号の形（8けた）で見せます */
+function idText(id){ const t = String(id || "").trim(); return /^\d{1,7}$/.test(t) ? t.padStart(8, "0") : t; }
+
+/* ---------- 会員情報／紹介コード ---------- */
+if(!me){
+  $("#memCard").innerHTML = '<p style="text-align:center;font-size:14px;">ログインすると、会員番号と紹介コードが出ます。</p>';
+}else{
+  $("#mId").textContent = idText(me.id);
+  $("#mCopy").addEventListener("click", async ()=>{
+    const ok = await copyText(idText(me.id));
+    $("#mCopy").classList.toggle("done", ok); $("#mCopy").textContent = ok ? "✓ コピーしました" : "📋 コピー";
+    $("#mMsg").textContent = ok ? "そのまま、貼りつけて使えます" : "コピーできませんでした。番号を長押ししてコピーしてください";
+  });
+  $("#rCopy").addEventListener("click", async ()=>{
+    const url = String(me.refUrl || "").trim();
+    if(!url){
+      $("#rMsg").innerHTML = "紹介コードがまだ登録されていません。<br>"
+        + "<span style='font-weight:500;color:#37474F;'>紹介コード（URL）は、<b>ビジネスマイページ</b>を開いてログインし、右上のメニューの<b>「新規会員紹介」</b>から発行できます。発行したら、アカウントのページに貼りつけて登録してください。</span><br>"
+        + "<a href='https://member.link-platform.jp' target='_blank' rel='noopener'>ビジネスマイページを開く ›</a><br>"
+        + "<a href='../ikusei/account.html'>アカウントのページで登録する ›</a>";
+      return;
+    }
+    const ok = await copyText(url);
+    $("#rCopy").classList.toggle("done", ok); $("#rCopy").textContent = ok ? "✓ コピーしました" : "🔗 紹介コードをコピーする";
+    $("#rMsg").textContent = ok ? "招待コードのURLがコピーされました" : "コピーできませんでした。アカウントのページで、URLを長押ししてコピーしてください";
+  });
+}
+
+/* ---------- オープンチャットの名前づくり ---------- */
+(function(){
+  const sel = $("#seriesSelect"), nm = $("#nameInput"), box = $("#resultBox"), btn = $("#nickCopy"), hint = $("#nickHint");
+  sel.innerHTML = '<option value="">選んでください</option>' + (window.SKY_KEIRETSU || []).map(k=>`<option value="${k}">${k}</option>`).join("");
+  function update(){
+    const n = nm.value.trim(), k = sel.value;
+    if(!n || !k){ skyNick.clearWarn(box); box.textContent = !n && !k ? "👆 お名前と系列を入れてください" : (!n ? "👆 お名前を入れてください" : "👆 系列を選んでください"); return; }
+    skyNick.render(box, n, k);
+  }
+  nm.addEventListener("input", update); sel.addEventListener("change", update);
+  if(me){
+    if(me.name) nm.value = me.name;
+    if(me.keiretsu && Array.from(sel.options).some(o=>o.value === me.keiretsu)) sel.value = me.keiretsu;
+  }
+  update();
+  btn.addEventListener("click", async ()=>{
+    if(!nm.value.trim() || !sel.value){ hint.textContent = "⚠️ 先にお名前と系列を入れてください"; return; }
+    const ok = await copyText(skyNick.make(nm.value.trim(), sel.value).text);
+    btn.classList.toggle("done", ok); btn.textContent = ok ? "✓ コピーしました" : "📋 タップしてコピー";
+    hint.textContent = ok ? "オープンチャットのニックネームに貼りつけてください" : "コピーできませんでした。上の名前を長押ししてコピーしてください";
+  });
+})();
+
+</script>
+<script src="../track.js"></script>
+<script src="../menu.js"></script>
+</body>
+</html>
