@@ -850,10 +850,13 @@ function saveReturn(){
   }
   try{ if(idx.length) sessionStorage.setItem(RET_KEY, JSON.stringify({ idx, t: Date.now() })); else sessionStorage.removeItem(RET_KEY); }catch(e){}
 }
+let hashBack = false;
 function restoreReturn(){
   /* 「交流会・サポート会情報」から（チーム情報のページ・活用の1stステップ）：各種スケジュール情報（公式公認／チーム独自）の段を開きます */
   if(location.hash === "#sched"){
     try{ sessionStorage.removeItem(RET_KEY); }catch(e){}
+    /* この段の「もどる」は、開く前のページ（チーム情報など）へもどります */
+    try{ hashBack = !!document.referrer && new URL(document.referrer).origin === location.origin && history.length > 1; }catch(e){ hashBack = false; }
     try{ history.replaceState(null, "", location.pathname + location.search); }catch(e){}
     const want = [/^各種スケジュール情報$/];
     let list = TREE;
@@ -880,6 +883,8 @@ function restoreReturn(){
 
 /* 「もどる」のアイコンを押したら、1つ前の段へ */
 function goBack(n){
+  /* チーム情報のページなどから「各種スケジュール情報」の段へ来たときは、その段の「もどる」で、もとのページへ */
+  if(hashBack && path.length === 1){ hashBack = false; history.back(); return; }
   document.getElementById("info").hidden = true;
   goTo(()=> path.pop(), n ? n.x : undefined, n ? n.y : undefined, n);
 }
