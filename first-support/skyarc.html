@@ -14,7 +14,8 @@
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden}
 body{font-family:"Zen Kaku Gothic New",sans-serif;background:radial-gradient(ellipse at 50% 45%,#FFFFFF 0%,#FFF8F0 55%,#FDEFE3 100%);color:#4E342E}
-.back-btn{position:fixed;left:14px;top:calc(env(safe-area-inset-top) + 14px);z-index:20;display:inline-block;color:#E65100;font-size:14px;font-weight:700;text-decoration:none;background:rgba(255,255,255,.9);border-radius:999px;padding:6px 12px;box-shadow:0 2px 8px rgba(140,70,30,.12)}
+.ttl{position:fixed;left:16px;top:calc(env(safe-area-inset-top) + 18px);z-index:20;font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:18px;color:#4E342E;pointer-events:none}
+.verTag{position:fixed;left:0;right:12px;bottom:calc(env(safe-area-inset-bottom) + 4px);text-align:right;font-size:9.5px;color:#C4B8B0;font-family:monospace;pointer-events:none}
 #stage{position:fixed;inset:0;overflow:hidden}
 .orb{position:absolute;left:0;top:0;border:1px dashed rgba(230,120,50,.16);border-radius:50%;pointer-events:none}
 .bub{position:absolute;left:0;top:0;width:110px;display:flex;flex-direction:column;align-items:center;gap:5px;text-decoration:none;color:#4E342E;
@@ -24,12 +25,9 @@ body{font-family:"Zen Kaku Gothic New",sans-serif;background:radial-gradient(ell
 .bub .nm{font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:12px;line-height:1.3;text-align:center;white-space:pre;background:rgba(255,255,255,.9);border-radius:8px;padding:2px 7px}
 .bub.grab{cursor:grabbing}
 .bub.grab .ball{box-shadow:0 14px 28px rgba(140,70,30,.28)}
-.bub.sun{width:140px}
-.bub.sun .ball{width:96px;height:96px;font-size:44px;border:none;
-  background:conic-gradient(from 200deg,#F49AC1,#F5A97A,#F5D06A,#8FD9A8,#6FC7D9,#7BA3E8,#A88BE0,#F49AC1);box-shadow:0 0 0 8px rgba(255,200,150,.25),0 0 34px rgba(245,169,122,.45)}
-.bub.sun .ball span{display:grid;place-items:center;width:78px;height:78px;border-radius:50%;background:#fff}
-.bub.sun .nm{font-weight:900;font-size:15px;color:#E65100}
-@media (max-width:380px){ .bub.sun .ball{width:84px;height:84px;font-size:38px} .bub.sun .ball span{width:68px;height:68px} }   /* せまい画面では、まんなかを少し小さく */
+.bub.sun{width:120px}
+.bub.sun .ball{width:76px;height:76px;font-size:34px;border:3px solid #8E86C8;background:#fff;box-shadow:0 0 0 7px rgba(142,134,200,.14),0 6px 18px rgba(80,60,140,.18)}
+.bub.sun .nm{font-weight:900;font-size:14px;color:#6E5FB5}
 /* ポップアップ（マルシェ情報） */
 .sheet{position:fixed;inset:0;z-index:8500;background:rgba(60,30,10,.45);display:flex;align-items:center;justify-content:center;padding:16px}
 .sheet[hidden]{display:none}
@@ -37,26 +35,49 @@ body{font-family:"Zen Kaku Gothic New",sans-serif;background:radial-gradient(ell
 .pop h2{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:17px;color:#E65100;margin:0 0 10px;padding-bottom:5px;border-bottom:3px solid #FFD6A0}
 .pop p{font-size:14px;color:#5D4037;line-height:1.9;margin-bottom:8px}
 .coming{background:#FFF8E1;border:2px dashed #FFD54F;border-radius:12px;padding:12px;text-align:center;font-size:14px;color:#6D4C41;margin-top:6px}
-.closeb{display:block;width:100%;margin-top:14px;padding:12px;border-radius:12px;border:none;background:#FF7043;color:#fff;font-family:inherit;font-weight:700;font-size:15px;cursor:pointer}
+.closeb{display:block;width:100%;margin-top:10px;padding:12px;border-radius:12px;border:2px solid #CFD8DC;background:#fff;color:#455A64;font-family:inherit;font-weight:700;font-size:15px;cursor:pointer}
+.gob{display:block;width:100%;margin-top:14px;padding:13px;border-radius:12px;background:#FF7043;color:#fff;text-align:center;font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:16px;text-decoration:none}
+.ext{font-size:12.5px !important;color:#8D6E63 !important;margin:6px 0 0 !important;text-align:center}
 </style>
 <link rel="stylesheet" href="../beta.css">
 <script src="../loading.js"></script>
 <script src="../login.js"></script>
 </head>
 <body>
-<a href="../index.html" class="back-btn">← 戻る</a>
+<div class="ttl">🌈 チーム情報</div>
 
-<!-- まんなか：Skyarc専用サイト／まわり：3つがぐるぐる（どの丸も、つまんで引っぱれます） -->
+<!-- まんなか：もどる／まわり：4つがぐるぐる（どの丸も、つまんで引っぱれます） -->
 <div id="stage">
   <div class="orb" id="orb"></div>
-  <a class="bub sun" href="https://skyarc.life/" target="_blank" rel="noopener"><span class="ball"><span>🌈</span></span><span class="nm">Skyarc
-専用サイト</span></a>
-  <a class="bub ring" href="../index.html#sched"><span class="ball">🤝</span><span class="nm">交流会・
-サポート会情報</span></a>
+  <a class="bub sun back-btn" href="../index.html"><span class="ball">↩️</span><span class="nm">もどる</span></a>
+  <button type="button" class="bub ring" data-pop="popSkyarc"><span class="ball">🌈</span><span class="nm">Skyarc
+専用サイト</span></button>
+  <button type="button" class="bub ring" data-pop="popKouryu"><span class="ball">🤝</span><span class="nm">交流会・
+サポート会情報</span></button>
   <button type="button" class="bub ring" data-pop="popMarche"><span class="ball">🛍️</span><span class="nm">マルシェ情報</span></button>
   <a class="bub ring" href="skyarc-recruit.html"><span class="ball">🚀</span><span class="nm">紹介・ビジネス
 活動サポート</span></a>
 </div>
+<div class="verTag"></div>
+
+<!-- Skyarc専用サイト（ポップアップ） -->
+<div class="sheet" id="popSkyarc" hidden><div class="pop" role="dialog" aria-modal="true">
+  <h2>🌈 Skyarc専用サイト</h2>
+  <p>Skyarcメンバー向けの専用サイトです。<br>有志メンバーが作ってくれた、Skyarcの活用マニュアルです。</p>
+  <p>こちらもぜひご覧いただけると嬉しいです✨</p>
+  <a class="gob" href="https://skyarc.life/" target="_blank" rel="noopener">🌈 アクセスする</a>
+  <p class="ext">※タップすると、外部サイト（新しいタブ）へ移動します</p>
+  <button type="button" class="closeb">← 戻る</button>
+</div></div>
+
+<!-- 交流会・サポート会情報（ポップアップ） -->
+<div class="sheet" id="popKouryu" hidden><div class="pop" role="dialog" aria-modal="true">
+  <h2>🤝 交流会・サポート会情報</h2>
+  <p>交流会やサポート会などの情報へ移動します。</p>
+  <p>チーム独自の、より身近な交流と、公式公認イベントの全体的な交流など、いろいろなスケジュールを確認することができます。</p>
+  <a class="gob" href="../index.html#sched">📋 各種スケジュール情報へ</a>
+  <button type="button" class="closeb">← 戻る</button>
+</div></div>
 
 <!-- マルシェ情報（ポップアップ） -->
 <div class="sheet" id="popMarche" hidden><div class="pop" role="dialog" aria-modal="true">
@@ -71,9 +92,11 @@ body{font-family:"Zen Kaku Gothic New",sans-serif;background:radial-gradient(ell
 <script src="../menu.js"></script>
 <script>
 /* ================================================================
-   チーム情報（スカイアークチームのページ）  v1.221
-   ・まんなか：Skyarc専用サイト（押すと skyarc.life が開きます）。ふわふわ浮いています
-   ・まわりの3つ：交流会・サポート会情報（トップの「各種スケジュール情報」の段へ）／
+   チーム情報（スカイアークチームのページ）  v1.221 → v1.222
+   v1.222：まんなかを「もどる」に。Skyarc専用サイト・交流会・サポート会情報は、押すと説明が出てから移動します
+   ・まんなか：もどる（ブラウザの「戻る」と同じ）。ふわふわ浮いています
+   ・まわりの4つ：Skyarc専用サイト（説明 → skyarc.life を新しいタブで）／
+     交流会・サポート会情報（説明 → トップの「各種スケジュール情報」の段へ）／
      マルシェ情報（ポップアップ）／紹介・ビジネス活動サポート（skyarc-recruit.html）
    ・どの丸も、つまんで引っぱると「ビヨーン」とのび、はなすと元の場所へ（ホームと同じ）
 ================================================================ */
@@ -147,7 +170,7 @@ document.addEventListener("keydown", e=>{ if(e.key === "Escape") closePops(); })
     N.forEach(n=>{
       let hx = cx, hy = cy;
       if(n.kind === "ring"){
-        const a = sec * 2 * Math.PI / 36 + n.k * 2 * Math.PI / 3 - Math.PI / 2;   /* 36秒でひとまわり */
+        const a = sec * 2 * Math.PI / 40 + n.k * 2 * Math.PI / 4 - Math.PI / 2;   /* 40秒でひとまわり */
         hx = cx + R.x * Math.cos(a); hy = cy + R.y * Math.sin(a);
       }
       if(n.x == null){ n.x = hx; n.y = hy; }
