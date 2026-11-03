@@ -16,17 +16,24 @@ html,body{height:100%;overflow:hidden}
 body{font-family:"Zen Kaku Gothic New",sans-serif;background:radial-gradient(ellipse at 50% 45%,#FFFFFF 0%,#F2F8FF 55%,#E8F1FB 100%);color:#37474F;font-size:15px;line-height:1.8}
 .back-btn{position:fixed;left:14px;top:calc(env(safe-area-inset-top) + 14px);z-index:20;display:inline-block;color:#1565C0;font-size:14px;font-weight:700;text-decoration:none;background:rgba(255,255,255,.9);border-radius:999px;padding:6px 12px;box-shadow:0 2px 8px rgba(30,80,140,.12)}
 #stage{position:fixed;left:0;right:0;top:0;bottom:0;overflow:hidden}
-.orb{position:absolute;border:1.5px dashed rgba(66,133,214,.28);border-radius:50%;pointer-events:none}
+.orb{position:absolute;left:0;top:0;border:1px dashed rgba(66,133,214,.12);border-radius:50%;pointer-events:none}
+.orb.o{border-color:rgba(232,135,58,.16)}
 .bub{position:absolute;left:0;top:0;width:92px;display:flex;flex-direction:column;align-items:center;gap:4px;text-decoration:none;color:#263238;
-  cursor:pointer;-webkit-tap-highlight-color:transparent;will-change:transform;background:none;border:none;font-family:inherit;padding:0}
+  cursor:pointer;-webkit-tap-highlight-color:transparent;will-change:transform;background:none;border:none;font-family:inherit;padding:0;
+  touch-action:none;user-select:none;-webkit-user-select:none;-webkit-user-drag:none;transform-origin:50% 27px}
+.bub.grab{cursor:grabbing}
+.bub.grab .ball{box-shadow:0 14px 28px rgba(30,80,140,.28)}
 .bub .ball{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;font-size:25px;background:#fff;border:3px solid var(--c);
   box-shadow:0 6px 16px rgba(30,80,140,.16)}
 .bub .nm{font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:11px;line-height:1.25;text-align:center;white-space:pre;
   background:rgba(255,255,255,.9);border-radius:8px;padding:2px 6px}
 .bub.in{--c:#4E86D6}
 .bub.out{--c:#E8873A}
-.bub.out .ball{width:58px;height:58px}
-.sun{position:absolute;left:0;top:0;width:120px;display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none}
+.bub.out{width:80px;transform-origin:50% 15px}
+.bub.out .ball{width:29px;height:29px;font-size:14px;border-width:2px}   /* 外がわの3つは、半分の大きさ */
+.bub.out .nm{font-size:9.5px;padding:1px 4px;border-radius:6px}
+.sun{position:absolute;left:0;top:0;width:120px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:grab;
+  touch-action:none;user-select:none;-webkit-user-select:none;transform-origin:50% 36px}
 .sun .ball{width:72px;height:72px;border-radius:50%;display:grid;place-items:center;font-size:32px;
   background:radial-gradient(circle at 35% 30%,#FFF9C4,#FFD54F 60%,#FFB300);box-shadow:0 0 0 8px rgba(255,213,79,.25),0 0 34px rgba(255,193,7,.45)}
 .sun .nm{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:15px;color:#0D47A1;line-height:1.25;text-align:center;
@@ -67,7 +74,7 @@ body{font-family:"Zen Kaku Gothic New",sans-serif;background:radial-gradient(ell
 <!-- 太陽系：まんなかに「便利な情報一覧」、内がわの輪にLINKのサイト（押すとそのページへ）、外がわの輪にポップアップ -->
 <div id="stage">
   <div class="orb" id="orbIn"></div>
-  <div class="orb" id="orbOut"></div>
+  <div class="orb o" id="orbOut"></div>
   <div class="sun" id="sun"><div class="ball">🧰</div><div class="nm">便利な<br>情報一覧</div></div>
   <a class="bub in" href="https://app.link-event-x.com" target="_blank" rel="noopener"><span class="ball">🏠</span><span class="nm">LINKポータル</span></a>
   <a class="bub in" href="https://member.link-platform.jp" target="_blank" rel="noopener"><span class="ball">💼</span><span class="nm">ビジネス
@@ -138,6 +145,8 @@ body{font-family:"Zen Kaku Gothic New",sans-serif;background:radial-gradient(ell
    v1.219：トップページのように、丸がぐるぐるまわる「太陽系」の形にしました。
      まんなか：便利な情報一覧／内がわの輪：LINKのサイト5つ（押すとそのページへ）
      外がわの輪：会員情報・紹介コード／オープンチャットの名前づくり／Zoom（押すとポップアップ）
+   v1.220：青い輪はたてにまっすぐ・外がわの3つは半分の大きさで、ななめにクロスする輪をまわります。
+     どの丸も、つまんで引っぱれます（ホームと同じ「ビヨーン」）
 ================================================================ */
 const $ = s => document.querySelector(s);
 let me = null;
@@ -233,50 +242,113 @@ document.querySelectorAll(".sheet").forEach(s=>{
 });
 document.addEventListener("keydown", e=>{ if(e.key === "Escape") closePops(); });
 
-/* ---------- 太陽系（ぐるぐる） ---------- */
+/* ---------- 太陽系（ぐるぐる） ----------
+   ・まんなかの「便利な情報一覧」は、ふわふわ浮いています
+   ・青い輪（LINKのサイト5つ）：輪はたてにまっすぐで動かず、丸だけが輪の上をまわります
+   ・オレンジの輪（ポップアップの3つ）：輪そのものがゆっくり回転しながら、奥・手前にゆらゆら（Z軸のゆらぎ）
+   ・どの丸も、つまんで引っぱると「ビヨーン」とのび、はなすと元の場所へもどります（ホームと同じ）。
+     つまんだ丸が近づくと、ほかの丸はよけます */
 (function(){
-  const stage = $("#stage"), sun = $("#sun");
-  const ins = [...document.querySelectorAll(".bub.in")], outs = [...document.querySelectorAll(".bub.out")];
-  const all = ins.concat(outs);
+  const stage = $("#stage"), sun = $("#sun"), orbIn = $("#orbIn"), orbOut = $("#orbOut");
   const reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
-  let W, H, cx, cy, ri, ro;
+  const N = [];
+  N.push({ el: sun, kind: "sun", ph: 0 });
+  document.querySelectorAll(".bub.in").forEach((el, i)=>N.push({ el, kind: "in", k: i, ph: i * 1.3 }));
+  document.querySelectorAll(".bub.out").forEach((el, i)=>N.push({ el, kind: "out", k: i, ph: i * 2.1 }));
+  N.forEach(n=>{ n.x = null; n.y = null; n.vx = 0; n.vy = 0; n.s = 1; n.ts = 1; n.el.draggable = false; });
+  let W, H, cx, cy, RI, RO;
   function size(){
     W = innerWidth; H = innerHeight;
-    /* 上：戻る・メニューのボタンの下から（丸の上はし）／下：名前の下はしが、管理者モードのボタンにかからないところまで */
+    /* 上：戻る・メニューのボタンの下から／下：名前の下はしが、管理者モードのボタンにかからないところまで */
     const yTop = 64 + 46, yBot = H - 50 - 72;
     cx = W / 2; cy = (yTop + yBot) / 2;
-    ro = { x: Math.min(W / 2 - 54, 300), y: Math.max(120, Math.min((yBot - yTop) / 2, 330)) };
-    ri = { x: Math.max(82, ro.x * 0.62), y: Math.max(125, ro.y * 0.66) };
-    const o1 = $("#orbIn"), o2 = $("#orbOut");
-    o1.style.cssText = `left:${cx-ri.x}px;top:${cy-ri.y}px;width:${ri.x*2}px;height:${ri.y*2}px`;
-    o2.style.cssText = `left:${cx-ro.x}px;top:${cy-ro.y}px;width:${ro.x*2}px;height:${ro.y*2}px`;
-    sun.style.transform = `translate(${cx - sun.offsetWidth/2}px,${cy - sun.querySelector(".ball").offsetHeight/2}px)`;
+    const half = (yBot - yTop) / 2;
+    RI = { x: Math.min(W * 0.34, 170), y: 0 };
+    RI.y = Math.min(half, RI.x * 1.45);
+    RO = { x: Math.min(W / 2 - 40, RI.x * 1.34), y0: 0 };
+    RO.y0 = RO.x * 0.39;
+    orbIn.style.cssText = `width:${RI.x*2}px;height:${RI.y*2}px;transform:translate(${cx-RI.x}px,${cy-RI.y}px)`;
+    N.forEach(n=>{ n.lw = null; });
   }
   size(); addEventListener("resize", size);
-  /* 丸の中心（ボールの中心）を、軌道の上に置きます */
-  const off = el => ({ x: el.offsetWidth / 2, y: el.querySelector(".ball").offsetHeight / 2 });
-  let held = false, last = performance.now(), ang = -Math.PI / 2;
-  stage.addEventListener("pointerdown", e=>{ if(e.target.closest(".bub")) held = true; });
-  addEventListener("pointerup", ()=>{ held = false; }); addEventListener("pointercancel", ()=>{ held = false; });
-  /* 内がわ5つは等間隔。外がわ3つは、内がわの丸と丸のあいだ（すき間のまんなか）に置き、
-     内と外がいっしょにまわるので、すれちがって重なることがありません */
-  const G = 2 * Math.PI / 5;
-  const outAt = [0.5 * G, 2.5 * G, 3.5 * G];
-  const pos = all.map(()=>({ x: 0, y: 0 }));
-  function frame(t){
-    const dt = Math.min(64, t - last); last = t;
-    if(!reduce && !held && !popOpen) ang += dt * (2 * Math.PI / 80000);   /* 80秒でひとまわり */
-    all.forEach((el, i)=>{
-      const isIn = i < ins.length, k = isIn ? i : i - ins.length;
-      const a = ang + (isIn ? k * G : outAt[k]), r = isIn ? ri : ro;
-      pos[i].x = cx + r.x * Math.cos(a); pos[i].y = cy + r.y * Math.sin(a);
+
+  /* ---- つまむ ---- */
+  let drag = null, lastDragEnd = 0;
+  N.forEach(n=>{
+    const el = n.el; let sx, sy, offx, offy, pid = null, moved = false;
+    el.addEventListener("pointerdown", e=>{
+      if(e.button !== undefined && e.button !== 0) return;
+      pid = e.pointerId; sx = e.clientX; sy = e.clientY; moved = false;
+      offx = e.clientX - n.x; offy = e.clientY - n.y;
+      try{ el.setPointerCapture(pid); }catch(_){}
     });
-    all.forEach((el, i)=>{
-      const o = off(el), p = pos[i];
-      /* 名前が画面の左右からはみ出さないように */
-      const hw = Math.max(o.x, el.querySelector(".nm").offsetWidth / 2) + 4;
-      const x = Math.min(Math.max(p.x, hw), W - hw);
-      el.style.transform = `translate(${(x - o.x).toFixed(1)}px,${(p.y - o.y).toFixed(1)}px)`;
+    el.addEventListener("pointermove", e=>{
+      if(pid !== e.pointerId) return;
+      if(!moved && Math.hypot(e.clientX - sx, e.clientY - sy) > 8){ moved = true; drag = n; n.ts = 1.12; el.classList.add("grab"); }
+      if(moved){
+        const nx = e.clientX - offx, ny = e.clientY - offy;
+        n.vx = nx - n.x; n.vy = ny - n.y; n.x = nx; n.y = ny;
+      }
+    });
+    const end = e=>{
+      if(pid !== e.pointerId) return;
+      pid = null;
+      if(moved){ drag = null; n.ts = 1; el.classList.remove("grab"); lastDragEnd = performance.now(); }
+    };
+    el.addEventListener("pointerup", end); el.addEventListener("pointercancel", end);
+    /* つまんで動かしたあとは、ページやポップアップは開かず、元の場所へもどるだけ */
+    el.addEventListener("click", e=>{
+      if(performance.now() - lastDragEnd < 400){ e.preventDefault(); e.stopImmediatePropagation(); }
+    }, true);
+    el.addEventListener("dragstart", e=>e.preventDefault());
+  });
+
+  /* ---- うごき ---- */
+  let last = null, sec = 0;
+  function frame(t){
+    const dt = last == null ? 0 : Math.min(64, t - last); last = t;
+    if(!reduce && !popOpen) sec += dt / 1000;   /* ポップアップを開いている間は、まわるのを止めます */
+    /* オレンジの輪：回転（45秒でひとまわり）と、Z軸のゆらぎ（7秒で1回） */
+    const tilt = (38 - sec * 360 / 45) * Math.PI / 180;
+    const ry = RO.y0 * (0.55 + 0.45 * Math.sin(sec * 2 * Math.PI / 7));
+    orbOut.style.cssText = `width:${RO.x*2}px;height:${ry*2}px;transform:translate(${cx-RO.x}px,${cy-ry}px) rotate(${tilt*180/Math.PI}deg)`;
+    N.forEach(n=>{
+      let hx, hy, depth = 0;
+      if(n.kind === "sun"){ hx = cx; hy = cy; }
+      else if(n.kind === "in"){
+        const a = sec * 2 * Math.PI / 30 + n.k * 2 * Math.PI / 5 - Math.PI / 2;   /* 30秒でひとまわり */
+        hx = cx + RI.x * Math.cos(a); hy = cy + RI.y * Math.sin(a);
+      }else{
+        const a = -sec * 2 * Math.PI / 22 + n.k * 2 * Math.PI / 3;              /* 反対まわりに22秒でひとまわり */
+        const x0 = RO.x * Math.cos(a), y0 = ry * Math.sin(a);
+        hx = cx + x0 * Math.cos(tilt) - y0 * Math.sin(tilt);
+        hy = cy + x0 * Math.sin(tilt) + y0 * Math.cos(tilt);
+        depth = Math.sin(a);                                                     /* 手前（+）ほど少し大きく、青い丸の前を通ります */
+      }
+      n.depth = depth;
+      if(n.x == null){ n.x = hx; n.y = hy; }
+      if(n !== drag){
+        let ax = (hx - n.x) * .055, ay = (hy - n.y) * .055;
+        if(drag){
+          /* つまんだ丸が近づくと、よけながら混ざります（ホームと同じ） */
+          const dx = n.x - drag.x, dy = n.y - drag.y, d = Math.hypot(dx, dy) || 1, R = 130;
+          if(d < R){ const f = (R - d) / R * 7; ax += dx / d * f; ay += dy / d * f;
+            ax += (-dy / d) * .35 + (Math.random() - .5) * .9; ay += (dx / d) * .35 + (Math.random() - .5) * .9; }
+        }
+        n.vx = (n.vx + ax) * .84; n.vy = (n.vy + ay) * .84;
+        n.x += n.vx; n.y += n.vy;
+        /* 名前が画面の左右からはみ出さないように */
+        if(n.lw == null){ const nm = n.el.querySelector(".nm"); n.lw = nm ? nm.offsetWidth : 0; }
+        const lim = Math.max(n.el.offsetWidth / 2, n.lw / 2) + 4;
+        n.x = Math.min(Math.max(n.x, lim), W - lim);
+      }
+      n.s += (n.ts - n.s) * .2;
+      const fy = reduce || n === drag ? 0 : Math.sin(t / 650 + n.ph) * (n.kind === "sun" ? 6 : 4);
+      const fx = reduce || n === drag ? 0 : Math.cos(t / 900 + n.ph) * 2.5;
+      const sc = n.s * (n.kind === "out" ? 0.86 + 0.14 * (depth + 1) / 2 : 1);
+      const hb = n.el.querySelector(".ball").offsetHeight / 2;
+      n.el.style.transform = `translate(${(n.x - n.el.offsetWidth / 2 + fx).toFixed(1)}px,${(n.y - hb + fy).toFixed(1)}px) scale(${sc.toFixed(3)})`;
+      n.el.style.zIndex = n === drag ? 9 : (n.kind === "out" ? (depth > 0 ? 6 : 2) : (n.kind === "sun" ? 3 : 4));
     });
     requestAnimationFrame(frame);
   }
