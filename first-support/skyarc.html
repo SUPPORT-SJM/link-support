@@ -12,98 +12,170 @@
 <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:"Zen Kaku Gothic New",sans-serif;background:#FFFBF7;padding:16px 14px 48px}
-.wrap{max-width:390px;margin:0 auto}
-.back-btn{display:flex;align-items:center;gap:6px;color:#FF7043;font-size:13px;font-weight:700;text-decoration:none;margin-bottom:16px}
-.hero{background:linear-gradient(135deg,#FFF8E1,#FFF0F0);border-radius:16px;padding:20px 16px;margin-bottom:20px;border:1px solid #FFD6A0;text-align:center}
-.hero-emoji{font-size:32px;margin-bottom:8px}
-.hero h1{font-size:17px;font-family:"Zen Maru Gothic",sans-serif;font-weight:700;color:#E65100;line-height:1.7;margin-bottom:8px}
-.hero p{font-size:13px;color:#795548;line-height:1.9}
-.section{margin-bottom:20px}
-.section-ttl{font-size:15px;font-weight:700;color:#E65100;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #FFD6A0}
-.card{background:#fff;border:1px solid #F0E0D0;border-radius:12px;padding:14px;margin-bottom:10px}
-.card p{font-size:14px;color:#5D4037;line-height:1.9;margin-bottom:8px}
-.card p:last-child{margin-bottom:0}
-.note{background:#FFF8E1;border-radius:8px;padding:10px 12px;font-size:13px;color:#5D4037;line-height:1.85;border-left:3px solid #FFD54F;margin:10px 0}
-.nav-btn{display:flex;align-items:center;gap:10px;padding:14px 16px;background:#fff;border:1px solid #FFD0B0;border-radius:12px;text-decoration:none;margin-bottom:10px}
-.nav-btn:hover{background:#FFF8F5}
-.nav-icon{font-size:24px;flex-shrink:0}
-.nav-body{}
-.nav-ttl{font-size:14px;font-weight:700;color:#E65100;line-height:1.4}
-.nav-sub{font-size:11px;color:#A1887F;margin-top:2px}
-.lbtn{display:flex;align-items:center;gap:8px;padding:12px 14px;border-radius:10px;font-size:13px;font-weight:500;text-decoration:none;margin:8px 0}
-.lbtn-or{border:1px solid #FFCCBC;background:#FFF8F5;color:#BF360C}
-.back-btn2{display:block;padding:14px;border-radius:12px;background:#FF7043;color:#fff;text-align:center;font-size:15px;font-weight:700;text-decoration:none;margin-top:20px}
+html,body{height:100%;overflow:hidden}
+body{font-family:"Zen Kaku Gothic New",sans-serif;background:radial-gradient(ellipse at 50% 45%,#FFFFFF 0%,#FFF8F0 55%,#FDEFE3 100%);color:#4E342E}
+.back-btn{position:fixed;left:14px;top:calc(env(safe-area-inset-top) + 14px);z-index:20;display:inline-block;color:#E65100;font-size:14px;font-weight:700;text-decoration:none;background:rgba(255,255,255,.9);border-radius:999px;padding:6px 12px;box-shadow:0 2px 8px rgba(140,70,30,.12)}
+#stage{position:fixed;inset:0;overflow:hidden}
+.orb{position:absolute;left:0;top:0;border:1px dashed rgba(230,120,50,.16);border-radius:50%;pointer-events:none}
+.bub{position:absolute;left:0;top:0;width:110px;display:flex;flex-direction:column;align-items:center;gap:5px;text-decoration:none;color:#4E342E;
+  cursor:pointer;-webkit-tap-highlight-color:transparent;will-change:transform;background:none;border:none;font-family:inherit;padding:0;
+  touch-action:none;user-select:none;-webkit-user-select:none;-webkit-user-drag:none}
+.bub .ball{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;font-size:29px;background:#fff;border:3px solid #FF8A50;box-shadow:0 6px 16px rgba(140,70,30,.16)}
+.bub .nm{font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:12px;line-height:1.3;text-align:center;white-space:pre;background:rgba(255,255,255,.9);border-radius:8px;padding:2px 7px}
+.bub.grab{cursor:grabbing}
+.bub.grab .ball{box-shadow:0 14px 28px rgba(140,70,30,.28)}
+.bub.sun{width:140px}
+.bub.sun .ball{width:96px;height:96px;font-size:44px;border:none;
+  background:conic-gradient(from 200deg,#F49AC1,#F5A97A,#F5D06A,#8FD9A8,#6FC7D9,#7BA3E8,#A88BE0,#F49AC1);box-shadow:0 0 0 8px rgba(255,200,150,.25),0 0 34px rgba(245,169,122,.45)}
+.bub.sun .ball span{display:grid;place-items:center;width:78px;height:78px;border-radius:50%;background:#fff}
+.bub.sun .nm{font-weight:900;font-size:15px;color:#E65100}
+@media (max-width:380px){ .bub.sun .ball{width:84px;height:84px;font-size:38px} .bub.sun .ball span{width:68px;height:68px} }   /* せまい画面では、まんなかを少し小さく */
+/* ポップアップ（マルシェ情報） */
+.sheet{position:fixed;inset:0;z-index:8500;background:rgba(60,30,10,.45);display:flex;align-items:center;justify-content:center;padding:16px}
+.sheet[hidden]{display:none}
+.pop{width:100%;max-width:420px;max-height:calc(100vh - 32px);overflow:auto;background:#fff;border-radius:20px;padding:18px 16px 16px;box-shadow:0 18px 40px rgba(0,0,0,.25)}
+.pop h2{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:17px;color:#E65100;margin:0 0 10px;padding-bottom:5px;border-bottom:3px solid #FFD6A0}
+.pop p{font-size:14px;color:#5D4037;line-height:1.9;margin-bottom:8px}
+.coming{background:#FFF8E1;border:2px dashed #FFD54F;border-radius:12px;padding:12px;text-align:center;font-size:14px;color:#6D4C41;margin-top:6px}
+.closeb{display:block;width:100%;margin-top:14px;padding:12px;border-radius:12px;border:none;background:#FF7043;color:#fff;font-family:inherit;font-weight:700;font-size:15px;cursor:pointer}
 </style>
 <link rel="stylesheet" href="../beta.css">
 <script src="../loading.js"></script>
 <script src="../login.js"></script>
 </head>
 <body>
-<div class="wrap">
+<a href="../index.html" class="back-btn">← 戻る</a>
 
-  <a href="../index.html" class="back-btn">← 戻る</a>
-
-  <div class="hero">
-    <div class="hero-emoji">🌈</div>
-    <h1>Skyarcの仲間と<br>いち早く繋がろう！</h1>
-    <p>Skyarcチームメンバー向けの情報をまとめています✨</p>
-  </div>
-
-  <div class="section">
-    <div class="section-ttl">🔗 Skyarc専用サイト</div>
-    <div class="card">
-      <p>Skyarcメンバー向けの専用サイトはこちら👇</p>
-    </div>
-    <a href="https://skyarc.life/" target="_blank" class="lbtn lbtn-or">🌈 Skyarc専用サイトを開く</a>
-  </div>
-
-  <div class="section">
-    <div class="section-ttl">📋 各種ページ</div>
-    <p style="font-size:13px;color:#5D4037;margin-bottom:12px;line-height:1.8">Skyarcの活動に関する情報をカテゴリ別にまとめています👇</p>
-
-    <a href="../index.html#sched" class="nav-btn">
-      <div class="nav-icon">🤝</div>
-      <div class="nav-body">
-        <div class="nav-ttl">交流会・サポート会情報</div>
-        <div class="nav-sub">チーム交流会・ユーザーサポート会の申し込みなど</div>
-      </div>
-    </a>
-
-    <a href="skyarc-marche.html" class="nav-btn">
-      <div class="nav-icon">🛍️</div>
-      <div class="nav-body">
-        <div class="nav-ttl">マルシェ情報</div>
-        <div class="nav-sub">マルシェのまとめ・申し込みなど</div>
-      </div>
-    </a>
-
-    <a href="skyarc-recruit.html" class="nav-btn">
-      <div class="nav-icon">🚀</div>
-      <div class="nav-body">
-        <div class="nav-ttl">紹介・ビジネス活動サポート</div>
-        <div class="nav-sub">ワイワイチャット・アポ部屋・Bトレなど</div>
-      </div>
-    </a>
-  </div>
-
-  <div class="note">
-    📝 わからない点は<strong>初期サポートグループライン</strong>でご質問ください❤️
-  </div>
-
-  <a href="../index.html" class="back-btn2">← 戻る</a>
-
+<!-- まんなか：Skyarc専用サイト／まわり：3つがぐるぐる（どの丸も、つまんで引っぱれます） -->
+<div id="stage">
+  <div class="orb" id="orb"></div>
+  <a class="bub sun" href="https://skyarc.life/" target="_blank" rel="noopener"><span class="ball"><span>🌈</span></span><span class="nm">Skyarc
+専用サイト</span></a>
+  <a class="bub ring" href="../index.html#sched"><span class="ball">🤝</span><span class="nm">交流会・
+サポート会情報</span></a>
+  <button type="button" class="bub ring" data-pop="popMarche"><span class="ball">🛍️</span><span class="nm">マルシェ情報</span></button>
+  <a class="bub ring" href="skyarc-recruit.html"><span class="ball">🚀</span><span class="nm">紹介・ビジネス
+活動サポート</span></a>
 </div>
-<div style="text-align:center;font-size:9.5px;color:#C4B8B0;font-family:monospace;padding:14px 0 20px;"></div>
+
+<!-- マルシェ情報（ポップアップ） -->
+<div class="sheet" id="popMarche" hidden><div class="pop" role="dialog" aria-modal="true">
+  <h2>🛍️ マルシェ情報</h2>
+  <p>LINKのマルシェ出店情報・申し込みをまとめています。</p>
+  <p>※マルシェ出店には<strong>LINKベースへの事業掲載</strong>が必要です。</p>
+  <div class="coming">🚧 マルシェ情報・申し込みリンクを準備中です</div>
+  <button type="button" class="closeb">← 戻る</button>
+</div></div>
+
 <script src="../track.js"></script>
 <script src="../menu.js"></script>
 <script>
+/* ================================================================
+   チーム情報（スカイアークチームのページ）  v1.221
+   ・まんなか：Skyarc専用サイト（押すと skyarc.life が開きます）。ふわふわ浮いています
+   ・まわりの3つ：交流会・サポート会情報（トップの「各種スケジュール情報」の段へ）／
+     マルシェ情報（ポップアップ）／紹介・ビジネス活動サポート（skyarc-recruit.html）
+   ・どの丸も、つまんで引っぱると「ビヨーン」とのび、はなすと元の場所へ（ホームと同じ）
+================================================================ */
+const $ = s => document.querySelector(s);
 /* 戻るボタンは、ブラウザの「戻る」と同じ動きにします（このサイトから来たとき） */
-document.querySelectorAll("a.back-btn, a.back-btn2").forEach(a=>a.addEventListener("click", e=>{
+document.querySelectorAll("a.back-btn").forEach(a=>a.addEventListener("click", e=>{
   let same = false;
   try{ same = !!document.referrer && new URL(document.referrer).origin === location.origin; }catch(_){}
   if(same && history.length > 1){ e.preventDefault(); history.back(); }
 }));
+
+/* ---------- ポップアップ ---------- */
+let popOpen = false;
+function closePops(){ document.querySelectorAll(".sheet").forEach(s=>s.hidden = true); popOpen = false; }
+document.querySelectorAll(".bub[data-pop]").forEach(b=>b.addEventListener("click", ()=>{ $("#" + b.dataset.pop).hidden = false; popOpen = true; }));
+document.querySelectorAll(".sheet").forEach(s=>{
+  s.addEventListener("click", e=>{ if(e.target === s) closePops(); });
+  s.querySelector(".closeb").addEventListener("click", closePops);
+});
+document.addEventListener("keydown", e=>{ if(e.key === "Escape") closePops(); });
+
+/* ---------- ぐるぐる・ふわふわ・つまむ ---------- */
+(function(){
+  const orb = $("#orb");
+  const reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const N = [];
+  N.push({ el: $(".bub.sun"), kind: "sun", ph: 0 });
+  document.querySelectorAll(".bub.ring").forEach((el, i)=>N.push({ el, kind: "ring", k: i, ph: 1 + i * 1.7 }));
+  N.forEach(n=>{ n.x = null; n.y = null; n.vx = 0; n.vy = 0; n.s = 1; n.ts = 1; n.el.draggable = false; });
+  let W, H, cx, cy, R;
+  function size(){
+    W = innerWidth; H = innerHeight;
+    const yTop = 64 + 50, yBot = H - 50 - 60;
+    cx = W / 2; cy = (yTop + yBot) / 2;
+    R = { x: Math.min(W / 2 - 62, 190), y: 0 };
+    R.y = Math.min((yBot - yTop) / 2, R.x * 1.6);
+    orb.style.cssText = `width:${R.x*2}px;height:${R.y*2}px;transform:translate(${cx-R.x}px,${cy-R.y}px)`;
+    N.forEach(n=>{ n.lw = null; });
+  }
+  size(); addEventListener("resize", size);
+
+  let drag = null, lastDragEnd = 0;
+  N.forEach(n=>{
+    const el = n.el; let sx, sy, offx, offy, pid = null, moved = false;
+    el.addEventListener("pointerdown", e=>{
+      if(e.button !== undefined && e.button !== 0) return;
+      pid = e.pointerId; sx = e.clientX; sy = e.clientY; moved = false;
+      offx = e.clientX - n.x; offy = e.clientY - n.y;
+      try{ el.setPointerCapture(pid); }catch(_){}
+    });
+    el.addEventListener("pointermove", e=>{
+      if(pid !== e.pointerId) return;
+      if(!moved && Math.hypot(e.clientX - sx, e.clientY - sy) > 8){ moved = true; drag = n; n.ts = 1.12; el.classList.add("grab"); }
+      if(moved){ const nx = e.clientX - offx, ny = e.clientY - offy; n.vx = nx - n.x; n.vy = ny - n.y; n.x = nx; n.y = ny; }
+    });
+    const end = e=>{
+      if(pid !== e.pointerId) return;
+      pid = null;
+      if(moved){ drag = null; n.ts = 1; el.classList.remove("grab"); lastDragEnd = performance.now(); }
+    };
+    el.addEventListener("pointerup", end); el.addEventListener("pointercancel", end);
+    /* つまんで動かしたあとは、ページやポップアップは開かず、元の場所へもどるだけ */
+    el.addEventListener("click", e=>{ if(performance.now() - lastDragEnd < 400){ e.preventDefault(); e.stopImmediatePropagation(); } }, true);
+    el.addEventListener("dragstart", e=>e.preventDefault());
+  });
+
+  let last = null, sec = 0;
+  function frame(t){
+    const dt = last == null ? 0 : Math.min(64, t - last); last = t;
+    if(!reduce && !popOpen) sec += dt / 1000;
+    N.forEach(n=>{
+      let hx = cx, hy = cy;
+      if(n.kind === "ring"){
+        const a = sec * 2 * Math.PI / 36 + n.k * 2 * Math.PI / 3 - Math.PI / 2;   /* 36秒でひとまわり */
+        hx = cx + R.x * Math.cos(a); hy = cy + R.y * Math.sin(a);
+      }
+      if(n.x == null){ n.x = hx; n.y = hy; }
+      if(n !== drag){
+        let ax = (hx - n.x) * .055, ay = (hy - n.y) * .055;
+        if(drag){
+          const dx = n.x - drag.x, dy = n.y - drag.y, d = Math.hypot(dx, dy) || 1, RR = 140;
+          if(d < RR){ const f = (RR - d) / RR * 7; ax += dx / d * f; ay += dy / d * f;
+            ax += (-dy / d) * .35 + (Math.random() - .5) * .9; ay += (dx / d) * .35 + (Math.random() - .5) * .9; }
+        }
+        n.vx = (n.vx + ax) * .84; n.vy = (n.vy + ay) * .84;
+        n.x += n.vx; n.y += n.vy;
+        if(n.lw == null){ const nm = n.el.querySelector(".nm"); n.lw = nm ? nm.offsetWidth : 0; }
+        const lim = Math.max(n.el.offsetWidth / 2, n.lw / 2) + 4;
+        n.x = Math.min(Math.max(n.x, lim), W - lim);
+      }
+      n.s += (n.ts - n.s) * .2;
+      const fy = reduce || n === drag ? 0 : Math.sin(t / 650 + n.ph) * (n.kind === "sun" ? 7 : 5);
+      const fx = reduce || n === drag ? 0 : Math.cos(t / 900 + n.ph) * 2.5;
+      const hb = n.el.querySelector(".ball").offsetHeight / 2;
+      n.el.style.transformOrigin = `50% ${hb}px`;
+      n.el.style.transform = `translate(${(n.x - n.el.offsetWidth / 2 + fx).toFixed(1)}px,${(n.y - hb + fy).toFixed(1)}px) scale(${n.s.toFixed(3)})`;
+      n.el.style.zIndex = n === drag ? 9 : (n.kind === "sun" ? 3 : 4);
+    });
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
 </script>
 </body>
 </html>

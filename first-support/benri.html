@@ -50,6 +50,8 @@ body{font-family:"Zen Kaku Gothic New",sans-serif;background:radial-gradient(ell
 .v{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:20px;letter-spacing:.05em}
 .v.url{font-family:"Zen Kaku Gothic New",sans-serif;font-weight:500;font-size:12.5px;letter-spacing:0;word-break:break-all;line-height:1.5}
 .idrow{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.btns{flex:none;display:flex;flex-direction:column;gap:6px}   /* URLだけ：上にコピー、下にアクセス */
+.cpy.acc{display:block;text-align:center;text-decoration:none;border-color:#1E88E5;background:#1E88E5;color:#fff}
 .cpy{flex:none;padding:10px 14px;border-radius:12px;border:2px solid #43A047;background:#fff;color:#2E7D32;font-family:inherit;font-weight:700;font-size:14px;cursor:pointer}
 .cpy.done{background:#43A047;color:#fff}
 .cpy.wide{width:100%;margin-top:6px;font-size:15px;padding:12px}
@@ -125,7 +127,7 @@ body{font-family:"Zen Kaku Gothic New",sans-serif;background:radial-gradient(ell
 <div class="sheet" id="popZoom" hidden><div class="pop" role="dialog" aria-modal="true">
   <h2>🎥 LINKセミナー・LINK主催イベントのZoom</h2>
   <div class="row"><span class="k">URL</span>
-    <div class="idrow"><span class="v url" id="zUrl"></span><button type="button" class="cpy" data-copy="url">📋 コピー</button></div>
+    <div class="idrow"><span class="v url" id="zUrl"></span><span class="btns"><button type="button" class="cpy" data-copy="url">📋 コピー</button><a class="cpy acc" id="zGo" href="#" target="_blank" rel="noopener">🎥 アクセス</a></span></div>
     <span class="cpmsg" aria-live="polite"></span></div>
   <div class="row"><span class="k">ミーティングID</span>
     <div class="idrow"><span class="v" id="zId"></span><button type="button" class="cpy" data-copy="id">📋 コピー</button></div>
@@ -219,7 +221,7 @@ const ZOOM = {
   id:  "546 026 6005",
   pw:  "LINK"
 };
-$("#zUrl").textContent = ZOOM.url; $("#zId").textContent = ZOOM.id; $("#zPw").textContent = ZOOM.pw;
+$("#zUrl").textContent = ZOOM.url; $("#zGo").href = ZOOM.url;   /* 「アクセス」を押すと、Zoomが開きます */ $("#zId").textContent = ZOOM.id; $("#zPw").textContent = ZOOM.pw;
 document.querySelectorAll("#popZoom [data-copy]").forEach(b=>{
   b.addEventListener("click", async ()=>{
     const k = b.dataset.copy;
