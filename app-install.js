@@ -23,6 +23,7 @@
                    （出ないときは、メニューからの手順をお見せします）
      ・iPhone   … iPhoneには、ボタン1つで追加するしくみがないため、
                    Safariの「共有」→「ホーム画面に追加」の手順を、画面の中でご案内します
+                   （iOS 26 は「・・・」→「共有」→「その他」→「ホーム画面に追加」。v1.223）
      ・パソコン … 開くボタンと、スマホで読みとるQRコード
      ・LINEで開いたとき … 自動でふつうのブラウザ（Safari・Chrome）に切りかえます
      ・アイコンから開いたとき … すぐに目的のページへ移ります
@@ -36,6 +37,10 @@
   const isInApp = isLINE || /Instagram|FBAN|FBAV|FB_IAB|Twitter|KAKAOTALK/i.test(ua);
   const isIOSChrome = isIOS && /CriOS/i.test(ua);
   const isIOSSafari = isIOS && /Safari/i.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS/i.test(ua) && !isInApp;
+  /* iOS 26 から、Safariのボタンの場所が変わりました（右下の「・・・」→「共有」）。
+     iOS 26 のSafariは、端末の版を「18_6」のままにして、Safariの版（Version/26）だけが変わるので、Safariの版で見分けます */
+  const safariVer = parseInt((ua.match(/Version\/(\d+)/) || [])[1] || "0", 10);
+  const isIOS26 = isIOS && safariVer >= 26;
   const isStandalone = (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches)
                     || (window.matchMedia && window.matchMedia("(display-mode: minimal-ui)").matches)
                     || navigator.standalone === true;
@@ -155,6 +160,17 @@
                     `下にずらして「<b>ホーム画面に追加</b>」${plusIcon} を押す`,
                     "右上の「<b>追加</b>」を押す"]);
     }
+    if(isIOS26){
+      /* iOS 26 のSafari：右下の「・・・」→「共有」→「その他」→「ホーム画面に追加」→「追加」 */
+      return '<p class="ai-lead">iPhoneは、画面の右下のボタンから追加します。</p>'
+        + stepList(["画面の右下の「<b>・・・</b>」を押す",
+                    `「<b>共有</b>」${shareIcon} を押す`,
+                    "「<b>その他</b>」を押す",
+                    `「<b>ホーム画面に追加</b>」${plusIcon} を押す<br><span class="ai-small">見つからないときは、上にずらしてください</span>`,
+                    "右上の「<b>追加</b>」を押す"])
+        + '<div class="ai-arrow ai-arrow-r" aria-hidden="true">⬇︎</div>';
+    }
+    /* iOS 18 までのSafari */
     return '<p class="ai-lead">iPhoneは、画面の下のボタンから追加します。</p>'
       + stepList([`画面の下の ${shareIcon}（共有）を押す<br><span class="ai-small">見当たらないときは「<b>…</b>」→「<b>共有</b>」</span>`,
                   `下にずらして「<b>ホーム画面に追加</b>」${plusIcon} を押す`,

@@ -59,6 +59,8 @@ body{font-family:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",sans-serif;co
 /* いちばん下：もう一方のツールへ */
 .ai-next{display:block;margin-top:10px;text-align:center;text-decoration:none;border-radius:13px;padding:12px 8px;
          background:#fff;border:2px dashed var(--c);color:var(--c);font-size:14px;font-weight:900;line-height:1.4;}
+.ai-arrow.ai-arrow-r{left:auto;right:22px;transform:none;animation-name:aiBobR;}
+@keyframes aiBobR{0%,100%{transform:translate(0,0);}50%{transform:translate(0,6px);}}   /* iOS 26：右下の「・・・」をさします */
 body.ai-arrow-on .ai-next{margin-bottom:26px;}   /* 下の矢印と重ならないように */
 .ai-line{background:#EAF8EE;border:1.5px solid #B9E4C7;color:#256B3C;border-radius:12px;padding:8px 10px;font-size:12px;line-height:1.6;margin-bottom:8px;text-align:center;}
 @media (max-height:620px){
