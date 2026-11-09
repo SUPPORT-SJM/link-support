@@ -1015,7 +1015,7 @@ function tap(n, e){
   if(it.flowInfo){ openInfoSheet("❓ LINKに入りたいと言われたら", "", '<p>「LINKに入りたい」「LINKが気になる」と言われたら、最低限これだけはやりましょう。</p>'
     + '<ol class="fol"><li><b>まずはアップに相談</b>しましょう。</li>'
     + '<li><b>説明会の日にちを決めます。</b>説明は、<b>アドバイザーの資格をもった人</b>にしてもらいます。</li>'
-    + '<li>説明会が、その方にとって「LINKってこういうものなんだ」「自分にも必要かも」と分かる時間になるように、<b>最低限のことを学んでおく</b>と良いです。</li></ol>'
+    + '<li>説明会までの間に、<b>一緒にやりたい目標</b>を考えます。相手のやりたいことを改めて聞いて、<b>一緒に叶えられる夢</b>を作ります（できれば）。</li></ol>'
     + '<a class="fbtn" href="first-support/present.html">🎁 気になる人にLINKをプレゼントするコツ</a>'); return; }
   if(it.goPage){ const pg = flowPageItem(it.goPage); goTo(()=>{ path.length = 0; path.push(pg); }, n.x, n.y, n); return; }
   if(it.goHome){ goTo(()=>{ path.length = 0; }, n.x, n.y, n); if(flowAllDone()) setTimeout(()=>flowCelebrate("🎉 3つとも終わりました！「チーム情報」が開きました"), 500); return; }
