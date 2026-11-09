@@ -112,6 +112,14 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body)
 #taskSheet .fgen .res{background:#fff;border:2px solid #FF8A65;border-radius:10px;padding:9px;text-align:center;font-weight:700;word-break:break-all;margin-bottom:8px;}
 #taskSheet .fgen button{width:100%;padding:10px;border-radius:10px;border:none;background:#FF7043;color:#fff;font-family:inherit;font-weight:700;font-size:14px;cursor:pointer;}
 #taskSheet h4{font-size:14px;color:#E65100;margin:12px 0 4px;}
+#taskSheet .frule{display:flex;gap:10px;align-items:flex-start;background:#FFF3E0;border:2px solid #FFB74D;border-radius:12px;padding:10px 12px;margin:8px 0;font-size:14px;line-height:1.8;cursor:pointer;}
+#taskSheet .frule input{width:22px;height:22px;margin-top:3px;flex:none;accent-color:#FF7043;}
+#taskSheet .fgate.off{opacity:.35;pointer-events:none;filter:grayscale(.6);}
+#taskSheet .fq{background:#F7F5FF;border-radius:12px;padding:8px 12px;margin:6px 0;}
+#taskSheet .fq p{margin:0 0 6px;font-size:14.5px;}
+#taskSheet .fqb{display:flex;gap:10px;}
+#taskSheet .fqb button{flex:1;padding:9px;border-radius:10px;border:2px solid #D1C4E9;background:#fff;font-size:20px;cursor:pointer;}
+#taskSheet .fqb button.on{background:#EDE7F6;border-color:#7E57C2;}
 .ffount{position:fixed;left:0;top:0;z-index:9000;pointer-events:none;font-size:24px;will-change:transform;}
 #taskSheet .fwait{font-size:12.5px;text-align:center;margin-top:8px;}
 .bub.wide .nm{white-space:pre;}   /* 「このサイトを教える」を1行に収めます */
@@ -524,13 +532,15 @@ const TREE = [
   ]},
   {ic:"🚀", nm:"LINKを\n使おう", g:"member", flowPage:"use", lockAfter:"know", kids:[
     /* v1.2.007：「1stステップ参加確認」はなくしました */
-    {ic:"🌈", nm:"Skyarcの\n交流＆PRチャット", g:"member", num:1, task:"u1", pass:true, wide:true,
+    {ic:"🌈", nm:"Skyarcの\n交流＆PRチャット", g:"member", num:1, task:"u1", pass:true, wide:true, nameRule:true,
      note2:"Skyarcの仲間たちが、いろいろなお知らせをしてくれたり、良かったことの交流や自己紹介をし合ったりしているチャットです。<br>名前に<b>グループ名を必ず入れて</b>、マナーを守って楽しくご参加ください😊<br><b>ユーザーサポート会</b>で教えてもらう<b>合言葉</b>を入れると、2つのチャットにご招待できます。"},
-    {ic:"📣", nm:"LINK情報伝達\nチャット", g:"member", num:2, task:"u2", gen:true, wide:true,
+    {ic:"📣", nm:"LINK情報伝達\nチャット", g:"member", num:2, task:"u2", gen:true, wide:true, nameRule:true,
      note2:"LINK全体の、<b>あなたにとって大事な情報</b>が常に来るチャットです（書きこみはできません）。しっかり毎日ご確認ください。<br>入る前に、下で名前を作ってコピーしておきましょう。",
      html:'<a class="fbtn" href="https://line.me/ti/g2/gMA3NZL3Ypihck48K0xB9mHwJe8AV3ezmjXX6A?utm_source=invitation&utm_medium=link_copy&utm_campaign=default" target="_blank" rel="noopener">📲 LINK情報伝達チャットに入る</a>'},
-    {ic:"🏘", nm:"地域コミュニティ\n趣味のサークル", g:"member", num:3, task:"u3", wide:true,
-     note2:"あなたの地域のコミュニティや、趣味・事業・興味に合うサークルがあります。注意書きを分かったうえで入りましょう。LINK information でも、詳しく分かります。",
+    {ic:"🏘", nm:"地域コミュニティ\n趣味のサークル", g:"member", num:3, task:"u3", wide:true, nameRule:true,
+     note2:"地域コミュニティと趣味のサークルは<b>「LINKサークル」</b>と呼ばれています。あなたの地域のコミュニティや、趣味・事業・興味に合うサークルがあります。<br>📛 <b>LINK全体のチャット（情報伝達チャット）は、書きこみ禁止</b>です。<br>💡 情報量が多くなるので、<b>最初はサークルは2つまで</b>にしておきましょう。慣れてきたら増やしてください。<br>LINK information でも、詳しく分かります。",
+     quiz:[{q:"告知（PR）は、1つの事業掲載につき、週に1回だけである。", a:"o"},
+           {q:"同じ日に、別のチャットであれば、同じ案件のPRをしても良い。", a:"x"}],
      pages:[{t:"📖 サークルやコミュニティの説明を見る", u:"first-support/openchat.html", part:"b"}]},
     /* 1〜3がそろうと、黄色く光って出ます（押すと「サポーターとは」） */
     {ic:"🐣", nm:"もっと\n使いこなすには", g:"member", need:"flow:use", supNext:true, url:B+"first-support/to-supporter.html"}
@@ -1086,15 +1096,20 @@ function openTask(it){
   $("#taskWhere").textContent = flowWhere();
   $("#taskTitle").textContent = it.ic + " " + it.nm.replace(/\n/g,"");
   let h = it.note2 ? `<p>${it.note2}</p>` : '<p style="color:#9E9E9E;font-size:13px">（仮組み：くわしい中身は準備中です）</p>';
+  /* 名前のルール：「理解しました」にチェックしないと、この先が使えません */
+  if(it.nameRule) h += '<label class="frule"><input type="checkbox" id="fRule"><span>LINKで活動するために各種オープンチャットに入るときは、ご自身のお名前を<b>「名前／チーム名／系列名」</b>にします。文字数が多くなりすぎるときは、チーム名を省いて<b>「名前／系列名」</b>だけでも大丈夫です。<br><b>✅ 理解しました</b></span></label><div id="fGate" class="fgate off">';
   if(it.gen) h += '<div class="fgen"><label for="fgName">👤 あなたのお名前</label><input id="fgName" type="text" autocomplete="nickname" placeholder="例：しょうこ">'
     + '<label for="fgKei">🏷️ 系列</label><select id="fgKei"></select><div class="res" id="fgRes">👆 お名前と系列を入れてください</div><button type="button" id="fgCopy">📋 タップしてコピー</button></div>';
   if(it.thanks) h += '<p class="koui">🤝 同じ会員の立場の方が、<b>貢献の気持ち</b>で開いてくださっている会です。そのことを理解して、<b>感謝しながら</b>参加していただければと思います。</p>';
   if(it.noteKey && NOTES[it.noteKey]){ const u = linkOf({ link: it.noteKey }); h += NOTES[it.noteKey].html + (u ? `<a class="fbtn" href="${u}" target="_blank" rel="noopener">${NOTES[it.noteKey].btn}</a>` : ""); }
   if(it.html) h += it.html;
   if(it.noteBtns) it.noteBtns.forEach(k=>{ const u = linkOf({ link: k }); if(u && NOTES[k]) h += `<a class="fbtn" href="${u}" target="_blank" rel="noopener">${NOTES[k].btn}</a>`; });
+  if(it.quiz) h += '<h4>📝 クイズ（ぜんぶ正解すると、説明が見られます）</h4>' + it.quiz.map((q, i)=>`<div class="fq" data-i="${i}"><p>Q${i + 1}. ${q.q}</p><div class="fqb"><button type="button" data-a="o">⭕</button><button type="button" data-a="x">❌</button></div></div>`).join("") + '<p class="fsmall" id="fQuizMsg" style="text-align:left"></p><div id="fQuizOk" hidden>';
   if(it.pages) it.pages.forEach((pg, i)=>{ h += `<button type="button" class="fbtn fpage" data-i="${i}" style="width:100%;border:none;cursor:pointer;font-family:inherit;background:#6E5FB5">${pg.t}</button>`; });
+  if(it.quiz) h += '</div>';
   if(it.refSave) h += '<div class="fgen"><input id="fRef" type="url" inputmode="url" autocapitalize="off" spellcheck="false" placeholder="https://…" value="' + String((me && me.refUrl) || "").replace(/"/g, "&quot;") + '"><button type="button" id="fRefOk">OK（会員情報に保存する）</button><p class="fsmall" id="fRefMsg" style="margin-top:6px"></p></div>';
   if(it.pass) h += '<div class="fgen"><label for="fPass">🔑 合言葉</label><input id="fPass" type="text" autocomplete="off" placeholder="ユーザーサポート会で教わった合言葉"><button type="button" id="fPassOk">合言葉を入れる</button><p class="fsmall" id="fPassMsg" style="margin-top:6px"></p><div id="fPassBox"></div></div>';
+  if(it.nameRule) h += '</div>';
   if(it.link) h += `<a class="flink" id="taskLink" href="${it.link.u}"${/^https?:/.test(it.link.u) ? ' target="_blank" rel="noopener"' : ""}>${it.link.t}</a>`;
   h += done ? '<button type="button" class="fdone undo" id="taskDone">もどす（まだ終わっていない）</button>' : '<button type="button" class="fdone" id="taskDone">✅ できた！</button>';
   if(done) h += FLOW_MARKS.indexOf(it.task) >= 0 ? '<p class="fwait" style="color:#8E24AA">🌈 サポーターの確認もついています</p>' : '<p class="fwait" style="color:#0288D1">🔵 サポーターの確認を待っています</p>';
@@ -1105,6 +1120,20 @@ function openTask(it){
   document.querySelectorAll("#taskBody .fpage").forEach(b=>b.addEventListener("click", ()=>openPage(it.pages[+b.dataset.i])));
   if(it.refSave) $("#fRefOk").onclick = flowSaveRef;
   if(it.pass) $("#fPassOk").onclick = flowPass;
+  if(it.nameRule){ const r = $("#fRule"), g = $("#fGate"); r.checked = false; g.classList.add("off");
+    r.onchange = ()=>{ g.classList.toggle("off", !r.checked); }; }   /* 開くたびに、チェックしてから進みます */
+  if(it.quiz){
+    const ans = {};
+    const judge = ()=>{
+      const all = it.quiz.every((q, i)=>ans[i] === q.a);
+      $("#fQuizOk").hidden = !all;
+      $("#fQuizMsg").textContent = all ? "🎉 ぜんぶ正解です！下のボタンから説明を見られます" : (Object.keys(ans).length === it.quiz.length ? "まちがっているところがあります。もう一度考えてみましょう" : "");
+      $("#fQuizMsg").style.color = all ? "#2E7D32" : "#C62828";
+    };
+    document.querySelectorAll("#taskBody .fq").forEach(d=>d.querySelectorAll("button").forEach(b=>b.addEventListener("click", ()=>{
+      ans[+d.dataset.i] = b.dataset.a; d.querySelectorAll("button").forEach(x=>x.classList.toggle("on", x === b)); judge();
+    })));
+  }
   $("#taskDone").onclick = ()=>{
     const pageK = path.length ? path[0].flowPage : "";
     const wasPage = pageK ? flowDone(pageK) : false;
