@@ -80,6 +80,11 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body)
 .bub.fme .ball{border-color:#29B6F6;animation:fGlowB 1.8s ease-in-out infinite;}          /* 自分で「できた！」：青く光る */
 .bub.fme .fnum{background:#29B6F6;}
 @keyframes fGlowB{0%,100%{box-shadow:0 0 0 4px rgba(41,182,246,.35),0 0 18px rgba(41,182,246,.55)}50%{box-shadow:0 0 0 8px rgba(41,182,246,.18),0 0 30px rgba(41,182,246,.8)}}
+.bub.fok .ball{border-color:transparent;box-shadow:0 0 22px rgba(255,170,120,.7);}   /* 先生の丸もついた：虹色 */
+.bub.fok .ball::before{content:"";position:absolute;inset:-9px;border-radius:50%;z-index:-1;background:conic-gradient(#F49AC1,#F5A97A,#F5D06A,#8FD9A8,#6FC7D9,#7BA3E8,#A88BE0,#F49AC1);animation:fSpin 3s linear infinite;}
+.bub.fok .ball::after{content:"";position:absolute;inset:0;border-radius:50%;background:var(--card);z-index:-1;}
+.bub.fok .fnum{background:linear-gradient(135deg,#F49AC1,#7BA3E8);}
+@keyframes fSpin{to{transform:rotate(360deg)}}
 .bub.fnext .ball{border-color:#FFA726;animation:fGlowY 1.8s ease-in-out infinite;}        /* 次のステップへ：黄色・オレンジに光る */
 .bub.fnext .nm{color:#E65100;font-weight:900;}
 @keyframes fGlowY{0%,100%{box-shadow:0 0 0 4px rgba(255,167,38,.4),0 0 18px rgba(255,193,7,.6)}50%{box-shadow:0 0 0 9px rgba(255,167,38,.18),0 0 32px rgba(255,193,7,.9)}}
@@ -591,15 +596,83 @@ const TREE = [
    ・サポーターの確認（先生の丸・虹色）は準備中
 ================================================================ */
 const FLOW_ORDER = ["hajime","know","use"];
-let FLOW = {};
+const FLOW_APP = "flow";   /* スプレッドシートのタブ「flow進捗」に記録します（先生の丸もこのタブ） */
+let FLOW = {}, FLOW_MARKS = [];
 function flowKey(){ return "sky_flow_v1_" + (me && me.id ? String(me.id) : "guest"); }
-function loadFlow(){ try{ FLOW = JSON.parse(localStorage.getItem(flowKey()) || "{}") || {}; }catch(e){ FLOW = {}; } }
-function saveFlow(){ try{ localStorage.setItem(flowKey(), JSON.stringify(FLOW)); }catch(e){} }
+function loadFlow(){
+  try{ const o = JSON.parse(localStorage.getItem(flowKey()) || "{}") || {}; FLOW = o.d ? o.d : o; FLOW_MARKS = o.m || []; }catch(e){ FLOW = {}; FLOW_MARKS = []; }
+}
+function saveFlowLocal(){ try{ localStorage.setItem(flowKey(), JSON.stringify({ d: FLOW, m: FLOW_MARKS })); }catch(e){} }
+function flowAllTasks(){ return FLOW_ORDER.flatMap(k=>flowTasks(flowPageItem(k))); }
+/* スプレッドシートへ記録します（できた＝true／もどした＝false。2台で使っても消えないよう、変えた項目だけ送ります） */
+let flowSaveT = 0, flowPending = {};
+function saveFlow(changed){
+  saveFlowLocal();
+  if(!me || !me.id || !me.pin || !GAS_URL) return;
+  Object.assign(flowPending, changed || {});
+  clearTimeout(flowSaveT);
+  flowSaveT = setTimeout(async ()=>{
+    const send = flowPending; flowPending = {};
+    try{
+      const body = new URLSearchParams({ action:"save", app:FLOW_APP, id:me.id, pin:me.pin, items:flowAllTasks().join(","), data:JSON.stringify(send) });
+      await fetch(GAS_URL, { method:"POST", body });
+    }catch(e){ Object.assign(flowPending, send); }
+  }, 600);
+}
+/* スプレッドシートから読みます。はじめて使う方は、今までの3つ（はじめの一歩・初期サポートガイド・活用の1stステップ）と
+   本人の記録で終わっていることを、新しい3つに引きつぎます（同じ作業をしたものは、できた扱い） */
+async function syncFlow(){
+  if(!me || !me.id || !me.pin || !GAS_URL) return;
+  const q = (app, items)=> fetch(`${GAS_URL}?action=load&app=${app}&id=${encodeURIComponent(me.id)}&pin=${encodeURIComponent(me.pin)}` + (items ? `&items=${encodeURIComponent(items)}` : "")).then(r=>r.json()).catch(()=>null);
+  const j = await q(FLOW_APP, flowAllTasks().join(","));
+  if(!j || j.ok !== true) return;
+  let d = {}; try{ d = JSON.parse(j.data || "{}") || {}; }catch(e){}
+  const before = JSON.stringify([FLOW, FLOW_MARKS]);
+  /* この端末で先に押した分は、残したまま送ります */
+  const localOnly = {}; Object.keys(FLOW).forEach(k=>{ if(FLOW[k] && d[k] === undefined) localOnly[k] = true; });
+  Object.keys(d).forEach(k=>{ if(d[k] === true) FLOW[k] = true; else if(d[k] === false) delete FLOW[k]; });
+  FLOW_MARKS = Array.isArray(j.marks) ? j.marks : [];
+  if(j.newUser || !j.data){
+    const inh = await flowInherit(q);
+    Object.keys(inh).forEach(k=>{ if(!FLOW[k]){ FLOW[k] = true; localOnly[k] = true; } });
+  }
+  if(Object.keys(localOnly).length) saveFlow(localOnly); else saveFlowLocal();
+  if(JSON.stringify([FLOW, FLOW_MARKS]) !== before){ flowPaintAll(); if(typeof reflowLevel === "function" && !drag) reflowLevel(); }
+}
+async function flowInherit(q){
+  const out = {};
+  const [h, g, s1] = await Promise.all([q("hajime"), q("guide"), q("step1")]);
+  const P = x=>{ try{ return x && x.ok && x.data ? (JSON.parse(x.data) || {}) : {}; }catch(e){ return {}; } };
+  const H = P(h), G = P(g), S = P(s1);
+  let V = {};
+  try{ const r = await fetch(GAS_URL + "?action=selfGet&id=" + encodeURIComponent(me.id) + "&pin=" + encodeURIComponent(me.pin)); const jj = await r.json(); if(jj && jj.ok) V = jj.vals || {}; }catch(e){}
+  const t = v=>v === true || (typeof v === "string" && v !== "");
+  if(t(G.G1)) out.h0 = true;                                   /* LINKポータルをホームに置く */
+  if(t(G.G2)) out.h1 = true;                                   /* LINK information */
+  if(t(H.H1) && t(H.H2) && (t(G.G5) || t(S.S5))) out.h2 = true;  /* 3つのオープンチャット */
+  if(t(H.H3)) out.h3 = true;                                   /* 紹介URL */
+  if(t(G.Gs)) out.k1 = true;                                   /* リッチメニューの解放 */
+  if(t(S.S1) || t(V.u)) out.k2a = true;                        /* ユーザーサポート会 */
+  if(t(S.S3) || ["s1","s2","s3","s4","s5"].every(k=>t(V[k]))) out.k2b = true;   /* LINKセミナー */
+  if(t(S.S2) || t(V.g1) || t(V.g2) || t(V.g3)) out.k2c = true; /* グルコン */
+  if(t(S.S4) || t(V.k)) out.k2d = true;                        /* チーム交流会 */
+  if(t(S.S8)) out.k3a = true;                                  /* SASAEAI */
+  if(t(S.S7)) out.k3b = true;                                  /* LINK-BASE */
+  if(t(S.S6) || t(H.H2)) out.u1 = true;                        /* チームのチャット（系列のオープンチャット） */
+  if(t(S.S5) || t(G.G5)) out.u2 = true;                        /* LINK全体のチャット */
+  return out;
+}
 function flowPageItem(k){ return TREE.find(it=>it.flowPage === k); }
 function flowTasks(it){ const out = []; (it.kids || []).forEach(c=>{ if(c.task) out.push(c.task); else if(c.group) out.push(...flowTasks(c)); }); return out; }
 function flowItemDone(it){
-  if(it.task) return !!FLOW[it.task];
+  if(it.task) return !!FLOW[it.task];   /* できた（青） */
   if(it.group || it.flowPage){ const t = flowTasks(it); return t.length > 0 && t.every(k=>!!FLOW[k]); }
+  return false;
+}
+/* 先生の丸（サポーターなどの確認）：タブ「flow進捗」の丸の列に、項目（h0 など）が入っていると虹色に光ります */
+function flowItemMarked(it){
+  if(it.task) return FLOW_MARKS.indexOf(it.task) >= 0;
+  if(it.group || it.flowPage){ const t = flowTasks(it); return t.length > 0 && t.every(k=>FLOW_MARKS.indexOf(k) >= 0); }
   return false;
 }
 function flowDone(k){ const it = flowPageItem(k); return !!it && flowItemDone(it); }
@@ -950,9 +1023,11 @@ document.addEventListener("click", e=>{
 /* ===== 仮組み：ファーストサポートの丸の光り方・中身 ===== */
 function flowPaintNode(el, it){
   const done = (it.task || it.group || it.flowPage) ? flowItemDone(it) : false;
-  el.classList.toggle("fme", done);
+  const marked = done && flowItemMarked(it);
+  el.classList.toggle("fme", done && !marked);
+  el.classList.toggle("fok", marked);
   el.classList.toggle("flock", !!(it.lockAfter && !flowDone(it.lockAfter)));
-  const m = el.querySelector(".fmark"); if(m) m.textContent = done ? "✅" : "";
+  const m = el.querySelector(".fmark"); if(m) m.textContent = marked ? "🌈" : done ? "✅" : "";
 }
 function flowPaintAll(){ nodes.forEach(n=>flowPaintNode(n.el, n.it)); paintPoint(); }
 /* 中の段でも、出す丸が変わったら（次のステップへの丸など）、すっと足します */
@@ -984,7 +1059,7 @@ function openTask(it){
   if(it.html) h += it.html;
   if(it.link) h += `<a class="flink" id="taskLink" href="${it.link.u}"${/^https?:/.test(it.link.u) ? ' target="_blank" rel="noopener"' : ""}>${it.link.t}</a>`;
   h += done ? '<button type="button" class="fdone undo" id="taskDone">もどす（まだ終わっていない）</button>' : '<button type="button" class="fdone" id="taskDone">✅ できた！</button>';
-  if(done) h += '<p class="fwait" style="color:#0288D1">🔵 サポーターの確認（先生の丸）は準備中です</p>';
+  if(done) h += FLOW_MARKS.indexOf(it.task) >= 0 ? '<p class="fwait" style="color:#8E24AA">🌈 サポーターの確認もついています</p>' : '<p class="fwait" style="color:#0288D1">🔵 サポーターの確認を待っています</p>';
   $("#taskBody").innerHTML = h;
   $("#taskSheet").hidden = false;
   const l = $("#taskLink"); if(l && !/^https?:/.test(it.link.u)) l.addEventListener("click", saveReturn);
@@ -993,8 +1068,9 @@ function openTask(it){
     const pageK = path.length ? path[0].flowPage : "";
     const wasPage = pageK ? flowDone(pageK) : false;
     const grp = path.length > 1 ? path[path.length-1] : null, wasGrp = grp ? flowItemDone(grp) : false;
-    if(FLOW[it.task]) delete FLOW[it.task]; else FLOW[it.task] = new Date().toISOString().slice(0,10);
-    saveFlow(); closeTask(); flowPaintAll(); reflowLevel();
+    const ch = {};
+    if(FLOW[it.task]){ delete FLOW[it.task]; ch[it.task] = false; } else { FLOW[it.task] = true; ch[it.task] = true; }
+    saveFlow(ch); closeTask(); flowPaintAll(); reflowLevel();
     if(pageK && !wasPage && flowDone(pageK)) flowCelebrate("🎉 " + flowPageItem(pageK).nm.replace(/\n/g,"") + "、ぜんぶできました！" + (grp ? "「もどる」から、👍 の丸で次へ進めます" : "👍 の丸から次へ進めます"));
     else if(grp && !wasGrp && flowItemDone(grp)) flowCelebrate("🎉 " + grp.nm.replace(/\n/g,"") + "、ぜんぶできました！");
   };
@@ -1094,7 +1170,24 @@ function saveReturn(){
   try{ if(idx.length) sessionStorage.setItem(RET_KEY, JSON.stringify({ idx, t: Date.now() })); else sessionStorage.removeItem(RET_KEY); }catch(e){}
 }
 let hashBack = false;
+/* 仮組み：メニューなどから「はじめの一歩」「LINKを知ろう」「LINKを使おう」の段を開きます（#hajime・#know・#use）
+   順番がまだのときは、トップのまま「先に〇〇を」とお知らせします */
+function flowHashPage(){ const h = location.hash.replace("#",""); return FLOW_ORDER.indexOf(h) >= 0 ? h : ""; }
+function openFlowHash(fromMenuSamePage){
+  const k = flowHashPage(); if(!k) return false;
+  try{ history.replaceState(null, "", location.pathname + location.search); }catch(e){}
+  const it = flowPageItem(k);
+  if(!me || !it) return true;
+  if(it.lockAfter && !flowDone(it.lockAfter)){ setTimeout(()=>showToast("先に「" + flowPageItem(it.lockAfter).nm.replace(/\n/g,"") + "」を進めましょう"), 600); return true; }
+  if(fromMenuSamePage){ goTo(()=>{ path.length = 0; path.push(it); }); return true; }
+  try{ sessionStorage.removeItem(RET_KEY); }catch(e){}
+  try{ hashBack = !!document.referrer && new URL(document.referrer).origin === location.origin && !/\/(index\.html)?$/.test(new URL(document.referrer).pathname) && history.length > 1; }catch(e){ hashBack = false; }
+  path.length = 0; path.push(it);
+  return true;
+}
+addEventListener("hashchange", ()=>{ if(flowHashPage()) openFlowHash(true); });
 function restoreReturn(){
+  if(openFlowHash(false)) return;
   /* 「交流会・サポート会情報」から（チーム情報のページ・活用の1stステップ）：各種スケジュール情報（公式公認／チーム独自）の段を開きます */
   if(location.hash === "#sched"){
     try{ sessionStorage.removeItem(RET_KEY); }catch(e){}
@@ -1754,7 +1847,7 @@ function saveMe(j, pin, fallbackId){
   };
   localStorage.setItem("skyarc_member", JSON.stringify(m));
   if(!localStorage.getItem("skyarc_member")) throw new Error("nosave");
-  me = m; loadFlow();   /* 仮組み：その方の進み具合を読みなおします */
+  me = m; loadFlow(); setTimeout(syncFlow, 300);   /* 仮組み：その方の進み具合を読みなおします */
   markReturning();
   pointProg = null; loadPoint();
   return m;
@@ -2046,6 +2139,7 @@ if(window.ResizeObserver){
 }
 restoreReturn();
 build(null, null);
+setTimeout(syncFlow, 400);   /* 仮組み：スプレッドシートの記録を読みます */
 nodes.forEach(n=>{ n.s = .3; n.o = 0; });
 requestAnimationFrame(frame);
 

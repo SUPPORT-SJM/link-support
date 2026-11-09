@@ -233,7 +233,7 @@
     if (role) return up + "ikusei/portal-creators.html";
     if (m.crie === true) return up + "ikusei/portal-creators.html";
     if (m.sup === true)  return up + "ikusei/portal-supporter.html";
-    return up + "first-support/";
+    return up + "index.html";   /* 仮組み：ファーストサポートはトップの丸で進めるので、トップへ */
   };
 
 })();

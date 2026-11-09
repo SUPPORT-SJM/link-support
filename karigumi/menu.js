@@ -27,12 +27,11 @@
       url: up+"howto.html", need:"" },
 
     { sec: "まなぶ" },
-    { ic:"👋", nm:"はじめの一歩",        url: up+"first-support/",            need:"" },
-    { ic:"📘", nm:"初期サポートガイド",    url: up+"first-support/guide.html",  need:"" },
-    { ic:"🚀", nm:"活用の1stステップ",    url: up+"first-support/step1.html",  need:"" },
-    { ic:"🐣", nm:"サポーターとは",
-      sub:"🌈 ファーストサポート修了認定の方へ",
-      url: up+"first-support/to-supporter.html", need:"grow3" },
+    /* 仮組み：ファーストサポートは、トップの丸（はじめの一歩 → LINKを知ろう → LINKを使おう）で進めます。
+       「サポーターとは」は「LINKを使おう」の中（もっと使いこなすには）に移しました */
+    { ic:"👋", nm:"はじめの一歩",        url: up+"index.html#hajime",  need:"" },
+    { ic:"🔎", nm:"LINKを知ろう",        url: up+"index.html#know",    need:"" },
+    { ic:"🚀", nm:"LINKを使おう",        url: up+"index.html#use",     need:"" },
     { ic:"🐣", nm:"ぴよぴよ脱出クイズ",    url: up+"ikusei/piyo-quiz.html",     need:"sup" },
     { ic:"🌱", nm:"グルコンリーダー育成",  url: up+"ikusei/gcon-roadmap.html",  need:"crie" },
 
@@ -284,6 +283,11 @@
     }
     btn.addEventListener("click", toggle);
     bg.addEventListener("click", toggle);
+    /* 仮組み：同じページの中の段へ動く項目（トップの #hajime など）を押したら、メニューを閉じます */
+    sheet.addEventListener("click", function (e) {
+      var a = e.target.closest ? e.target.closest("a.it") : null;
+      if (a && a.getAttribute("href").indexOf("#") >= 0 && sheet.classList.contains("on")) toggle();
+    });
   }
 
   /* ================================================================

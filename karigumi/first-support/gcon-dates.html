@@ -71,6 +71,7 @@ body{font-family:"Zen Kaku Gothic New",sans-serif;background:#FFFBF7;padding:16p
 <script src="../self-check.js"></script>
 <script src="../loading.js"></script>
 <script src="../login.js"></script>
+<link rel="stylesheet" href="../textpage.css">
 </head>
 <body>
 <div class="wrap">
@@ -160,6 +161,8 @@ function drawList(){
   document.querySelectorAll("#list .btn.plan").forEach(b=>b.addEventListener("click", ()=>askPlan(b)));
 }
 function drawPast(){
+  /* 仮組み v1.2.005：ここでは「出ます（出席予定）」の宣言だけにします。「出席できた」の記録は、いったん出しません */
+  $("#pastBox").hidden = true; $("#past").innerHTML = ""; return;
   const past = data.items.filter(x=>x.date <= data.today && !x.cancelled).reverse();   /* 中止の日は出しません */
   $("#pastBox").hidden = !past.length;
   $("#past").innerHTML = past.map(x=>{
