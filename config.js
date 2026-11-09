@@ -9,8 +9,8 @@
 ================================================================ */
 
 /* ---------------- ① バージョン ---------------- */
-window.SKY_VERSION = "v1.223";
-window.SKY_VERSION_DATE = "2026/11/08";
+window.SKY_VERSION = "v1.224";
+window.SKY_VERSION_DATE = "2026/11/09";
 
 /* ---------------- ② GASのURL ----------------
    デプロイし直してURLが変わったときは、ここだけ書き換えてください */
@@ -22,7 +22,7 @@ window.SKY_GAS_URL = "https://script.google.com/macros/s/AKfycbzY2l20zwGULjnKRUq
 window.SKY_KEIRETSU = [
   "🚀SkyExceed","🦅Zenith1","🏰Utop","🌟グローハピネス🌟","🥷HOT STUFF⚜️",
   "TELLUS.","FEAT","🌬️ザ・クラウドブルー(蒼雲)","✈️JET RISE","✨アフロディーテ",
-  "⭐️ルミナス","エネルギー🔥","💎プリズム","📚FairyTail","ミラメリ🪄","🪽HERO","♾️ZERO♾️"
+  "⭐️ルミナス","エネルギー🔥","💎プリズム","📚FairyTail","ミラメリ🪄","🪽HERO"
 ];
 
 /* ---------------- ③-2 「系列のつながり」から、いまある系列を受け取ります ----------------
