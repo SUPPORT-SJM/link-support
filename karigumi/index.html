@@ -369,6 +369,15 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body)
     <div class="nbody" id="taskBody"></div>
   </div>
 </div>
+<!-- 仮組み：ページをポップアップの中に出します -->
+<div class="sheet" id="pageSheet" style="z-index:8200;" hidden>
+  <div class="card note" role="dialog" aria-labelledby="pageTitle" style="max-width:520px;width:100%;height:88vh;display:flex;flex-direction:column;padding:14px 12px 12px">
+    <button type="button" class="close" id="pageClose" aria-label="とじる">×</button>
+    <h3 id="pageTitle" style="margin:0 36px 8px 4px;font-size:16px"></h3>
+    <iframe id="pageFrame" title="ページ" style="flex:1;width:100%;border:none;border-radius:12px;background:#FFFBF7"></iframe>
+    <button type="button" id="pageBack" style="margin-top:10px;padding:12px;border-radius:12px;border:2px solid #CFD8DC;background:#fff;font-family:inherit;font-weight:700;font-size:15px;cursor:pointer">← もどる</button>
+  </div>
+</div>
 <div class="sheet" id="sheet" hidden>
   <div class="card" role="dialog" aria-labelledby="jTitle">
     <button type="button" class="close" id="jClose" aria-label="とじる">×</button>
@@ -491,37 +500,40 @@ const TREE = [
         + '<a class="fbtn" href="first-support/step3-4.html">📄 つまずきやすいステップ3・4の補足を見る</a>'
         + '<p class="fsmall" style="text-align:left;margin-top:8px">リッチメニューが開放されない・わからない問題があるときは、初期サポートグループラインでご質問ください❤️</p>'},
     {ic:"🏁", nm:"1stステップを\n完了しよう", g:"member", num:2, group:true, kids:[
-      {ic:"🤝", nm:"ユーザー\nサポート会", g:"member", task:"k2a",
-       note2:"はじめての方が、いちばん最初に足を運ぶ場所です。転校初日に学校案内をしてもらうイメージで、ここで出会う人が最初の応援団になってくれます。週に何度も開かれているので、都合のよい回に参加しましょう。",
-       html:'<h4>📝 持っていくもの</h4><ol class="fhow"><li>自分の会員番号</li><li>入会時に設定したパスワード</li><li>LINKポータルが開けること</li></ol>',
-       link:{t:"📅 開催日を見る・申し込む", u:B+"first-support/events.html"}},
+      {ic:"🤝", nm:"ユーザー\nサポート会", g:"member", task:"k2a", noteKey:"support", thanks:true,
+       note2:"はじめての方が、いちばん最初に足を運ぶ場所です。転校初日に学校案内をしてもらうイメージで、ここで出会う人が最初の応援団になってくれます。"},
       {ic:"📚", nm:"LINKセミナー", g:"member", task:"k2b",
-       note2:"LINKの完全攻略MAP。全会員に必要な基盤となる5種類のセミナーです。『5ピースのパズル』と思って、ぜひ揃えてみてください✨ 月に4回ほどの開催なので、全部そろうまで1ヶ月半くらいかかります。",
-       link:{t:"📖 LINKセミナーについて", u:B+"first-support/link-seminar.html"}},
-      {ic:"🎓", nm:"グルコン", g:"member", task:"k2c",
-       note2:"実際にLINKを活用して大きなグループを作っている方から、直接教われる1時間です。<br><b>① 事前の作戦会議（30分）② 本番（約1時間）③ 振り返り（次に何をするかまで決めます）</b><br>ぜんぶをひとつのパッケージとして、しっかり時間をとって参加しましょう。",
-       link:{t:"🎓 グルコンの日程を見る（出席予定にする）", u:B+"first-support/gcon-dates.html"}},
-      {ic:"🎪", nm:"チーム\n交流会", g:"member", task:"k2d",
-       note2:"同じチームの仲間（クラスメイト）と出会える場です。人は「仲が良い人が頑張っていること」を応援したくなるものなので、何度も顔を出して覚えてもらいましょう。顔を出すだけでも大丈夫です。",
-       link:{t:"🎪 各種スケジュール情報をひらく", u:B+"index.html#sched"}}
+       note2:"LINKの完全攻略MAP（5つの宝の地図）。全会員に必要な基盤となる、5種類のセミナーです。LINKの「今」を知ることで、あなたのやりたいことが叶っていきます✨<br>下のボタンで中身を見て、見たセミナーにはチェックを入れましょう。",
+       pages:[{t:"📖 LINKセミナーについて（見たセミナーのチェックも）", u:"first-support/link-seminar.html"}]},
+      {ic:"🎓", nm:"グルコン", g:"member", task:"k2c", thanks:true,
+       note2:"<b>グルコン（グループコンサル）とは</b>：実際にLINKを活用して大きなグループを作っている方から、直接教われる1時間です。バスケ部で「伝説の部長」が直々にシュートを教えてくれるようなものです。<br><b>① 事前の作戦会議（30分）② 本番（約1時間）③ 振り返り（次に何をするかまで決めます）</b><br>ぜんぶをひとつのパッケージとして、しっかり時間をとって参加しましょう。",
+       link:{t:"🎓 グルコンの日程をひらく（出席予定にする）", u:B+"first-support/gcon-dates.html"}},
+      {ic:"🎪", nm:"チーム\n交流会", g:"member", task:"k2d", thanks:true, noteBtns:["kouryu-on","kouryu-re"],
+       note2:"同じチームの仲間（クラスメイト）と出会える場です。人は「仲が良い人が頑張っていること」を応援したくなるものなので、何度も顔を出して覚えてもらいましょう。",
+       html:'<p class="nm1">📝 申し込みのお名前には、必ず<b>自分の系列</b>が分かるように入れましょう。<br>🍽 <b>リアル交流会</b>は、<b>SASAEAIのプロフィールの記入が必須</b>です。すぐ出せるようにしておいてください。</p>'}
     ]},
-    {ic:"🪞", nm:"自分を\n整えよう", g:"member", num:3, group:true, kids:[
+    {ic:"🪞", nm:"集客の環境を\n整えよう", g:"member", num:3, group:true, kids:[
       {ic:"🤝", nm:"SASAEAIに\nプロフィール掲載", g:"member", task:"k3a",
        note2:"支え合いのマッチング設定です。できること・してほしいことを登録して、プロフィールを掲載します。",
-       link:{t:"🤝 SASAEAI設定ガイドをひらく", u:B+"first-support/sasaeai.html"}},
+       pages:[{t:"🤝 SASAEAI設定ガイドを見る", u:"first-support/sasaeai.html"}]},
       {ic:"🏰", nm:"LINK-BASEに\n事業を掲載", g:"member", task:"k3b",
        note2:"自分のこと・事業のことを知ってもらうページです。ご縁が広がるきっかけになります。",
-       link:{t:"🏰 LINK-BASE掲載ガイドをひらく", u:B+"first-support/linkbase.html"}}
+       pages:[{t:"🏰 LINK-BASE掲載ガイドを見る", u:"first-support/linkbase.html"}]}
     ]},
     {ic:"👍", nm:"次のステップへ\nLINKを使おう", g:"member", need:"flow:know", goPage:"use"}
   ]},
   {ic:"🚀", nm:"LINKを\n使おう", g:"member", flowPage:"use", lockAfter:"know", kids:[
-    {ic:"☑️", nm:"1stステップ\n参加確認", g:"member", opt:true, url:B+"first-support/step1.html"},
-    {ic:"👥", nm:"チームの\nチャット", g:"member", num:1, task:"u1"},
-    {ic:"🌏", nm:"LINK全体の\nチャット", g:"member", num:2, task:"u2", link:{t:"💬 入るべきオープンチャット集をひらく", u:B+"first-support/openchat.html"}},
-    {ic:"🏘", nm:"地域コミュニティ\n趣味のサークル", g:"member", num:3, task:"u3", note2:"注意書きを分かったうえで入る／あなたの地域のもの／海外の方の使い方など。LINK informationでも詳しく分かります。"},
-    {ic:"🐣", nm:"もっと\n使いこなすには", g:"sup", url:B+"first-support/to-supporter.html"},
-    {ic:"👍", nm:"OK！\nホームへ", g:"member", need:"flow:use", goHome:true}
+    /* v1.2.007：「1stステップ参加確認」はなくしました */
+    {ic:"🌈", nm:"Skyarcの\n交流＆PRチャット", g:"member", num:1, task:"u1", pass:true, wide:true,
+     note2:"Skyarcの仲間たちが、いろいろなお知らせをしてくれたり、良かったことの交流や自己紹介をし合ったりしているチャットです。<br>名前に<b>グループ名を必ず入れて</b>、マナーを守って楽しくご参加ください😊<br><b>ユーザーサポート会</b>で教えてもらう<b>合言葉</b>を入れると、2つのチャットにご招待できます。"},
+    {ic:"📣", nm:"LINK情報伝達\nチャット", g:"member", num:2, task:"u2", gen:true, wide:true,
+     note2:"LINK全体の、<b>あなたにとって大事な情報</b>が常に来るチャットです（書きこみはできません）。しっかり毎日ご確認ください。<br>入る前に、下で名前を作ってコピーしておきましょう。",
+     html:'<a class="fbtn" href="https://line.me/ti/g2/gMA3NZL3Ypihck48K0xB9mHwJe8AV3ezmjXX6A?utm_source=invitation&utm_medium=link_copy&utm_campaign=default" target="_blank" rel="noopener">📲 LINK情報伝達チャットに入る</a>'},
+    {ic:"🏘", nm:"地域コミュニティ\n趣味のサークル", g:"member", num:3, task:"u3", wide:true,
+     note2:"あなたの地域のコミュニティや、趣味・事業・興味に合うサークルがあります。注意書きを分かったうえで入りましょう。LINK information でも、詳しく分かります。",
+     pages:[{t:"📖 サークルやコミュニティの説明を見る", u:"first-support/openchat.html", part:"b"}]},
+    /* 1〜3がそろうと、黄色く光って出ます（押すと「サポーターとは」） */
+    {ic:"🐣", nm:"もっと\n使いこなすには", g:"member", need:"flow:use", supNext:true, url:B+"first-support/to-supporter.html"}
   ]},
   /* チーム情報：ファーストサポートの3つが終わったら開きます（サポーター・クリエ・役割のある方も）。
      押すと、スカイアークチームのページへ（v1.216 で「チーム作り」からかわりました） */
@@ -605,7 +617,8 @@ const TREE = [
         + '<li><b>「新規会員紹介」</b> をえらびます</li>'
         + '<li>そこに出ている <b>紹介用アドレスをコピー</b>します</li></ol>'
         + '<a class="fbtn" href="https://member.link-platform.jp/mypage/introduction.php" target="_blank" rel="noopener">🔗 新規会員紹介のページをひらく</a>'
-        + '<p class="fsmall">※ ログインしていない場合は、ログイン画面が出ます</p>'},
+        + '<p class="fsmall">※ ログインしていない場合は、ログイン画面が出ます</p>'
+        + '<h4>📋 コピーしたアドレスを、ここに貼りつけて「OK」</h4>', refSave:true},
     {ic:"👍", nm:"次のステップへ\nLINKを知ろう", g:"member", need:"flow:hajime", goPage:"know"}
   ]}
 ];
@@ -846,7 +859,7 @@ function makeNode(it, i, home, fromX, fromY){
   const el = document.createElement("button");
   el.type = "button";
   el.className = "bub" + (it.join ? " join" : "") + (it.back ? " backb" : "") + (it.wide ? " wide" : "") + (it.moon ? " moon" : "") + (it.tiny ? " tiny" : "")
-    + (it.ph ? " fph" : "") + (it.opt ? " fopt" : "") + (it.goPage || it.goHome ? " fnext" : "");
+    + (it.ph ? " fph" : "") + (it.opt ? " fopt" : "") + (it.goPage || it.goHome || it.supNext ? " fnext" : "");
   el.style.setProperty("--c", C[it.g]);
   el.innerHTML = `<span class="ball">${it.ic}${it.num != null ? `<span class="fnum">${it.num}</span>` : ""}<span class="fmark"></span></span><span class="nm">${it.nm}</span>`;
   flowPaintNode(el, it);
@@ -1072,10 +1085,16 @@ function openTask(it){
   const done = !!FLOW[it.task];
   $("#taskWhere").textContent = flowWhere();
   $("#taskTitle").textContent = it.ic + " " + it.nm.replace(/\n/g,"");
-  let h = (it.note2 ? `<p>${it.note2}</p>` : "") + '<p style="color:#9E9E9E;font-size:13px">（仮組み：くわしい中身は準備中です）</p>';
+  let h = it.note2 ? `<p>${it.note2}</p>` : '<p style="color:#9E9E9E;font-size:13px">（仮組み：くわしい中身は準備中です）</p>';
   if(it.gen) h += '<div class="fgen"><label for="fgName">👤 あなたのお名前</label><input id="fgName" type="text" autocomplete="nickname" placeholder="例：しょうこ">'
     + '<label for="fgKei">🏷️ 系列</label><select id="fgKei"></select><div class="res" id="fgRes">👆 お名前と系列を入れてください</div><button type="button" id="fgCopy">📋 タップしてコピー</button></div>';
+  if(it.thanks) h += '<p class="koui">🤝 同じ会員の立場の方が、<b>貢献の気持ち</b>で開いてくださっている会です。そのことを理解して、<b>感謝しながら</b>参加していただければと思います。</p>';
+  if(it.noteKey && NOTES[it.noteKey]){ const u = linkOf({ link: it.noteKey }); h += NOTES[it.noteKey].html + (u ? `<a class="fbtn" href="${u}" target="_blank" rel="noopener">${NOTES[it.noteKey].btn}</a>` : ""); }
   if(it.html) h += it.html;
+  if(it.noteBtns) it.noteBtns.forEach(k=>{ const u = linkOf({ link: k }); if(u && NOTES[k]) h += `<a class="fbtn" href="${u}" target="_blank" rel="noopener">${NOTES[k].btn}</a>`; });
+  if(it.pages) it.pages.forEach((pg, i)=>{ h += `<button type="button" class="fbtn fpage" data-i="${i}" style="width:100%;border:none;cursor:pointer;font-family:inherit;background:#6E5FB5">${pg.t}</button>`; });
+  if(it.refSave) h += '<div class="fgen"><input id="fRef" type="url" inputmode="url" autocapitalize="off" spellcheck="false" placeholder="https://…" value="' + String((me && me.refUrl) || "").replace(/"/g, "&quot;") + '"><button type="button" id="fRefOk">OK（会員情報に保存する）</button><p class="fsmall" id="fRefMsg" style="margin-top:6px"></p></div>';
+  if(it.pass) h += '<div class="fgen"><label for="fPass">🔑 合言葉</label><input id="fPass" type="text" autocomplete="off" placeholder="ユーザーサポート会で教わった合言葉"><button type="button" id="fPassOk">合言葉を入れる</button><p class="fsmall" id="fPassMsg" style="margin-top:6px"></p><div id="fPassBox"></div></div>';
   if(it.link) h += `<a class="flink" id="taskLink" href="${it.link.u}"${/^https?:/.test(it.link.u) ? ' target="_blank" rel="noopener"' : ""}>${it.link.t}</a>`;
   h += done ? '<button type="button" class="fdone undo" id="taskDone">もどす（まだ終わっていない）</button>' : '<button type="button" class="fdone" id="taskDone">✅ できた！</button>';
   if(done) h += FLOW_MARKS.indexOf(it.task) >= 0 ? '<p class="fwait" style="color:#8E24AA">🌈 サポーターの確認もついています</p>' : '<p class="fwait" style="color:#0288D1">🔵 サポーターの確認を待っています</p>';
@@ -1083,6 +1102,9 @@ function openTask(it){
   $("#taskSheet").hidden = false;
   const l = $("#taskLink"); if(l && !/^https?:/.test(it.link.u)) l.addEventListener("click", saveReturn);
   if(it.gen) flowGen();
+  document.querySelectorAll("#taskBody .fpage").forEach(b=>b.addEventListener("click", ()=>openPage(it.pages[+b.dataset.i])));
+  if(it.refSave) $("#fRefOk").onclick = flowSaveRef;
+  if(it.pass) $("#fPassOk").onclick = flowPass;
   $("#taskDone").onclick = ()=>{
     const pageK = path.length ? path[0].flowPage : "";
     const wasPage = pageK ? flowDone(pageK) : false;
@@ -1090,12 +1112,49 @@ function openTask(it){
     const ch = {};
     if(FLOW[it.task]){ delete FLOW[it.task]; ch[it.task] = false; } else { FLOW[it.task] = true; ch[it.task] = true; }
     saveFlow(ch); closeTask(); flowPaintAll(); reflowLevel();
-    if(pageK && !wasPage && flowDone(pageK)) flowCelebrate("🎉 " + flowPageItem(pageK).nm.replace(/\n/g,"") + "、ぜんぶできました！" + (grp ? "「もどる」から、👍 の丸で次へ進めます" : "👍 の丸から次へ進めます"));
+    if(pageK === "use" && !wasPage && flowDone(pageK)) flowCelebrate("🎉 3つとも終わりました！ホームに「チーム情報」が開きました。光っている「もっと使いこなすには」も見てみてください");
+    else if(pageK && !wasPage && flowDone(pageK)) flowCelebrate("🎉 " + flowPageItem(pageK).nm.replace(/\n/g,"") + "、ぜんぶできました！" + (grp ? "「もどる」から、👍 の丸で次へ進めます" : "👍 の丸から次へ進めます"));
     else if(grp && !wasGrp && flowItemDone(grp)) flowCelebrate("🎉 " + grp.nm.replace(/\n/g,"") + "、ぜんぶできました！");
   };
 }
 function closeTask(){ $("#taskSheet").hidden = true; }
+/* ページをポップアップの中に出します（もどるで、ステップの中身にもどります） */
+function openPage(pg){
+  const f = $("#pageFrame");
+  f.src = B + pg.u + "?embed=1" + (pg.part ? "&part=" + pg.part : "");
+  $("#pageTitle").textContent = pg.t.replace(/^\S+\s/, "");
+  $("#pageSheet").hidden = false;
+}
+function closePage(){ $("#pageSheet").hidden = true; $("#pageFrame").src = "about:blank"; }
+/* 紹介URLを、会員情報（会員名簿の紹介URL）に保存します */
+async function flowSaveRef(){
+  const v = $("#fRef").value.trim(), msg = $("#fRefMsg");
+  if(!/^https?:\/\//i.test(v)){ msg.textContent = "⚠️ https:// から始まるアドレスを貼りつけてください"; msg.style.color = "#C62828"; return; }
+  if(!me || !me.id || !me.pin){ msg.textContent = "ログインすると保存できます"; return; }
+  msg.textContent = "☁️ 保存しています…"; msg.style.color = "";
+  try{
+    const r = await fetch(GAS_URL, { method:"POST", body:new URLSearchParams({ action:"saveProfile", id:me.id, pin:me.pin, refUrl:v }) });
+    const j = await r.json();
+    if(j && j.ok){
+      me.refUrl = v; try{ localStorage.setItem("skyarc_member", JSON.stringify(me)); }catch(e){}
+      msg.textContent = "✅ 会員情報に反映されました。下の「できた！」を押してください"; msg.style.color = "#2E7D32";
+    }else{ msg.textContent = "保存できませんでした。もう一度お試しください"; msg.style.color = "#C62828"; }
+  }catch(e){ msg.textContent = "電波のよいところで、もう一度お試しください"; msg.style.color = "#C62828"; }
+}
+/* Skyarcの交流チャット＆PRチャット：合言葉（仮：リンク）で、招待のURLとQRコードを出します */
+const FLOW_PASS = "リンク";
+function flowPass(){
+  const v = $("#fPass").value.trim().replace(/\s/g, ""), msg = $("#fPassMsg");
+  if(v !== FLOW_PASS){ msg.textContent = "合言葉がちがうようです。ユーザーサポート会で教えてもらってください"; msg.style.color = "#C62828"; $("#fPassBox").innerHTML = ""; return; }
+  msg.textContent = "✅ 合言葉が合いました！ 2つのチャットにご招待します"; msg.style.color = "#2E7D32";
+  $("#fPassBox").innerHTML =
+      '<h4>🌈 Skyarc（スカイアーク）チームの交流チャット</h4><a class="fbtn" href="https://line.me/ti/g2/TJLFirmMubg3EgD_Eu1NFg-0dak0Mggqg4l-Hw?utm_source=invitation&utm_medium=link_copy&utm_campaign=default" target="_blank" rel="noopener">📲 タップして参加する</a><img class="fqr" src="img/qr-skyarc-chat.png" alt="交流チャットのQRコード">'
+    + '<h4>🌈 PR・体験受講 専用チャット</h4><a class="fbtn" href="https://line.me/ti/g2/gbb3x61l5IuzViBiZ6xVG9NeyGN57yxlA9GBFw?utm_source=invitation&utm_medium=link_copy&utm_campaign=default" target="_blank" rel="noopener">📲 タップして参加する</a><img class="fqr" src="img/qr-skyarc-pr.png" alt="PRチャットのQRコード">'
+    + '<p class="fsmall">パソコンで見ているときは、スマホのカメラでQRコードを読みとってください</p>';
+}
 document.getElementById("taskClose").addEventListener("click", closeTask);
+document.getElementById("pageClose").addEventListener("click", closePage);
+document.getElementById("pageBack").addEventListener("click", closePage);
 document.getElementById("taskSheet").addEventListener("click", e=>{ if(e.target.id === "taskSheet") closeTask(); });
 function openInfoSheet(title, text){
   $("#taskWhere").textContent = ""; $("#taskTitle").textContent = title;
