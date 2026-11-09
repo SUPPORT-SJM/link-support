@@ -1,0 +1,1979 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<script src="config.js"></script>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Skyarc LINKサポート</title>
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" type="image/png" sizes="64x64" href="./img/app-icon-64.png">
+<link rel="apple-touch-icon" href="./img/app-icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="LINKサポート">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#6E5FB5">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./beta.css">
+<style>
+/* レイアウト：ログイン後のトップ。丸いまとまりの中に、アイコンと名前がひとかたまりで浮かぶ。
+   つまんで動かすと周りがよけて混ざり、離すと元の場所へ。押すとその色が画面いっぱいに広がる */
+:root{
+  --ink:#2A2438; --sub:#7A7390; --deep:#6E5FB5; --mist:#F0EDF9; --paper:#FCFBFF; --line:#E4E0F0; --card:#FFFFFF;
+  --g-member:#3FA98A; --g-apply:#E8873A; --g-team:#4E86D6; --g-sup:#D9A21E; --g-crie:#8A6FD6; --g-common:#9A93B0; --g-back:#8E86C8; --g-join:#5FB8E6; --join-ink:#3A9BD0; --rainbow:#F49AC1,#F5A97A,#F5D06A,#8FD9A8,#6FC7D9,#7BA3E8,#A88BE0,#F49AC1;
+  --halo:rgba(110,95,181,.07);
+  --shadow:0 6px 18px rgba(60,42,110,.13);
+  --f-head:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Yu Gothic",sans-serif;
+  --f-body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",sans-serif;
+}
+/* このサイトは明るい画面だけでそろえています（ほかのページと同じ） */
+*{box-sizing:border-box;}
+[hidden]{display:none !important;}
+html,body{overflow-x:hidden;}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.7;}
+.wrap{max-width:520px;margin:0 auto;padding-inline:16px;padding-block:14px 30px;}
+
+/* 上の見出し */
+.top{display:flex;align-items:center;gap:12px;padding-right:58px;}
+.appicon{width:52px;height:52px;border-radius:14px;flex:none;overflow:hidden;box-shadow:var(--shadow);
+  background:#6E5FB5 url("./img/app-icon-180.png") center/cover no-repeat;}   /* ホーム画面のアイコンと同じ絵 */
+.top h1{font-family:var(--f-head);font-weight:900;font-size:18px;line-height:1.35;margin:0;color:var(--deep);text-wrap:balance;}
+.top p{margin:0;font-size:12.5px;color:var(--sub);}
+
+/* もどる */
+.crumb{display:flex;align-items:center;gap:10px;min-height:40px;margin-top:12px;}
+.back{border:none;background:var(--mist);color:var(--deep);font-family:var(--f-head);font-weight:700;
+  font-size:13px;padding:7px 14px;border-radius:999px;cursor:pointer;white-space:nowrap;flex:none;}
+.back:focus-visible,.bub:focus-visible{outline:3px solid var(--deep);outline-offset:3px;border-radius:20px;}
+.crumb h2{margin:0;font-family:var(--f-head);font-weight:900;font-size:16px;color:var(--ink);}
+
+/* アイコンの舞台（丸いまとまり） */
+.stage{position:relative;width:100%;max-width:440px;margin:6px auto 0;touch-action:pan-y;user-select:none;-webkit-user-select:none;}
+/* 何もないところを指で上下になぞると、ページが動きます（下のバージョン情報まで見られるように）。丸は、これまでどおりつまめます */
+.stage .bub{touch-action:none;}
+.stage::before{content:"";position:absolute;left:50%;top:50%;width:92%;aspect-ratio:1;max-height:100%;
+  transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,var(--halo) 0%,transparent 70%);
+  pointer-events:none;}
+.bub{position:absolute;left:0;top:0;width:96px;display:flex;flex-direction:column;align-items:center;gap:6px;
+  text-decoration:none;color:var(--ink);background:none;border:none;padding:0;cursor:grab;font-family:inherit;
+  -webkit-tap-highlight-color:transparent;-webkit-user-drag:none;will-change:transform;}
+.bub.grab{cursor:grabbing;z-index:5;}
+/* サポーターの部屋：2回つづけて押すと、裏返って「サポーターとは」になります */
+.bub.flipping .ball,.bub.flipping .nm{animation:bubFlip .44s ease-in-out;}
+@keyframes bubFlip{0%{transform:rotateY(0)}50%{transform:rotateY(90deg)}100%{transform:rotateY(0)}}
+@media (prefers-reduced-motion: reduce){ .bub.flipping .ball,.bub.flipping .nm{animation:none;} }
+.bub .ball{width:68px;height:68px;border-radius:50%;display:grid;place-items:center;font-size:30px;
+  background:var(--card);border:3px solid var(--c);box-shadow:var(--shadow);transition:box-shadow .2s;pointer-events:none;}
+.bub.grab .ball{box-shadow:0 14px 28px rgba(60,42,110,.25);}
+/* ===== 仮組み：ファーストサポートの新しい流れ ===== */
+.bub .ball{position:relative;}
+.bub .fnum{position:absolute;left:-7px;top:-7px;width:24px;height:24px;border-radius:50%;background:var(--c);color:#fff;
+  font-size:12.5px;font-weight:900;display:grid;place-items:center;box-shadow:0 2px 6px rgba(0,0,0,.15);font-family:var(--f-head);}
+.bub .fmark{position:absolute;right:-8px;bottom:-6px;font-size:17px;}
+.bub.fme .ball{border-color:#29B6F6;animation:fGlowB 1.8s ease-in-out infinite;}          /* 自分で「できた！」：青く光る */
+.bub.fme .fnum{background:#29B6F6;}
+@keyframes fGlowB{0%,100%{box-shadow:0 0 0 4px rgba(41,182,246,.35),0 0 18px rgba(41,182,246,.55)}50%{box-shadow:0 0 0 8px rgba(41,182,246,.18),0 0 30px rgba(41,182,246,.8)}}
+.bub.fnext .ball{border-color:#FFA726;animation:fGlowY 1.8s ease-in-out infinite;}        /* 次のステップへ：黄色・オレンジに光る */
+.bub.fnext .nm{color:#E65100;font-weight:900;}
+@keyframes fGlowY{0%,100%{box-shadow:0 0 0 4px rgba(255,167,38,.4),0 0 18px rgba(255,193,7,.6)}50%{box-shadow:0 0 0 9px rgba(255,167,38,.18),0 0 32px rgba(255,193,7,.9)}}
+.bub.flock .ball,.bub.flock .nm{opacity:.4;}   /* 順番がまだの丸は薄く */
+.bub.fph .ball{border-style:dashed;border-color:#BDBDBD;color:#9E9E9E;}
+.bub.fph .nm{color:#9E9E9E;}
+.bub.fopt .ball{border-color:#90A4AE;}
+.bub.moon.tiny .ball{width:38px;height:38px;font-size:17px;}
+.bub.moon.tiny .nm{font-size:9.5px;}
+@media (prefers-reduced-motion: reduce){ .bub.fme .ball,.bub.fnext .ball{animation:none;} }
+.fconf{position:fixed;top:-20px;z-index:9000;font-size:20px;pointer-events:none;animation:fFall linear forwards;}
+@keyframes fFall{to{transform:translateY(110vh) rotate(540deg)}}
+#taskSheet .fdone{display:block;width:100%;padding:14px;border-radius:14px;border:none;background:#29B6F6;color:#fff;font-family:inherit;font-weight:900;font-size:16px;margin-top:12px;cursor:pointer;}
+#taskSheet .fdone.undo{background:#ECEFF1;color:#546E7A;font-size:14px;}
+#taskSheet .flink{display:block;padding:12px;border-radius:12px;border:2px solid #90CAF9;background:#F2F8FF;color:#1565C0;font-weight:700;font-size:14.5px;text-align:center;text-decoration:none;margin-top:10px;}
+#taskSheet .fwait{font-size:12.5px;text-align:center;margin-top:8px;}
+.bub.wide .nm{white-space:pre;}   /* 「このサイトを教える」を1行に収めます */
+/* アカウントのまわりを、月のようにまわる小さなアイコン（ほかのアイコンの7割ほど） */
+.bub.moon{z-index:3;gap:4px;}
+.orbit{position:absolute;left:0;top:0;border:1.5px dashed rgba(110,95,181,.28);border-radius:50%;pointer-events:none;
+  transition:opacity .4s;}
+.bub.moon .ball{width:48px;height:48px;font-size:21px;border-width:2.5px;}
+.bub.moon .nm{font-size:10.5px;line-height:1.25;background:rgba(255,255,255,.9);border-radius:8px;padding:2px 6px;
+  box-shadow:0 2px 6px rgba(60,42,110,.12);}   /* ほかのアイコンの前を通っても読めるように */
+.bub.backb .ball{width:62px;height:62px;font-size:26px;}
+.bub.backb .nm{color:var(--deep);font-size:13px;}
+.bub .nm{font-family:var(--f-head);font-weight:700;font-size:12px;line-height:1.3;text-align:center;
+  white-space:pre-line;pointer-events:none;}
+
+/* 次に進むところを指さす 👉（はじめの一歩 → 初期サポートガイド → 活用の1stステップ） */
+.bub.pointed{z-index:4;}
+.bub .point{position:absolute;left:-14px;top:-12px;font-size:34px;line-height:1;pointer-events:none;
+  transform:rotate(38deg);transform-origin:70% 50%;filter:drop-shadow(0 3px 4px rgba(60,42,110,.28));
+  animation:pointPoke 1.1s ease-in-out infinite;}
+@keyframes pointPoke{0%,100%{translate:0 0;}50%{translate:7px 7px;}}
+@media (prefers-reduced-motion: reduce){ .bub .point{animation:none;} }
+
+/* 案内だけの段（公式公認イベント） */
+.info{margin-top:22px;background:var(--card);border:2px solid var(--g-apply);border-radius:22px;padding:22px 18px;
+  box-shadow:var(--shadow);display:flex;flex-direction:column;gap:14px;text-align:center;
+  animation:bloom .42s cubic-bezier(.25,1.3,.5,1) both;}
+@keyframes bloom{from{opacity:0;transform:scale(.5);}to{opacity:1;transform:none;}}
+.info p{margin:0;font-size:14px;line-height:1.9;}
+.info-btn[hidden]{display:none;}
+.info-btn{display:block;padding:14px;border-radius:14px;background:var(--g-apply);color:#fff;text-decoration:none;
+  font-family:var(--f-head);font-weight:700;font-size:15px;}
+.info-btn:focus-visible{outline:3px solid var(--deep);outline-offset:3px;}
+
+/* 短いお知らせ */
+.toast{position:fixed;left:50%;bottom:calc(28px + env(safe-area-inset-bottom));transform:translate(-50%,20px);z-index:60;
+  background:rgba(62,47,40,.92);color:#fff;font-size:13.5px;font-weight:700;border-radius:999px;padding:11px 20px;
+  max-width:calc(100vw - 32px);text-align:center;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;}
+.toast.show{opacity:1;transform:translate(-50%,0);}
+/* ログイン中のトップの、小さな「使い方」（ほかのアイコンがよけて近づいた一瞬は、その後ろを通ります。つまむと前に出ます） */
+.tut{position:absolute;left:0;top:0;z-index:0;touch-action:none;cursor:grab;width:80px;display:flex;flex-direction:column;align-items:center;gap:2px;
+  text-decoration:none;will-change:transform;}
+.tut .tb{width:32px;height:32px;border-radius:50%;background:#fff;border:2px solid var(--deep);display:grid;place-items:center;
+  font-size:15px;box-shadow:var(--shadow);}
+.tut .tt{font-family:var(--f-head);font-weight:700;font-size:10px;color:var(--deep);background:rgba(255,255,255,.92);
+  border-radius:6px;padding:0 5px;white-space:nowrap;}
+.tut:focus-visible{outline:3px solid var(--deep);outline-offset:3px;border-radius:12px;}
+/* ログイン中のトップの、小さな「会員情報」（左上。使い方と同じように浮いていて、つまんで動かせます） */
+.tut.mem .tb{border-color:var(--g-member);}
+.tut.mem .tt{color:#2E7D62;white-space:pre;text-align:center;line-height:1.25;}
+.tut.mem{width:96px;}
+/* 管理者モードの丸（管理者の方だけ）：オフ＝灰色／オン＝紺／試し中＝オレンジ */
+.tut.dbg .tb{border-color:#8A84A0;}
+.tut.dbg{width:104px;}
+.tut.view{width:104px;}
+.tut.view .tb{border-color:#5E8FD8;}
+.tut.view .tt{color:#3F6DB5;white-space:pre;text-align:center;line-height:1.25;}
+.tut.dbg .tt{color:#6E6890;white-space:pre;text-align:center;line-height:1.25;}
+.tut.dbg.on .tb{border-color:#3C3557;background:#EDEAF7;}
+.tut.dbg.on .tt{color:#3C3557;}
+.tut.dbg.cus .tb{border-color:#F57C00;background:#FFF1E0;}
+.tut.dbg.cus .tt{color:#C25E00;}
+/* 管理者モードがオンのあいだは、オレンジ色にゆっくり明滅します */
+.tut.dbg.on .tb,.tut.dbg.cus .tb{animation:dbgPulse 2.4s ease-in-out infinite;}
+@keyframes dbgPulse{0%,100%{box-shadow:0 0 0 0 rgba(245,124,0,.0),0 2px 6px rgba(0,0,0,.12);border-color:#F57C00;}
+  50%{box-shadow:0 0 0 7px rgba(245,124,0,.28),0 0 16px 4px rgba(245,124,0,.45);border-color:#FFB74D;}}
+@media (prefers-reduced-motion: reduce){ .tut.dbg.on .tb,.tut.dbg.cus .tb{animation:none;box-shadow:0 0 0 4px rgba(245,124,0,.3);} }
+/* 会員情報の画面 */
+.minfo{margin:6px 0 14px;border:2px solid var(--line);border-radius:16px;overflow:hidden;}
+.minfo .row{display:flex;flex-direction:column;gap:2px;padding:12px 14px;border-bottom:1px dashed var(--line);}
+.minfo .row:last-child{border-bottom:none;}
+.minfo .k{font-size:13px;font-weight:700;color:var(--deep);}
+.minfo .v{font-family:var(--f-head);font-weight:900;font-size:22px;color:var(--ink);word-break:break-all;}
+.minfo .v.none{font-size:15px;font-weight:700;color:var(--sub);}
+.minfo .v.num{letter-spacing:.06em;}
+.minfo .idrow{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.cpy{flex:none;padding:10px 14px;border-radius:12px;border:2px solid var(--g-member);background:#fff;color:#2E7D62;
+  font-family:var(--f-head);font-weight:900;font-size:15px;cursor:pointer;}
+.cpy.done{background:var(--g-member);color:#fff;}
+.cpy.ref{width:100%;margin-top:4px;padding:12px 14px;font-size:15px;}
+.cpmsg{font-size:13px;font-weight:700;color:#2E7D62;min-height:1.2em;}
+.pwnote{background:#FFF8E1;border:1.5px solid #FFE08A;border-radius:14px;padding:12px 14px;font-size:14px;line-height:1.85;color:#5D4037;margin-bottom:14px;}
+.pwnote b{color:#BF360C;}
+.mlink{display:block;text-align:center;text-decoration:none;font-family:var(--f-head);font-weight:900;font-size:16px;color:#fff;
+  background:var(--g-member);border-radius:14px;padding:14px;margin-bottom:10px;box-shadow:0 6px 16px rgba(63,169,138,.3);}
+.mclose{display:block;width:100%;padding:12px;border:none;border-radius:14px;background:var(--mist);color:var(--deep);
+  font-family:var(--f-head);font-weight:700;font-size:15px;cursor:pointer;}
+/* 「登録」の右下の、小さな「使い方」 */
+.howto{position:absolute;left:0;top:0;z-index:4;touch-action:none;cursor:grab;width:44px;display:flex;flex-direction:column;align-items:center;gap:2px;
+  text-decoration:none;will-change:transform;}
+.howto .hb{width:30px;height:30px;border-radius:50%;background:#fff;border:2.5px solid var(--deep);display:grid;place-items:center;
+  font-size:14px;box-shadow:var(--shadow);}
+.howto .ht{font-family:var(--f-head);font-weight:900;font-size:10.5px;color:var(--deep);background:rgba(255,255,255,.92);
+  border-radius:6px;padding:0 5px;white-space:nowrap;}
+.tut.grab,.howto.grab{cursor:grabbing;z-index:6;}
+.tut.grab .tb,.howto.grab .hb{box-shadow:0 10px 22px rgba(60,42,110,.3);}
+.howto:focus-visible{outline:3px solid var(--deep);outline-offset:3px;border-radius:12px;}
+/* 押したとき、その色が画面いっぱいに広がる */
+.spread{position:fixed;inset:0;z-index:50;pointer-events:none;background:var(--c);
+  clip-path:circle(0px at var(--x) var(--y));display:grid;place-items:center;}
+.spread.go{transition:clip-path .55s cubic-bezier(.6,0,.3,1);clip-path:circle(150vmax at var(--x) var(--y));}
+.spread.out{transition:opacity .35s;opacity:0;}
+.spread .big{font-size:72px;transform:scale(.4);opacity:0;transition:transform .5s .12s cubic-bezier(.25,1.4,.5,1),opacity .3s .12s;}
+.spread .bign{display:block;margin-top:10px;color:#fff;font-family:var(--f-head);font-weight:900;font-size:20px;
+  text-align:center;white-space:pre-line;opacity:0;transition:opacity .3s .25s;}
+.spread.go .big{transform:scale(1);opacity:1;}
+.spread.go .bign{opacity:1;}
+
+@media (prefers-reduced-motion: reduce){
+  .info{animation:none !important;}
+  .spread.go,.spread .big,.spread .bign{transition:none !important;}
+}
+
+/* はじめての方：まん中の「登録」 */
+.bub.join{width:110px;}
+@property --ang{syntax:"<angle>";inherits:false;initial-value:0deg;}
+.bub.join .ball{width:88px;height:88px;font-size:36px;border:5px solid transparent;
+  /* まん中は水色の水晶玉：左上から光が当たり、下に光が抜けて、ふちが少し濃くなる球 */
+  background:
+    radial-gradient(ellipse 34% 22% at 35% 25%, rgba(255,255,255,.95) 0%, rgba(255,255,255,.5) 45%, rgba(255,255,255,0) 75%) padding-box,
+    radial-gradient(ellipse 55% 30% at 58% 86%, rgba(225,250,255,.85) 0%, rgba(225,250,255,0) 70%) padding-box,
+    radial-gradient(circle at 50% 50%, rgba(255,255,255,0) 62%, rgba(40,110,160,.28) 100%) padding-box,
+    radial-gradient(circle at 38% 32%, #F2FCFF 0%, #BDE9FA 22%, #82CBEC 52%, #4BA4D4 80%, #3A8DC0 100%) padding-box,
+    conic-gradient(from var(--ang), var(--rainbow)) border-box;
+  animation:spin 6s linear infinite, beacon 2.8s ease-in-out infinite;}
+.bub.join .nm{font-size:14px;font-weight:900;color:var(--join-ink);}
+@keyframes spin{to{--ang:360deg;}}
+@keyframes beacon{
+  0%,100%{box-shadow:0 0 6px 1px rgba(111,199,217,.35),var(--shadow);}
+  33%{box-shadow:0 0 22px 7px rgba(123,163,232,.55),var(--shadow);}
+  66%{box-shadow:0 0 22px 7px rgba(244,154,193,.5),var(--shadow);}
+}
+
+/* 申し込みの前の説明 */
+.sheet .card.note h3{margin:0 30px 12px;}
+.nbody p{margin:0 0 10px;font-size:14px;line-height:1.85;color:var(--ink);}
+.nbody ul{margin:-4px 0 10px;padding-left:1.3em;font-size:14px;line-height:1.85;}
+.nbody .koui{background:#FFF6E5;border-radius:12px;padding:10px 12px;}
+.nbody .nm1{background:#EEF4FF;border-radius:12px;padding:10px 12px;}
+.nbody a.nlink{display:inline-block;color:#1565C0;font-weight:700;text-decoration:underline;}
+.ngo{display:block;margin-top:14px;padding:15px;border-radius:14px;text-align:center;text-decoration:none;color:#fff;
+  background:linear-gradient(135deg,#FF8A50,#F2994A);font-family:var(--f-head);font-weight:900;font-size:16px;box-shadow:0 6px 16px rgba(242,153,74,.35);}
+
+/* 登録の画面 */
+.sheet{position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:16px;
+  background:rgba(30,22,52,.35);backdrop-filter:blur(2px);}
+.sheet .card{width:100%;max-width:400px;background:var(--card);border-radius:24px;padding:24px 20px 20px;
+  box-shadow:0 20px 50px rgba(30,22,52,.3);animation:bloom .4s cubic-bezier(.25,1.3,.5,1) both;position:relative;
+  max-height:calc(100vh - 32px);overflow-y:auto;}
+.sheet h3{margin:0 0 4px;font-family:var(--f-head);font-weight:900;font-size:20px;text-align:center;color:var(--ink);}
+.sheet .lead{margin:0 0 18px;text-align:center;font-size:13px;color:var(--sub);}
+.sheet .close{position:absolute;top:10px;right:12px;width:36px;height:36px;border-radius:50%;border:none;
+  background:var(--mist);color:var(--sub);font-size:18px;cursor:pointer;}
+.f{margin-bottom:14px;}
+.f label{display:block;font-size:12px;font-weight:700;color:var(--deep);margin-bottom:6px;}
+.f label small{font-weight:500;color:var(--sub);margin-left:4px;}
+.f input{width:100%;padding:13px 14px;font-size:16px;border:2px solid var(--line);border-radius:12px;
+  background:var(--paper);color:var(--ink);font-family:inherit;}
+.f input:focus{outline:none;border-color:var(--g-join);}
+.f input.pin{text-align:center;font-size:26px;letter-spacing:.5em;padding-left:.5em;font-family:var(--f-head);font-weight:700;}
+.gbtn{width:100%;padding:12px;border-radius:12px;border:2px solid var(--line);background:var(--card);color:var(--ink);
+  font-family:var(--f-head);font-weight:700;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;}
+.gbtn.done{border-color:var(--g-member);color:var(--g-member);}
+.or{display:flex;align-items:center;gap:10px;margin:10px 0;font-size:11px;color:var(--sub);}
+.or::before,.or::after{content:"";flex:1;height:1px;background:var(--line);}
+/* 止まったときのお知らせ：押したボタンのすぐ上に、赤い太字で出します */
+.err{display:none;margin:4px 0 12px;padding:10px 12px;border-radius:12px;background:#FFF1F0;border:1.5px solid #F5B5AE;font-size:14px;font-weight:700;line-height:1.7;color:#C62828;text-align:center;}
+.go-btn{width:100%;padding:15px;border:none;border-radius:14px;color:#fff;cursor:pointer;
+  background:linear-gradient(110deg,var(--rainbow));text-shadow:0 1px 3px rgba(40,30,80,.35);font-family:var(--f-head);font-weight:900;font-size:16px;}
+.done-msg{text-align:center;padding:10px 0 4px;}
+.done-msg .em{font-size:48px;line-height:1;}
+.done-msg p{margin:10px 0 0;font-family:var(--f-head);font-weight:900;font-size:18px;color:var(--ink);}
+
+
+/* 登録・ログインの切りかえ */
+.seg{display:flex;gap:4px;background:var(--mist);border-radius:12px;padding:4px;margin:0 0 16px;}
+.seg button{flex:1;border:none;background:none;border-radius:9px;padding:9px 6px;font-family:var(--f-head);
+  font-weight:700;font-size:13px;color:var(--sub);cursor:pointer;}
+.seg button.on{background:var(--card);color:var(--deep);box-shadow:0 2px 8px rgba(60,42,110,.10);}
+.seg.small button{font-size:12px;padding:7px 4px;}
+.err a{color:var(--deep);}
+.forgot{display:block;text-align:center;margin-top:12px;font-size:12px;color:var(--sub);}
+.go-btn:disabled{opacity:.6;}
+.foot{text-align:center;font-size:11px;color:var(--sub);line-height:2;margin-top:18px;}
+/* いちばん上の段では、「Presented by／バージョン」を、丸の場所のいちばん下（左右の小さな丸のあいだ）に重ねて置きます。
+   そのぶん丸を大きく並べられて、スクロールしなくても最後まで画面に収まります */
+.foot.inStage{position:relative;z-index:0;pointer-events:none;margin-top:-50px;}
+.foot .verTag{font-family:monospace;font-size:9.5px;}
+
+@media (prefers-reduced-motion: reduce){ .bub.join .ball,.sheet .card{animation:none !important;} }
+</style>
+<script src="loading.js"></script>
+<script src="login.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="appicon" aria-hidden="true"></div>
+    <div>
+      <h1>Skyarc LINKサポート</h1>
+      <p id="hello">ようこそ</p>
+    </div>
+  </div>
+
+  <div class="crumb" id="crumb" hidden>
+    <h2 id="crumbTitle"></h2>
+  </div>
+
+  <div class="info" id="info" hidden>
+    <p id="infoText"></p>
+    <a id="infoBtn" class="info-btn" target="_blank" rel="noopener"></a>
+  </div>
+
+  <nav class="stage" id="stage" aria-live="polite"></nav>
+
+  <div class="foot">Presented by Skyarc-team<br><span class="verTag"></span></div>
+</div>
+
+<div class="sheet" id="memSheet" style="z-index:8100;" hidden>
+  <div class="card" role="dialog" aria-labelledby="mTitle">
+    <button type="button" class="close" id="mClose" aria-label="とじる">×</button>
+    <h3 id="mTitle">👤 会員情報</h3>
+    <p class="lead">ユーザーサポート会などで聞かれたら、ここを見せてください</p>
+    <div class="minfo">
+      <div class="row"><span class="k">① 登録名（ニックネーム）</span><span class="v" id="mName"></span></div>
+      <div class="row"><span class="k">② 本名</span><span class="v" id="mReal"></span></div>
+      <div class="row"><span class="k">③ 会員番号</span>
+        <div class="idrow"><span class="v num" id="mId"></span><button type="button" class="cpy" id="mCopy">📋 コピー</button></div>
+        <span class="cpmsg" id="mCopyMsg" aria-live="polite"></span></div>
+      <div class="row"><span class="k">④ 紹介コード（招待コードのURL）</span>
+        <button type="button" class="cpy ref" id="mRefCopy">🔗 紹介コードをコピーする</button>
+        <span class="cpmsg" id="mRefMsg" aria-live="polite"></span></div>
+    </div>
+    <div class="pwnote">🔑 <b>LINKのサービスを使うためのパスワード</b>は、ここには出しません。<br>
+      ほかの人に分からないように、ご自身でしっかり管理してください。<br>
+      手帳にメモする、LINEのノートに書いておくなど、<b>ご自分がすぐ分かるところ</b>に残しておくと安心です。</div>
+    <a class="mlink" href="./first-support/sheet-howto.html">📄 スプレッドシートの書き方<br><span style="font-size:13px;font-weight:700;">（イベントの申し込みのしかた）</span></a>
+    <button type="button" class="mclose" id="mClose2">とじる</button>
+  </div>
+</div>
+<div class="sheet" id="noteSheet" style="z-index:8100;" hidden>
+  <div class="card note" role="dialog" aria-labelledby="noteTitle">
+    <button type="button" class="close" id="noteClose" aria-label="とじる">×</button>
+    <h3 id="noteTitle"></h3>
+    <div class="nbody" id="noteBody"></div>
+    <a class="ngo" id="noteGo" href="#" target="_blank" rel="noopener"></a>
+  </div>
+</div>
+<!-- 仮組み：ファーストサポートの各ステップの中身 -->
+<div class="sheet" id="taskSheet" style="z-index:8100;" hidden>
+  <div class="card note" role="dialog" aria-labelledby="taskTitle">
+    <button type="button" class="close" id="taskClose" aria-label="とじる">×</button>
+    <div style="font-size:12px;font-weight:900;color:#FF7043" id="taskWhere"></div>
+    <h3 id="taskTitle"></h3>
+    <div class="nbody" id="taskBody"></div>
+  </div>
+</div>
+<div class="sheet" id="sheet" hidden>
+  <div class="card" role="dialog" aria-labelledby="jTitle">
+    <button type="button" class="close" id="jClose" aria-label="とじる">×</button>
+    <div id="jBody">
+      <h3 id="jTitle">登録</h3>
+      <p class="lead" id="jLead">これだけで、はじめられます</p>
+      <div class="seg" id="jSeg">
+        <button type="button" data-m="new" class="on">はじめての方</button>
+        <button type="button" data-m="login">登録ずみの方</button>
+      </div>
+      <p class="err" id="jErr"></p>
+
+      <form id="jForm" novalidate>
+        <div class="f">
+          <label for="jName">お名前</label>
+          <input id="jName" autocomplete="name">
+        </div>
+        <div class="f">
+          <label>Googleアカウント か メールアドレス</label>
+          <button type="button" class="gbtn" id="jGoogle"><b style="color:#4285F4;">G</b> Googleアカウントでつなぐ</button>
+          <div class="or">または</div>
+          <input id="jMail" type="email" inputmode="email" autocomplete="email" placeholder="メールアドレス">
+        </div>
+        <div class="f">
+          <label for="jPin">パスコード<small>数字4桁</small></label>
+          <input id="jPin" class="pin" type="password" inputmode="numeric" maxlength="4" autocomplete="new-password">
+        </div>
+        <div class="f">
+          <label for="jId">会員番号<small>分かれば</small></label>
+          <input id="jId" inputmode="numeric" autocomplete="off">
+        </div>
+        <button type="submit" class="go-btn" id="jGo">はじめる</button>
+      </form>
+
+      <form id="lForm" novalidate hidden>
+        <div class="seg small" id="lTabs">
+          <button type="button" data-t="google" class="on">Google</button>
+          <button type="button" data-t="id">会員番号</button>
+          <button type="button" data-t="mail">メール</button>
+        </div>
+        <div class="f" id="lPaneG">
+          <button type="button" class="gbtn" id="lGoogle"><b style="color:#4285F4;">G</b> Googleアカウントをえらぶ</button>
+        </div>
+        <div class="f" id="lPaneId" hidden>
+          <label for="lId">会員番号</label>
+          <input id="lId" inputmode="numeric" autocomplete="username" placeholder="00012345">
+        </div>
+        <div class="f" id="lPaneMail" hidden>
+          <label for="lMail">メールアドレス</label>
+          <input id="lMail" type="email" inputmode="email" autocomplete="email">
+        </div>
+        <div class="f">
+          <label for="lPin">パスコード<small>数字4桁</small></label>
+          <input id="lPin" class="pin" type="password" inputmode="numeric" maxlength="4" autocomplete="current-password">
+        </div>
+        <button type="submit" class="go-btn" id="lGo">ログイン</button>
+        <a href="#" class="forgot" id="lForgot">パスコードをお忘れの方</a>
+      </form>
+    </div>
+    <div class="done-msg" id="jDone" hidden><div class="em">🌱</div><p id="jDoneMsg"></p></div>
+  </div>
+</div>
+<div class="spread" id="spread" hidden><div><div class="big" id="spreadIc"></div><span class="bign" id="spreadNm"></span></div></div>
+
+<script>
+const B = "./";
+const SHEET = id => "https://docs.google.com/spreadsheets/d/" + id + "/edit";
+/* アイコンが開くスプレッドシート（管理画面の「🔗 リンク先の変更」で変えられます）
+   ・GASから受け取ったものを、この端末に覚えておきます
+   ・まだ受け取っていないときは、下のもとのリンク先を使います */
+const LINK_DEF = {
+  "support":   SHEET("1yZ5JO8nX4LlzVM2JMnk8pcrZfOZ6hEbwLes_zTc44Hg"),
+  "kouryu-on": SHEET("1MM-T4y721505YCHRW_D-7c4MycaZB5UjN7loHwIM0GM"),
+  "kouryu-re": SHEET("13qMv4dlEvHODH1bQrUlI1HSQSBgZW0as4y3Om7RORFs"),
+  "douga":     SHEET("1SpCvnlYs2D_mVlO6I5h9yjpRBR2cX7bw-tE-tAeL430"),
+  "btore":     SHEET("1HXtpJD21K2vomACuUuT32ZTvGFBS00r6armdCyQgIs4"),   /* アポ部屋と同じシート（GASから受け取ると、Bトレのいちばん新しい月のタブが開きます） */
+  "apoheya":   SHEET("1HXtpJD21K2vomACuUuT32ZTvGFBS00r6armdCyQgIs4"),
+  "c-monthly":       SHEET("1lxk7KrTWdUBVzKg1Vg_orSy4tQII27M2OXDgNNxCaoU"),   /* スペシャルMTG */
+  "c-tokkun-crie":   SHEET("1i_4lutdOUzC33WcKnF8IgUESQAGsb5R3FnR8QnfPipE"),   /* クリエ特訓 */
+  "c-tokkun-linker": SHEET("1ggolefkePK29kLXsR5JWmYpSQB9MWNpz4jtVNIh8RI8"),   /* リンカー特訓 */
+  "c-gcon":    "https://docs.google.com/spreadsheets/d/1MlH5NfYR210zQZh8rA77muqbCYk0qGne8WiCl1FRjtA/edit?gid=1657229561#gid=1657229561"   /* グルコン予定（クリエ以上向け） */
+};
+/* 申し込みのシートを開く前に出す説明（同じ会員の方がご好意で開いている会であること・お名前のことなど） */
+const NOTES = {
+  "support": { title:"🧡 ユーザーサポート会", btn:"🧡 ユーザーサポート会に申し込む", html:"<p class=\"koui\">🤝 同じLINK会員の方が、<b>ご好意（貢献の気持ち）</b>で開いてくださっている会です。会社の方が開いているものではありません。</p><p>はじめての方が、<b>LINKの最低限の使い方</b>が分かる会です。</p><p>ご参加のときは、次のものが<b>すぐ分かる・すぐ開ける</b>状態にしておいてください。</p><ul><li>会員情報（ご自分の会員番号）</li><li>LINKのコンテンツサービスにログインするときのパスワード</li><li>LINKポータルが開ける状態</li></ul><p class=\"nm1\">📝 お知らせが届きやすくなるように、<b>申し込みのお名前は、オープンチャットのお名前と同じ</b>にしてください。</p>" },
+  "douga": { title:"🎬 動画視聴会", btn:"🎬 動画視聴会に申し込む", html:"<p class=\"koui\">🤝 同じLINK会員の方が、<b>ご好意（貢献の気持ち）</b>で開いてくださっている動画視聴会です。会社の方が開いているものではありません。</p><p>大切な動画を、<b>みんなで一緒に見る会</b>です。</p><p class=\"nm1\">📝 お知らせが届きやすくなるように、<b>申し込みのお名前は、オープンチャットのお名前と同じ</b>にしてください。</p>" },
+  "kouryu-on": { title:"💻 オンライン交流会", btn:"💻 オンライン交流会に申し込む", html:"<p class=\"koui\">🤝 同じLINK会員の方が、<b>ご好意（貢献の気持ち）</b>で運営・主催してくださっている、チームの交流会です。会社の方が開いているものではありません。</p><p>オンラインで、<b>クラスメイトとも言えるチームの仲間</b>との絆を深めましょう。</p><p class=\"nm1\">📝 お知らせが届きやすくなるように、<b>申し込みのお名前は、チームのLINE・ユーザーサポート会・オープンチャットなどと同じお名前</b>にしてください。</p>" },
+  "kouryu-re": { title:"🍽 リアル交流会", btn:"🍽 リアル交流会に申し込む", html:"<p class=\"koui\">🤝 同じLINK会員の方が、<b>ご好意（貢献の気持ち）</b>で運営してくださっている、チームの交流会です。会社の方が開いているものではありません。</p><p>画面越しではなく、<b>実際に仲間たちと会える会</b>です。一度お会いしておくと、その後のやりとりがぐっと近くなります。</p><p class=\"nm1\">📝 お知らせが届きやすくなるように、<b>申し込みのお名前は、オープンチャットのお名前と同じ</b>にしてください。</p>" },
+  "btore": { title:"🏋️ Bトレ", btn:"🏋️ Bトレに申し込む", html:"<p class=\"koui\">🤝 同じLINK会員の方が、<b>ご好意（貢献の気持ち）</b>で開いてくださっている会です。会社の方が開いているものではありません。</p><p>おつなぎ役としての<b>「Bさん」のあり方</b>が学べます。全般的に<b>セールスの力も上がります</b>ので、ぜひ受講しましょう。</p><p>ご参加のときは：</p><ul><li>つながる<b>アドバイザーの方のプロフィール</b>を持った状態で来てください</li><li>なるべく、<b>説明会の日取りが決まっている</b>状態で来てください</li></ul><p class=\"nm1\">📝 お知らせが届きやすくなるように、<b>申し込みのお名前は、オープンチャットのお名前と同じ</b>にしてください。</p>" },
+  "apoheya": { title:"📞 アポ部屋", btn:"📞 アポ部屋に申し込む", html:"<p class=\"koui\">🤝 同じLINK会員の方が、<b>ご好意（貢献の気持ち）</b>で開いてくださっている会です。会社の方が開いているものではありません。</p><p>LINKを紹介する<b>アポイントのコツ</b>を教わったり、いろいろなパターンの<b>アポイントへの懸念を解消</b>したりできる会への申し込みになります。</p><p>実際に行動に移していく部分も多いので、<b>リストアップが終わっている状態</b>が望ましいです。</p><p><a class=\"nlink\" href=\"./first-support/listup.html\">📝 リストアップとは？（やり方を見る） ›</a></p><p class=\"nm1\">📝 お知らせが届きやすくなるように、<b>申し込みのお名前は、オープンチャットのお名前と同じ</b>にしてください。</p>" },
+  "douga-sup": { title:"🎬 動画視聴会（サポーター向け）", btn:"🎬 動画視聴会に申し込む", html:"<p class=\"koui\">🤝 同じLINK会員の方が、<b>ご好意（貢献の気持ち）</b>で開いてくださっている動画視聴会です。会社の方が開いているものではありません。</p><p>ここからは、<b>サポートする側としての感覚</b>も身につけていってください。</p><p>動画視聴会の担当の会員さんに、<b>あなたが新しく紹介したメンバーさんの動画視聴会</b>の依頼をかけることができます。</p><p>あなたがサポートできない時間帯を、ほかの会員さんが補ってくださいます。<b>感謝の気持ちを持って</b>依頼をかけましょう。</p><p class=\"nm1\">📝 お知らせが届きやすくなるように、<b>申し込みのお名前は、オープンチャットのお名前と同じ</b>にしてください。</p>" }
+};
+const LINKS_KEY = "skyarc_links";
+let LINKS = null;
+try{ const c = JSON.parse(localStorage.getItem(LINKS_KEY) || "null"); if(c && typeof c === "object") LINKS = c; }catch(e){}
+function linkOf(it){
+  if(!it.link) return it.url || "";
+  if(LINKS && Object.prototype.hasOwnProperty.call(LINKS, it.link)) return String(LINKS[it.link] || "");
+  return LINK_DEF[it.link] || "";
+}
+const C = {back:"var(--g-back)",join:"var(--g-join)",member:"var(--g-member)",apply:"var(--g-apply)",team:"var(--g-team)",sup:"var(--g-sup)",crie:"var(--g-crie)",common:"var(--g-common)"};
+
+/* アイコンの中身（ここに足せば増やせます） */
+const TREE = [
+  {ic:"👤", nm:"アカウント", g:"common", url:B+"ikusei/account.html"},
+  {ic:"💌", nm:"新しい仲間へ\nこのサイトを教える", g:"common", url:B+"ikusei/first-message.html", wide:true, moon:true},
+  /* 2つめの月：「新しい仲間へ」と、アカウントをはさんで反対側を、同じ通り道でまわります */
+  {ic:"🧰", nm:"便利な\n情報一覧", g:"common", url:B+"first-support/benri.html", moon:true},
+  /* 仮組み：3つめの月「入りたいと言われたら」（いちばん小さい丸。中身は準備中） */
+  {ic:"❓", nm:"入りたいと\n言われたら", g:"common", moon:true, tiny:true, flowInfo:"join"},
+  /* ===== 仮組み：ファーストサポートの新しい流れ（はじめの一歩 → LINKを知ろう → LINKを使おう） ===== */
+  {ic:"🔎", nm:"LINKを\n知ろう", g:"member", flowPage:"know", lockAfter:"hajime", kids:[
+    {ic:"？", nm:"（0番）\n準備中", g:"member", num:0, ph:true},
+    {ic:"💬", nm:"LINK information\nについて", g:"member", num:1, task:"k1", note2:"LINK informationとはどんなものかを知って、リッチメニューの解放まで進めます。",
+     link:{t:"📘 今の初期サポートガイド（リッチメニューの解放）をひらく", u:B+"first-support/guide.html"}},
+    {ic:"🏁", nm:"1stステップを\n完了しよう", g:"member", num:2, group:true, kids:[
+      {ic:"🤝", nm:"ユーザー\nサポート会", g:"member", task:"k2a", link:{t:"📅 ユーザーサポート会の開催日をひらく", u:B+"first-support/events.html"}},
+      {ic:"📚", nm:"LINKセミナー", g:"member", task:"k2b", link:{t:"📚 LINKセミナーについてをひらく", u:B+"first-support/link-seminar.html"}},
+      {ic:"🎓", nm:"グルコン", g:"member", task:"k2c", link:{t:"🎓 グルコンの日程をひらく", u:B+"first-support/gcon-dates.html"}},
+      {ic:"🎪", nm:"チーム\n交流会", g:"member", task:"k2d", link:{t:"🎪 各種スケジュール情報をひらく", u:B+"index.html#sched"}}
+    ]},
+    {ic:"🪞", nm:"自分を\n整えよう", g:"member", num:3, group:true, kids:[
+      {ic:"🤝", nm:"SASAEAIに\nプロフィール掲載", g:"member", task:"k3a", link:{t:"🤝 SASAEAI設定ガイドをひらく", u:B+"first-support/sasaeai.html"}},
+      {ic:"🏰", nm:"LINK-BASEに\n事業を掲載", g:"member", task:"k3b", link:{t:"🏰 LINK-BASE掲載ガイドをひらく", u:B+"first-support/linkbase.html"}}
+    ]},
+    {ic:"👍", nm:"次のステップへ\nLINKを使おう", g:"member", need:"flow:know", goPage:"use"}
+  ]},
+  {ic:"🚀", nm:"LINKを\n使おう", g:"member", flowPage:"use", lockAfter:"know", kids:[
+    {ic:"☑️", nm:"1stステップ\n参加確認", g:"member", opt:true, url:B+"first-support/step1.html"},
+    {ic:"👥", nm:"チームの\nチャット", g:"member", num:1, task:"u1"},
+    {ic:"🌏", nm:"LINK全体の\nチャット", g:"member", num:2, task:"u2", link:{t:"💬 入るべきオープンチャット集をひらく", u:B+"first-support/openchat.html"}},
+    {ic:"🏘", nm:"地域コミュニティ\n趣味のサークル", g:"member", num:3, task:"u3", note2:"注意書きを分かったうえで入る／あなたの地域のもの／海外の方の使い方など。LINK informationでも詳しく分かります。"},
+    {ic:"🐣", nm:"もっと\n使いこなすには", g:"sup", url:B+"first-support/to-supporter.html"},
+    {ic:"👍", nm:"OK！\nホームへ", g:"member", need:"flow:use", goHome:true}
+  ]},
+  /* チーム情報：ファーストサポートの3つが終わったら開きます（サポーター・クリエ・役割のある方も）。
+     押すと、スカイアークチームのページへ（v1.216 で「チーム作り」からかわりました） */
+  {ic:"🌈", nm:"チーム情報", g:"team", need:"team", url:B+"first-support/skyarc.html"},
+  {ic:"📋", nm:"各種スケジュール情報", g:"apply", wide:true, kids:[
+    {ic:"🗓", nm:"公式公認\nイベント", g:"apply", info:{
+      text:"LINK公式・公認のイベントは、LINKのスケジュールサイトにまとまっています。こちらから日程を見て、お申し込みください。",
+      btn:"🗓 スケジュールを見る", url:"https://link-event-x.com/"}},
+    {ic:"☁️", nm:"チーム独自", g:"apply", kids:[
+      {ic:"🙋", nm:"メンバー\n向け", g:"member", noCrumb:true, kids:[
+        {ic:"🧡", nm:"ユーザー\nサポート会", g:"member", link:"support", note:"support"},
+        {ic:"📚", nm:"LINKセミナー\n各種に参加する", g:"member", url:B+"first-support/link-seminar.html"},
+        {ic:"💻", nm:"オンライン\n交流会", g:"member", link:"kouryu-on", note:"kouryu-on"},
+        {ic:"🍽", nm:"リアル交流会", g:"member", link:"kouryu-re", note:"kouryu-re"},
+        /* いまは仮：クリエ以上の方にだけ出ます */
+        {ic:"📅", nm:"グルコン\n日程確認", g:"member", need:"crie", url:B+"first-support/gcon-dates.html"},
+        {ic:"🎬", nm:"動画視聴会", g:"member", link:"douga", note:"douga"}
+      ]},
+      {ic:"🐣", nm:"サポーター\n向け", g:"sup", need:"sup", kids:[
+        {ic:"🏋️", nm:"Bトレ", g:"sup", link:"btore", note:"btore"},
+        {ic:"📞", nm:"アポ部屋", g:"sup", link:"apoheya", note:"apoheya"},
+        {ic:"🎬", nm:"動画視聴会", g:"sup", link:"douga", note:"douga-sup"},
+        /* 部門のあるサポーターの方も、ここから予定のかぶりチェックを見られます（アドバンス以上・部門のあるクリエの方にも出ます） */
+        {ic:"🔎", nm:"予定の\nかぶりチェック", g:"sup", need:"cal", url:B+"first-support/calendar.html"}
+      ]},
+      {ic:"🌱", nm:"クリエ以上\n向け", g:"crie", need:"crie", kids:[
+        {ic:"🌟", nm:"月初スペシャル\nミーティング", g:"crie", link:"c-monthly"},
+        {ic:"📆", nm:"毎週月曜\nクリエミーティング", g:"crie", wide:true, link:"c-monday"},
+        {ic:"🗾", nm:"全国クリエ会議\n（アフター担当）", g:"crie", wide:true, link:"c-zenkoku"},
+        {ic:"🔥", nm:"クリエ特訓\n＆リンカー特訓", g:"crie", kids:[
+          {ic:"🔥", nm:"クリエ特訓", g:"crie", link:"c-tokkun-crie"},
+          {ic:"⚡", nm:"リンカー特訓", g:"crie", link:"c-tokkun-linker"}
+        ]},
+        {ic:"🤝", nm:"グルコン予定", g:"crie", link:"c-gcon"},
+        /* 予定のかぶりチェック：アドバンス以上と、部門に入っているクリエ・サポーターにだけ出ます */
+        {ic:"🔎", nm:"予定の\nかぶりチェック", g:"crie", need:"cal", url:B+"first-support/calendar.html"},
+        {ic:"✨", nm:"その他", g:"crie", link:"c-sonota"},
+        /* カレンダー形式は、ただいま工事中（押すと、お知らせだけが出ます。いつか空き日程の吸い出しもここで） */
+        {ic:"🗓️", nm:"カレンダー\n形式でみる", g:"crie", info:{
+          text:"🚧 カレンダー形式でみる は、ただいま工事中です。できあがったら、またお知らせします。"}},
+      ]}
+    ]}
+    /* 各種スケジュール情報は「公式公認」と「チーム独自」だけ。予定のかぶりチェック・カレンダー形式は「クリエ以上向け」に移しました（v1.205） */
+  ]},
+  {ic:"🌱", nm:"クリエの部屋", g:"crie", need:"crie", kids:[
+    {ic:"🌱", nm:"グルコン\nリーダー育成", g:"crie", url:B+"ikusei/gcon-roadmap.html"},
+    {ic:"🎓", nm:"学びの\nポータル", g:"crie", url:B+"ikusei/portal-creators.html"},
+    {ic:"🗺", nm:"クリエマップ", g:"crie", url:B+"ikusei/creamap-x7k2m9.html"}
+  ]},
+  /* ファーストサポートの3つ（はじめの一歩・ガイド・1stステップ）が終わって、まだサポーターでない方に。
+     サポーターの印がつくと、ここが「サポーターの部屋」に変わります */
+  /* 仮組み：「サポーターとは」は、ホームからなくして「LINKを使おう」の「もっと使いこなすには」に移しました */
+  /* 2回つづけて押すと、裏返って「サポーターとは」になります（もう一度見たくなったとき用） */
+  {ic:"🐣", nm:"サポーターの\n部屋", g:"sup", need:"sup",
+   flip:{ic:"🐣", nm:"サポーター\nとは", g:"sup", url:B+"first-support/to-supporter.html"}, kids:[
+    {ic:"💌", nm:"新規の方への\n最初のメッセージ", g:"sup", url:B+"ikusei/first-message.html"},
+    {ic:"🐣", nm:"ぴよぴよ\n脱出クイズ", g:"sup", url:B+"ikusei/piyo-quiz.html"},
+    {ic:"🤝", nm:"サポート\nメンバー状況", g:"sup", url:B+"ikusei/myteam.html"},
+    {ic:"📝", nm:"新規登録の\n依頼", g:"sup", url:B+"ikusei/shinki-irai.html"},
+    {ic:"🔐", nm:"管理ページ", g:"sup", url:B+"ikusei/kanri-x7k2m9.html"},
+    {ic:"🏠", nm:"LINKポータル", g:"sup", url:"https://app.link-event-x.com"}
+  ]},
+  {ic:"👋", nm:"はじめの一歩", g:"member", flowPage:"hajime", kids:[
+    {ic:"📲", nm:"2つのサイトを\nホームに置く", g:"member", num:0, task:"h0", note2:"LINKポータルと、このサイトをホーム画面に置きます。アプリみたいになっていた方が楽です。",
+     link:{t:"📲 ホーム画面に置く案内をひらく", u:B+"app.html"}},
+    {ic:"💬", nm:"LINK information\nを追加", g:"member", num:1, task:"h1", note2:"いまは「友だち追加」だけでOKです。",
+     link:{t:"📲 LINK information を友だち追加する", u:"https://s.lmes.jp/landing-qr/2008524921-7QZ2vX3X?uLand=iRyJ9G"}},
+    {ic:"🫧", nm:"3つの\nオープンチャット", g:"member", num:2, task:"h2", note2:"名前の後ろに「グループ名と系列名」を入れてから、3つのチャットに入ります。",
+     link:{t:"💬 入るべきオープンチャット集をひらく", u:B+"first-support/openchat.html"}},
+    {ic:"🔗", nm:"紹介URLを\n発行・保存", g:"member", num:3, task:"h3", note2:"未来の自分のための準備です。発行して、このサイトに保存しておきましょう。",
+     link:{t:"🔗 紹介URLを保存する（今のはじめの一歩のページ）", u:B+"first-support/"}},
+    {ic:"👍", nm:"次のステップへ\nLINKを知ろう", g:"member", need:"flow:hajime", goPage:"know"}
+  ]}
+];
+/* ================================================================
+   仮組み：ファーストサポートの進み具合
+   ・いまは、この端末の中にだけ記録します（スプレッドシートへの記録は準備中）
+   ・サポーターの確認（先生の丸・虹色）は準備中
+================================================================ */
+const FLOW_ORDER = ["hajime","know","use"];
+let FLOW = {};
+function flowKey(){ return "sky_flow_v1_" + (me && me.id ? String(me.id) : "guest"); }
+function loadFlow(){ try{ FLOW = JSON.parse(localStorage.getItem(flowKey()) || "{}") || {}; }catch(e){ FLOW = {}; } }
+function saveFlow(){ try{ localStorage.setItem(flowKey(), JSON.stringify(FLOW)); }catch(e){} }
+function flowPageItem(k){ return TREE.find(it=>it.flowPage === k); }
+function flowTasks(it){ const out = []; (it.kids || []).forEach(c=>{ if(c.task) out.push(c.task); else if(c.group) out.push(...flowTasks(c)); }); return out; }
+function flowItemDone(it){
+  if(it.task) return !!FLOW[it.task];
+  if(it.group || it.flowPage){ const t = flowTasks(it); return t.length > 0 && t.every(k=>!!FLOW[k]); }
+  return false;
+}
+function flowDone(k){ const it = flowPageItem(k); return !!it && flowItemDone(it); }
+function flowAllDone(){ return FLOW_ORDER.every(flowDone); }
+function flowNext(){ return me ? (FLOW_ORDER.find(k=>!flowDone(k)) || "") : ""; }
+/* ================================================================
+   その方の立場（メニューと同じ分け方）
+================================================================ */
+const GAS_URL = window.SKY_GAS_URL;
+const CLIENT_ID = "315827385958-ikdpkfhkr6nmrgql470aolt4pv27pak3.apps.googleusercontent.com";
+let me = null;
+function loadMe(){
+  try{
+    const raw = localStorage.getItem("skyarc_member");
+    me = (raw && raw !== "null" && raw !== "undefined") ? JSON.parse(raw) : null;
+    if(me && !me.id) me = null;
+  }catch(e){ me = null; }
+}
+loadMe();
+loadFlow();
+/* アドバンス以上（アドバンス・系列代表・チーム代表・管理者） */
+function isAdv(){
+  if(!me) return false;
+  return /アドバンス|系列代表|チーム代表|管理者/.test(String(me.role || ""));
+}
+function ok(it){
+  if(!it.need) return true;
+  if(!me) return false;
+  if(it.need === "grow3"){
+    let g = null;
+    try{ g = growNow(); }catch(e){ g = window.skyGrowth.mine(); }   /* 読みこみの途中は、この端末の記録で */
+    return g === 3 && me.sup !== true && me.crie !== true && !String(me.role || "");
+  }
+  if(it.need === "team"){
+    /* 仮組み：3つ（はじめの一歩・LINKを知ろう・LINKを使おう）が終わったら開きます（サポーター・クリエ・役割のある方も） */
+    if(String(me.role || "") || me.sup === true || me.crie === true) return true;
+    return flowAllDone();
+  }
+  if(String(it.need).indexOf("flow:") === 0) return flowDone(String(it.need).slice(5));   /* 仮組み：次のステップへの丸 */
+  if(it.need === "adv") return isAdv();
+  if(it.need === "cal"){
+    const r = String(me.role || "");
+    if(/管理者|チーム代表|系列代表|アドバンス/.test(r)) return true;   /* アドバンス以上は部門がなくても */
+    return (me.sup === true || me.crie === true || r !== "") && !!(me.dept || me.deptLead === true || me.schedIn === true);
+  }
+  if(String(me.role || "")) return true;
+  if(it.need === "sup")  return me.sup === true || me.crie === true;
+  if(it.need === "crie") return me.crie === true;
+  return true;
+}
+const JOIN = {ic:"", nm:"登録", g:"join", join:true};
+const BACK = {ic:"↩️", nm:"もどる", g:"back", back:true};
+/* この端末で一度でも登録・ログインしたことがあれば、まん中は「ログイン」になります
+   （ログアウトしても残ります） */
+const RETURN_KEY = "lsapp_returning";
+function isReturning(){ try{ return localStorage.getItem(RETURN_KEY) === "1"; }catch(e){ return false; } }
+function markReturning(){ try{ localStorage.setItem(RETURN_KEY, "1"); }catch(e){} }
+if(me) markReturning();
+/* 名前の左に、育ちのマーク（🫘 → 🌱 → 🌷 → 🌈）をつけます */
+function growNow(){
+  if(!me) return null;
+  if(typeof pointProg !== "undefined" && pointProg) return window.skyGrowth.stage(pointProg);
+  return window.skyGrowth.mine();
+}
+function setHello(t){
+  if(t){ document.getElementById("hello").textContent = t; return; }
+  let g = null;
+  try{ g = growNow(); }catch(e){}
+  const mk = g == null ? "" : window.skyGrowth.mark(g) + " ";
+  document.getElementById("hello").textContent = me && me.name ? mk + me.name + "さん、おかえりなさい" : "ようこそ";
+}
+setHello();
+
+const stage = document.getElementById("stage");
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const path = [];
+let nodes = [];          /* いま出ているアイコン */
+let leaving = [];        /* 消えていくところのアイコン */
+let drag = null;
+let lastDragEnd = -1e9;         /* つまんでいるアイコン */
+let W = 360, H = 420;
+
+/* ---------- 丸いまとまりの中の置き場所 ---------- */
+const WOBBLE = [[0,0],[4,-6],[-5,3],[6,4],[-3,-5],[5,2],[-6,-2],[3,6],[-4,5],[2,-4]];
+function homes(n, centered, pair){
+  if(centered === undefined) centered = n >= 7;
+  if(pair && n >= 4) return homesPair(n);
+  { const ft = document.querySelector(".foot"); if(ft) ft.classList.remove("inStage"); }   /* 中の段では、下の文字はふつうに丸の下に置きます */
+  W = Math.min(stage.clientWidth || 360, 440);
+  const cx = W/2;
+  let pts = [], rx, ry;
+  if(n === 1){ ry = centered ? Math.max(W*.39, 132) * .94 : 0; pts.push([0,0]); }
+  else if(n === 2 && !centered){ rx = W*.26; ry = 0; pts.push([-rx,0],[rx,0]); }
+  else{
+    const ring = centered ? n-1 : n;
+    rx = (ring >= 6 || (centered && ring >= 3)) ? Math.max(W*.39, 132) : Math.max(W*.32, 108);
+    ry = rx * (ring >= 7 ? 1.22 : .94);   /* 7つ以上の輪は、たてに広げて重ならないように */
+    if(centered) pts.push([0,0]);
+    for(let i=0;i<ring;i++){
+      const a = (ring === 2 ? Math.PI : -Math.PI/2) + i*2*Math.PI/ring;
+      pts.push([Math.cos(a)*rx, Math.sin(a)*ry]);
+    }
+  }
+  H = Math.max(2*(ry||0) + 140, 170);
+  stage.style.height = H + "px";
+  const k = W/360;
+  return pts.map((p,i)=>[cx + p[0] + WOBBLE[i%10][0]*k, H/2 + p[1] + WOBBLE[i%10][1]*k]);
+}
+
+/* いちばん上の段：まん中にアカウント、そのまわりを「新しい仲間へ」が月のようにまわります。
+   ほかのアイコンは、そのまわりに大きめの輪で並べます */
+const ORBIT = { rx: 112, ry: 102, sec: 16 };      /* 月の通り道の大きさと、1周の秒数 */
+const ORBIT_RY0 = 102;   /* 月の通り道の、もともとのたての大きさ */
+const STAGE_PAD = 60;    /* いちばん下の小さな丸の名前のための余白 */
+const RY_MIN = 185;      /* 輪をたてに縮めるときの下限（これより小さいと丸どうしが重なります） */
+function homesPair(n){
+  W = Math.min(stage.clientWidth || 360, 440);
+  /* まん中のアカウントと、そのまわりの月（いまは2つ）をのぞいた数が、まわりの輪の丸の数です */
+  const moonN = TREE.filter(it=>it.moon && ok(it)).length;
+  const cx = W/2, ring = n-1-moonN;
+  const rx = Math.max(W*.41, 140);
+  /* 画面の高さに合わせて、たての広がりを決めます。
+     その端末で見えている高さ（innerHeight）から、上の見出しと下の「Presented by／バージョン」の分を引いて、
+     スクロールしなくても最後まで画面に収まる大きさにします。ただし、丸どうしが重ならない大きさより小さくはしません */
+  const ryWant = Math.max(W*.64, 235);
+  const stTop = stage.getBoundingClientRect().top + (window.scrollY || 0);
+  const ft = document.querySelector(".foot");
+  if(ft) ft.classList.add("inStage");
+  /* 下の文字は丸の場所の下の余白に重なるので、はみ出すのは「2行ぶん − 50」だけです（バージョンの文字が入る前でも2行ぶんで考えます） */
+  const footH = Math.max((ft ? Math.max(ft.offsetHeight, 44) : 44) - 50, 0);
+  const avail = (window.innerHeight || 800) - stTop - footH - 8;
+  const ryFit = (avail - STAGE_PAD - 150) / 2;
+  const ry = Math.max(Math.min(ryWant, ryFit), RY_MIN);
+  /* 輪がたてに縮んだぶん、月の通り道も少しだけ小さくします */
+  ORBIT.ry = Math.round(ORBIT_RY0 * Math.max(Math.min(ry / ryWant, 1), .8));
+  const pts = [[0, 0]];
+  for(let m=0; m<moonN; m++) pts.push([0, m % 2 ? -ORBIT.ry : ORBIT.ry]);
+  for(let i=0;i<ring;i++){
+    const a = -Math.PI/2 + i*2*Math.PI/ring;
+    pts.push([Math.cos(a)*rx, Math.sin(a)*ry]);
+  }
+  H = Math.max(2*ry + 150, 170);
+  /* いちばん下に「使い方」「管理者モード」の小さな丸が来ても、名前が下の文字に重ならないよう、下に少し余白をとります */
+  stage.style.height = (H + STAGE_PAD) + "px";
+  const k = W/360;
+  /* いちばん上の段の輪は、左右対称に並べます（アカウントのまん中から、同じ楕円の上に。ゆらしはつけません） */
+  return pts.map(p=>[cx + p[0], H/2 + p[1]]);
+}
+
+/* ---------- アイコンをひとつ作る ---------- */
+function makeNode(it, i, home, fromX, fromY){
+  const el = document.createElement("button");
+  el.type = "button";
+  el.className = "bub" + (it.join ? " join" : "") + (it.back ? " backb" : "") + (it.wide ? " wide" : "") + (it.moon ? " moon" : "") + (it.tiny ? " tiny" : "")
+    + (it.ph ? " fph" : "") + (it.opt ? " fopt" : "") + (it.goPage || it.goHome ? " fnext" : "");
+  el.style.setProperty("--c", C[it.g]);
+  el.innerHTML = `<span class="ball">${it.ic}${it.num != null ? `<span class="fnum">${it.num}</span>` : ""}<span class="fmark"></span></span><span class="nm">${it.nm}</span>`;
+  flowPaintNode(el, it);
+  if(path.length === 0 && it.flowPage && it.flowPage === flowNext()){ el.classList.add("pointed"); el.insertAdjacentHTML("beforeend", '<span class="point" aria-hidden="true">👉</span>'); }
+  stage.appendChild(el);
+  const n = { el, it, hx:home[0], hy:home[1],
+    x: fromX ?? home[0], y: fromY ?? home[1], vx:0, vy:0,
+    s: fromX == null ? 1 : .3, ts:1, o: fromX == null ? 1 : 0, to:1,
+    ph: i*1.7, delay: i*45, born: performance.now() };
+  hook(n);
+  return n;
+}
+
+/* ---------- 解放されたアイコンだけを、パッと足します ----------
+   いま出ているアイコンはそのまま、新しい置き場所へすっと動きます */
+function reflow(){
+  if(path.length !== 0) return;
+  const items = TREE.filter(ok);
+  const hs = homes(items.length, true, true);
+  const keep = [];
+  nodes.forEach(n=>{
+    if(items.indexOf(n.it) >= 0) keep.push(n);
+    else{ n.to = 0; n.ts = .4; n.hx = null; n.dying = performance.now(); leaving.push(n); }
+  });
+  nodes = items.map((it,i)=>{
+    let n = keep.find(k=>k.it === it);
+    if(!n){
+      n = makeNode(it, i, hs[i], hs[i][0], hs[i][1]);
+      n.delay = 0; n.s = .2; n.ts = 1.25;
+      setTimeout(()=>{ n.ts = 1; }, 320);
+    }
+    n.hx = hs[i][0]; n.hy = hs[i][1];
+    return n;
+  });
+}
+
+/* ---------- アイコンを並べる ---------- */
+function build(fromX, fromY){
+  const last = path[path.length-1];
+  let items = last ? (last.kids || []).filter(ok) : TREE.filter(ok);
+  if(!last && !me) items = [Object.assign({}, JOIN, { nm: isReturning() ? "ログイン" : "登録" })];  /* まだの方は、まん中のひとつだけ */
+  if(last) items = [BACK].concat(items);                      /* 中の段は、まん中が「もどる」 */
+  const hs = homes(items.length, path.length === 0 ? true : items.length > 1, path.length === 0 && !!me);  /* いちばん上は、まん中に上下でアカウントと「新しい仲間へ」 */
+  nodes = items.map((it,i)=> makeNode(it, i, hs[i], fromX, fromY));
+  document.getElementById("crumb").hidden = path.length === 0 || !!(last && last.noCrumb);   /* 「メンバー向け」の段は、左上の名前を出しません */
+  document.getElementById("crumbTitle").textContent = (last ? last.nm.replace(/\n/g,"") : "");
+  const info = document.getElementById("info");
+  info.hidden = !(last && last.info);
+  if(last && last.info){
+    document.getElementById("infoText").textContent = last.info.text;
+    const ib = document.getElementById("infoBtn");
+    ib.hidden = !last.info.btn;
+    if(last.info.btn){
+      ib.textContent = last.info.btn; ib.href = last.info.url;
+      /* このサイトの中のページは、同じタブで開きます */
+      if(/^https?:\/\//.test(last.info.url)){ ib.target = "_blank"; ib.rel = "noopener"; }
+      else{ ib.removeAttribute("target"); ib.removeAttribute("rel"); }
+    }
+  }
+  stage.hidden = items.length === 0;
+}
+
+/* 今のアイコンを散らして、次の段へ */
+function goTo(change, ox, oy, tapped){
+  const cx = W/2, cy = H/2;
+  nodes.forEach(n=>{
+    if(n === tapped){ n.ts = 1.35; n.to = 0; n.fade = 160; }
+    else{
+      const dx = n.x - (ox ?? cx), dy = n.y - (oy ?? cy), d = Math.hypot(dx,dy) || 1;
+      n.vx += dx/d*14; n.vy += dy/d*14; n.ts = .5; n.to = 0; n.hx = null;
+    }
+    n.dying = performance.now();
+  });
+  leaving = leaving.concat(nodes); nodes = [];
+  change();
+  setTimeout(()=> build(ox ?? cx, oy ?? cy), reduce ? 0 : 200);
+}
+
+/* ---------- 指でつまむ・押す ---------- */
+function hook(n){
+  const el = n.el;
+  let sx, sy, moved = false, offx, offy, pid = null;
+  el.addEventListener("pointerdown", e=>{
+    if(e.button !== undefined && e.button !== 0) return;
+    pid = e.pointerId; sx = e.clientX; sy = e.clientY; moved = false; n.justDragged = false;
+    const r = stage.getBoundingClientRect();
+    offx = e.clientX - r.left - n.x; offy = e.clientY - r.top - n.y;
+    try{ el.setPointerCapture(pid); }catch(_){}
+  });
+  el.addEventListener("pointermove", e=>{
+    if(pid !== e.pointerId) return;
+    if(!moved && Math.hypot(e.clientX-sx, e.clientY-sy) > 8){
+      moved = true; drag = n; n.ts = 1.12; el.classList.add("grab");
+    }
+    if(moved){
+      const r = stage.getBoundingClientRect();
+      const nx = e.clientX - r.left - offx, ny = e.clientY - r.top - offy;
+      n.vx = nx - n.x; n.vy = ny - n.y; n.x = nx; n.y = ny;
+    }
+  });
+  const end = e=>{
+    if(pid !== e.pointerId) return;
+    pid = null;
+    if(moved){ drag = null; n.ts = 1; el.classList.remove("grab"); n.justDragged = true; lastDragEnd = performance.now(); }
+  };
+  el.addEventListener("pointerup", end);
+  el.addEventListener("pointercancel", end);
+  el.addEventListener("click", e=>{
+    /* つまんで動かしたあとは、ページへは移らずに元の場所へ戻るだけ */
+    if(n.justDragged || performance.now() - lastDragEnd < 500){ e.preventDefault(); e.stopPropagation(); n.justDragged = false; return; }
+    /* 裏返せる丸は、少しだけ待って、2回目が来たら裏返します */
+    if(n.it.flip){
+      if(n.tapT){ clearTimeout(n.tapT); n.tapT = 0; flipNode(n); return; }
+      n.tapT = setTimeout(()=>{ n.tapT = 0; tap(n, e); }, 300);
+      return;
+    }
+    tap(n, e);
+  });
+}
+function flipNode(n){
+  n.flipped = !n.flipped;
+  const face = n.flipped ? n.it.flip : n.it;
+  n.el.classList.remove("flipping"); void n.el.offsetWidth; n.el.classList.add("flipping");
+  setTimeout(()=>{   /* 真横を向いたところで、表と裏を入れかえます */
+    n.el.querySelector(".ball").textContent = face.ic;
+    n.el.querySelector(".nm").textContent = face.nm;
+  }, reduce ? 0 : 220);
+  setTimeout(()=> n.el.classList.remove("flipping"), 460);
+  clearTimeout(n.flipBackT);
+  if(n.flipped) n.flipBackT = setTimeout(()=>{ if(n.flipped && n.el.isConnected) flipNode(n); }, 8000);   /* しばらくしたら表に戻ります */
+}
+
+function tap(n, e){
+  const it = n.flipped && n.it.flip ? n.it.flip : n.it;
+  if(it.join){ openJoin(n); return; }
+  if(it.back){ goBack(n); return; }
+  /* ===== 仮組み：ファーストサポートの新しい流れ ===== */
+  if(it.lockAfter && !flowDone(it.lockAfter)){ showToast("先に「" + flowPageItem(it.lockAfter).nm.replace(/\n/g,"") + "」を進めましょう"); return; }
+  if(it.ph){ showToast("0番は、準備中です"); return; }
+  if(it.task){ openTask(it); return; }
+  if(it.flowInfo){ openInfoSheet("❓ 入りたいと言われたら", "（準備中）「LINKに入りたい」「気になる」と言われたときに、最低限やることが、ここに入ります。"); return; }
+  if(it.goPage){ const pg = flowPageItem(it.goPage); goTo(()=>{ path.length = 0; path.push(pg); }, n.x, n.y, n); return; }
+  if(it.goHome){ goTo(()=>{ path.length = 0; }, n.x, n.y, n); if(flowAllDone()) setTimeout(()=>flowCelebrate("🎉 3つとも終わりました！「チーム情報」が開きました"), 500); return; }
+  /* 開ける方が決まっている丸：ほかの方には、お知らせだけを出します */
+  if(it.lock === "adv" && !isAdv()){
+    const shown = Object.assign({}, it, { url:"", link:"", lock:"", info: it.lockInfo });
+    goTo(()=> path.push(shown), n.x, n.y, n);
+    return;
+  }
+  /* 説明のある丸：先に説明を出して、「〇〇に申し込む」でシートを開きます */
+  if(it.note && NOTES[it.note]){
+    const url = linkOf(it);
+    if(!url){ showToast("このリンク先は、まだ決まっていません"); return; }
+    openNote(NOTES[it.note], url);
+    return;
+  }
+  if(it.url || it.link){
+    const url = linkOf(it);
+    if(!url){ showToast("このリンク先は、まだ決まっていません"); return; }
+    /* その色が画面いっぱいに広がってから、ページへ */
+    const r = n.el.querySelector(".ball").getBoundingClientRect();
+    const sp = document.getElementById("spread");
+    sp.style.setProperty("--c", C[it.g]);
+    sp.style.background = "";
+    sp.style.setProperty("--x", (r.left + r.width/2) + "px");
+    sp.style.setProperty("--y", (r.top + r.height/2) + "px");
+    document.getElementById("spreadIc").textContent = it.ic;
+    document.getElementById("spreadNm").textContent = it.nm;
+    n.ts = 1.3;
+    const ext = /^https?:\/\//.test(url);
+    if(ext){
+      /* ほかのサイト（申込みシートなど）は、別のタブで開きます（押したその場で開きます） */
+      const a = document.createElement("a");
+      a.href = url; a.target = "_blank"; a.rel = "noopener"; a.hidden = true;
+      document.body.appendChild(a); a.click(); a.remove();
+    }
+    sp.className = "spread"; sp.hidden = false;
+    requestAnimationFrame(()=>requestAnimationFrame(()=> sp.classList.add("go")));
+    setTimeout(()=>{
+      if(!ext){ saveReturn(); location.href = url; return; }
+      sp.classList.add("out"); n.ts = 1;
+      setTimeout(()=>{ sp.hidden = true; sp.className = "spread"; }, 380);
+    }, reduce ? 0 : 650);
+    return;
+  }
+  goTo(()=> path.push(it), n.x, n.y, n);
+}
+document.addEventListener("click", e=>{
+  if(performance.now() - lastDragEnd < 500 && stage.contains(e.target)){
+    e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
+  }
+}, true);
+/* ===== 仮組み：ファーストサポートの丸の光り方・中身 ===== */
+function flowPaintNode(el, it){
+  const done = (it.task || it.group || it.flowPage) ? flowItemDone(it) : false;
+  el.classList.toggle("fme", done);
+  el.classList.toggle("flock", !!(it.lockAfter && !flowDone(it.lockAfter)));
+  const m = el.querySelector(".fmark"); if(m) m.textContent = done ? "✅" : "";
+}
+function flowPaintAll(){ nodes.forEach(n=>flowPaintNode(n.el, n.it)); paintPoint(); }
+/* 中の段でも、出す丸が変わったら（次のステップへの丸など）、すっと足します */
+function reflowLevel(){
+  if(path.length === 0){ reflow(); return; }
+  const last = path[path.length-1];
+  const items = [BACK].concat((last.kids || []).filter(ok));
+  const hs = homes(items.length, items.length > 1, false);
+  const keep = [];
+  nodes.forEach(n=>{
+    if(items.indexOf(n.it) >= 0) keep.push(n);
+    else{ n.to = 0; n.ts = .4; n.hx = null; n.dying = performance.now(); leaving.push(n); }
+  });
+  nodes = items.map((it,i)=>{
+    let n = keep.find(k=>k.it === it);
+    if(!n){ n = makeNode(it, i, hs[i], hs[i][0], hs[i][1]); n.delay = 0; n.s = .2; n.ts = 1.25; setTimeout(()=>{ n.ts = 1; }, 320); }
+    n.hx = hs[i][0]; n.hy = hs[i][1];
+    return n;
+  });
+}
+function flowWhere(){ return path.map(p=>p.nm.replace(/\n/g,"")).join(" › "); }
+function openTask(it){
+  const done = !!FLOW[it.task];
+  $("#taskWhere").textContent = flowWhere();
+  $("#taskTitle").textContent = it.ic + " " + it.nm.replace(/\n/g,"");
+  let h = (it.note2 ? `<p>${it.note2}</p>` : "") + '<p style="color:#9E9E9E;font-size:13px">（仮組み：くわしい中身は準備中です）</p>';
+  if(it.link) h += `<a class="flink" id="taskLink" href="${it.link.u}"${/^https?:/.test(it.link.u) ? ' target="_blank" rel="noopener"' : ""}>${it.link.t}</a>`;
+  h += done ? '<button type="button" class="fdone undo" id="taskDone">もどす（まだ終わっていない）</button>' : '<button type="button" class="fdone" id="taskDone">✅ できた！</button>';
+  if(done) h += '<p class="fwait" style="color:#0288D1">🔵 サポーターの確認（先生の丸）は準備中です</p>';
+  $("#taskBody").innerHTML = h;
+  $("#taskSheet").hidden = false;
+  const l = $("#taskLink"); if(l && !/^https?:/.test(it.link.u)) l.addEventListener("click", saveReturn);
+  $("#taskDone").onclick = ()=>{
+    const pageK = path.length ? path[0].flowPage : "";
+    const wasPage = pageK ? flowDone(pageK) : false;
+    const grp = path.length > 1 ? path[path.length-1] : null, wasGrp = grp ? flowItemDone(grp) : false;
+    if(FLOW[it.task]) delete FLOW[it.task]; else FLOW[it.task] = new Date().toISOString().slice(0,10);
+    saveFlow(); closeTask(); flowPaintAll(); reflowLevel();
+    if(pageK && !wasPage && flowDone(pageK)) flowCelebrate("🎉 " + flowPageItem(pageK).nm.replace(/\n/g,"") + "、ぜんぶできました！" + (grp ? "「もどる」から、👍 の丸で次へ進めます" : "👍 の丸から次へ進めます"));
+    else if(grp && !wasGrp && flowItemDone(grp)) flowCelebrate("🎉 " + grp.nm.replace(/\n/g,"") + "、ぜんぶできました！");
+  };
+}
+function closeTask(){ $("#taskSheet").hidden = true; }
+document.getElementById("taskClose").addEventListener("click", closeTask);
+document.getElementById("taskSheet").addEventListener("click", e=>{ if(e.target.id === "taskSheet") closeTask(); });
+function openInfoSheet(title, text){
+  $("#taskWhere").textContent = ""; $("#taskTitle").textContent = title;
+  $("#taskBody").innerHTML = `<p>${text}</p>`; $("#taskSheet").hidden = false;
+}
+function flowCelebrate(msg){
+  showToast(msg, 3200);
+  if(reduce) return;
+  const em = ["🎉","✨","🌈","⭐","💫"];
+  for(let i=0;i<24;i++){ const c = document.createElement("div"); c.className = "fconf"; c.textContent = em[i % em.length];
+    c.style.left = Math.random()*100 + "vw"; c.style.animationDuration = (1.6 + Math.random()*1.4) + "s"; c.style.animationDelay = (Math.random()*.4) + "s";
+    document.body.appendChild(c); setTimeout(()=>c.remove(), 3600); }
+}
+/* ---------- 説明のポップアップ ---------- */
+function openNote(nt, url){
+  $("#noteTitle").textContent = nt.title;
+  $("#noteBody").innerHTML = nt.html;
+  const a = $("#noteGo");
+  a.textContent = nt.btn; a.href = url;
+  $("#noteSheet").hidden = false;
+}
+function closeNote(){ $("#noteSheet").hidden = true; }
+document.getElementById("noteClose").addEventListener("click", closeNote);
+document.getElementById("noteGo").addEventListener("click", ()=>setTimeout(closeNote, 300));   /* シートは別の画面で開きます */
+document.getElementById("noteSheet").addEventListener("click", e=>{ if(e.target.id === "noteSheet") closeNote(); });
+/* 説明の中のページへのリンク（リストアップとは など）：戻ってきたら、いまの段に戻れるように覚えておきます */
+document.getElementById("noteBody").addEventListener("click", e=>{ if(e.target.closest && e.target.closest("a.nlink")) saveReturn(); });
+
+/* ---------- 戻ってきたときは、開く直前の段に戻ります ----------
+   丸の段（例：各種スケジュール情報 › チーム独自 › メンバー向け）からページを開いたら、その段を覚えておき、
+   そのページの「ホームに戻る」などでトップに戻ってきたときに、同じ段を出します */
+const RET_KEY = "sky_return";
+function saveReturn(){
+  const idx = []; let list = TREE;
+  for(const p of path){
+    const i = list.indexOf(p);
+    if(i < 0) return;            /* お知らせだけの段などは、覚えません */
+    idx.push(i); list = p.kids || [];
+  }
+  try{ if(idx.length) sessionStorage.setItem(RET_KEY, JSON.stringify({ idx, t: Date.now() })); else sessionStorage.removeItem(RET_KEY); }catch(e){}
+}
+let hashBack = false;
+function restoreReturn(){
+  /* 「交流会・サポート会情報」から（チーム情報のページ・活用の1stステップ）：各種スケジュール情報（公式公認／チーム独自）の段を開きます */
+  if(location.hash === "#sched"){
+    try{ sessionStorage.removeItem(RET_KEY); }catch(e){}
+    /* この段の「もどる」は、開く前のページ（チーム情報など）へもどります */
+    try{ hashBack = !!document.referrer && new URL(document.referrer).origin === location.origin && history.length > 1; }catch(e){ hashBack = false; }
+    try{ history.replaceState(null, "", location.pathname + location.search); }catch(e){}
+    const want = [/^各種スケジュール情報$/];
+    let list = TREE;
+    for(const re of want){
+      const it = list.find(x=>x.kids && re.test(x.nm));
+      if(!it || !ok(it)){ path.length = 0; return; }
+      path.push(it); list = it.kids;
+    }
+    return;
+  }
+  let r = null;
+  try{ r = JSON.parse(sessionStorage.getItem(RET_KEY) || "null"); sessionStorage.removeItem(RET_KEY); }catch(e){}
+  if(!r || !Array.isArray(r.idx) || !me || location.hash) return;
+  if(Date.now() - (r.t || 0) > 2*60*60*1000) return;      /* 2時間より前のものは使いません */
+  let ref = ""; try{ ref = document.referrer ? new URL(document.referrer).origin : ""; }catch(e){}
+  if(ref !== location.origin) return;                      /* このサイトのページから戻ってきたときだけ */
+  let list = TREE;
+  for(const i of r.idx){
+    const it = list[i];
+    if(!it || !it.kids || !ok(it)) { path.length = 0; return; }
+    path.push(it); list = it.kids;
+  }
+}
+
+/* 「もどる」のアイコンを押したら、1つ前の段へ */
+function goBack(n){
+  /* チーム情報のページなどから「各種スケジュール情報」の段へ来たときは、その段の「もどる」で、もとのページへ */
+  if(hashBack && path.length === 1){ hashBack = false; history.back(); return; }
+  document.getElementById("info").hidden = true;
+  goTo(()=> path.pop(), n ? n.x : undefined, n ? n.y : undefined, n);
+}
+
+/* ---------- 動き（ばねと、ふわふわ） ---------- */
+function frame(t){
+  const all = nodes.concat(leaving);
+  /* 月：アカウントのまわりを、ゆっくりまわります（つまんでいる間は止まります） */
+  const moons = path.length === 0 ? nodes.filter(n=>n.it.moon) : [];
+  const moon = moons[0] || null;
+  const earth = moon ? nodes.find(n=>n.it === TREE[0]) : null;
+  let orb = document.getElementById("orbit");
+  if(!orb){ orb = document.createElement("div"); orb.id = "orbit"; orb.className = "orbit"; orb.style.opacity = 0; stage.prepend(orb); }
+  if(moon && earth){
+    orb.style.width = ORBIT.rx*2 + "px"; orb.style.height = ORBIT.ry*2 + "px";
+    orb.style.transform = `translate(${earth.x - ORBIT.rx}px, ${earth.y - ORBIT.ry}px)`;
+    orb.style.opacity = earth.o;
+  }else orb.style.opacity = 0;
+  if(moon && earth && earth.hx != null){
+    const a0 = reduce ? Math.PI/2 : Math.PI/2 + t/1000 * 2*Math.PI/ORBIT.sec;
+    moons.forEach((mn, i)=>{
+      if(mn === drag) return;
+      const a = a0 + i*2*Math.PI/moons.length;   /* 2つなら、ちょうど反対側 */
+      mn.hx = earth.hx + Math.cos(a)*ORBIT.rx;
+      mn.hy = earth.hy + Math.sin(a)*ORBIT.ry;
+    });
+  }
+  for(const n of all){
+    if(n !== drag){
+      let ax = 0, ay = 0;
+      if(n.hx != null){ ax = (n.hx - n.x)*.055; ay = (n.hy - n.y)*.055; }
+      if(moon && !n.it.moon && n !== earth && n !== drag && n.hx != null){
+        /* 月が近づいたら、ほかのアイコンは少しよけます（月が2つでも同じ） */
+        n.dodge = false;
+        moons.forEach(mn=>{
+          const dx = n.x - mn.x, dy = n.y - (mn.y + 14), d = Math.hypot(dx,dy) || 1, R = 150;
+          if(d < R){ const f = (R-d)/R*7; ax += dx/d*f; ay += dy/d*f; n.dodge = true; }
+        });
+      }
+      /* 「使い方」の丸をつまんで近づけたときも、ほかのアイコンはよけます */
+      const fd = [tutF, howF, memF, dbgF].find(x=>x && x.held && x.el.style.display !== "none") || null;
+      if(fd && n.hx != null){
+        /* アイコンをつまんだときと同じ動き：よけながら、まわりでくるくる混ざります（登録・ログインの丸も同じ） */
+        const dx = n.x - fd.x, dy = n.y - fd.y, d = Math.hypot(dx,dy) || 1, R = 140;
+        if(d < R){ const f = (R-d)/R*7; ax += dx/d*f; ay += dy/d*f; }
+        ax += (-dy/d)*.35 + (Math.random()-.5)*.9;
+        ay += ( dx/d)*.35 + (Math.random()-.5)*.9;
+      }
+      if(drag && n.hx != null){
+        /* つまんだアイコンが近づくと、よけながら混ざる */
+        const dx = n.x - drag.x, dy = n.y - drag.y, d = Math.hypot(dx,dy) || 1, R = 140;
+        if(d < R){ const f = (R-d)/R*7; ax += dx/d*f; ay += dy/d*f; }
+        ax += (-dy/d)*.35 + (Math.random()-.5)*.9;
+        ay += ( dx/d)*.35 + (Math.random()-.5)*.9;
+      }
+      n.vx = (n.vx + ax)*.84; n.vy = (n.vy + ay)*.84;
+      n.x += n.vx; n.y += n.vy;
+      /* 中の段でも、名前が画面の左右の外へ出ないようにします（名前の長い丸のため） */
+      if(!moon && n.hx != null && n !== drag){
+        if(n.lw == null){ const nm = n.el.querySelector(".nm"); n.lw = nm ? nm.offsetWidth : 0; }
+        const lim0 = Math.max(44, n.lw/2 + 4);
+        n.x = Math.min(Math.max(n.x, lim0), W - lim0);
+      }
+      if(moon && n.hx != null){
+        /* よけるのは、もとの場所から少しだけ（となりのアイコンまで押し出さないように） */
+        const ox = n.x - n.hx, oy = n.y - n.hy, od = Math.hypot(ox, oy), MAXD = 34;   /* 月が2つになったので、よける幅は小さめに */
+        if(n.dodge && !drag && od > MAXD){ n.x = n.hx + ox/od*MAXD; n.y = n.hy + oy/od*MAXD; }
+        /* よけても、画面の外へは出ません（名前が長いアイコンは、名前の幅まで見ます） */
+        if(n.lw == null){ const nm = n.el.querySelector(".nm"); n.lw = nm ? nm.offsetWidth : 0; }
+        const lim = Math.max(44, n.lw/2 + 6);
+        n.x = Math.min(Math.max(n.x, lim), W - lim);
+        /* 管理者モードの丸のすぐ上・すぐ下の丸は、月をよけるときも、その丸のほうへは寄りません（重ならないように） */
+        n.calm = false;
+        if(dbgF && dbgF.hy != null && dbgF.el.style.display !== "none" && Math.abs(n.hx - dbgF.hx) < n.lw/2 + 70){
+          n.calm = Math.abs(n.hy - dbgF.hy) < 140;   /* すぐとなりの丸は、ふわふわを小さく */
+          if(n.hy < dbgF.hy) n.y = Math.min(n.y, n.hy + 3);
+          else n.y = Math.max(n.y, n.hy - 3);
+          if(Math.abs(n.hy - dbgF.hy) < 60) n.x = n.hx < dbgF.hx ? Math.min(n.x, n.hx + 3) : Math.max(n.x, n.hx - 3);
+        }
+      }
+    }
+    const wait = t - n.born < n.delay;
+    if(!wait){ n.s += (n.ts - n.s)*.2; n.o += (n.to - n.o)*.2; }
+    if(reduce){ n.s = n.ts; n.o = n.to; }
+    const amp = n.calm ? .3 : 1;
+    const fy = reduce || n === drag ? 0 : Math.sin(t/650 + n.ph)*5*amp;
+    const fx = reduce || n === drag ? 0 : Math.cos(t/900 + n.ph)*2.5*amp;
+    const hw = n.it.join ? 55 : 48, hh = n.it.join ? 50 : (n.it.moon ? 28 : 40);
+    n.el.style.transform = `translate(${n.x - hw + fx}px, ${n.y - hh + fy}px) scale(${n.s})`;
+    n.el.style.opacity = n.o;
+  }
+  placeHowto(t);
+  placeTut(t);
+  placeMem(t);
+  placeDbg(t);
+  placeView(t);
+  leaving = leaving.filter(n=>{
+    if(t - n.dying > 420){ n.el.remove(); return false; }
+    return true;
+  });
+  requestAnimationFrame(frame);
+}
+
+
+/* ================================================================
+   小さな「使い方」の丸（ほかのアイコンとは別に、ひとつだけで動きます）
+   ・ふわふわ浮いています
+   ・指でつまんで動かせます（はなすと、元の場所へゆっくり戻ります）
+   ・押すと使い方のページへ
+================================================================ */
+function makeFloater(cls, ph, opt){
+  const el = document.createElement("a");
+  el.className = cls; el.href = (opt && opt.href) || (B + "howto.html");
+  el.setAttribute("aria-label", (opt && opt.aria) || "使い方（このサイトの使い方）を見る");
+  el.innerHTML = opt ? `<span class="tb">${opt.ic}</span><span class="tt">${opt.nm}</span>`
+               : cls === "howto" ? '<span class="hb">📖</span><span class="ht">使い方</span>'
+                                 : '<span class="tb">📖</span><span class="tt">使い方</span>';
+  el.draggable = false;
+  const f = { el, x: null, y: null, vx: 0, vy: 0, hx: 0, hy: 0, ph, held: false, moved: false, last: -1e9 };
+  let sx, sy, offx, offy, pid = null;
+  el.addEventListener("pointerdown", e=>{
+    if(e.button !== undefined && e.button !== 0) return;
+    e.stopPropagation();
+    pid = e.pointerId; sx = e.clientX; sy = e.clientY; f.moved = false;
+    const r = stage.getBoundingClientRect();
+    offx = e.clientX - r.left - f.x; offy = e.clientY - r.top - f.y;
+    try{ el.setPointerCapture(pid); }catch(_){}
+  });
+  el.addEventListener("pointermove", e=>{
+    if(pid !== e.pointerId) return;
+    e.stopPropagation();
+    if(!f.moved && Math.hypot(e.clientX-sx, e.clientY-sy) > 8){ f.moved = true; f.held = true; el.classList.add("grab"); }
+    if(f.moved){
+      const r = stage.getBoundingClientRect();
+      const nx = e.clientX - r.left - offx, ny = e.clientY - r.top - offy;
+      f.vx = nx - f.x; f.vy = ny - f.y; f.x = nx; f.y = ny;
+    }
+  });
+  const end = e=>{
+    if(pid !== e.pointerId) return;
+    pid = null;
+    if(f.moved){ f.held = false; el.classList.remove("grab"); f.last = performance.now(); }
+  };
+  el.addEventListener("pointerup", end);
+  el.addEventListener("pointercancel", end);
+  el.addEventListener("click", e=>{
+    /* つまんで動かしたあとは、ページへは移らずに元の場所へ戻るだけ */
+    if(f.moved || performance.now() - f.last < 400){ e.preventDefault(); e.stopPropagation(); f.moved = false; return; }
+    if(opt && opt.onTap){ e.preventDefault(); opt.onTap(); }
+  });
+  return f;
+}
+/* ばねで元の場所へ戻りながら、ふわふわ揺れます */
+function stepFloater(f, t, s, o, hw, hh, amp){
+  if(amp == null) amp = 1;
+  if(f.x == null){ f.x = f.hx; f.y = f.hy; }
+  if(!f.held){
+    f.vx = (f.vx + (f.hx - f.x)*.05)*.85; f.vy = (f.vy + (f.hy - f.y)*.05)*.85;
+    f.x += f.vx; f.y += f.vy;
+  }
+  const fy = reduce || f.held ? 0 : Math.sin(t/700 + f.ph)*5*amp;
+  const fx = reduce || f.held ? 0 : Math.cos(t/1100 + f.ph)*3*amp;
+  f.el.style.transform = `translate(${f.x - hw + fx}px, ${f.y - hh + fy}px) scale(${f.held ? s*1.12 : s})`;
+  f.el.style.opacity = o;
+}
+
+/* ---- ログイン中のトップ：まわりの輪よりも外の、右下に置きます ---- */
+let tutF = null, tutKey = "";
+/* ほかのアイコンの「元の場所」と重ならない、輪の外の右下をさがします（並びが変わったときだけ） */
+function tutHome(){
+  const acc = nodes.find(n=>n.it === TREE[0]) || { hx: W/2, hy: H/2 };
+  const boxes = nodes.filter(n=>!n.it.moon && n.hx != null).map(n=>{
+    const lw = Math.max(70, n.lw || 0);
+    return [n.hx - Math.max(42, lw/2) - 16, n.hy - 48, n.hx + Math.max(42, lw/2) + 16, n.hy + 72];   /* ふわふわ揺れる分も見ておきます */
+  });
+  /* 月の通り道（輪）にもかからないように */
+  const inOrbit = (x, y)=>{ const dx = (x - acc.hx)/(ORBIT.rx + 50), dy = (y - acc.hy)/(ORBIT.ry + 50); return dx*dx + dy*dy < 1; };
+  /* 目じるし：輪のいちばん右より外側で、高さはまん中と、いちばん下のアイコンの間くらい */
+  const hs = nodes.filter(n=>!n.it.moon && n.hx != null);
+  const maxY = Math.max(...hs.map(n=>n.hy)), maxX = Math.max(...hs.map(n=>n.hx));
+  /* サポーターの部屋がない方は、いちばん下の「各種スケジュール情報」よりも下の右へ */
+  const hasSup = nodes.some(n=>n.it.g === "sup" && n.it.kids);
+  const ax = W - 44, ay = hasSup ? acc.hy + (maxY - acc.hy)*.66 : maxY + 60;
+  let best = null, bestS = Infinity;
+  for(let x = W - 44; x >= W*.45; x -= 4){
+    for(let y = Math.min(H + 30, maxY + 80); y >= acc.hy; y -= 4){
+      const box = [x - 42, y - 18, x + 42, y + 34];
+      let a = 0;
+      boxes.forEach(r=>{
+        const ox = Math.min(box[2], r[2]) - Math.max(box[0], r[0]);
+        const oy = Math.min(box[3], r[3]) - Math.max(box[1], r[1]);
+        if(ox > 0 && oy > 0) a += ox*oy;
+      });
+      if(inOrbit(x, y)) a += 5000;
+      const sc = a*100 + Math.hypot(x - ax, y - ay) - .5*Math.hypot(x - acc.hx, y - acc.hy);
+      if(sc < bestS){ bestS = sc; best = [x, y]; }
+    }
+  }
+  return best;
+}
+function placeTut(t){
+  const top = path.length === 0 && me;
+  const sch = top ? nodes.find(n=>n.it.g === "apply" && n.it.kids) : null;
+  if(!sch){ if(tutF) tutF.el.style.display = "none"; tutKey = ""; return; }
+  if(!tutF){ tutF = makeFloater("tut", 2.1); stage.insertBefore(tutF.el, stage.firstChild); }
+  tutF.el.style.display = "";
+  const key = W + "|" + H + "|" + nodes.map(n=>Math.round(n.hx||0) + "," + Math.round(n.hy||0)).join(";");
+  if(key !== tutKey){
+    nodes.forEach(n=>{ if(n.lw == null){ const nm = n.el.querySelector(".nm"); n.lw = nm ? nm.offsetWidth : 0; } });
+    const h = tutHome(); if(h){ tutF.hx = h[0]; tutF.hy = h[1]; } tutKey = key;
+  }
+  stepFloater(tutF, t, sch.s, sch.o, 40, 16);
+}
+
+/* ---- ログイン中のトップ：「会員情報」を左上（はじめの一歩と初期サポートガイドの間の、輪の外）に置きます ---- */
+let memF = null, memKey = "";
+function memHome(){
+  const acc = nodes.find(n=>n.it === TREE[0]) || { hx: W/2, hy: H/2 };
+  const a = nodes.find(n=>n.it.url === B + "first-support/");            /* はじめの一歩 */
+  const g = nodes.find(n=>n.it.url === B + "first-support/guide.html");  /* 初期サポートガイド */
+  const hs = nodes.filter(n=>!n.it.moon && n.hx != null);
+  const boxes = hs.map(n=>{
+    const lw = Math.max(70, n.lw || 0);
+    return [n.hx - Math.max(42, lw/2) - 16, n.hy - 48, n.hx + Math.max(42, lw/2) + 16, n.hy + 72];
+  });
+  if(tutF && tutF.hx) boxes.push([tutF.hx - 50, tutF.hy - 30, tutF.hx + 50, tutF.hy + 44]);
+  const inOrbit = (x, y)=>{ const dx = (x - acc.hx)/(ORBIT.rx + 50), dy = (y - acc.hy)/(ORBIT.ry + 50); return dx*dx + dy*dy < 1; };
+  /* 目じるし：2つの丸のまん中から、輪の外へ少し出たところ */
+  let tx = 44, ty = acc.hy - 120;
+  if(a && g){
+    const mx = (a.hx + g.hx)/2, my = (a.hy + g.hy)/2;
+    const dx = mx - acc.hx, dy = my - acc.hy, d = Math.hypot(dx, dy) || 1;
+    tx = mx + dx/d*70; ty = my + dy/d*70;
+  }
+  let best = null, bestS = Infinity;
+  for(let x = 44; x <= W*.55; x += 4){
+    for(let y = Math.max(24, acc.hy - 300); y <= acc.hy + 40; y += 4){   /* 輪がたてに縮んだときも入れるよう、上は24まで探します */
+      const box = [x - 42, y - 18, x + 42, y + 34];
+      let ar = 0;
+      boxes.forEach(r=>{
+        const ox = Math.min(box[2], r[2]) - Math.max(box[0], r[0]);
+        const oy = Math.min(box[3], r[3]) - Math.max(box[1], r[1]);
+        if(ox > 0 && oy > 0) ar += ox*oy;
+      });
+      if(inOrbit(x, y)) ar += 5000;
+      const sc = ar*100 + Math.hypot(x - tx, y - ty);
+      if(sc < bestS){ bestS = sc; best = [x, y]; }
+    }
+  }
+  return best;
+}
+function placeMem(t){
+  const top = path.length === 0 && me;
+  const sch = top ? nodes.find(n=>n.it.g === "apply" && n.it.kids) : null;
+  if(!sch){ if(memF) memF.el.style.display = "none"; memKey = ""; return; }
+  if(!memF){
+    memF = makeFloater("tut mem", 3.4, { ic:"👤", nm:"会員情報\n／紹介コード", href:"#member", aria:"会員情報（会員番号・紹介コード）を見る", onTap: openMemInfo });
+    stage.insertBefore(memF.el, stage.firstChild);
+  }
+  memF.el.style.display = "";
+  const key = W + "|" + H + "|" + nodes.map(n=>Math.round(n.hx||0) + "," + Math.round(n.hy||0)).join(";") + "|" + (tutF ? Math.round(tutF.hx) : "");
+  if(key !== memKey){
+    nodes.forEach(n=>{ if(n.lw == null){ const nm = n.el.querySelector(".nm"); n.lw = nm ? nm.offsetWidth : 0; } });
+    const h = memHome(); if(h){ memF.hx = h[0]; memF.hy = h[1]; } memKey = key;
+  }
+  stepFloater(memF, t, sch.s, sch.o, 40, 16);
+}
+/* ---- 管理者の方だけ：「管理者モード」の丸を、アカウントから見て「使い方」と左右反対の場所に置きます ---- */
+window.SKY_DBG_FLOATER = true;   /* config.js の左下のボタンのかわりに、この丸を出します */
+let dbgF = null, dbgKey = "";
+function dbgHome(){
+  /* アカウントの丸のまん中から見て、「使い方」と左右反対の場所に置きます。
+     重なるときだけ、そのまわりで重ならないところをさがします */
+  const acc = nodes.find(n=>n.it === TREE[0]) || { hx: W/2, hy: H/2 };
+  const hs = nodes.filter(n=>!n.it.moon && n.hx != null);
+  /* ほかの丸は、丸と名前の大きさだけを見ます（左右対称の場所に入りやすいように） */
+  const boxes = hs.map(n=>{
+    const lw = Math.max(70, n.lw || 0);
+    return [n.hx - Math.max(40, lw/2) - 8, n.hy - 44, n.hx + Math.max(40, lw/2) + 8, n.hy + 64];
+  });
+  [tutF, memF].forEach(f=>{ if(f && f.hx) boxes.push([f.hx - 50, f.hy - 30, f.hx + 50, f.hy + 44]); });
+  const inOrbit = (x, y)=>{ const dx = (x - acc.hx)/(ORBIT.rx + 50), dy = (y - acc.hy)/(ORBIT.ry + 50); return dx*dx + dy*dy < 1; };
+  const maxY = Math.max(...hs.map(n=>n.hy));
+  /* 「使い方」から左へまっすぐのばした線（底辺）と、「会員情報」から真下へおろした線が交わるところ
+     （使い方・会員情報と結ぶと、直角三角形の直角の角になる場所） */
+  /* アカウントの丸のまん中から見て、「使い方」と左右反対の場所（横のはなれ方は同じ・高さも同じ） */
+  let tx = 60, ty = maxY;
+  if(tutF && tutF.hx){ tx = acc.hx - (tutF.hx - acc.hx); ty = tutF.hy; }
+  const sl0 = Math.max(0, stage.getBoundingClientRect().left);
+  const twh = (dbgF && dbgF.el.querySelector(".tt") ? dbgF.el.querySelector(".tt").offsetWidth : 80) / 2;
+  const minX0 = Math.max(10, twh + 4 - sl0);   /* 名前が画面の左はしから出ないところまで */
+  /* 同じ高さでさがすときは、丸と名前を別々の四角で見ます（すき間に入りやすいように） */
+  const fine = [];
+  hs.forEach(n=>{
+    const lw = Math.max(60, n.lw || 0);
+    fine.push([n.hx - 40, n.hy - 44, n.hx + 40, n.hy + 32]);                 /* 丸（ふわふわ揺れる分も少し見ます） */
+    fine.push([n.hx - lw/2 - 6, n.hy + 30, n.hx + lw/2 + 6, n.hy + 66]);     /* 名前 */
+  });
+  [tutF, memF].forEach(f=>{ if(f && f.hx) fine.push([f.hx - 46, f.hy - 22, f.hx + 46, f.hy + 40]); });
+  const area = (x, y, P)=>{
+    /* この丸の、小さな丸と2行の名前の場所（じっさいの大きさで見ます） */
+    const mine = [".tb", ".tt"].map(sel=>{
+      const e = dbgF && dbgF.el.querySelector(sel);
+      if(!e || !e.offsetWidth) return sel === ".tb" ? [x - 18, y - 14, x + 18, y + 22] : [x - 40, y + 22, x + 40, y + 50];
+      const l = x - 52 + e.offsetLeft, t = y - 16 + e.offsetTop;
+      return [l - 2, t - 2, l + e.offsetWidth + 2, t + e.offsetHeight + 2];
+    });
+    let ar = 0;
+    mine.forEach(b=>fine.forEach(r0=>{
+      const r = [r0[0] - P, r0[1] - P, r0[2] + P, r0[3] + P];
+      const ox = Math.min(b[2], r[2]) - Math.max(b[0], r[0]);
+      const oy = Math.min(b[3], r[3]) - Math.max(b[1], r[1]);
+      if(ox > 0 && oy > 0) ar += ox*oy;
+    }));
+    return ar + (inOrbit(x, y) ? 5000 : 0);
+  };
+  /* まず「使い方」と同じ高さのまま、左右だけでさがします（高さはずらしません） */
+  /* すき間（ふわふわ揺れる分）を8とって入れば、それ。だめなら、すき間なしで入るところ */
+  for(const P of [8, 5, 3, 0]){
+    let bx = null;
+    for(let x = minX0; x <= W*.5; x += 2){
+      if(area(x, ty, P) === 0 && (bx == null || Math.abs(x - tx) < Math.abs(bx - tx))) bx = x;
+    }
+    if(bx != null) return [bx, ty];
+  }
+  /* どうしても入らないときだけ、上下にもずらします */
+  let best = null, bestS = Infinity;
+  /* 名前（2行）が画面の外に出ないところまで、左へ寄せられます */
+  const sl = Math.max(0, stage.getBoundingClientRect().left);
+  const minX = Math.max(10, 58 - sl);
+  for(let x = minX; x <= W*.5; x += 2){
+    for(let y = acc.hy - 40; y <= Math.min(H + 30, maxY + 90); y += 4){
+      const box = [x - 52, y - 18, x + 52, y + 46];   /* 名前が2行なので、少し大きめに見ます */
+      let ar = 0;
+      boxes.forEach(r=>{
+        const ox = Math.min(box[2], r[2]) - Math.max(box[0], r[0]);
+        const oy = Math.min(box[3], r[3]) - Math.max(box[1], r[1]);
+        if(ox > 0 && oy > 0) ar += ox*oy;
+      });
+      if(inOrbit(x, y)) ar += 5000;
+      const sc = ar*100 + Math.hypot(x - tx, y - ty);
+      if(sc < bestS){ bestS = sc; best = [x, y]; }
+    }
+  }
+  return best;
+}
+function placeDbg(t){
+  const top = path.length === 0 && me && window.skyDebug && window.skyDebug.realAdmin && window.skyDebug.realAdmin();
+  const sch = top ? nodes.find(n=>n.it.g === "apply" && n.it.kids) : null;
+  if(!sch){ if(dbgF) dbgF.el.style.display = "none"; dbgKey = ""; return; }
+  if(!dbgF){
+    const d = window.skyDebug.get();
+    const nm = "管理者モード\n" + (!d ? "オフ" : d.mode === "admin" ? "オン" : window.skyDebug.label());
+    dbgF = makeFloater("tut dbg" + (!d ? "" : d.mode === "admin" ? " on" : " cus"), 4.2,
+      { ic:"🛠", nm:nm, href:"#admin", aria:"管理者モードを切りかえる", onTap: ()=>window.skyDebug.open() });
+    stage.insertBefore(dbgF.el, stage.firstChild);
+  }
+  dbgF.el.style.display = "";
+  const key = W + "|" + H + "|" + nodes.map(n=>Math.round(n.hx||0) + "," + Math.round(n.hy||0)).join(";") + "|" + (tutF ? Math.round(tutF.hx) : "") + "|" + (memF ? Math.round(memF.hx) : "");
+  if(key !== dbgKey){
+    nodes.forEach(n=>{ if(n.lw == null){ const nm = n.el.querySelector(".nm"); n.lw = nm ? nm.offsetWidth : 0; } });
+    const h = dbgHome(); if(h){ dbgF.hx = h[0]; dbgF.hy0 = h[1]; } dbgKey = key;
+  }
+  dbgF.hy = dbgF.hy0;
+  stepFloater(dbgF, t, sch.s, sch.o, 52, 16, .4);   /* となりの丸に近いので、ふわふわは小さめ */
+}
+
+/* ---- ログイン中のトップ：「見やすさ」の丸を、アカウントの丸のまん中から見て「会員情報」と左右反対の場所（同じ高さ）に置きます ---- */
+let viewF = null, viewKey = "";
+function viewName(){ return "見やすさ\n（" + (window.skyView ? window.skyView.label() : "ふつう") + "）"; }
+function viewHome(){
+  const acc = nodes.find(n=>n.it === TREE[0]) || { hx: W/2, hy: H/2 };
+  let tx = W - 60, ty = memF && memF.hy ? memF.hy : acc.hy - 200;
+  if(memF && memF.hx) tx = acc.hx + (acc.hx - memF.hx);
+  const hs = nodes.filter(n=>!n.it.moon && n.hx != null);
+  const fine = [];
+  hs.forEach(n=>{
+    const lw = Math.max(60, n.lw || 0);
+    fine.push([n.hx - 40, n.hy - 44, n.hx + 40, n.hy + 32]);
+    fine.push([n.hx - lw/2 - 6, n.hy + 30, n.hx + lw/2 + 6, n.hy + 66]);
+  });
+  [tutF, memF].forEach(f=>{ if(f && f.hx) fine.push([f.hx - 46, f.hy - 22, f.hx + 46, f.hy + 40]); });
+  /* 右上の「メニュー」のボタン（画面に固定）にもかからないように */
+  const sr = stage.getBoundingClientRect();
+  fine.push([window.innerWidth - 80 - sr.left, -999, 9999, 92 - sr.top]);
+  const inOrbit = (x, y)=>{ const dx = (x - acc.hx)/(ORBIT.rx + 50), dy = (y - acc.hy)/(ORBIT.ry + 50); return dx*dx + dy*dy < 1; };
+  const area = (x, y)=>{
+    const b = [x - 44, y - 18, x + 44, y + 44];   /* 小さな丸と、2行の名前 */
+    let ar = 0;
+    fine.forEach(r=>{
+      const ox = Math.min(b[2], r[2]) - Math.max(b[0], r[0]);
+      const oy = Math.min(b[3], r[3]) - Math.max(b[1], r[1]);
+      if(ox > 0 && oy > 0) ar += ox*oy;
+    });
+    return ar + (inOrbit(x, y) ? 5000 : 0);
+  };
+  /* まず同じ高さのまま、左右だけでさがします。だめなときだけ上下にもずらします */
+  const maxX = Math.min(W - 46, window.innerWidth - sr.left - 50);
+  let bx = null;
+  for(let x = W*.5; x <= maxX; x += 2){ if(area(x, ty) === 0 && (bx == null || Math.abs(x - tx) < Math.abs(bx - tx))) bx = x; }
+  if(bx != null) return [bx, ty];
+  let best = null, bestS = Infinity;
+  for(let x = W*.5; x <= maxX; x += 2){
+    for(let y = Math.max(24, acc.hy - 300); y <= acc.hy + 40; y += 4){
+      const sc = area(x, y)*100 + Math.hypot(x - tx, y - ty);
+      if(sc < bestS){ bestS = sc; best = [x, y]; }
+    }
+  }
+  return best;
+}
+function placeView(t){
+  const top = path.length === 0 && me && window.skyView;
+  const sch = top ? nodes.find(n=>n.it.g === "apply" && n.it.kids) : null;
+  if(!sch || !memF || memF.el.style.display === "none"){ if(viewF) viewF.el.style.display = "none"; viewKey = ""; return; }
+  if(!viewF){
+    viewF = makeFloater("tut view", 5.3, { ic:"👓", nm:viewName(), href:"#view", aria:"見やすさ（文字の大きさ・字体）を変える", onTap: ()=>window.skyView.open() });
+    stage.insertBefore(viewF.el, stage.firstChild);
+  }
+  viewF.el.style.display = "";
+  const key = W + "|" + H + "|" + nodes.map(n=>Math.round(n.hx||0) + "," + Math.round(n.hy||0)).join(";") + "|" + Math.round(memF.hx || 0) + "," + Math.round(memF.hy || 0);
+  if(key !== viewKey){
+    nodes.forEach(n=>{ if(n.lw == null){ const nm = n.el.querySelector(".nm"); n.lw = nm ? nm.offsetWidth : 0; } });
+    const h = viewHome(); if(h){ viewF.hx = h[0]; viewF.hy = h[1]; } viewKey = key;
+  }
+  stepFloater(viewF, t, sch.s, sch.o, 52, 16, .6);
+}
+/* 見やすさを変えたら：丸の名前を書きかえて、文字の幅が変わったぶん、並びを合わせなおします */
+window.addEventListener("skyview", ()=>{
+  if(viewF){ const tt = viewF.el.querySelector(".tt"); if(tt) tt.textContent = viewName(); }
+  nodes.forEach(n=>{ n.lw = null; });
+  tutKey = memKey = dbgKey = viewKey = "";
+  window.dispatchEvent(new Event("resize"));
+});
+
+/* 会員番号は、LINKの会員番号の形（8けた）で見せます（名簿に頭の0がなくても同じ番号です） */
+function memIdText(id){
+  const t = String(id || "").trim();
+  return /^\d{1,7}$/.test(t) ? t.padStart(8, "0") : t;
+}
+function openMemInfo(){
+  if(!me) return;
+  $("#mName").textContent = me.name || "（ご登録がありません）";
+  $("#mName").classList.toggle("none", !me.name);
+  $("#mReal").textContent = me.realName || "（ご登録がありません）";
+  $("#mReal").classList.toggle("none", !me.realName);
+  $("#mId").textContent = memIdText(me.id);
+  $("#mCopy").classList.remove("done"); $("#mCopy").textContent = "📋 コピー"; $("#mCopyMsg").textContent = "";
+  $("#mRefCopy").classList.remove("done"); $("#mRefCopy").textContent = "🔗 紹介コードをコピーする"; $("#mRefMsg").innerHTML = "";
+  $("#memSheet").hidden = false;
+}
+/* 会員番号をコピーします（新しいやり方が使えないブラウザでは、昔からのやり方でコピーします） */
+async function copyText(t){
+  try{ if(navigator.clipboard && window.isSecureContext){ await navigator.clipboard.writeText(t); return true; } }catch(e){}
+  try{
+    const ta = document.createElement("textarea");
+    ta.value = t; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.top = "-1000px"; ta.style.fontSize = "16px";
+    document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0, t.length);
+    const ok = document.execCommand("copy"); ta.remove(); return ok;
+  }catch(e){ return false; }
+}
+document.getElementById("mCopy").addEventListener("click", async ()=>{
+  const t = document.getElementById("mId").textContent.trim();
+  const ok = await copyText(t);
+  const b = document.getElementById("mCopy"), m = document.getElementById("mCopyMsg");
+  if(ok){ b.classList.add("done"); b.textContent = "✓ コピーしました"; m.textContent = "そのまま、貼りつけて使えます"; }
+  else{ m.textContent = "コピーできませんでした。番号を長押しして、コピーしてください"; }
+});
+/* 紹介コード（招待コードのURL）：会員名簿の「紹介URL」の列に入っているものをコピーします
+   （アカウントのページで登録したもの。ログインのときに受け取って、この端末に覚えています） */
+document.getElementById("mRefCopy").addEventListener("click", async ()=>{
+  const b = document.getElementById("mRefCopy"), m = document.getElementById("mRefMsg");
+  const url = String((me && me.refUrl) || "").trim();
+  if(!url){
+    m.innerHTML = "紹介コードがまだ登録されていません。<br>"
+      + "<span style='font-weight:500;color:var(--ink);'>紹介コード（URL）は、<b>ビジネスマイページ</b>を開いてログインし、右上のメニューの<b>「新規会員紹介」</b>から発行できます。"
+      + "発行したら、アカウントのページに貼りつけて登録してください。</span><br>"
+      + "<a href='https://member.link-platform.jp' target='_blank' rel='noopener' style='color:var(--deep);font-weight:700;'>ビジネスマイページを開く ›</a><br>"
+      + "<a href='./ikusei/account.html' style='color:var(--deep);font-weight:700;'>アカウントのページで登録する ›</a>";
+    return;
+  }
+  const ok = await copyText(url);
+  if(ok){ b.classList.add("done"); b.textContent = "✓ コピーしました"; m.textContent = "招待コードのURLがコピーされました"; }
+  else{ m.textContent = "コピーできませんでした。アカウントのページで、URLを長押ししてコピーしてください"; }
+});
+document.getElementById("mClose").addEventListener("click", ()=>{ document.getElementById("memSheet").hidden = true; });
+document.getElementById("mClose2").addEventListener("click", ()=>{ document.getElementById("memSheet").hidden = true; });
+
+/* ---- まだログインしていない方：「登録（ログイン）」の丸の右下に置きます ---- */
+let howF = null;
+function placeHowto(t){
+  const j = (path.length === 0) ? nodes.find(n=>n.it.join) : null;
+  if(!j || j.hx == null){ if(howF) howF.el.style.display = "none"; return; }
+  if(!howF){ howF = makeFloater("howto", 1.3); stage.appendChild(howF.el); }
+  howF.el.style.display = "";
+  /* 「登録（ログイン）」の丸が動いても、いっしょには動きません（元の場所を目じるしにします） */
+  howF.hx = j.hx + 82; howF.hy = j.hy + 66;
+  stepFloater(howF, t, j.s, j.o, 22, 15);
+}
+
+/* ================================================================
+   登録・ログインの画面
+================================================================ */
+const $ = q => document.querySelector(q);
+let joinMode = "new";          /* new = はじめての方 / login = 登録ずみの方 */
+let loginTab = "google";       /* google / id / mail */
+let gMail = "", gName = "", gFor = "";
+
+function openJoin(n){
+  joinMode = isReturning() ? "login" : "new";
+  const r = n.el.querySelector(".ball").getBoundingClientRect();
+  const sp = $("#spread");
+  sp.style.setProperty("--c", "var(--g-join)");
+  sp.style.background = "linear-gradient(135deg, var(--rainbow))";
+  sp.style.setProperty("--x", (r.left + r.width/2) + "px");
+  sp.style.setProperty("--y", (r.top + r.height/2) + "px");
+  $("#spreadIc").textContent = ""; $("#spreadNm").textContent = "";
+  sp.className = "spread"; sp.hidden = false;
+  requestAnimationFrame(()=>requestAnimationFrame(()=> sp.classList.add("go")));
+  setTimeout(()=>{
+    showSheet();
+    sp.classList.add("out");
+    setTimeout(()=>{ sp.hidden = true; sp.className = "spread"; sp.style.background = ""; }, 380);
+  }, reduce ? 0 : 520);
+}
+function showSheet(){
+  $("#jDone").hidden = true;
+  $("#jBody").hidden = false;
+  msg("");
+  setMode(joinMode);
+  $("#sheet").hidden = false;
+  setTimeout(()=> (joinMode === "new" ? $("#jName") : $("#lPin")).focus(), 300);
+}
+$("#jClose").addEventListener("click", ()=>{ $("#sheet").hidden = true; });
+
+function setMode(m){
+  joinMode = m;
+  document.querySelectorAll("#jSeg button").forEach(b=>b.classList.toggle("on", b.dataset.m === m));
+  $("#jForm").hidden = (m !== "new");
+  $("#lForm").hidden = (m !== "login");
+  $("#jTitle").textContent = (m === "new") ? "登録" : "ログイン";
+  $("#jLead").textContent = (m === "new") ? "これだけで、はじめられます" : "ご登録のときの内容で入れます";
+  msg("");
+}
+document.querySelectorAll("#jSeg button").forEach(b=>b.addEventListener("click", ()=> setMode(b.dataset.m)));
+
+function setLoginTab(t){
+  loginTab = t;
+  document.querySelectorAll("#lTabs button").forEach(b=>b.classList.toggle("on", b.dataset.t === t));
+  $("#lPaneG").hidden = (t !== "google");
+  $("#lPaneId").hidden = (t !== "id");
+  $("#lPaneMail").hidden = (t !== "mail");
+  msg("");
+}
+document.querySelectorAll("#lTabs button").forEach(b=>b.addEventListener("click", ()=> setLoginTab(b.dataset.t)));
+
+function msg(t){
+  const e = $("#jErr");
+  e.innerHTML = t || "";
+  e.style.display = t ? "block" : "none";
+  if(!t) return;
+  /* いま見えている方の「はじめる」「ログイン」ボタンのすぐ上へ動かして、画面に入るように動かします
+     （iPhone でキーボードが出ていても見えるように） */
+  const btn = $("#lForm").hidden ? $("#jGo") : $("#lGo");
+  if(btn && e.nextElementSibling !== btn) btn.parentNode.insertBefore(e, btn);
+  try{ e.scrollIntoView({ block:"center", behavior: reduce ? "auto" : "smooth" }); }catch(x){ e.scrollIntoView(); }
+}
+function onlyDigits(el, max){
+  el.addEventListener("input", ()=>{
+    el.value = el.value.replace(/[０-９]/g, c=>String.fromCharCode(c.charCodeAt(0)-65248)).replace(/\D/g,"").slice(0, max || 99);
+  });
+}
+onlyDigits($("#jPin"), 4); onlyDigits($("#lPin"), 4); onlyDigits($("#jId")); onlyDigits($("#lId"));
+
+/* ---------- Google ---------- */
+function startGoogle(forWhat){
+  gFor = forWhat;
+  if(!window.google || !google.accounts){
+    msg("Googleの読み込みが終わっていません。少しお待ちください。");
+    return;
+  }
+  google.accounts.id.prompt();
+}
+function onGoogle(res){
+  try{
+    const p = JSON.parse(decodeURIComponent(escape(atob(res.credential.split(".")[1].replace(/-/g,"+").replace(/_/g,"/")))));
+    gMail = String(p.email || "").toLowerCase();
+    gName = p.name || "";
+    const label = "✓ " + gMail;
+    $("#jGoogle").classList.add("done"); $("#jGoogle").textContent = label;
+    $("#lGoogle").classList.add("done"); $("#lGoogle").textContent = label;
+    $("#jMail").value = "";
+    if(gFor === "new" && !$("#jName").value.trim() && gName) $("#jName").value = gName;
+    msg("");
+  }catch(e){
+    msg("Googleの確認ができませんでした。");
+  }
+}
+window.addEventListener("load", ()=>{
+  if(window.google && google.accounts){
+    google.accounts.id.initialize({ client_id: CLIENT_ID, callback: onGoogle });
+  }
+});
+$("#jGoogle").addEventListener("click", ()=> startGoogle("new"));
+$("#lGoogle").addEventListener("click", ()=> startGoogle("login"));
+$("#jMail").addEventListener("input", e=>{
+  if(e.target.value && gMail){
+    gMail = "";
+    $("#jGoogle").classList.remove("done");
+    $("#jGoogle").innerHTML = '<b style="color:#4285F4;">G</b> Googleアカウントでつなぐ';
+  }
+});
+
+/* ---------- 端末に残す ---------- */
+function saveMe(j, pin, fallbackId){
+  const m = {
+    id: j.id || fallbackId, pin: pin, email: j.email || "",
+    name: j.name || "", realName: j.realName || "", area: j.area || "",
+    keiretsu: j.keiretsu || "", role: j.role || "",
+    sup: j.sup === true, crie: j.crie === true,
+    nick: j.nick || "", keiChat: j.keiChat || "", refUrl: j.refUrl || "", linkJoin: j.linkJoin || "",
+    badges: j.badges || [], celebrate: j.celebrate || "", helper: j.helper || "",
+    dept: j.dept || "", deptLead: j.deptLead === true, schedIn: j.schedIn === true,
+    needPin: j.needPin === true
+  };
+  localStorage.setItem("skyarc_member", JSON.stringify(m));
+  if(!localStorage.getItem("skyarc_member")) throw new Error("nosave");
+  me = m; loadFlow();   /* 仮組み：その方の進み具合を読みなおします */
+  markReturning();
+  pointProg = null; loadPoint();
+  return m;
+}
+function welcome(text){
+  $("#jBody").hidden = true;
+  $("#jDoneMsg").textContent = text;
+  $("#jDone").hidden = false;
+  setTimeout(()=>{
+    $("#sheet").hidden = true;
+    setHello(text);
+    path.length = 0;
+    goTo(()=>{}, W/2, H/2, nodes.find(n=>n.it.join));
+  }, 1300);
+}
+const ERR = {
+  busy: "いま混み合っています。少しおいてお試しください。",
+  emailtaken: "このメールアドレス（Googleアカウント）は、すでにご登録があります。<br>上の「登録ずみの方」から、ご自分で決めたパスコードで入ってください。",
+  exists: "この会員番号は、すでにご登録があります。<br>上の「登録ずみの方」から、ご自分で決めたパスコードで入ってください。",
+  proxy: "あなたは、すでにサポートのどなたかから登録をしてもらっています。<br>上の「登録ずみの方」から、会員番号とはじめのパスコード「1111」で入り、そのあと、ご自分で決めた新しいパスコードに変えてください。",
+  pin1111: "1111 は使えません。ご自分で決めた数字4桁を入れてください。<br>サポートの方に先に登録してもらった方は、上の「登録ずみの方」から、会員番号と「1111」で入ることもできます。",
+  badpin: "パスコードは数字4桁で入れてください。",
+  badid: "会員番号は数字だけで入れてください。",
+  bademail: "メールアドレスをご確認ください。",
+  noname: "お名前を入れてください。",
+  nomember: "ご登録が見つかりません。",
+  email: "ご登録のGoogleアカウントと異なります。",
+  nosave: "この端末では、ログインの記録を残せない設定になっています。<br>ブラウザの「プライベートモード」を解いてお試しください。"
+};
+
+/* ---------- はじめての方：登録 ---------- */
+$("#jForm").addEventListener("submit", async e=>{
+  e.preventDefault();
+  const name = $("#jName").value.trim();
+  const mail = gMail || $("#jMail").value.trim().toLowerCase();
+  const pin  = $("#jPin").value.trim();
+  const id   = $("#jId").value.trim();
+  const bad = !name ? ERR.noname
+            : !mail ? "Googleアカウントをつなぐか、メールアドレスを入れてください。"
+            : !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(mail) ? ERR.bademail
+            : !/^\d{4}$/.test(pin) ? ERR.badpin
+            : pin === "1111" ? ERR.pin1111
+            : "";
+  if(bad){ msg(bad); return; }
+  msg("");
+  const btn = $("#jGo"); btn.disabled = true;
+  if(typeof skyLoading === "function") skyLoading("登録しています…");
+  try{
+    const body = new URLSearchParams({ action:"join", name, email:mail, pin, id, authType: gMail ? "Google" : "メール" });
+    const r = await fetch(GAS_URL, { method:"POST", body });
+    const j = await r.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
+    if(typeof skyLoadingDone === "function") skyLoadingDone();
+    if(!j || j.ok !== true){ msg(ERR[j && j.error] || "登録できませんでした。少しおいてお試しください。"); return; }
+    saveMe(j, pin, j.id);
+    welcome(name + "さん、ようこそ");
+  }catch(err){
+    if(typeof skyLoadingDone === "function") skyLoadingDone();
+    msg(err && err.message === "nosave" ? ERR.nosave : "通信できませんでした。電波のよい場所でお試しください。");
+  }finally{
+    btn.disabled = false;
+  }
+});
+
+/* ---------- 登録ずみの方：ログイン ---------- */
+$("#lForm").addEventListener("submit", async e=>{
+  e.preventDefault();
+  const pin = $("#lPin").value.trim();
+  let id = "", email = "";
+  if(loginTab === "google"){
+    if(!gMail){ msg("先にGoogleアカウントをえらんでください。"); return; }
+    email = gMail;
+  }else if(loginTab === "mail"){
+    email = $("#lMail").value.trim().toLowerCase();
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ msg(ERR.bademail); return; }
+  }else{
+    id = $("#lId").value.trim();
+    if(!id){ msg("会員番号を入れてください。"); return; }
+  }
+  if(!/^\d{4}$/.test(pin)){ msg(ERR.badpin); return; }
+  msg("");
+  const btn = $("#lGo"); btn.disabled = true;
+  if(typeof skyLoading === "function") skyLoading("ログインしています…");
+  try{
+    if(!id){
+      const r0 = await fetch(`${GAS_URL}?action=byEmail&email=${encodeURIComponent(email)}`);
+      const j0 = await r0.json();
+      if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j0)) return;
+      const list = (j0 && j0.members) || [];
+      if(!j0.ok || !list.length){
+        if(typeof skyLoadingDone === "function") skyLoadingDone();
+        msg("このメールアドレス（Googleアカウント）でのご登録が見つかりません。<br>会員番号でお試しいただくか、「はじめての方」から登録してください。");
+        return;
+      }
+      id = list[0].id;
+    }
+    const url = `${GAS_URL}?action=loginFast&id=${encodeURIComponent(id)}&pin=${encodeURIComponent(pin)}` +
+                (loginTab === "google" ? `&email=${encodeURIComponent(email)}` : "");
+    const r = await fetch(url);
+    const j = await r.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
+    if(typeof skyLoadingDone === "function") skyLoadingDone();
+    if(!j || j.ok !== true){
+      if(j && j.error === "locked") msg(`パスコードのお間違いが続いたため、<b>${j.wait || 60}秒ほど</b>おやすみいただきます。`);
+      else if(j && j.error === "pin") msg("パスコードが違います。" + (j.rest > 0 ? `<br>あと${j.rest}回まちがえると、少しおやすみになります。` : ""));
+      else msg(ERR[j && j.error] || "ログインできませんでした。");
+      return;
+    }
+    const m = saveMe(j, pin, id);
+    welcome((m.name || "") + (m.name ? "さん、おかえりなさい" : "おかえりなさい"));
+  }catch(err){
+    if(typeof skyLoadingDone === "function") skyLoadingDone();
+    msg(err && err.message === "nosave" ? ERR.nosave : "通信できませんでした。電波のよい場所でお試しください。");
+  }finally{
+    btn.disabled = false;
+  }
+});
+$("#lForgot").addEventListener("click", e=>{
+  e.preventDefault();
+  msg("パスコードは、ご登録ページから決めなおしていただけます。<br>" +
+      "<a href='./touroku.html' style='color:var(--deep);font-weight:700;'>ご登録ページをひらく ›</a>");
+});
+
+/* ================================================================
+   ログインしている方は、立場が変わっていないかを裏でそっと確かめます
+   （サポーターやクリエになったときに、アイコンが増えるように）
+================================================================ */
+(async function refresh(){
+  if(!me || !me.id || !me.pin || !GAS_URL) return;
+  try{
+    const r = await fetch(`${GAS_URL}?action=loginFast&id=${encodeURIComponent(me.id)}&pin=${encodeURIComponent(me.pin)}`);
+    const j = await r.json();
+    if(!j || j.ok !== true) return;
+    const before = [me.id, me.sup, me.crie, me.role, me.name, me.dept, me.deptLead, me.schedIn].join("|");
+    const keep = me;
+    const m = Object.assign({}, keep, {
+      id: j.id || keep.id, name: j.name || keep.name || "", realName: j.realName || "",
+      area: j.area || "", keiretsu: j.keiretsu || "", role: j.role || "",
+      sup: j.sup === true, crie: j.crie === true, email: j.email || keep.email || "",
+      nick: j.nick || "", keiChat: j.keiChat || "", refUrl: j.refUrl || "", linkJoin: j.linkJoin || "", helper: j.helper || "",
+      dept: j.dept || "", deptLead: j.deptLead === true, schedIn: j.schedIn === true,
+      needPin: j.needPin === true
+    });
+    localStorage.setItem("skyarc_member", JSON.stringify(m));
+    me = m;
+    if(before !== [me.id, me.sup, me.crie, me.role, me.name, me.dept, me.deptLead, me.schedIn].join("|")){
+      setHello();
+      if(path.length === 0 && !drag) reflow();
+    }
+  }catch(e){}
+})();
+
+/* ================================================================
+   次に進むところを指さします（スプレッドシートの進み具合で決まります）
+     はじめの一歩 → 初期サポートガイド → 活用の1stステップ
+     「終わった」… その進み具合のタブで、項目がぜんぶチェック済み（または卒業）
+     3つとも終わったら、指はなくなります
+================================================================ */
+const POINT_ORDER = [
+  { app:"hajime", url:B+"first-support/" },
+  { app:"guide",  url:B+"first-support/guide.html" },
+  { app:"step1",  url:B+"first-support/step1.html" }
+];
+const POINT_KEY = "skyarc_point";
+let pointProg = null;                 /* { hajime:true/false, guide:…, step1:… } */
+try{
+  const c = JSON.parse(localStorage.getItem(POINT_KEY) || "null");
+  if(c && me && c.id === me.id) pointProg = c.done;
+}catch(e){}
+setHello();   /* 前回の記録で、すぐマークを出します（通信を待たない） */
+function pointUrl(){
+  if(!me || !pointProg) return "";
+  const next = POINT_ORDER.find(o=>pointProg[o.app] !== true);
+  return next ? next.url : "";
+}
+function paintPoint(){
+  const want = pointUrl();
+  nodes.forEach(n=>{
+    const on = path.length === 0 && !!n.it.flowPage && n.it.flowPage === flowNext();   /* 仮組み：次に進める3つのどれかを指さします */
+    const has = n.el.querySelector(".point");
+    if(on && !has){ n.el.classList.add("pointed"); n.el.insertAdjacentHTML("beforeend", '<span class="point" aria-hidden="true">👉</span>'); }
+    if(!on && has){ n.el.classList.remove("pointed"); has.remove(); }
+  });
+}
+async function loadPoint(){
+  if(!me || !me.id || !me.pin || !GAS_URL) return;
+  try{
+    const r = await fetch(`${GAS_URL}?action=home&id=${encodeURIComponent(me.id)}&pin=${encodeURIComponent(me.pin)}&apps=${encodeURIComponent(POINT_ORDER.map(o=>o.app).join(","))}`);
+    const j = await r.json();
+    if(j && j.ok === true && j.links && typeof j.links === "object"){
+      LINKS = j.links;
+      try{ localStorage.setItem(LINKS_KEY, JSON.stringify(j.links)); }catch(e){}
+    }
+    if(!j || j.ok !== true || !j.progress) return;
+    const done = {};
+    POINT_ORDER.forEach(o=>{ done[o.app] = !!(j.progress[o.app] && j.progress[o.app].done); });
+    const wasG3 = ok({ need:"grow3" }), wasTeam = ok({ need:"team" });
+    pointProg = done;
+    try{ localStorage.setItem(POINT_KEY, JSON.stringify({ id: me.id, done: done })); }catch(e){}
+    if((wasG3 !== ok({ need:"grow3" }) || wasTeam !== ok({ need:"team" })) && path.length === 0 && !drag) reflow();
+    paintPoint();
+    setHello();
+    celebrateQueue(j.celebrate);
+  }catch(e){}
+}
+loadPoint();
+
+/* 段階が上がったときに、1回だけお祝いします（この端末に、見た段階を覚えておきます） */
+/* ================================================================
+   トップページのお祝い（v1.194〜）
+   ・GASが「まだ見ていないお祝い」を順番に返します（はじめの一歩〜チーム代表）
+   ・1つずつ出して、とじたら「見た」と記録します（機種を変えても一度きり）
+   ・管理者モードで状態をえらんで試しているときは、GASが返しません
+================================================================ */
+let celebBusy = false;
+async function celebrateQueue(list){
+  if(celebBusy || !Array.isArray(list) || !list.length || !window.skyCelebrate || !me) return;
+  celebBusy = true;
+  for(const k of list){
+    await window.skyCelebrate(k, { name: me.name || "" });
+    try{
+      await fetch(GAS_URL, { method:"POST", body:new URLSearchParams({ action:"seenCelebration", id:me.id, pin:me.pin, kind:k }) });
+    }catch(e){}
+  }
+  celebBusy = false;
+  try{ localStorage.setItem("sky_growth_seen", JSON.stringify({ id: me.id, s: growNow() })); }catch(e){}
+}
+/* （v1.193まで：段階が上がったときの短いお知らせ。いまは上の celebrateQueue でお祝いします） */
+function celebrateGrowth(){
+  const g = growNow();
+  if(g == null || !me) return;
+  const KEY = "sky_growth_seen";
+  let seen = null;
+  try{ const c = JSON.parse(localStorage.getItem(KEY) || "null"); if(c && c.id === me.id) seen = c.s; }catch(e){}
+  try{ localStorage.setItem(KEY, JSON.stringify({ id: me.id, s: g })); }catch(e){}
+  if(g === 0 || (seen != null && g <= seen)) return;
+  const MSG = ["", "🌱 芽が出ました！ はじめの一歩、おつかれさまでした",
+               "🌷 花が咲きました！ 初期サポートガイド、おつかれさまでした",
+               "🌈 ファーストサポート修了認定！ ここまで、本当におつかれさまでした"];
+  showToast(MSG[g], 5200);
+}
+
+/* 短いお知らせ（下に少し出て消えます） */
+let toastT = 0;
+function showToast(msg, ms){
+  let t = document.getElementById("toast");
+  if(!t){ t = document.createElement("div"); t.id = "toast"; t.className = "toast"; t.setAttribute("role","status"); document.body.appendChild(t); }
+  t.textContent = msg; t.classList.add("show");
+  clearTimeout(toastT); toastT = setTimeout(()=> t.classList.remove("show"), ms || 2600);
+}
+
+/* メニューの「ログインする」から来たときは、ログインの画面をそのまま開きます */
+function openLoginFromMenu(){
+  if(me || (location.hash !== "#login" && location.hash !== "#join")) return;
+  const want = location.hash === "#join" ? "new" : "login";   /* 使い方のページの「登録する」からは、登録の画面 */
+  const openMenu = document.querySelector(".skym.on");      /* 開いているメニューは閉じてから */
+  if(openMenu){ const bg = document.querySelector(".skym-bg"); if(bg) bg.click(); }
+  joinMode = want;
+  setTimeout(()=>{ showSheet(); try{ history.replaceState(null, "", location.pathname + location.search); }catch(e){} }, 350);
+}
+openLoginFromMenu();
+window.addEventListener("hashchange", openLoginFromMenu);   /* このページのメニューから押したとき */
+
+/* 別のページから「もどる」で帰ってきたときは、広がった色を片づけます */
+window.addEventListener("pageshow", ev=>{
+  const sp = $("#spread");
+  sp.hidden = true; sp.className = "spread"; sp.style.background = "";
+  nodes.forEach(n=>{ n.ts = 1; });
+  if(ev.persisted){
+    const was = !!me; loadMe(); setHello();
+    if(was !== !!me){ path.length = 0; goTo(()=>{}, W/2, H/2); }
+  }
+});
+
+/* ---------- 最初に並べます ---------- */
+window.addEventListener("resize", ()=>{
+  const hs = homes(nodes.length, path.length === 0 ? true : nodes.length > 1, path.length === 0 && !!me);
+  nodes.forEach((n,i)=>{ n.hx = hs[i][0]; n.hy = hs[i][1]; });
+});
+/* 上の「〇〇さん、おかえりなさい」があとから2行になったときも、丸の並びを画面の高さに合わせなおします */
+if(window.ResizeObserver){
+  const topBox = document.querySelector(".top");
+  let topH = topBox ? topBox.offsetHeight : 0;
+  if(topBox) new ResizeObserver(()=>{
+    if(topBox.offsetHeight === topH) return;
+    topH = topBox.offsetHeight;
+    window.dispatchEvent(new Event("resize"));
+  }).observe(topBox);
+}
+restoreReturn();
+build(null, null);
+nodes.forEach(n=>{ n.s = .3; n.o = 0; });
+requestAnimationFrame(frame);
+
+/* ホーム画面に置いたときの仕組み */
+if("serviceWorker" in navigator){
+  window.addEventListener("load", ()=>{ navigator.serviceWorker.register("./sw.js").catch(()=>{}); });
+}
+</script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="./track.js"></script>
+<script src="menu.js"></script>
+</body>
+</html>

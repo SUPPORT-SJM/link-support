@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<script src="../config.js"></script>
+<script src="../nickname.js"></script>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>はじめの一歩 | LINK 初期サポート</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:"Zen Kaku Gothic New",sans-serif;background:#FFFBF7;padding:16px 14px 48px}
+  .wrap{max-width:390px;margin:0 auto}
+  button,a{font-family:inherit}
+
+  /* ベータ表記 */
+  .beta-bar{background:#FFF3D6;border:1.5px solid #F0C86A;border-radius:10px;padding:9px 12px;margin-bottom:14px;font-size:11.5px;color:#7A5A00;line-height:1.75}
+  .beta-bar b{display:inline-block;background:#F0B429;color:#fff;border-radius:20px;padding:1px 9px;font-size:10.5px;margin-right:5px}
+  .beta-foot{margin-top:20px;padding:12px;background:#FFF8E1;border-radius:10px;font-size:11px;color:#8D6E63;line-height:1.8;text-align:center}
+
+  /* ログイン状態 */
+  .login-bar{border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:12px;line-height:1.7;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .login-bar.on{background:#E8F5E9;border:1.5px solid #A5D6A7;color:#2E7D32}
+  .login-bar.off{background:#F5F5F5;border:1.5px solid #DDD;color:#757575}
+  .login-bar .who{font-weight:700;flex:1}
+  .login-bar a{color:#43A047;font-weight:700;text-decoration:underline;white-space:nowrap}
+  .login-bar.off a{color:#FF7043}
+  .sync-note{font-size:10.5px;opacity:.85;width:100%}
+
+  .hero{background:linear-gradient(135deg,#FFE0B2,#FFCCBC);border-radius:18px;padding:26px 18px;text-align:center;margin-bottom:18px}
+  .hero .em{font-size:40px;line-height:1}
+  .hero h1{font-size:20px;font-family:"Zen Maru Gothic",sans-serif;font-weight:900;color:#E65100;margin:8px 0 8px;line-height:1.5}
+  .hero p{font-size:13px;color:#8D6E63;line-height:1.9}
+
+  .progress-box{background:#fff;border-radius:14px;padding:16px;margin-bottom:18px;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+  .progress-box .row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+  .progress-box b{font-size:14px;font-weight:900;color:#E65100}
+  .progress-box .cnt{font-size:18px;font-weight:900;color:#FF9800}
+  .bar{height:10px;background:#FFE0B2;border-radius:99px;overflow:hidden}
+  .bar i{display:block;height:100%;background:linear-gradient(90deg,#FFB74D,#FF9800);border-radius:99px;width:0%;transition:width .5s ease}
+
+  .card{background:#fff;border-radius:14px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,.05);overflow:hidden;border:2px solid transparent}
+  .card.done{border-color:#A5D6A7;background:#F8FDF8}
+  .card-head{padding:14px;display:flex;align-items:flex-start;gap:10px;cursor:pointer}
+  .card-num{background:#FFE0B2;color:#E65100;font-size:12px;font-weight:900;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+  .card.done .card-num{background:#A5D6A7;color:#fff}
+  .card-ttl{font-size:14.5px;font-family:"Zen Maru Gothic",sans-serif;font-weight:700;color:#5D4037;line-height:1.6;flex:1}
+  .badge{font-size:10.5px;font-weight:700;border-radius:20px;padding:2px 9px;flex-shrink:0;margin-top:3px}
+  .badge-yet{background:#EEE;color:#9E9E9E}
+  .badge-done{background:#A5D6A7;color:#fff}
+  .card-arrow{color:#BCAAA4;font-size:11px;transition:transform .25s;flex-shrink:0;margin-top:5px}
+  .card-arrow.open{transform:rotate(180deg)}
+  .card-body{display:none;padding:0 14px 14px}
+  .card-body.open{display:block}
+  .card-body p{font-size:13.5px;color:#5D4037;line-height:1.9;margin-bottom:8px}
+  .tip{background:#FFF8E1;border-radius:10px;padding:10px 12px;font-size:12.5px;color:#8D6E63;line-height:1.8;margin-bottom:10px}
+  .soon{background:#F5F5F5;border-radius:10px;padding:10px 12px;font-size:12.5px;color:#9E9E9E;line-height:1.8;margin-bottom:10px;text-align:center}
+  .link-btn{display:block;background:#FFF3E0;border:1.5px solid #FFCC80;border-radius:10px;padding:11px;text-align:center;color:#E65100;font-size:13px;font-weight:700;text-decoration:none;margin-bottom:8px}
+  .done-btn{width:100%;padding:12px;border-radius:10px;font-size:13.5px;font-weight:700;border:none;cursor:pointer}
+  .done-btn-pending{background:#FFE0B2;color:#E65100}
+  .done-btn-done{background:#A5D6A7;color:#fff}
+
+  /* オープンチャットへの参加 */
+  .join-box{margin-bottom:12px;}
+  .join-btn{width:100%;padding:14px;border-radius:12px;border:none;cursor:pointer;
+    background:#06C755;color:#fff;font-size:15px;font-weight:700;}
+  .join-btn.locked{background:#CFD8DC;color:#78909C;}
+  .join-note{font-size:11.5px;color:#A1887F;text-align:center;margin-top:7px;line-height:1.7;}
+  .join-note.ready{color:#2E7D32;font-weight:700;}
+  .join-note.warn{color:#D84315;font-weight:700;}
+
+  /* 入れてほしい欄を、揺らしてお知らせします */
+  @keyframes shakeIt{
+    0%,100%{transform:translateX(0);}
+    12%{transform:translateX(-7px);} 28%{transform:translateX(7px);}
+    44%{transform:translateX(-5px);} 60%{transform:translateX(5px);}
+    76%{transform:translateX(-2px);} 88%{transform:translateX(2px);}
+  }
+  .shake{animation:shakeIt .55s ease;}
+  .need-input{
+    border-color:#E53935 !important;
+    background:#FFF5F5 !important;
+    box-shadow:0 0 0 3px rgba(229,57,53,.12);
+  }
+  .need-input::placeholder{color:#E53935;opacity:.85;}
+  .need-label{color:#E53935 !important;}
+  .need-msg{
+    display:none;font-size:11.5px;color:#E53935;font-weight:700;
+    margin:-6px 0 10px;line-height:1.7;
+  }
+  .need-msg.show{display:block;}
+  @media (prefers-reduced-motion:reduce){ .shake{animation:none;} }
+
+  /* 発行のしかた */
+  .howto{margin:10px 0 12px;padding-left:22px;}
+  .howto li{font-size:13px;line-height:2;color:#5D4037;margin-bottom:3px;}
+  .howto li b{color:#E65100;}
+  .howto-link{display:block;padding:13px;border-radius:12px;background:#FF7043;color:#fff;
+    text-align:center;text-decoration:none;font-size:14px;font-weight:700;margin-bottom:7px;}
+  .howto-note{font-size:11px;color:#A1887F;text-align:center;line-height:1.8;margin-bottom:4px;}
+  /* 番号つきの手順の中にあるボタンも、下のボタンと同じ幅にそろえます（番号の分だけ左へ広げます） */
+  .howto li .howto-link{margin-left:-22px !important;}
+
+  /* ニックネーム作成 */
+  .gen-box{background:#FFF8F5;border:1px solid #FFD0B0;border-radius:12px;padding:14px;margin-bottom:10px}
+  .gen-label{font-size:12px;font-weight:700;color:#FF7043;margin-bottom:6px;display:block}
+  .gen-input,.gen-select{width:100%;border:1.5px solid #FFCCBC;border-radius:8px;padding:10px 12px;font-size:15px;font-family:inherit;color:#4E342E;background:#fff;margin-bottom:10px;outline:none}
+  .gen-input:focus,.gen-select:focus{border-color:#FF7043}
+  .result-box.waiting{background:#FAFAFA;border-color:#DDD;color:#9E9E9E;font-weight:400;font-size:13px;}
+  .result-box{background:#FFF0EB;border:2px solid #FF7043;border-radius:10px;padding:12px 14px;font-size:15px;font-weight:700;color:#BF360C;line-height:1.6;min-height:46px;margin-bottom:10px;word-break:break-all;text-align:center}
+  .copy-btn{width:100%;padding:13px;border-radius:10px;background:#FF7043;color:#fff;border:none;cursor:pointer;font-size:15px;font-weight:700}
+  .copy-hint{font-size:11.5px;color:#A1887F;text-align:center;margin-top:6px;line-height:1.7}
+
+  /* 系列のオプチャ案内 */
+  .kei-result{display:none;background:#FFF3E0;border:1.5px solid #FFCC80;border-radius:10px;padding:12px 14px;font-size:13px;color:#5D4037;line-height:1.9;margin-top:4px}
+  .kei-result.show{display:block}
+  .kei-result b{color:#E65100}
+  .kei-req{margin-top:12px;padding-top:12px;border-top:1.5px dashed #FFCC80}
+  .kei-req-lead{font-size:13px;line-height:1.8;margin-bottom:8px}
+  .kei-req-warn{font-size:12px;color:#C62828;margin-bottom:6px}
+  .kei-req-text{background:#fff;border:1.5px solid #FFCCBC;border-radius:8px;padding:10px 12px;font-size:14px;line-height:1.8;white-space:pre-wrap;margin-bottom:8px;-webkit-user-select:text;user-select:text}
+
+  /* 紹介コード */
+  .code-input{width:100%;border:1.5px solid #FFCCBC;border-radius:8px;padding:11px 12px;font-size:15px;font-family:inherit;color:#4E342E;background:#fff;margin-bottom:8px;outline:none}
+  .save-btn{width:100%;padding:12px;border-radius:10px;background:#66BB6A;color:#fff;border:none;cursor:pointer;font-size:14px;font-weight:700}
+
+  .next{background:linear-gradient(135deg,#C8E6C9,#DCEDC8);border-radius:16px;padding:20px 18px;text-align:center;margin-top:22px}
+  .next .em{font-size:32px;line-height:1}
+  .next h2{font-size:16px;font-weight:900;color:#2E7D32;margin:6px 0 8px}
+  .next p{font-size:13px;color:#558B2F;line-height:1.9;margin-bottom:14px}
+  .next a{display:block;background:#66BB6A;color:#fff;border-radius:12px;padding:14px;font-size:15px;font-weight:700;text-decoration:none}
+  .verTag{display:block;text-align:center;font-size:9.5px;color:#C4B8B0;font-family:monospace;padding:14px 0 20px}
+</style>
+<link rel="stylesheet" href="../beta.css">
+<script src="../login.js"></script>
+<script src="../loading.js"></script>
+</head>
+<body>
+<div class="wrap">
+
+<div class="beta-bar">
+  <b>BETA</b>ベータテスト中です。<br>
+  内容は精査中のため、今後変更になる場合がございます🙇
+</div>
+
+<div class="login-bar off" id="loginBar">
+  <span class="who" id="loginWho">ログインしていません</span>
+  <a href="../index.html" id="loginLink">ログインする</a>
+  <span class="sync-note" id="syncNote">※ 進捗はこの端末にだけ記録されます。機種を変えると消えてしまいます。</span>
+</div>
+
+<div class="hero">
+  <div class="em">👋</div>
+  <h1>はじめの一歩</h1>
+  <p>ご登録おつかれさまでした!<br>
+  まずは、この3つから始めましょう🌱</p>
+</div>
+
+<div class="progress-box">
+  <div class="row">
+    <b>👋 はじめの一歩</b>
+    <span class="cnt"><span id="doneN">0</span> / <span id="totalN">3</span></span>
+  </div>
+  <div class="bar"><i id="progBar"></i></div>
+</div>
+
+<!-- ① Skyarcのユーザーサポート -->
+<div class="card" id="card-H1">
+  <div class="card-head" onclick="toggle(this)">
+    <span class="card-num">1</span>
+    <span class="card-ttl">チーム初期サポートオープンチャットに入る</span>
+    <span class="badge badge-yet" id="badge-H1">未</span>
+    <span class="card-arrow">▼</span>
+  </div>
+  <div class="card-body">
+    <p>Skyarcの仲間が集まるオープンチャット「🌈ユーザーサポート」です。分からないことを気軽に聞ける場所なので、まずはここに入りましょう。</p>
+
+    <p style="font-weight:700;color:#E65100;margin-top:14px;">📛 ① まずはニックネームを用意しましょう</p>
+    <p>LINKの各オープンチャットでは、お名前と系列がひと目でわかる形がルールで決められています。下で作ってコピーしてください。</p>
+
+    <div class="gen-box">
+      <label class="gen-label" id="nameLabel">👤 あなたのお名前</label>
+      <input class="gen-input" id="nameInput" type="text" name="nickname" autocomplete="nickname" placeholder="例：しょうこ">
+      <p class="need-msg" id="nameMsg">👆 お名前を入れてください</p>
+
+      <label class="gen-label" id="seriesLabel">🏷️ 系列を選ぶ</label>
+      <select class="gen-select" id="seriesSelect"></select>
+      <p class="need-msg" id="seriesMsg">👆 系列を選んでください</p>
+      <label class="gen-label">✅ あなたのニックネーム</label>
+      <div class="result-box waiting" id="resultBox">👆 お名前と系列を入れてください</div>
+      <button class="copy-btn" onclick="copyResult()">📋 タップしてコピー</button>
+      <div class="copy-hint" id="copyHint">コピーして、オープンチャットの参加時に貼り付けてください</div>
+    </div>
+
+    <p style="font-weight:700;color:#E65100;margin-top:16px;">📲 ② 用意ができたら参加しましょう</p>
+    <div class="join-box" id="joinBox">
+      <button class="join-btn locked" onclick="goOpenChat()">📲 ユーザーサポートに参加する</button>
+      <p class="join-note" id="joinNote">先にニックネームをコピーしてから、参加してください</p>
+    </div>
+
+    <button class="done-btn done-btn-pending" id="btn-H1" onclick="markDone('H1')">☑️ 完了したらここを押してね!</button>
+  </div>
+</div>
+
+<!-- ② 系列のオプチャ -->
+<div class="card" id="card-H2">
+  <div class="card-head" onclick="toggle(this)">
+    <span class="card-num">2</span>
+    <span class="card-ttl">系列のオープンチャット・グループLINEを確認する</span>
+    <span class="badge badge-yet" id="badge-H2">未</span>
+    <span class="card-arrow">▼</span>
+  </div>
+  <div class="card-body">
+    <p>系列ごとに、専用のオープンチャットやLINEグループがある場合があります。あなたの系列を選んでみてください。</p>
+    <p>初期サポートのユーザーサポート会を受けたあとに、Skyarc全体の交流オープンチャットにも招待してもらえます。そちらも楽しみにしていてくださいね😊</p>
+
+    <div class="gen-box">
+      <label class="gen-label">🏷️ あなたの系列</label>
+      <select class="gen-select" id="keiSelect" style="margin-bottom:0;"></select>
+      <div class="kei-result" id="keiResult"></div>
+    </div>
+
+    <div class="tip">💡 系列のグループは、いちばん身近な相談先になります。ぜひ入っておきましょう😊</div>
+
+    <button class="done-btn done-btn-pending" id="btn-H2" onclick="markDone('H2')">☑️ 完了したらここを押してね!</button>
+  </div>
+</div>
+
+<!-- ③ 紹介コード -->
+<div class="card" id="card-H3">
+  <div class="card-head" onclick="toggle(this)">
+    <span class="card-num">3</span>
+    <span class="card-ttl">紹介URLを発行して保存する</span>
+    <span class="badge badge-yet" id="badge-H3">未</span>
+    <span class="card-arrow">▼</span>
+  </div>
+  <div class="card-body">
+    <p>あなた専用の紹介URLです。お仲間をお誘いするときに、このリンクをお送りします。</p>
+
+    <p style="font-weight:700;color:#E65100;margin-top:14px;">📝 発行のしかた</p>
+    <ol class="howto">
+      <li><b>ビジネスマイページ</b>にログインします<br><a class="howto-link" href="https://member.link-platform.jp" target="_blank" rel="noopener" style="margin:6px 0 2px;">🔗 ビジネスマイページをひらく</a></li>
+      <li>右上の <b>メニュー（三本線）</b> をひらきます</li>
+      <li><b>「新規会員紹介」</b> をえらびます</li>
+      <li>そこに出ている <b>紹介用アドレスをコピー</b>します</li>
+      <li>下の欄に貼り付けて、保存してください</li>
+    </ol>
+    <a class="howto-link" href="https://member.link-platform.jp/mypage/introduction.php"
+       target="_blank" rel="noopener">🔗 新規会員紹介のページをひらく</a>
+    <p class="howto-note">※ ログインしていない場合は、ログイン画面が出ます</p>
+
+    <p style="font-weight:700;color:#E65100;margin-top:12px;">発行できたら、ここに控えておきましょう</p>
+    <div class="gen-box">
+      <label class="gen-label">🔗 あなたの紹介URL</label>
+      <input class="code-input" id="refUrl" type="url" inputmode="url" autocapitalize="off" spellcheck="false" placeholder="https://…">
+      <button class="save-btn" onclick="saveRefCode()">💾 保存する</button>
+      <div class="copy-hint" id="codeHint">保存すると、どの端末からでも見返せます</div>
+
+      <div id="refUrlBox" style="display:none;margin-top:12px;padding-top:12px;border-top:1px dashed #FFCCBC;">
+        <div class="copy-hint" style="margin-top:0;margin-bottom:8px;">保存されている紹介URL</div>
+        <div style="background:#FFF0EB;border:1.5px solid #FFAB91;border-radius:9px;padding:10px 12px;font-size:12px;color:#BF360C;word-break:break-all;line-height:1.7;" id="refUrlShow"></div>
+        <button class="save-btn" style="background:#FF7043;margin-top:8px;" onclick="copyRefUrl()">📋 URLをコピー</button>
+      </div>
+    </div>
+
+    <button class="done-btn done-btn-pending" id="btn-H3" onclick="markDone('H3')">☑️ 完了したらここを押してね!</button>
+  </div>
+</div>
+
+<div class="next">
+  <div class="em">📘</div>
+  <h2>つぎは初期サポートガイドへ</h2>
+  <p>LINKを使いはじめるための<br>設定をひとつずつ進めていきましょう。</p>
+  <a href="guide.html">📘 初期サポートガイドへ進む</a>
+</div>
+
+<div class="beta-foot">
+  🧪 このページはベータテスト中です<br>
+  内容は精査中のため、今後変更になる場合がございます。<br>
+  お気づきの点があれば、担当の方までお知らせください🙇
+</div>
+
+<div class="verTag"></div>
+</div>
+
+<script>
+/* ================================================================
+   育成システムとの連携(ログインしていれば進捗を保存します)
+================================================================ */
+const GAS_URL = window.SKY_GAS_URL;   /* 共通設定（config.js）から受け取ります */
+const APP_ID  = "hajime";
+const KEYS = ["H1","H2","H3"];
+const ITEM_IDS = KEYS.join(",");
+
+/* 系列の一覧は、共通設定（config.js）から受け取ります（「系列のつながり」にある系列が出ます） */
+const KEIRETSU = (window.SKY_KEIRETSU || []).slice();
+
+/* 系列ごとのオープンチャット・グループ
+   URLが分かり次第、ここに追加してください
+   例) "🪽HERO": { chat:"https://line.me/...", note:"HEROの交流チャットです" } */
+const KEI_LINKS = {};
+
+let member = null;
+let progress = {};
+let saveTimer = null;
+
+/* ---------- 系列の選択肢を作る ---------- */
+(function(){
+  const opts = '<option value="">選んでください</option>'
+    + KEIRETSU.map(k=>`<option value="${k}">${k}</option>`).join("");
+  document.getElementById("seriesSelect").innerHTML = opts;
+  document.getElementById("keiSelect").innerHTML = opts;
+})();
+
+/* ---------- ログイン状態 ---------- */
+function refreshLoginBar(){
+  /* 保存されたログイン情報を読み込みます */
+  member = null;
+  try{
+    const raw = localStorage.getItem("skyarc_member");
+    if(raw && raw !== "null" && raw !== "undefined") member = JSON.parse(raw);
+  }catch(e){}
+  if(member && !member.id) member = null;
+  const bar = document.getElementById("loginBar");
+  const who = document.getElementById("loginWho");
+  const link = document.getElementById("loginLink");
+  const note = document.getElementById("syncNote");
+
+  if(member && member.id){
+    bar.className = "login-bar on";
+    who.textContent = (member.name ? (window.skyGrowth ? skyGrowth.selfTag(member.id) : "") + member.name + "さん" : "会員番号 " + member.id) + " でログイン中";
+    link.textContent = "育成プログラム";
+    link.href = "../ikusei/";
+    note.textContent = "✅ 進捗は保存されます。どの端末からでも続きが見られます。";
+    // お名前と系列を先に入れておきます
+    if(member.name) document.getElementById("nameInput").value = member.name;
+    if(member.keiretsu){
+      document.getElementById("seriesSelect").value = member.keiretsu;
+      document.getElementById("keiSelect").value = member.keiretsu;
+    }
+    // 前に保存した内容を呼び出します
+    if(member.keiChat){
+      document.getElementById("keiSelect").value = member.keiChat;
+    }
+    /* 系列が入っていれば、②の案内と依頼の文章も、はじめから出しておきます */
+    if(document.getElementById("keiSelect").value) showKeiLinks(true);
+    if(member.refUrl){
+      document.getElementById("refUrl").value = member.refUrl;
+      showRefUrl(member.refUrl);
+    }
+    showKeiLinks();
+    updateNick();
+    loadProgress();
+  }else{
+    bar.className = "login-bar off";
+    who.textContent = "ログインしていません";
+    link.textContent = "ログインする";
+    link.href = "#";
+    link.onclick = function(e){
+      e.preventDefault();
+      if(typeof skyLoginRequired === "function") skyLoginRequired(function(m){ member = m; refreshLoginBar(); });
+      else location.href = "../index.html";
+    };
+    note.innerHTML = '※ いまは記録されません。ログインすると、どの端末からでも続きが見られます。'
+      + '<br>はじめての方は <a href="../touroku.html" style="color:#FF7043;">会員情報の登録</a> からどうぞ。';
+  }
+}
+refreshLoginBar();
+
+async function loadProgress(){
+  try{
+    if(typeof skyLoading === "function") skyLoading("進捗を読み込んでいます", "データを読み込んでいます。しばらくお待ちください");
+    const url = `${GAS_URL}?action=load&app=${APP_ID}&id=${encodeURIComponent(member.id)}&pin=${encodeURIComponent(member.pin)}&items=${encodeURIComponent(ITEM_IDS)}`;
+    const res = await fetch(url);
+    const j = await res.json();
+    if(typeof skyLoadingDone === "function") skyLoadingDone();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
+    if(j.ok && j.data){
+      let d = {};
+      try{ d = JSON.parse(j.data) || {}; }catch(e){}
+      progress = d;
+      KEYS.forEach(id=>{
+        if(progress[id] === true){
+          localStorage.setItem('hajime_done_'+id,'1');
+          applyState(id,true);
+        }
+      });
+      update();
+    }
+  }catch(e){ if(typeof skyLoadingDone === "function") skyLoadingDone(); }
+}
+
+function saveProgress(){
+  if(!member || !member.id) return;
+  const note = document.getElementById("syncNote");
+  if(note) note.textContent = "☁️ 保存しています…";
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async ()=>{
+    try{
+      const body = new URLSearchParams({
+        action:"save", app:APP_ID, id:member.id, pin:member.pin,
+        items:ITEM_IDS, data:JSON.stringify(progress)
+      });
+      const res = await fetch(GAS_URL, {method:"POST", body});
+      const j = await res.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
+      if(note) note.textContent = (j && j.ok)
+        ? "✅ 保存しました。どの端末からでも続きが見られます。"
+        : "📱 この端末に保存しました。";
+    }catch(e){
+      if(note) note.textContent = "📱 この端末に保存しました(電波のよい場所で自動的に同期されます)。";
+    }
+  }, 700);
+}
+
+/* ---------- 入力内容を会員名簿に保存します ---------- */
+async function saveProfile(fields, hintId, okMsg){
+  /* 同じ処理が重なって動かないようにします */
+  if(typeof skyBusy === "function" && skyBusy("saveProfile")) return;
+  try{
+  const hint = hintId ? document.getElementById(hintId) : null;
+  if(!member || !member.id){
+    if(typeof skyLoginRequired === "function"){
+      if(hint) hint.textContent = "ログインすると記録できます";
+      skyLoginRequired(function(m){ member = m; refreshLoginBar(); saveProfile(fields, hintId, okMsg); });
+    }
+    return;
+  }
+  if(hint) hint.textContent = "☁️ 保存しています…";
+  try{
+    const params = { action:"saveProfile", id:member.id, pin:member.pin };
+    Object.keys(fields).forEach(k=>{ if(fields[k]) params[k] = fields[k]; });
+    const res = await fetch(GAS_URL, {method:"POST", body:new URLSearchParams(params)});
+    const j = await res.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
+    if(hint) hint.textContent = (j && j.ok) ? okMsg : "📱 この端末に保存しました";
+  }catch(e){
+    if(hint) hint.textContent = "📱 この端末に保存しました(電波のよい場所で自動的に記録されます)";
+  }
+
+  }finally{
+    if(typeof skyBusyEnd === "function") skyBusyEnd("saveProfile");
+  }
+}
+
+/* ---------- ニックネーム作成 ---------- */
+function updateNick(){
+  const name = document.getElementById("nameInput").value.trim();
+  const kei = document.getElementById("seriesSelect").value;
+  const box = document.getElementById("resultBox");
+  if(!name || !kei){
+    box.className = "result-box waiting";
+    skyNick.clearWarn(box);
+    box.textContent = !name && !kei ? "👆 お名前と系列を入れてください"
+                    : (!name ? "👆 お名前を入れてください" : "👆 系列を選んでください");
+    return;
+  }
+  box.className = "result-box";
+  skyNick.render(box, name, kei);   /* 20文字の決まりは nickname.js にまとめています */
+}
+
+async function copyResult(){
+  const name = document.getElementById("nameInput").value.trim();
+  const kei = document.getElementById("seriesSelect").value;
+  const hint = document.getElementById("copyHint");
+  if(!name || !kei){
+    hint.textContent = !name ? "⚠️ お名前を入れてください" : "⚠️ 系列を選んでください";
+    if(!name) markNeeded("nameInput", "nameLabel", "nameMsg");
+    else      markNeeded("seriesSelect", "seriesLabel", "seriesMsg");
+    return;
+  }
+  const text = document.getElementById("resultBox").textContent;
+  let copied = false;
+  try{
+    await navigator.clipboard.writeText(text);
+    copied = true;
+  }catch(e){
+    const ta = document.createElement("textarea");
+    ta.value = text; ta.style.position="fixed"; ta.style.opacity="0";
+    document.body.appendChild(ta); ta.select();
+    try{ document.execCommand("copy"); copied = true; }
+    catch(e2){ hint.textContent = "上の文字を長押しして選択してください"; }
+    document.body.removeChild(ta);
+  }
+  if(copied){
+    hint.textContent = "✅ コピーしました!下の参加ボタンから進んでください";
+    localStorage.setItem("hajime_nick", text);
+    localStorage.setItem("hajime_nick_copied", "1");
+    nickCopied = true;
+    refreshJoinBtn();
+    // 記録しておきます(あとから見返せます)
+    saveProfile({ nick: text }, "copyHint", "✅ コピーして記録しました!参加時に貼り付けてください");
+  }
+}
+document.getElementById("nameInput").addEventListener("input", function(){
+  updateNick();
+  if(this.value.trim()) clearNeeded("nameInput", "nameLabel", "nameMsg");
+});
+document.getElementById("seriesSelect").addEventListener("change", function(){
+  updateNick();
+  if(this.value) clearNeeded("seriesSelect", "seriesLabel", "seriesMsg");
+});
+
+/* ---------- 入れてほしい欄を、揺らしてお知らせします ---------- */
+function markNeeded(inputId, labelId, msgId){
+  const el = document.getElementById(inputId);
+  const label = document.getElementById(labelId);
+  const msg = document.getElementById(msgId);
+  const box = document.querySelector(".gen-box");
+  if(!el) return;
+
+  el.classList.add("need-input");
+  if(label) label.classList.add("need-label");
+  if(msg) msg.classList.add("show");
+
+  /* カードを揺らします */
+  if(box){
+    box.classList.remove("shake");
+    void box.offsetWidth;          // いったん止めて、もう一度animateさせます
+    box.classList.add("shake");
+    setTimeout(()=>box.classList.remove("shake"), 600);
+  }
+  el.scrollIntoView({behavior:"smooth", block:"center"});
+  setTimeout(()=>{ try{ el.focus(); }catch(e){} }, 350);
+}
+
+/* 入力されたら、赤い印を消します */
+function clearNeeded(inputId, labelId, msgId){
+  const el = document.getElementById(inputId);
+  const label = document.getElementById(labelId);
+  const msg = document.getElementById(msgId);
+  if(el) el.classList.remove("need-input");
+  if(label) label.classList.remove("need-label");
+  if(msg) msg.classList.remove("show");
+}
+
+/* ---------- オープンチャットへの参加 ---------- */
+const OPENCHAT_URL = "https://line.me/ti/g2/yBQmWy1jkxlyWsEQ6hpzwTEyKK6VVSdt4B5mhw?utm_source=invitation&utm_medium=link_copy&utm_campaign=default";
+
+let nickCopied = false;   // ニックネームをコピーしたかどうか
+
+function goOpenChat(){
+  const note = document.getElementById("joinNote");
+  const name = document.getElementById("nameInput").value.trim();
+  const kei  = document.getElementById("seriesSelect").value;
+
+  /* まだニックネームを用意していないとき */
+  if(!name || !kei){
+    note.textContent = !name
+      ? "⚠️ お名前を入れてください"
+      : "⚠️ 系列を選んでください";
+    note.className = "join-note warn";
+    if(!name) markNeeded("nameInput", "nameLabel", "nameMsg");
+    else      markNeeded("seriesSelect", "seriesLabel", "seriesMsg");
+    return;
+  }
+  if(!nickCopied){
+    note.innerHTML = "⚠️ 先に <b>「📋 タップしてコピー」</b> を押してから参加してください<br>" +
+      "<span style=\"font-weight:400;\">参加のときに、コピーしたお名前を貼り付けます</span>";
+    note.className = "join-note warn";
+    const btn = document.querySelector(".copy-btn");
+    if(btn){
+      btn.scrollIntoView({behavior:"smooth", block:"center"});
+      btn.classList.remove("shake");
+      void btn.offsetWidth;
+      btn.classList.add("shake");
+      setTimeout(()=>btn.classList.remove("shake"), 600);
+    }
+    return;
+  }
+
+  /* 準備ができているので、開きます */
+  note.textContent = "コピーしたお名前を、参加のときに貼り付けてください😊";
+  note.className = "join-note ready";
+  window.open(OPENCHAT_URL, "_blank");
+}
+
+/* ボタンの見た目を、準備の具合に合わせます */
+function refreshJoinBtn(){
+  const btn = document.querySelector(".join-btn");
+  const note = document.getElementById("joinNote");
+  if(!btn || !note) return;
+  if(nickCopied){
+    btn.classList.remove("locked");
+    note.textContent = "✅ 準備ができました。参加のときにお名前を貼り付けてください";
+    note.className = "join-note ready";
+  }else{
+    btn.classList.add("locked");
+    note.textContent = "先にニックネームをコピーしてから、参加してください";
+    note.className = "join-note";
+  }
+}
+
+/* ---------- 系列のオプチャ案内 ---------- */
+function showKeiLinks(noSave){
+  const kei = document.getElementById("keiSelect").value;
+  const box = document.getElementById("keiResult");
+  if(!kei){ box.classList.remove("show"); return; }
+  const info = KEI_LINKS[kei];
+  if(info && info.chat){
+    box.innerHTML = `<b>${kei}</b> のグループはこちら<br>` +
+      (info.note ? `<span style="font-size:12px;">${info.note}</span><br>` : "") +
+      `<a href="${info.chat}" target="_blank" class="link-btn" style="margin-top:8px;">📲 参加する</a>`;
+  }else{
+    box.innerHTML = `<b>${kei}</b> のグループについて<br>` +
+      `ご紹介者か担当の方にお尋ねください🙇<br>` +
+      `<span style="font-size:12px;color:#8D6E63;">※ 系列によって、ある場合とない場合があります</span>`;
+  }
+  /* 系列のオープンチャットに入れてもらう依頼の文章（初期サポートラインに貼りつけて送ります）
+     お名前は、①でユーザーサポートのオープンチャットに入ったときのニックネームを使います */
+  const nk = localStorage.getItem("hajime_nick") || (member && member.nick) || "";
+  box.insertAdjacentHTML("beforeend",
+    `<div class="kei-req">
+      <p class="kei-req-lead">📩 <b>系列のオープンチャットに入れてもらう依頼</b>をしましょう。下の文章をコピーして、<b>初期サポートライン</b>に貼りつけて送ってください。</p>
+      ${nk ? "" : '<p class="kei-req-warn">⚠️ 先に①でニックネームを作ってコピーすると、お名前が入ります</p>'}
+      <div class="kei-req-text" id="keiReqText"></div>
+      <button type="button" class="copy-btn" id="keiReqCopy">📋 依頼の文章をコピーする</button>
+      <div class="copy-hint" id="keiReqHint">コピーして、初期サポートラインに貼りつけてください</div>
+    </div>`);
+  const reqText = `${nk || "（ユーザーサポートのオープンチャットのお名前）"}です。\n${kei}のグループのオープンチャットに誘ってください。\nよろしくお願いします。`;
+  document.getElementById("keiReqText").textContent = reqText;
+  document.getElementById("keiReqCopy").onclick = async ()=>{
+    const hint = document.getElementById("keiReqHint");
+    let ok = false;
+    try{ await navigator.clipboard.writeText(reqText); ok = true; }catch(e){
+      try{
+        const ta = document.createElement("textarea");
+        ta.value = reqText; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.top = "-1000px"; ta.style.fontSize = "16px";
+        document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0, reqText.length);
+        ok = document.execCommand("copy"); ta.remove();
+      }catch(e2){}
+    }
+    hint.textContent = ok ? "✅ コピーしました！初期サポートラインに貼りつけて、送ってください"
+                          : "コピーできませんでした。上の文章を長押ししてコピーしてください";
+  };
+  box.classList.add("show");
+  if(noSave === true) return;   /* 開いたときに、前に選んだ系列を出すだけのときは、記録しません */
+  // 選んだ系列を記録します
+  localStorage.setItem("hajime_keichat", kei);
+  saveProfile({ keiChat: kei }, null, "");
+}
+document.getElementById("keiSelect").addEventListener("change", ()=>showKeiLinks());
+
+/* ---------- 紹介コードの保存 ---------- */
+function saveRefCode(){
+  const url  = document.getElementById("refUrl").value.trim();
+  const hint = document.getElementById("codeHint");
+  if(!url){ hint.textContent = "⚠️ 紹介URLを入れてください"; return; }
+  if(!/^https?:\/\//i.test(url)){
+    hint.textContent = "⚠️ URLは https:// から始まる形で入れてください"; return;
+  }
+  localStorage.setItem("hajime_refurl", url);
+  showRefUrl(url);
+  saveProfile({ refUrl: url }, "codeHint",
+    "✅ 保存しました。どの端末からでも見返せます");
+}
+
+/* 保存されている紹介URLを表示します */
+function showRefUrl(url){
+  const box = document.getElementById("refUrlBox");
+  const show = document.getElementById("refUrlShow");
+  if(!box || !show) return;
+  if(url){ show.textContent = url; box.style.display = "block"; }
+  else{ box.style.display = "none"; }
+}
+
+/* 紹介URLをコピーします */
+async function copyRefUrl(){
+  const url = document.getElementById("refUrlShow").textContent;
+  const hint = document.getElementById("codeHint");
+  if(!url) return;
+  try{
+    await navigator.clipboard.writeText(url);
+    hint.textContent = "✅ コピーしました!お誘いのときにお送りください";
+  }catch(e){
+    const ta = document.createElement("textarea");
+    ta.value = url; ta.style.position="fixed"; ta.style.opacity="0";
+    document.body.appendChild(ta); ta.select();
+    try{ document.execCommand("copy"); hint.textContent = "✅ URLをコピーしました!"; }
+    catch(e2){ hint.textContent = "上のURLを長押しして選択してください"; }
+    document.body.removeChild(ta);
+  }
+}
+
+/* ---------- 共通 ---------- */
+function toggle(head){
+  head.querySelector('.card-arrow').classList.toggle('open');
+  head.nextElementSibling.classList.toggle('open');
+}
+
+function markDone(id){
+  // ログインしていなければ、その場でログインしてもらいます
+  if((!member || !member.id) && typeof skyLoginRequired === "function"){
+    skyLoginRequired(function(m){ member = m; refreshLoginBar(); markDone(id); });
+    return;
+  }
+  const done = localStorage.getItem('hajime_done_'+id)==='1';
+  if(done){
+    localStorage.removeItem('hajime_done_'+id);
+    delete progress[id];
+    applyState(id,false);
+  }else{
+    localStorage.setItem('hajime_done_'+id,'1');
+    progress[id] = true;
+    applyState(id,true);
+  }
+  update();
+  saveProgress();
+}
+
+function applyState(id,done){
+  const card=document.getElementById('card-'+id);
+  const btn=document.getElementById('btn-'+id);
+  const badge=document.getElementById('badge-'+id);
+  if(!card||!btn||!badge) return;
+  if(done){
+    card.classList.add('done');
+    btn.textContent='✅ 完了!(もう一度押すと戻せます)';
+    btn.className='done-btn done-btn-done';
+    badge.textContent='完了✓';
+    badge.className='badge badge-done';
+  }else{
+    card.classList.remove('done');
+    btn.textContent='☑️ 完了したらここを押してね!';
+    btn.className='done-btn done-btn-pending';
+    badge.textContent='未';
+    badge.className='badge badge-yet';
+  }
+}
+
+function update(){
+  const n = KEYS.filter(id=>progress[id]).length;
+  document.getElementById("doneN").textContent = n;
+  document.getElementById("progBar").style.width = (n/KEYS.length*100) + "%";
+}
+
+/* 端末に残っている記録を反映 */
+KEYS.forEach(id=>{
+  if(localStorage.getItem('hajime_done_'+id)==='1'){
+    progress[id] = true;
+    applyState(id,true);
+  }
+});
+if(localStorage.getItem("hajime_nick_copied") === "1") nickCopied = true;
+refreshJoinBtn();
+const savedUrl = localStorage.getItem("hajime_refurl");
+if(savedUrl){
+  document.getElementById("refUrl").value = savedUrl;
+  showRefUrl(savedUrl);
+}
+update();
+</script>
+<script src="../track.js"></script>
+<script src="../menu.js"></script>
+</body>
+</html>

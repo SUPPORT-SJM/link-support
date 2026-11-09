@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<script src="../config.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>新規の方に送る最初のメッセージ｜Skyarc</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../beta.css">
+<style>
+  :root{ --ink:#2A2438; --sub:#7A7390; --line:#E4E0F0; --paper:#FCFBFF; --mist:#F0EDF9; --c:#6E5FB5; }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",sans-serif;background:var(--paper);color:var(--ink);line-height:1.7;}
+  .wrap{max-width:480px;margin:0 auto;padding:20px 16px 40px;}
+  .hero{text-align:center;margin:6px 0 16px;}
+  .hero .em{font-size:38px;line-height:1;}
+  .hero h1{font-family:"Zen Maru Gothic","Hiragino Maru Gothic ProN",sans-serif;font-size:20px;font-weight:900;color:#3A3060;margin:8px 0 6px;line-height:1.5;}
+  .hero p{font-size:13.5px;color:#4A4560;line-height:1.85;}
+  .hero .only{font-size:12.5px;color:#8A6D00;margin-top:4px;}
+  .steps{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:14px;font-size:13.5px;line-height:1.8;}
+  .steps b{color:var(--c);}
+  .qr{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:12px 14px 10px;margin-bottom:14px;text-align:center;}
+  .qr img{display:block;width:100%;height:auto;image-rendering:pixelated;border-radius:8px;}
+  .qr p{font-size:12.5px;color:#6E6890;line-height:1.7;margin-top:6px;}
+  .tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
+  .tabs button{border:2px solid var(--line);background:#fff;border-radius:12px;padding:10px 4px;font-family:inherit;font-size:13.5px;font-weight:700;color:var(--ink);cursor:pointer;}
+  .tabs button.on{border-color:var(--c);background:var(--mist);color:var(--c);}
+  .msg{background:#fff;border:2px solid var(--c);border-radius:14px;padding:14px;font-size:14px;line-height:1.85;white-space:pre-wrap;word-break:break-all;}
+  .copy{display:block;width:100%;margin-top:12px;border:none;border-radius:14px;padding:16px;background:linear-gradient(135deg,#8A7DD0,#6E5FB5);
+        color:#fff !important;-webkit-text-fill-color:#fff;font-family:inherit;font-size:16px;font-weight:900;cursor:pointer;box-shadow:0 6px 16px rgba(60,42,110,.22);}
+  .copy.done{background:#3FA98A;}
+  /* 送る相手と、あなたの立場（ログインしているとき） */
+  .who{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:13px 14px;margin-bottom:14px;}
+  .who h2{font-size:14px;font-weight:700;color:var(--c);margin-bottom:8px;}
+  .who label.f{display:block;font-size:12.5px;font-weight:700;margin:4px 0 5px;}
+  .who label.f small{color:#B3352F;font-weight:700;margin-left:4px;}
+  .who input[type=text]{width:100%;border:2px solid var(--line);border-radius:10px;padding:11px 12px;font-size:16px;font-family:inherit;letter-spacing:.06em;}
+  .who input[type=text]:focus{outline:none;border-color:var(--c);}
+  .roles{display:flex;flex-wrap:wrap;gap:7px;margin-top:6px;}
+  .roles label{display:flex;align-items:center;gap:6px;border:2px solid var(--line);border-radius:10px;padding:8px 11px;font-size:13.5px;font-weight:700;cursor:pointer;background:#fff;}
+  .roles label:has(input:checked){border-color:var(--c);background:var(--mist);color:var(--c);}
+  .roles input{width:18px;height:18px;accent-color:#6E5FB5;}
+  .who .note{font-size:11.5px;color:var(--sub);line-height:1.7;margin-top:8px;}
+  .res{font-size:12.5px;line-height:1.8;border-radius:12px;padding:10px 12px;margin-top:10px;display:none;}
+  .res.ok{display:block;background:#EAF8EE;border:1.5px solid #B9E4C7;color:#256B3C;}
+  .res.ng{display:block;background:#FDECEA;border:1.5px solid #F2B8B2;color:#B3352F;}
+  .who{margin-top:18px;}
+  .who .me{font-size:12px;color:var(--sub);margin:-2px 0 8px;}
+  .rec{display:block;width:100%;margin-top:12px;border:2px solid var(--c);border-radius:12px;padding:13px;background:#fff;
+       color:var(--c);font-family:inherit;font-size:15px;font-weight:900;cursor:pointer;}
+  .rec:disabled{opacity:.45;cursor:default;}
+  .who select{width:100%;border:2px solid var(--line);border-radius:10px;padding:10px 12px;font-size:15px;font-family:inherit;background:#fff;color:var(--ink);}
+  .conf{margin-top:12px;border:2px solid var(--c);border-radius:12px;padding:12px;background:#FCFBFF;font-size:13px;line-height:1.8;}
+  .conf h3{font-size:13.5px;color:var(--c);margin-bottom:4px;}
+  .conf ul{list-style:none;margin:4px 0 0;}
+  .conf .warn{background:#FFF6DC;border:1.5px solid #F2D27A;color:#7A5A00;border-radius:10px;padding:8px 10px;margin:8px 0 2px;font-size:12.5px;}
+  .conf .stop{background:#FDECEA;border:1.5px solid #F2B8B2;color:#B3352F;border-radius:10px;padding:8px 10px;margin:8px 0 2px;font-size:12.5px;font-weight:700;}
+  .conf-btns{display:flex;gap:8px;margin-top:10px;}
+  .conf[hidden],.conf-btns[hidden]{display:none !important;}
+  .conf-btns button{flex:1;border-radius:10px;padding:11px;font-family:inherit;font-size:14px;font-weight:900;cursor:pointer;}
+  .conf-btns .yes{border:none;background:linear-gradient(135deg,#8A7DD0,#6E5FB5);color:#fff;}
+  .conf-btns .no{border:2px solid var(--line);background:#fff;color:var(--sub);}
+  .hint{font-size:12px;color:var(--sub);text-align:center;margin-top:8px;line-height:1.7;}
+  .verTag{display:block;text-align:center;font-size:10.5px;color:#B5AFC8;margin-top:22px;font-family:monospace;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <div class="em">💌</div>
+    <h1>新規の方に送る<br>最初のメッセージ</h1>
+    <p>新しくLINKに登録された方に、<br>このメッセージを送ってあげてください。</p>
+    <p class="only">※ Skyarc専用です</p>
+  </div>
+  <div class="steps">
+    <b>①</b> 下で、送りたい雰囲気をえらぶ<br>
+    <b>②</b>「メッセージをコピーする」を押す<br>
+    <b>③</b> LINEで、新規の方とのトークに貼りつけて送る
+  </div>
+  <!-- このサイト（app.html）のQRコード：目の前の方には、スマホで読みとってもらえます -->
+  <div class="qr">
+    <img src="../img/app-qr.png" alt="Skyarc LINKサポートのQRコード（app.html）" width="592" height="592">
+    <p>📱 目の前にいる方には、このQRコードを<br>スマホのカメラで読みとってもらえます</p>
+  </div>
+  <div class="tabs">
+    <button data-v="0" class="on">🎉 明るく楽しく</button>
+    <button data-v="1">🌸 やさしく丁寧に</button>
+  </div>
+  <div class="msg" id="msg"></div>
+  <button class="copy" id="copyBtn">📋 メッセージをコピーする</button>
+  <p class="hint" id="hint">コピーしたら、LINEのトークに貼りつけて送ってください</p>
+  <div class="who" id="who" hidden>
+    <h2>📝 新規の方の情報を記録する（分かるときだけ）</h2>
+    <p class="me" id="whoMe"></p>
+    <label class="f" for="tid">新規の方の会員番号</label>
+    <input type="text" id="tid" inputmode="numeric" autocomplete="off" placeholder="例：00012345">
+    <label class="f" for="tname" style="margin-top:10px;">新規の方のお名前</label>
+    <input type="text" id="tname" autocomplete="off" placeholder="例：やまだはなこ">
+    <label class="f" for="tkei" style="margin-top:10px;">新規の方の系列</label>
+    <select id="tkei"></select>
+    <label class="f" style="margin-top:10px;">あなたは、この方の…（当てはまるものすべて）</label>
+    <div class="roles">
+      <label><input type="checkbox" value="up"> アップクリエ</label>
+      <label><input type="checkbox" value="intro"> 紹介者</label>
+      <label><input type="checkbox" value="sup"> サポーター</label>
+    </div>
+    <button class="rec" id="recBtn" type="button">💾 この情報を記録する</button>
+    <p class="note" id="recHint">会員番号と、あなたの立場を入れると押せます。押すと、まず名簿と照らし合わせて、どう記録されるかをお見せします（まだ書きこみません）。<br>新規の方がこの番号で登録すると、同じ行にご本人の情報が足されます。</p>
+    <div class="conf" id="conf" hidden>
+      <div id="confBody"></div>
+      <div class="conf-btns" id="confBtns">
+        <button type="button" class="yes" id="confYes">はい、この内容で記録する</button>
+        <button type="button" class="no" id="confNo">やめる</button>
+      </div>
+    </div>
+    <div class="res" id="res"></div>
+  </div>
+  <span class="verTag"></span>
+</div>
+<script>
+/* 送るメッセージ（ここを書きかえると、文面が変わります） */
+const URL_APP = "https://support-sjm.github.io/link-support/app.html";
+const MESSAGES = [
+`🎉 LINKへのご登録、おめでとうございます！🎉
+
+Skyarcの仲間として、これから一緒に楽しく活動していきましょう✨
+
+活動の土台を支える「お助けツール」を2つお渡しします🎁
+
+① Skyarc LINKサポート
+② LINKポータル
+
+下のURLをタップして、2つともスマートフォンのホーム画面にアイコンとして置いてください📱
+画面の案内どおりに進めるだけで、かんたんに置けます👌
+
+👇こちらをタップ
+${URL_APP}
+
+わからないところがあれば、いつでも気軽に声をかけてくださいね😊
+これから、どうぞよろしくお願いします🌈`,
+`LINKへのご登録、本当におめでとうございます🌸
+
+Skyarcの仲間として、これから一緒に、楽しく活動していきましょう。
+
+活動を支えるツールを2つ、お渡しします。
+・Skyarc LINKサポート
+・LINKポータル
+
+下のURLをタップすると、ご案内の画面が開きます。
+お使いのスマートフォン（iPhone／Android）をえらんで、画面のとおりに進めると、ホーム画面にアイコンが置けます📱
+
+${URL_APP}
+
+むずかしいときは、そのままお声がけください。一緒にやりましょう😊
+これから、どうぞよろしくお願いいたします。`
+];
+let cur = 0;
+const $ = (id)=>document.getElementById(id);
+/* ログインしている方は、送る相手と立場を入れてからコピーします */
+let me = null;
+try{ me = JSON.parse(localStorage.getItem("skyarc_member") || "null"); if(!me || !me.id || !me.pin) me = null; }catch(e){ me = null; }
+const half = t => { let x = String(t || ""); try{ x = x.normalize("NFKC"); }catch(e){} return x.replace(/[\s-]/g, ""); };
+function roles(){ return [...document.querySelectorAll(".roles input:checked")].map(i=>i.value); }
+function ready(){
+  const id = half($("tid").value);
+  return /^\d+$/.test(id) && roles().length > 0;
+}
+function gate(){ if(me) $("recBtn").disabled = !ready(); }
+if(me){
+  $("who").hidden = false;
+  $("whoMe").textContent = "記録する人：" + (me.name ? (window.skyGrowth ? skyGrowth.selfTag(me.id) : "") + me.name + "さん" : "") + "（会員番号 " + me.id + "）";
+  /* 系列：はじめは、ログインしている方の系列にしておきます（えらび直せます） */
+  const keis = (window.SKY_KEIRETSU || []).slice();
+  if(me.keiretsu && keis.indexOf(me.keiretsu) < 0) keis.unshift(me.keiretsu);
+  $("tkei").innerHTML = '<option value="">（えらんでください）</option>'
+    + keis.map(k=>'<option>' + String(k).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])) + '</option>').join("");
+  $("tkei").value = me.keiretsu || "";
+  const reset = ()=>{ $("res").className = "res"; $("conf").hidden = true; gate(); };
+  ["tid","tname"].forEach(k=>$(k).addEventListener("input", reset));
+  $("tkei").addEventListener("change", reset);
+  document.querySelectorAll(".roles input").forEach(i=>i.addEventListener("change", reset));
+  $("recBtn").addEventListener("click", ()=>{ if(ready()) record(false); });
+  $("confYes").addEventListener("click", ()=>record(true));
+  $("confNo").addEventListener("click", ()=>{ $("conf").hidden = true; gate(); });
+}
+const ROLE_NAME = { up:"アップクリエ", intro:"紹介者", sup:"サポーター" };
+const escH = t => String(t == null ? "" : t).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const ERRS = { self:"ご自身の会員番号になっています。新規の方の番号を入れてください。",
+               badtarget:"会員番号は数字で入れてください。",
+               pin:"ログインし直してから、もう一度「記録する」を押してください。",
+               busy:"いま混み合っています。少しおいて、もう一度押してください。",
+               keimismatch:"この会員番号は、ほかの系列の方の番号です。会員番号が間違っている可能性が非常に高いので、改めてチェックしてください（記録はしていません）。" };
+/* write=false … 名簿と照らし合わせて、どう記録されるかをお見せするだけ（書きこみません）
+   write=true  … 「はい」を押したあと、書きこみます */
+async function record(write){
+  const target = half($("tid").value), rs = roles();
+  const res = $("res"), conf = $("conf");
+  res.className = "res ok"; res.textContent = write ? "スプレッドシートに記録しています…" : "名簿と照らし合わせています…";
+  $("recBtn").disabled = true; $("confYes").disabled = true;
+  try{
+    const body = new URLSearchParams({ action:"firstMsgLink", id:me.id, pin:me.pin, target, roles: rs.join(","),
+                                       tname: $("tname").value.trim(), tkei: $("tkei").value, mode: write ? "write" : "check" });
+    const r = await fetch(window.SKY_GAS_URL, { method:"POST", body });
+    const j = await r.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
+    if(!j || j.ok !== true){
+      res.className = "res ng"; res.textContent = ERRS[j && j.error] || "うまくいきませんでした。少しおいて、もう一度押してください。";
+      conf.hidden = true; return;
+    }
+    const tn = $("tname").value.trim();
+    if(!write){
+      /* どう記録されるかを、お見せします */
+      let h = j.keiMismatch ? "<h3>この会員番号では、記録できません</h3>" : "<h3>この内容で記録しますか？</h3>";
+      h += j.exists
+        ? "会員番号 " + escH(j.id) + "：名簿では「" + escH(j.cur.name || "（お名前なし）") + "」さん" + (j.cur.keiretsu ? "（" + escH(j.cur.keiretsu) + "）" : "") + "です。"
+        : "会員番号 " + escH(j.id) + "：まだ名簿にいない方です。" + (tn ? "「" + escH(tn) + "」さんとして、" : "") + "番号だけの行を作ります。";
+      if(j.keiMismatch){
+        h += '<p class="stop">⚠️ この会員番号の方は、名簿では「' + escH(j.cur.keiretsu) + '」の系列です（えらんだ系列：' + escH($("tkei").value) + '）。<br>会員番号が間違っている可能性が非常に高いので、会員番号を改めてチェックしてください。</p>';
+      }else{
+        if(j.nameMismatch) h += '<p class="warn">⚠️ 名簿のお名前は「' + escH(j.cur.name) + '」さんで、入れたお名前「' + escH(tn) + '」とちがいます。<br>どちらかが間違えている可能性があるので、あなたのデータを今一度確認してください（名簿のお名前は書きかえません）。</p>';
+        h += "<ul>" + j.plan.map(x=>"<li>・" + ROLE_NAME[x.role] + "："
+          + (x.act === "set" ? "あなたを入れます" : x.act === "same" ? "すでにあなたが入っています" : "<b>" + escH(x.who) + " さんから、あなたに上書きします</b>") + "</li>").join("") + "</ul>";
+      }
+      $("confBody").innerHTML = h;
+      $("confBtns").hidden = !!j.keiMismatch;
+      conf.hidden = false; res.className = "res";
+      return;
+    }
+    conf.hidden = true;
+    const lines = ["✅ 会員番号 " + j.id + (j.name ? "（" + j.name + "さん）" : "") + " の行に記録しました："
+                   + j.plan.map(x=>ROLE_NAME[x.role]).join("・")];
+    if(j.created) lines.push("まだ登録前の方なので、番号だけの行を作りました。ご本人がこの番号で登録すると、同じ行に足されます。");
+    j.plan.filter(x=>x.act === "replace").forEach(x=>lines.push("・" + ROLE_NAME[x.role] + "は、" + x.who + " さんから、あなたに上書きしました。"));
+    res.className = "res ok"; res.innerHTML = lines.map(escH).join("<br>");
+  }catch(e){
+    res.className = "res ng"; res.textContent = "通信できませんでした。電波のよい場所で、もう一度押してください。";
+  }finally{
+    gate(); $("confYes").disabled = false;
+  }
+}
+function show(){
+  $("msg").textContent = MESSAGES[cur];
+  document.querySelectorAll(".tabs button").forEach(b=>b.classList.toggle("on", Number(b.dataset.v) === cur));
+  $("copyBtn").textContent = "📋 メッセージをコピーする"; $("copyBtn").classList.remove("done");
+  $("hint").textContent = "コピーしたら、LINEのトークに貼りつけて送ってください";
+  if(typeof gate === "function" && me) gate();
+}
+document.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click", ()=>{ cur = Number(b.dataset.v); show(); }));
+$("copyBtn").addEventListener("click", async ()=>{
+  const text = MESSAGES[cur];
+  let ok = false;
+  try{ await navigator.clipboard.writeText(text); ok = true; }
+  catch(e){
+    const ta = document.createElement("textarea");
+    ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    try{ ok = document.execCommand("copy"); }catch(e2){}
+    document.body.removeChild(ta);
+  }
+  if(ok){
+    $("copyBtn").textContent = "✅ コピーしました"; $("copyBtn").classList.add("done");
+    $("hint").textContent = "LINEのトークに貼りつけて、送ってください";
+  }else{
+    $("hint").textContent = "上の文を長押しして、コピーしてください";
+  }
+});
+show();
+gate();
+</script>
+<script src="../menu.js"></script>
+</body>
+</html>

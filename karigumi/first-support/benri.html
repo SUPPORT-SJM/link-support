@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<script src="../config.js"></script>
+<script src="../nickname.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>便利な情報一覧 | LINK 初期サポート</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:"Zen Kaku Gothic New",sans-serif;background:radial-gradient(ellipse at 50% 45%,#FFFFFF 0%,#F2F8FF 55%,#E8F1FB 100%);color:#37474F;font-size:15px;line-height:1.8}
+.back-btn{position:fixed;left:14px;top:calc(env(safe-area-inset-top) + 14px);z-index:20;display:inline-block;color:#1565C0;font-size:14px;font-weight:700;text-decoration:none;background:rgba(255,255,255,.9);border-radius:999px;padding:6px 12px;box-shadow:0 2px 8px rgba(30,80,140,.12)}
+#stage{position:fixed;left:0;right:0;top:0;bottom:0;overflow:hidden}
+.orb{position:absolute;left:0;top:0;border:1px dashed rgba(66,133,214,.12);border-radius:50%;pointer-events:none}
+.orb.o{border-color:rgba(232,135,58,.16)}
+.bub{position:absolute;left:0;top:0;width:92px;display:flex;flex-direction:column;align-items:center;gap:4px;text-decoration:none;color:#263238;
+  cursor:pointer;-webkit-tap-highlight-color:transparent;will-change:transform;background:none;border:none;font-family:inherit;padding:0;
+  touch-action:none;user-select:none;-webkit-user-select:none;-webkit-user-drag:none;transform-origin:50% 27px}
+.bub.grab{cursor:grabbing}
+.bub.grab .ball{box-shadow:0 14px 28px rgba(30,80,140,.28)}
+.bub .ball{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;font-size:25px;background:#fff;border:3px solid var(--c);
+  box-shadow:0 6px 16px rgba(30,80,140,.16)}
+.bub .nm{font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:11px;line-height:1.25;text-align:center;white-space:pre;
+  background:rgba(255,255,255,.9);border-radius:8px;padding:2px 6px}
+.bub.in{--c:#4E86D6}
+.bub.out{--c:#E8873A}
+.bub.out{width:80px;transform-origin:50% 15px}
+.bub.out .ball{width:29px;height:29px;font-size:14px;border-width:2px}   /* 外がわの3つは、半分の大きさ */
+.bub.out .nm{font-size:9.5px;padding:1px 4px;border-radius:6px}
+.sun{position:absolute;left:0;top:0;width:120px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:grab;
+  touch-action:none;user-select:none;-webkit-user-select:none;transform-origin:50% 36px}
+.sun .ball{width:72px;height:72px;border-radius:50%;display:grid;place-items:center;font-size:32px;
+  background:radial-gradient(circle at 35% 30%,#FFF9C4,#FFD54F 60%,#FFB300);box-shadow:0 0 0 8px rgba(255,213,79,.25),0 0 34px rgba(255,193,7,.45)}
+.sun .nm{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:15px;color:#0D47A1;line-height:1.25;text-align:center;
+  background:rgba(255,255,255,.85);border-radius:10px;padding:2px 8px}
+/* ポップアップ */
+.sheet{position:fixed;inset:0;z-index:8500;background:rgba(20,40,70,.45);display:flex;align-items:center;justify-content:center;padding:16px}
+.sheet[hidden]{display:none}
+.pop{width:100%;max-width:420px;max-height:calc(100vh - 32px);overflow:auto;background:#fff;border-radius:20px;padding:18px 16px 16px;box-shadow:0 18px 40px rgba(0,0,0,.25)}
+.pop h2{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:17px;color:#1565C0;margin:0 0 10px;padding-bottom:5px;border-bottom:3px solid #BBDEFB}
+.pop .closeb{display:block;width:100%;margin-top:14px;padding:12px;border-radius:12px;border:2px solid #CFD8DC;background:#fff;color:#455A64;font-family:inherit;font-weight:700;font-size:15px;cursor:pointer}
+.row{padding:8px 0;border-bottom:1px dashed #E3E8F0}
+.row:last-child{border-bottom:none}
+.k{font-size:13px;font-weight:700;color:#1565C0}
+.v{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:20px;letter-spacing:.05em}
+.v.url{font-family:"Zen Kaku Gothic New",sans-serif;font-weight:500;font-size:12.5px;letter-spacing:0;word-break:break-all;line-height:1.5}
+.idrow{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.btns{flex:none;display:flex;flex-direction:column;gap:6px}   /* URLだけ：上にコピー、下にアクセス */
+.cpy.acc{display:block;text-align:center;text-decoration:none;border-color:#1E88E5;background:#1E88E5;color:#fff}
+.cpy{flex:none;padding:10px 14px;border-radius:12px;border:2px solid #43A047;background:#fff;color:#2E7D32;font-family:inherit;font-weight:700;font-size:14px;cursor:pointer}
+.cpy.done{background:#43A047;color:#fff}
+.cpy.wide{width:100%;margin-top:6px;font-size:15px;padding:12px}
+.cpmsg{display:block;font-size:13px;font-weight:700;color:#2E7D32;margin-top:4px;min-height:1em}
+.cpmsg a{color:#1565C0}
+.gen-label{font-size:13px;font-weight:700;color:#1565C0;margin:4px 0 5px;display:block}
+.gen-input,.gen-select{width:100%;border:1.5px solid #BBDEFB;border-radius:10px;padding:11px 12px;font-size:16px;font-family:inherit;color:#37474F;background:#fff;margin-bottom:10px}
+.result-box{background:#E3F2FD;border:2px solid #42A5F5;border-radius:10px;padding:12px;font-size:17px;font-weight:700;color:#0D47A1;text-align:center;word-break:break-all;margin-bottom:10px}
+.go{display:block;width:100%;padding:13px;border:none;border-radius:12px;background:#1E88E5;color:#fff;font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:16px;cursor:pointer}
+.go.done{background:#43A047}
+.hint{font-size:12.5px;color:#607D8B;text-align:center;margin-top:6px}
+@media (prefers-reduced-motion: reduce){ .bub{will-change:auto} }
+@media (max-width:380px){ .sun .ball{width:60px;height:60px;font-size:27px} .sun .nm{font-size:13.5px} }   /* せまい画面では、まんなかを少し小さく */
+</style>
+<link rel="stylesheet" href="../beta.css">
+<script src="../loading.js"></script>
+<script src="../login.js"></script>
+</head>
+<body>
+<a href="../index.html" class="back-btn">← ホームに戻る</a>
+
+<!-- 太陽系：まんなかに「便利な情報一覧」、内がわの輪にLINKのサイト（押すとそのページへ）、外がわの輪にポップアップ -->
+<div id="stage">
+  <div class="orb" id="orbIn"></div>
+  <div class="orb o" id="orbOut"></div>
+  <div class="sun" id="sun"><div class="ball">🧰</div><div class="nm">便利な<br>情報一覧</div></div>
+  <a class="bub in" href="https://app.link-event-x.com" target="_blank" rel="noopener"><span class="ball">🏠</span><span class="nm">LINKポータル</span></a>
+  <a class="bub in" href="https://member.link-platform.jp" target="_blank" rel="noopener"><span class="ball">💼</span><span class="nm">ビジネス
+マイページ</span></a>
+  <a class="bub in" href="https://link-event-x.com/" target="_blank" rel="noopener"><span class="ball">🗓</span><span class="nm">LINK公認公式
+スケジュール</span></a>
+  <a class="bub in" href="https://sasaeai.link-platform.jp/" target="_blank" rel="noopener"><span class="ball">🤝</span><span class="nm">SASAEAI
+マッチング</span></a>
+  <a class="bub in" href="https://link-base.jp/" target="_blank" rel="noopener"><span class="ball">🏢</span><span class="nm">LINK-BASE
+サイト</span></a>
+  <button type="button" class="bub out" data-pop="popMem"><span class="ball">👤</span><span class="nm">会員情報
+紹介コード</span></button>
+  <button type="button" class="bub out" data-pop="popNick"><span class="ball">🏷️</span><span class="nm">オープン
+チャットの
+名前づくり</span></button>
+  <button type="button" class="bub out" data-pop="popZoom"><span class="ball">🎥</span><span class="nm">LINKセミナー
+イベントZoom</span></button>
+</div>
+
+<!-- 会員情報／紹介コード -->
+<div class="sheet" id="popMem" hidden><div class="pop" role="dialog" aria-modal="true">
+  <h2>👤 会員情報／紹介コード</h2>
+  <div id="memCard">
+    <div class="row"><span class="k">会員番号</span>
+      <div class="idrow"><span class="v" id="mId">–</span><button type="button" class="cpy" id="mCopy">📋 コピー</button></div>
+      <span class="cpmsg" id="mMsg" aria-live="polite"></span></div>
+    <div class="row"><span class="k">紹介コード（招待コードのURL）</span>
+      <button type="button" class="cpy wide" id="rCopy">🔗 紹介コードをコピーする</button>
+      <span class="cpmsg" id="rMsg" aria-live="polite"></span></div>
+  </div>
+  <button type="button" class="closeb">とじる</button>
+</div></div>
+
+<!-- オープンチャットの名前 -->
+<div class="sheet" id="popNick" hidden><div class="pop" role="dialog" aria-modal="true">
+  <h2>🏷️ オープンチャットの名前づくり</h2>
+  <label class="gen-label" for="nameInput">👤 あなたのお名前</label>
+  <input class="gen-input" id="nameInput" type="text" autocomplete="nickname" placeholder="例：しょうこ">
+  <label class="gen-label" for="seriesSelect">🏷️ 系列</label>
+  <select class="gen-select" id="seriesSelect"></select>
+  <div class="result-box" id="resultBox">👆 お名前と系列を入れてください</div>
+  <button type="button" class="go" id="nickCopy">📋 タップしてコピー</button>
+  <p class="hint" id="nickHint">LINKの中での、あなたのお名前（オープンチャットのニックネーム）です</p>
+  <button type="button" class="closeb">とじる</button>
+</div></div>
+
+<!-- Zoom -->
+<div class="sheet" id="popZoom" hidden><div class="pop" role="dialog" aria-modal="true">
+  <h2>🎥 LINKセミナー・LINK主催イベントのZoom</h2>
+  <div class="row"><span class="k">URL</span>
+    <div class="idrow"><span class="v url" id="zUrl"></span><span class="btns"><button type="button" class="cpy" data-copy="url">📋 コピー</button><a class="cpy acc" id="zGo" href="#" target="_blank" rel="noopener">🎥 アクセス</a></span></div>
+    <span class="cpmsg" aria-live="polite"></span></div>
+  <div class="row"><span class="k">ミーティングID</span>
+    <div class="idrow"><span class="v" id="zId"></span><button type="button" class="cpy" data-copy="id">📋 コピー</button></div>
+    <span class="cpmsg" aria-live="polite"></span></div>
+  <div class="row"><span class="k">パスコード</span>
+    <div class="idrow"><span class="v" id="zPw"></span><button type="button" class="cpy" data-copy="pw">📋 コピー</button></div>
+    <span class="cpmsg" aria-live="polite"></span></div>
+  <button type="button" class="closeb">とじる</button>
+</div></div>
+<script>
+/* ================================================================
+   便利な情報一覧（トップページの「便利な情報一覧」の丸から開きます）
+   ・LINKのサイト：LINKポータル・ビジネスマイページ・公認公式スケジュールサイト・SASAEAI・LINK-BASE
+   ・会員情報／紹介コード：ログインしている方の会員番号と、紹介URL（会員名簿の「紹介URL」）をコピーできます
+   ・オープンチャットの名前づくり：nickname.js の決まり（20文字）で作ります
+   ・Zoom：LINKセミナー・LINK主催イベントのZoom（URL・ミーティングID・パスコード、それぞれコピー）
+   v1.219：トップページのように、丸がぐるぐるまわる「太陽系」の形にしました。
+     まんなか：便利な情報一覧／内がわの輪：LINKのサイト5つ（押すとそのページへ）
+     外がわの輪：会員情報・紹介コード／オープンチャットの名前づくり／Zoom（押すとポップアップ）
+   v1.220：青い輪はたてにまっすぐ・外がわの3つは半分の大きさで、ななめにクロスする輪をまわります。
+     どの丸も、つまんで引っぱれます（ホームと同じ「ビヨーン」）
+================================================================ */
+const $ = s => document.querySelector(s);
+let me = null;
+try{ me = JSON.parse(localStorage.getItem("skyarc_member") || "null"); }catch(e){}
+if(me && !me.id) me = null;
+
+async function copyText(t){
+  try{ if(navigator.clipboard && window.isSecureContext){ await navigator.clipboard.writeText(t); return true; } }catch(e){}
+  try{
+    const ta = document.createElement("textarea");
+    ta.value = t; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.top = "-1000px"; ta.style.fontSize = "16px";
+    document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0, t.length);
+    const ok = document.execCommand("copy"); ta.remove(); return ok;
+  }catch(e){ return false; }
+}
+/* 会員番号は、LINKの会員番号の形（8けた）で見せます */
+function idText(id){ const t = String(id || "").trim(); return /^\d{1,7}$/.test(t) ? t.padStart(8, "0") : t; }
+
+/* ---------- 会員情報／紹介コード ---------- */
+if(!me){
+  $("#memCard").innerHTML = '<p style="text-align:center;font-size:14px;">ログインすると、会員番号と紹介コードが出ます。</p>';
+}else{
+  $("#mId").textContent = idText(me.id);
+  $("#mCopy").addEventListener("click", async ()=>{
+    const ok = await copyText(idText(me.id));
+    $("#mCopy").classList.toggle("done", ok); $("#mCopy").textContent = ok ? "✓ コピーしました" : "📋 コピー";
+    $("#mMsg").textContent = ok ? "そのまま、貼りつけて使えます" : "コピーできませんでした。番号を長押ししてコピーしてください";
+  });
+  $("#rCopy").addEventListener("click", async ()=>{
+    const url = String(me.refUrl || "").trim();
+    if(!url){
+      $("#rMsg").innerHTML = "紹介コードがまだ登録されていません。<br>"
+        + "<span style='font-weight:500;color:#37474F;'>紹介コード（URL）は、<b>ビジネスマイページ</b>を開いてログインし、右上のメニューの<b>「新規会員紹介」</b>から発行できます。発行したら、アカウントのページに貼りつけて登録してください。</span><br>"
+        + "<a href='https://member.link-platform.jp' target='_blank' rel='noopener'>ビジネスマイページを開く ›</a><br>"
+        + "<a href='../ikusei/account.html'>アカウントのページで登録する ›</a>";
+      return;
+    }
+    const ok = await copyText(url);
+    $("#rCopy").classList.toggle("done", ok); $("#rCopy").textContent = ok ? "✓ コピーしました" : "🔗 紹介コードをコピーする";
+    $("#rMsg").textContent = ok ? "招待コードのURLがコピーされました" : "コピーできませんでした。アカウントのページで、URLを長押ししてコピーしてください";
+  });
+}
+
+/* ---------- オープンチャットの名前づくり ---------- */
+(function(){
+  const sel = $("#seriesSelect"), nm = $("#nameInput"), box = $("#resultBox"), btn = $("#nickCopy"), hint = $("#nickHint");
+  sel.innerHTML = '<option value="">選んでください</option>' + (window.SKY_KEIRETSU || []).map(k=>`<option value="${k}">${k}</option>`).join("");
+  function update(){
+    const n = nm.value.trim(), k = sel.value;
+    if(!n || !k){ skyNick.clearWarn(box); box.textContent = !n && !k ? "👆 お名前と系列を入れてください" : (!n ? "👆 お名前を入れてください" : "👆 系列を選んでください"); return; }
+    skyNick.render(box, n, k);
+  }
+  nm.addEventListener("input", update); sel.addEventListener("change", update);
+  if(me){
+    if(me.name) nm.value = me.name;
+    if(me.keiretsu && Array.from(sel.options).some(o=>o.value === me.keiretsu)) sel.value = me.keiretsu;
+  }
+  update();
+  btn.addEventListener("click", async ()=>{
+    if(!nm.value.trim() || !sel.value){ hint.textContent = "⚠️ 先にお名前と系列を入れてください"; return; }
+    const ok = await copyText(skyNick.make(nm.value.trim(), sel.value).text);
+    btn.classList.toggle("done", ok); btn.textContent = ok ? "✓ コピーしました" : "📋 タップしてコピー";
+    hint.textContent = ok ? "オープンチャットのニックネームに貼りつけてください" : "コピーできませんでした。上の名前を長押ししてコピーしてください";
+  });
+})();
+
+/* ---------- Zoom ---------- */
+const ZOOM = {
+  url: "https://us02web.zoom.us/j/5460266005?pwd=bDBqOVdxQmFLWGwzTW1zWXB1YTRRdz09",
+  id:  "546 026 6005",
+  pw:  "LINK"
+};
+$("#zUrl").textContent = ZOOM.url; $("#zGo").href = ZOOM.url;   /* 「アクセス」を押すと、Zoomが開きます */ $("#zId").textContent = ZOOM.id; $("#zPw").textContent = ZOOM.pw;
+document.querySelectorAll("#popZoom [data-copy]").forEach(b=>{
+  b.addEventListener("click", async ()=>{
+    const k = b.dataset.copy;
+    const t = k === "id" ? ZOOM.id.replace(/\s/g, "") : ZOOM[k];   /* ミーティングIDは、すきまなしの数字でコピー */
+    const ok = await copyText(t);
+    document.querySelectorAll("#popZoom [data-copy]").forEach(x=>{ x.classList.remove("done"); x.textContent = "📋 コピー"; x.closest(".row").querySelector(".cpmsg").textContent = ""; });
+    b.classList.toggle("done", ok); b.textContent = ok ? "✓ コピー済" : "📋 コピー";
+    b.closest(".row").querySelector(".cpmsg").textContent = ok ? "コピーしました" : "コピーできませんでした。長押ししてコピーしてください";
+  });
+});
+
+/* ---------- ポップアップ ---------- */
+let popOpen = false;
+function openPop(id){ const s = document.getElementById(id); if(!s) return; s.hidden = false; popOpen = true; }
+function closePops(){ document.querySelectorAll(".sheet").forEach(s=>s.hidden = true); popOpen = false; }
+document.querySelectorAll(".bub[data-pop]").forEach(b=>b.addEventListener("click", ()=>openPop(b.dataset.pop)));
+document.querySelectorAll(".sheet").forEach(s=>{
+  s.addEventListener("click", e=>{ if(e.target === s) closePops(); });
+  s.querySelector(".closeb").addEventListener("click", closePops);
+});
+document.addEventListener("keydown", e=>{ if(e.key === "Escape") closePops(); });
+
+/* ---------- 太陽系（ぐるぐる） ----------
+   ・まんなかの「便利な情報一覧」は、ふわふわ浮いています
+   ・青い輪（LINKのサイト5つ）：輪はたてにまっすぐで動かず、丸だけが輪の上をまわります
+   ・オレンジの輪（ポップアップの3つ）：輪そのものがゆっくり回転しながら、奥・手前にゆらゆら（Z軸のゆらぎ）
+   ・どの丸も、つまんで引っぱると「ビヨーン」とのび、はなすと元の場所へもどります（ホームと同じ）。
+     つまんだ丸が近づくと、ほかの丸はよけます */
+(function(){
+  const stage = $("#stage"), sun = $("#sun"), orbIn = $("#orbIn"), orbOut = $("#orbOut");
+  const reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const N = [];
+  N.push({ el: sun, kind: "sun", ph: 0 });
+  document.querySelectorAll(".bub.in").forEach((el, i)=>N.push({ el, kind: "in", k: i, ph: i * 1.3 }));
+  document.querySelectorAll(".bub.out").forEach((el, i)=>N.push({ el, kind: "out", k: i, ph: i * 2.1 }));
+  N.forEach(n=>{ n.x = null; n.y = null; n.vx = 0; n.vy = 0; n.s = 1; n.ts = 1; n.el.draggable = false; });
+  let W, H, cx, cy, RI, RO;
+  function size(){
+    W = innerWidth; H = innerHeight;
+    /* 上：戻る・メニューのボタンの下から／下：名前の下はしが、管理者モードのボタンにかからないところまで */
+    const yTop = 64 + 46, yBot = H - 50 - 72;
+    cx = W / 2; cy = (yTop + yBot) / 2;
+    const half = (yBot - yTop) / 2;
+    RI = { x: Math.min(W * 0.34, 170), y: 0 };
+    RI.y = Math.min(half, RI.x * 1.45);
+    RO = { x: Math.min(W / 2 - 40, RI.x * 1.34), y0: 0 };
+    RO.y0 = RO.x * 0.39;
+    orbIn.style.cssText = `width:${RI.x*2}px;height:${RI.y*2}px;transform:translate(${cx-RI.x}px,${cy-RI.y}px)`;
+    N.forEach(n=>{ n.lw = null; });
+  }
+  size(); addEventListener("resize", size);
+
+  /* ---- つまむ ---- */
+  let drag = null, lastDragEnd = 0;
+  N.forEach(n=>{
+    const el = n.el; let sx, sy, offx, offy, pid = null, moved = false;
+    el.addEventListener("pointerdown", e=>{
+      if(e.button !== undefined && e.button !== 0) return;
+      pid = e.pointerId; sx = e.clientX; sy = e.clientY; moved = false;
+      offx = e.clientX - n.x; offy = e.clientY - n.y;
+      try{ el.setPointerCapture(pid); }catch(_){}
+    });
+    el.addEventListener("pointermove", e=>{
+      if(pid !== e.pointerId) return;
+      if(!moved && Math.hypot(e.clientX - sx, e.clientY - sy) > 8){ moved = true; drag = n; n.ts = 1.12; el.classList.add("grab"); }
+      if(moved){
+        const nx = e.clientX - offx, ny = e.clientY - offy;
+        n.vx = nx - n.x; n.vy = ny - n.y; n.x = nx; n.y = ny;
+      }
+    });
+    const end = e=>{
+      if(pid !== e.pointerId) return;
+      pid = null;
+      if(moved){ drag = null; n.ts = 1; el.classList.remove("grab"); lastDragEnd = performance.now(); }
+    };
+    el.addEventListener("pointerup", end); el.addEventListener("pointercancel", end);
+    /* つまんで動かしたあとは、ページやポップアップは開かず、元の場所へもどるだけ */
+    el.addEventListener("click", e=>{
+      if(performance.now() - lastDragEnd < 400){ e.preventDefault(); e.stopImmediatePropagation(); }
+    }, true);
+    el.addEventListener("dragstart", e=>e.preventDefault());
+  });
+
+  /* ---- うごき ---- */
+  let last = null, sec = 0;
+  function frame(t){
+    const dt = last == null ? 0 : Math.min(64, t - last); last = t;
+    if(!reduce && !popOpen) sec += dt / 1000;   /* ポップアップを開いている間は、まわるのを止めます */
+    /* オレンジの輪：回転（45秒でひとまわり）と、Z軸のゆらぎ（7秒で1回） */
+    const tilt = (38 - sec * 360 / 45) * Math.PI / 180;
+    const ry = RO.y0 * (0.55 + 0.45 * Math.sin(sec * 2 * Math.PI / 7));
+    orbOut.style.cssText = `width:${RO.x*2}px;height:${ry*2}px;transform:translate(${cx-RO.x}px,${cy-ry}px) rotate(${tilt*180/Math.PI}deg)`;
+    N.forEach(n=>{
+      let hx, hy, depth = 0;
+      if(n.kind === "sun"){ hx = cx; hy = cy; }
+      else if(n.kind === "in"){
+        const a = sec * 2 * Math.PI / 30 + n.k * 2 * Math.PI / 5 - Math.PI / 2;   /* 30秒でひとまわり */
+        hx = cx + RI.x * Math.cos(a); hy = cy + RI.y * Math.sin(a);
+      }else{
+        const a = -sec * 2 * Math.PI / 22 + n.k * 2 * Math.PI / 3;              /* 反対まわりに22秒でひとまわり */
+        const x0 = RO.x * Math.cos(a), y0 = ry * Math.sin(a);
+        hx = cx + x0 * Math.cos(tilt) - y0 * Math.sin(tilt);
+        hy = cy + x0 * Math.sin(tilt) + y0 * Math.cos(tilt);
+        depth = Math.sin(a);                                                     /* 手前（+）ほど少し大きく、青い丸の前を通ります */
+      }
+      n.depth = depth;
+      if(n.x == null){ n.x = hx; n.y = hy; }
+      if(n !== drag){
+        let ax = (hx - n.x) * .055, ay = (hy - n.y) * .055;
+        if(drag){
+          /* つまんだ丸が近づくと、よけながら混ざります（ホームと同じ） */
+          const dx = n.x - drag.x, dy = n.y - drag.y, d = Math.hypot(dx, dy) || 1, R = 130;
+          if(d < R){ const f = (R - d) / R * 7; ax += dx / d * f; ay += dy / d * f;
+            ax += (-dy / d) * .35 + (Math.random() - .5) * .9; ay += (dx / d) * .35 + (Math.random() - .5) * .9; }
+        }
+        n.vx = (n.vx + ax) * .84; n.vy = (n.vy + ay) * .84;
+        n.x += n.vx; n.y += n.vy;
+        /* 名前が画面の左右からはみ出さないように */
+        if(n.lw == null){ const nm = n.el.querySelector(".nm"); n.lw = nm ? nm.offsetWidth : 0; }
+        const lim = Math.max(n.el.offsetWidth / 2, n.lw / 2) + 4;
+        n.x = Math.min(Math.max(n.x, lim), W - lim);
+      }
+      n.s += (n.ts - n.s) * .2;
+      const fy = reduce || n === drag ? 0 : Math.sin(t / 650 + n.ph) * (n.kind === "sun" ? 6 : 4);
+      const fx = reduce || n === drag ? 0 : Math.cos(t / 900 + n.ph) * 2.5;
+      const sc = n.s * (n.kind === "out" ? 0.86 + 0.14 * (depth + 1) / 2 : 1);
+      const hb = n.el.querySelector(".ball").offsetHeight / 2;
+      n.el.style.transform = `translate(${(n.x - n.el.offsetWidth / 2 + fx).toFixed(1)}px,${(n.y - hb + fy).toFixed(1)}px) scale(${sc.toFixed(3)})`;
+      n.el.style.zIndex = n === drag ? 9 : (n.kind === "out" ? (depth > 0 ? 6 : 2) : (n.kind === "sun" ? 3 : 4));
+    });
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+<script src="../track.js"></script>
+<script src="../menu.js"></script>
+</body>
+</html>
