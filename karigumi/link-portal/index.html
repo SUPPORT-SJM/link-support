@@ -22,6 +22,8 @@ window.SKY_APP = { tool:"portal", base:"../", name:"LINKポータル", open:"./o
 <script src="../app-install.js"></script>
 </head>
 <body>
+<!-- 仮組み：置けたら、はじめの一歩にもどれるように -->
+<a href="../index.html" id="aiBackHome" style="position:fixed;left:12px;top:calc(env(safe-area-inset-top) + 10px);z-index:50;background:rgba(255,255,255,.95);border-radius:999px;padding:7px 14px;font-size:14px;font-weight:700;color:#6E5FB5;text-decoration:none;box-shadow:0 2px 8px rgba(60,42,110,.15)">← もどる</a>
 <div class="ai-wrap" id="aiRoot"></div>
 </body>
 </html>
