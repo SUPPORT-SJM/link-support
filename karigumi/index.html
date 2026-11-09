@@ -104,6 +104,8 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body)
 #taskSheet .fbtn.green{background:#06C755;}
 #taskSheet .fqr{display:block;width:170px;height:170px;margin:10px auto 2px;border-radius:12px;border:1px solid #E0E0E0;}
 #taskSheet .fsmall{font-size:12px;color:#8D6E63;text-align:center;}
+#taskSheet .fol{margin:8px 0 10px 1.3em;padding:0;font-size:14px;line-height:1.85;color:#5D4037;}
+#taskSheet .fol li{margin-bottom:6px;}
 #taskSheet ol.fhow{padding-left:22px;margin:6px 0;}
 #taskSheet ol.fhow li{font-size:14px;line-height:1.9;margin-bottom:2px;}
 #taskSheet .fgen{background:#FFF8F5;border:1px solid #FFD0B0;border-radius:12px;padding:10px 12px;margin:8px 0;}
@@ -494,8 +496,8 @@ const TREE = [
   {ic:"💌", nm:"新しい仲間へ\nこのサイトを教える", g:"common", url:B+"ikusei/first-message.html", wide:true, moon:true},
   /* 2つめの月：「新しい仲間へ」と、アカウントをはさんで反対側を、同じ通り道でまわります */
   {ic:"🧰", nm:"便利な\n情報一覧", g:"common", url:B+"first-support/benri.html", moon:true},
-  /* 仮組み：3つめの月「入りたいと言われたら」（いちばん小さい丸。中身は準備中） */
-  {ic:"❓", nm:"入りたいと\n言われたら", g:"common", moon:true, tiny:true, flowInfo:"join"},
+  /* 3つめの月「LINKに入りたいと言われたら」（いちばん小さい丸） */
+  {ic:"❓", nm:"LINKに入りたいと\n言われたら", g:"common", moon:true, tiny:true, flowInfo:"join"},
   /* ===== 仮組み：ファーストサポートの新しい流れ（はじめの一歩 → LINKを知ろう → LINKを使おう） ===== */
   {ic:"🔎", nm:"LINKを\n知ろう", g:"member", flowPage:"know", lockAfter:"hajime", kids:[
     /* v1.2.006：0番は、いったんなくしました（思い出したら入れます） */
@@ -1010,7 +1012,11 @@ function tap(n, e){
   if(it.lockAfter && !flowDone(it.lockAfter)){ showToast("先に「" + flowPageItem(it.lockAfter).nm.replace(/\n/g,"") + "」を進めましょう"); return; }
   if(it.ph){ showToast("0番は、準備中です"); return; }
   if(it.task){ openTask(it); return; }
-  if(it.flowInfo){ openInfoSheet("❓ 入りたいと言われたら", "（準備中）「LINKに入りたい」「気になる」と言われたときに、最低限やることが、ここに入ります。"); return; }
+  if(it.flowInfo){ openInfoSheet("❓ LINKに入りたいと言われたら", "", '<p>「LINKに入りたい」「LINKが気になる」と言われたら、最低限これだけはやりましょう。</p>'
+    + '<ol class="fol"><li><b>まずはアップに相談</b>しましょう。</li>'
+    + '<li><b>説明会の日にちを決めます。</b>説明は、<b>アドバイザーの資格をもった人</b>にしてもらいます。</li>'
+    + '<li>説明会が、その方にとって「LINKってこういうものなんだ」「自分にも必要かも」と分かる時間になるように、<b>最低限のことを学んでおく</b>と良いです。</li></ol>'
+    + '<a class="fbtn" href="first-support/present.html">🎁 気になる人にLINKをプレゼントするコツ</a>'); return; }
   if(it.goPage){ const pg = flowPageItem(it.goPage); goTo(()=>{ path.length = 0; path.push(pg); }, n.x, n.y, n); return; }
   if(it.goHome){ goTo(()=>{ path.length = 0; }, n.x, n.y, n); if(flowAllDone()) setTimeout(()=>flowCelebrate("🎉 3つとも終わりました！「チーム情報」が開きました"), 500); return; }
   /* 開ける方が決まっている丸：ほかの方には、お知らせだけを出します */
@@ -1185,9 +1191,9 @@ document.getElementById("taskClose").addEventListener("click", closeTask);
 document.getElementById("pageClose").addEventListener("click", closePage);
 document.getElementById("pageBack").addEventListener("click", closePage);
 document.getElementById("taskSheet").addEventListener("click", e=>{ if(e.target.id === "taskSheet") closeTask(); });
-function openInfoSheet(title, text){
+function openInfoSheet(title, text, html){
   $("#taskWhere").textContent = ""; $("#taskTitle").textContent = title;
-  $("#taskBody").innerHTML = `<p>${text}</p>`; $("#taskSheet").hidden = false;
+  $("#taskBody").innerHTML = html || `<p>${text}</p>`; $("#taskSheet").hidden = false;
 }
 /* その方の系列を、系列の一覧（絵文字つき）の名前に合わせます（絵文字のあるなしは気にしません） */
 function flowKei(){
