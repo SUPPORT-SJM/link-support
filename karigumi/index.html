@@ -1034,7 +1034,11 @@ function flowEmojis(){
   (window.SKY_KEIRETSU || []).forEach(k=>{ const e = String(k).match(re) || []; e.forEach(x=>{ if(all.indexOf(x) < 0) all.push(x); }); });
   const mk = flowKei() ? (flowKei().match(re) || []) : [];
   mk.forEach(x=>mine.push(x));
-  if(!all.length) all.push("🎉","✨","🌈");
+  /* 系列の一覧は、管理ページの「系列のつながり」から自動で受け取ります（足す・なくすと、ここにもそのまま出ます）。
+     盛り上がるように、お祝いの絵文字もまぜます。絵文字のない系列の方は、お祝いの絵文字が多めに出ます */
+  const party = ["🎉","✨","🌈","⭐","💫","🎊"];
+  party.forEach(x=>{ if(all.indexOf(x) < 0) all.push(x); });
+  if(!mine.length) party.forEach(x=>mine.push(x));
   return { all, mine };
 }
 function flowCelebrate(msg){

@@ -9,7 +9,7 @@
 ================================================================ */
 
 /* ---------------- ① バージョン ---------------- */
-window.SKY_VERSION = "v1.2.002";   /* 仮組みは v1.2.001 から */
+window.SKY_VERSION = "v1.2.003";   /* 仮組みは v1.2.001 から */
 window.SKY_VERSION_DATE = "2026/11/09";
 
 /* ---------------- ② GASのURL ----------------
@@ -22,7 +22,7 @@ window.SKY_GAS_URL = "https://script.google.com/macros/s/AKfycbzY2l20zwGULjnKRUq
 window.SKY_KEIRETSU = [
   "🚀SkyExceed","🦅Zenith1","🏰Utop","🌟グローハピネス🌟","🥷HOT STUFF⚜️",
   "TELLUS.","FEAT","🌬️ザ・クラウドブルー(蒼雲)","✈️JET RISE","✨アフロディーテ",
-  "⭐️ルミナス","エネルギー🔥","💎プリズム","📚FairyTail","ミラメリ🪄","🪽HERO","♾️ZERO♾️"
+  "⭐️ルミナス","エネルギー🔥","💎プリズム","📚FairyTail","ミラメリ🪄","🪽HERO"
 ];
 
 /* ---------------- ③-2 「系列のつながり」から、いまある系列を受け取ります ----------------
