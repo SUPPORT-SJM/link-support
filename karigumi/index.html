@@ -481,18 +481,37 @@ const TREE = [
   {ic:"❓", nm:"入りたいと\n言われたら", g:"common", moon:true, tiny:true, flowInfo:"join"},
   /* ===== 仮組み：ファーストサポートの新しい流れ（はじめの一歩 → LINKを知ろう → LINKを使おう） ===== */
   {ic:"🔎", nm:"LINKを\n知ろう", g:"member", flowPage:"know", lockAfter:"hajime", kids:[
-    {ic:"？", nm:"（0番）\n準備中", g:"member", num:0, ph:true},
-    {ic:"💬", nm:"LINK information\nについて", g:"member", num:1, task:"k1", note2:"LINK informationとはどんなものかを知って、リッチメニューの解放まで進めます。",
-     link:{t:"📘 今の初期サポートガイド（リッチメニューの解放）をひらく", u:B+"first-support/guide.html"}},
+    /* v1.2.006：0番は、いったんなくしました（思い出したら入れます） */
+    {ic:"💬", nm:"LINK information\nについて", g:"member", num:1, task:"k1",
+     note2:"LINK information は、LINK内の全ての情報検索ができる、LINK公式ラインです。Q&Aやニーズ別診断、スタンプラリーなどもあります😲<br>大切な<b>リッチメニュー</b>は、5つのステップのチュートリアルを終わらせると解放されます。",
+     html:'<img src="img/richmenu-01.jpg" alt="リッチメニュー解放イメージ" style="display:block;width:100%;border-radius:12px;margin:6px 0">'
+        + '<h4>📋 チュートリアル：ステップ5つ</h4><ol class="fhow"><li>ルール動画</li><li>動き方動画</li><li>SASAEAIマッチング動画 → 制作</li><li>LINKベース → 制作</li><li>LINK information 使い方動画</li></ol>'
+        + '<p>📝 ステップ3・4で作ったものは、<b>初期サポートグループライン</b>にURLを必ず貼ってください。</p>'
+        + '<p>動画はすべて、しっかり全部見てください🎞️ 途中のクイズも正解してくださいね😀</p>'
+        + '<a class="fbtn" href="first-support/step3-4.html">📄 つまずきやすいステップ3・4の補足を見る</a>'
+        + '<p class="fsmall" style="text-align:left;margin-top:8px">リッチメニューが開放されない・わからない問題があるときは、初期サポートグループラインでご質問ください❤️</p>'},
     {ic:"🏁", nm:"1stステップを\n完了しよう", g:"member", num:2, group:true, kids:[
-      {ic:"🤝", nm:"ユーザー\nサポート会", g:"member", task:"k2a", link:{t:"📅 ユーザーサポート会の開催日をひらく", u:B+"first-support/events.html"}},
-      {ic:"📚", nm:"LINKセミナー", g:"member", task:"k2b", link:{t:"📚 LINKセミナーについてをひらく", u:B+"first-support/link-seminar.html"}},
-      {ic:"🎓", nm:"グルコン", g:"member", task:"k2c", link:{t:"🎓 グルコンの日程をひらく", u:B+"first-support/gcon-dates.html"}},
-      {ic:"🎪", nm:"チーム\n交流会", g:"member", task:"k2d", link:{t:"🎪 各種スケジュール情報をひらく", u:B+"index.html#sched"}}
+      {ic:"🤝", nm:"ユーザー\nサポート会", g:"member", task:"k2a",
+       note2:"はじめての方が、いちばん最初に足を運ぶ場所です。転校初日に学校案内をしてもらうイメージで、ここで出会う人が最初の応援団になってくれます。週に何度も開かれているので、都合のよい回に参加しましょう。",
+       html:'<h4>📝 持っていくもの</h4><ol class="fhow"><li>自分の会員番号</li><li>入会時に設定したパスワード</li><li>LINKポータルが開けること</li></ol>',
+       link:{t:"📅 開催日を見る・申し込む", u:B+"first-support/events.html"}},
+      {ic:"📚", nm:"LINKセミナー", g:"member", task:"k2b",
+       note2:"LINKの完全攻略MAP。全会員に必要な基盤となる5種類のセミナーです。『5ピースのパズル』と思って、ぜひ揃えてみてください✨ 月に4回ほどの開催なので、全部そろうまで1ヶ月半くらいかかります。",
+       link:{t:"📖 LINKセミナーについて", u:B+"first-support/link-seminar.html"}},
+      {ic:"🎓", nm:"グルコン", g:"member", task:"k2c",
+       note2:"実際にLINKを活用して大きなグループを作っている方から、直接教われる1時間です。<br><b>① 事前の作戦会議（30分）② 本番（約1時間）③ 振り返り（次に何をするかまで決めます）</b><br>ぜんぶをひとつのパッケージとして、しっかり時間をとって参加しましょう。",
+       link:{t:"🎓 グルコンの日程を見る（出席予定にする）", u:B+"first-support/gcon-dates.html"}},
+      {ic:"🎪", nm:"チーム\n交流会", g:"member", task:"k2d",
+       note2:"同じチームの仲間（クラスメイト）と出会える場です。人は「仲が良い人が頑張っていること」を応援したくなるものなので、何度も顔を出して覚えてもらいましょう。顔を出すだけでも大丈夫です。",
+       link:{t:"🎪 各種スケジュール情報をひらく", u:B+"index.html#sched"}}
     ]},
     {ic:"🪞", nm:"自分を\n整えよう", g:"member", num:3, group:true, kids:[
-      {ic:"🤝", nm:"SASAEAIに\nプロフィール掲載", g:"member", task:"k3a", link:{t:"🤝 SASAEAI設定ガイドをひらく", u:B+"first-support/sasaeai.html"}},
-      {ic:"🏰", nm:"LINK-BASEに\n事業を掲載", g:"member", task:"k3b", link:{t:"🏰 LINK-BASE掲載ガイドをひらく", u:B+"first-support/linkbase.html"}}
+      {ic:"🤝", nm:"SASAEAIに\nプロフィール掲載", g:"member", task:"k3a",
+       note2:"支え合いのマッチング設定です。できること・してほしいことを登録して、プロフィールを掲載します。",
+       link:{t:"🤝 SASAEAI設定ガイドをひらく", u:B+"first-support/sasaeai.html"}},
+      {ic:"🏰", nm:"LINK-BASEに\n事業を掲載", g:"member", task:"k3b",
+       note2:"自分のこと・事業のことを知ってもらうページです。ご縁が広がるきっかけになります。",
+       link:{t:"🏰 LINK-BASE掲載ガイドをひらく", u:B+"first-support/linkbase.html"}}
     ]},
     {ic:"👍", nm:"次のステップへ\nLINKを使おう", g:"member", need:"flow:know", goPage:"use"}
   ]},

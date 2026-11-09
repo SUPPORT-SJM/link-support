@@ -1087,6 +1087,26 @@ const GOOGLE_CLIENT_ID = "315827385958-ikdpkfhkr6nmrgql470aolt4pv27pak3.apps.goo
      ここにも同じIDで追加してください。
 ================================================================ */
 const ITEM_MASTER = {
+  /* 仮組み v1.2.006：新しいファーストサポート（トップの丸：はじめの一歩 → LINKを知ろう → LINKを使おう）。タブ「flow進捗」 */
+  flow: {
+    label: "🌈 ファーストサポート（新）",
+    items: [
+      ["h0","はじめの一歩：便利な2つをホームに置く"],
+      ["h1","はじめの一歩：LINK information を追加"],
+      ["h2","はじめの一歩：3つのオープンチャット"],
+      ["h3","はじめの一歩：紹介URLを発行・保存"],
+      ["k1","LINKを知ろう：LINK information について"],
+      ["k2a","LINKを知ろう：ユーザーサポート会"],
+      ["k2b","LINKを知ろう：LINKセミナー"],
+      ["k2c","LINKを知ろう：グルコン"],
+      ["k2d","LINKを知ろう：チーム交流会"],
+      ["k3a","LINKを知ろう：SASAEAIにプロフィール掲載"],
+      ["k3b","LINKを知ろう：LINK-BASEに事業を掲載"],
+      ["u1","LINKを使おう：チームのチャット"],
+      ["u2","LINKを使おう：LINK全体のチャット"],
+      ["u3","LINKを使おう：地域コミュニティ・趣味のサークル"],
+    ]
+  },
   hajime: {
     label: "👋 はじめの一歩",
     items: [
@@ -2275,7 +2295,7 @@ function openMember(m){
 
   document.getElementById("mmId").value = m ? m.id : "";
   const lw = document.getElementById("mmLinkWrap");
-  lw.style.display = (m && m.temp && data && data.isFull) ? "block" : "none";
+  lw.style.display = (m && m.temp && data && (data.isFull || m.edit === true)) ? "block" : "none";   /* 仮組み v1.2.006：その方を編集できる方も、ひもづけられます */
   document.getElementById("mmLinkId").value = "";
   document.getElementById("mmId").readOnly = !!m;
   document.getElementById("mmId").style.background = m ? "#EFEDF5" : "var(--paper)";
