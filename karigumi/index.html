@@ -385,7 +385,7 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body)
 <!-- 仮組み：ファーストサポートの各ステップの中身 -->
 <div id="fCopyAlert" hidden><div class="fca-card" role="alertdialog" aria-labelledby="fcaTtl">
   <p class="fca-ttl" id="fcaTtl">⚠️ お名前をコピーしてください</p>
-  <p class="fca-txt">オープンチャットに入るときは、ご自身のお名前を<b>「名前／チーム名／系列名」</b>にします。文字数が多くなりすぎるときは、チーム名を省いて<b>「名前／系列名」</b>だけでも大丈夫です。</p>
+  <p class="fca-txt">オープンチャットに入るときは、ご自身のお名前を<br><b>「名前／チーム名／系列名」</b><br>にします。文字数が多くなりすぎるときは、チーム名を省いて<br><b>「名前／系列名」</b><br>だけでも大丈夫です。</p>
   <p class="fca-txt">参加のときに、このお名前を貼り付けます。先に<b>「📋 タップしてコピー」</b>を押して、お名前をコピーしてください。</p>
   <button type="button" id="fcaOk">OK</button>
 </div></div>
@@ -490,7 +490,7 @@ const LINK_DEF = {
 };
 /* 申し込みのシートを開く前に出す説明（同じ会員の方がご好意で開いている会であること・お名前のことなど） */
 const NOTES = {
-  "support": { title:"🧡 ユーザーサポート会", btn:"🧡 ユーザーサポート会に申し込む", html:"<p class=\"koui\">🤝 同じLINK会員の方が、<b>ご好意（貢献の気持ち）</b>で開いてくださっている会です。会社の方が開いているものではありません。</p><p>はじめての方が、<b>LINKの最低限の使い方</b>が分かる会です。</p><p>ご参加のときは、次のものが<b>すぐ分かる・すぐ開ける</b>状態にしておいてください。</p><ul><li>会員情報（ご自分の会員番号）</li><li>LINKのコンテンツサービスにログインするときのパスワード</li><li>LINKポータルが開ける状態</li></ul><p class=\"nm1\">📝 お知らせが届きやすくなるように、<b>申し込みのお名前は、オープンチャットのお名前と同じ</b>にしてください。</p>" },
+  "support": { title:"🧡 ユーザーサポート会", btn:"🧡 ユーザーサポート会に申し込む", html:"<p class=\"koui\">🤝 あなたと同じLINK会員の方が、<b>貢献の気持ち</b>で開いてくださっている会です。そのことを理解して、<b>感謝しながら</b>参加していただければと思います。</p><p>はじめての方が、<b>LINKの最低限の使い方</b>が分かる会です。</p><p>ご参加のときは、次のものを準備してください。</p><ul><li>ご自身の会員番号</li><li>LINKのコンテンツサービスにログインするときのパスワード</li><li>LINKポータルが開ける状態</li></ul><p class=\"nm1\">📝 お知らせが届きやすくなるように、<b>申し込みのお名前は、ユーザーサポートのオープンチャットのお名前と同じ</b>にしてください。</p>" },
   "douga": { title:"🎬 動画視聴会", btn:"🎬 動画視聴会に申し込む", html:"<p class=\"koui\">🤝 同じLINK会員の方が、<b>ご好意（貢献の気持ち）</b>で開いてくださっている動画視聴会です。会社の方が開いているものではありません。</p><p>大切な動画を、<b>みんなで一緒に見る会</b>です。</p><p class=\"nm1\">📝 お知らせが届きやすくなるように、<b>申し込みのお名前は、オープンチャットのお名前と同じ</b>にしてください。</p>" },
   "kouryu-on": { title:"💻 オンライン交流会", btn:"💻 オンライン交流会に申し込む", html:"<p class=\"koui\">🤝 同じLINK会員の方が、<b>ご好意（貢献の気持ち）</b>で運営・主催してくださっている、チームの交流会です。会社の方が開いているものではありません。</p><p>オンラインで、<b>クラスメイトとも言えるチームの仲間</b>との絆を深めましょう。</p><p class=\"nm1\">📝 お知らせが届きやすくなるように、<b>申し込みのお名前は、チームのLINE・ユーザーサポート会・オープンチャットなどと同じお名前</b>にしてください。</p>" },
   "kouryu-re": { title:"🍽 リアル交流会", btn:"🍽 リアル交流会に申し込む", html:"<p class=\"koui\">🤝 同じLINK会員の方が、<b>ご好意（貢献の気持ち）</b>で運営してくださっている、チームの交流会です。会社の方が開いているものではありません。</p><p>画面越しではなく、<b>実際に仲間たちと会える会</b>です。一度お会いしておくと、その後のやりとりがぐっと近くなります。</p><p class=\"nm1\">📝 お知らせが届きやすくなるように、<b>申し込みのお名前は、オープンチャットのお名前と同じ</b>にしてください。</p>" },
@@ -528,8 +528,8 @@ const TREE = [
         + '<a class="fbtn" href="first-support/step3-4.html">📄 つまずきやすいステップ3・4の補足を見る</a>'
         + '<p class="fsmall" style="text-align:left;margin-top:8px">リッチメニューが開放されない・わからない問題があるときは、初期サポートグループラインでご質問ください❤️</p>'},
     {ic:"🏁", nm:"1stステップを\n完了しよう", g:"member", num:2, group:true, kids:[
-      {ic:"🤝", nm:"ユーザー\nサポート会", g:"member", task:"k2a", noteKey:"support", thanks:true,
-       note2:"はじめての方が、いちばん最初に足を運ぶ場所です。転校初日に学校案内をしてもらうイメージで、ここで出会う人が最初の応援団になってくれます。"},
+      {ic:"🤝", nm:"ユーザー\nサポート会", g:"member", task:"k2a", noteKey:"support",
+       note2:"はじめての方が、いちばん最初に足を運ぶ場所です。転校初日に学校案内をしてもらうイメージです。"},
       {ic:"📚", nm:"LINKセミナー", g:"member", task:"k2b",
        note2:"LINKの完全攻略MAP（5つの宝の地図）。全会員に必要な基盤となる、5種類のセミナーです。LINKの「今」を知ることで、あなたのやりたいことが叶っていきます✨<br>下のボタンで中身を見て、見たセミナーにはチェックを入れましょう。",
        pages:[{t:"📖 LINKセミナーについて（見たセミナーのチェックも）", u:"first-support/link-seminar.html"}]},
@@ -1129,7 +1129,7 @@ function openTask(it){
   if(it.pages) it.pages.forEach((pg, i)=>{ h += `<button type="button" class="fbtn fpage" data-i="${i}" style="width:100%;border:none;cursor:pointer;font-family:inherit;background:#6E5FB5">${pg.t}</button>`; });
   if(it.quiz) h += '</div>';
   if(it.refSave) h += '<div class="fgen"><input id="fRef" type="url" inputmode="url" autocapitalize="off" spellcheck="false" placeholder="https://…" value="' + String((me && me.refUrl) || "").replace(/"/g, "&quot;") + '"><button type="button" id="fRefOk">OK（会員情報に保存する）</button><p class="fsmall" id="fRefMsg" style="margin-top:6px"></p></div>';
-  if(it.pass) h += '<div class="fgen"><label for="fPass">🔑 合言葉</label><input id="fPass" type="text" autocomplete="off" placeholder="ユーザーサポート会で教わった合言葉"><button type="button" id="fPassOk">合言葉を入れる</button><p class="fsmall" id="fPassMsg" style="margin-top:6px"></p><div id="fPassBox"></div></div>';
+  if(it.pass) h += '<div class="fgen"><label for="fPass">🔑 合言葉（ヒント：この会社名をカタカナで）</label><input id="fPass" type="text" autocomplete="off" placeholder="ユーザーサポート会で教わった合言葉"><button type="button" id="fPassOk">合言葉を入れる</button><p class="fsmall" id="fPassMsg" style="margin-top:6px"></p><div id="fPassBox"></div></div>';
   if(it.nameRule) h += '</div>';
   if(it.link) h += `<a class="flink" id="taskLink" href="${it.link.u}"${/^https?:/.test(it.link.u) ? ' target="_blank" rel="noopener"' : ""}>${it.link.t}</a>`;
   h += done ? '<button type="button" class="fdone undo" id="taskDone">もどす（まだ終わっていない）</button>' : '<button type="button" class="fdone" id="taskDone">✅ できた！</button>';
