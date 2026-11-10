@@ -24,9 +24,9 @@ window.SKY_APP = { tool:"support", base:"./", name:"LINKサポート", open:"./i
 <script src="./app-install.js"></script>
 </head>
 <body>
-<!-- 仮組み：置けたら、はじめの一歩にもどれるように -->
-<a href="./index.html" id="aiBackHome" style="position:fixed;left:12px;top:calc(env(safe-area-inset-top) + 10px);z-index:50;background:rgba(255,255,255,.95);border-radius:999px;padding:7px 14px;font-size:14px;font-weight:700;color:#6E5FB5;text-decoration:none;box-shadow:0 2px 8px rgba(60,42,110,.15)">← もどる</a>
 <div class="ai-wrap" id="aiRoot"></div>
+<!-- 仮組み：「もどる」はページのいちばん下のまんなかに -->
+<div style="text-align:center;padding:10px 0 calc(env(safe-area-inset-bottom) + 56px)"><a href="./index.html" id="aiBackHome" style="display:inline-block;background:#fff;border:2px solid #CFC8E6;border-radius:999px;padding:10px 26px;font-size:15px;font-weight:700;color:#6E5FB5;text-decoration:none;box-shadow:0 2px 8px rgba(60,42,110,.12)">← もどる</a></div>
 <script>
 /* 仮組み：ホーム以外のページ（便利ボタン集など）から来たときは、「もどる」でそのページへ */
 (function(){

@@ -1118,7 +1118,7 @@ function openTask(it){
   $("#taskTitle").textContent = it.ic + " " + it.nm.replace(/\n/g,"");
   let h = it.note2 ? `<p>${it.note2}</p>` : '<p style="color:#9E9E9E;font-size:13px">（仮組み：くわしい中身は準備中です）</p>';
   /* 名前のルール：「理解しました」にチェックしないと、この先が使えません */
-  if(it.nameRule) h += '<div class="frule"><span>LINKで活動するために各種オープンチャットに入るときは、ご自身のお名前を<b>「名前／チーム名／系列名」</b>にします。文字数が多くなりすぎるときは、チーム名を省いて<b>「名前／系列名」</b>だけでも大丈夫です。</span><label class="frule-ok"><input type="checkbox" id="fRule"><b>理解しました</b></label></div><div id="fGate" class="fgate off">';
+  if(it.nameRule) h += '<div class="frule"><span>LINKで活動するために各種オープンチャットに入るときは、ご自身のお名前を<br><b>「名前／チーム名／系列名」</b><br>にします。文字数が多くなりすぎるときは、チーム名を省いて<br><b>「名前／系列名」</b><br>だけでも大丈夫です。</span><label class="frule-ok"><input type="checkbox" id="fRule"><b>理解しました</b></label></div><div id="fGate" class="fgate off">';
   if(it.gen) h += '<div class="fgen"><label for="fgName">👤 あなたのお名前</label><input id="fgName" type="text" autocomplete="nickname" placeholder="例：しょうこ">'
     + '<label for="fgKei">🏷️ 系列</label><select id="fgKei"></select><div class="res" id="fgRes">👆 お名前と系列を入れてください</div><button type="button" id="fgCopy">📋 タップしてコピー</button></div>';
   if(it.thanks) h += '<p class="koui">🤝 同じ会員の立場の方が、<b>貢献の気持ち</b>で開いてくださっている会です。そのことを理解して、<b>感謝しながら</b>参加していただければと思います。</p>';
