@@ -25,6 +25,9 @@
     { ic:"📖", nm:"使い方",
       sub:"このサイトの使い方を、絵で見る",
       url: up+"howto.html", need:"" },
+    { ic:"💡", nm:"Tips一覧",
+      sub:"LINKの豆知識を、短い動画で見る",
+      url: up+"tips.html", need:"" },
 
     { sec: "まなぶ" },
     /* 仮組み：ファーストサポートは、トップの丸（はじめの一歩 → LINKを知ろう → LINKを使おう）で進めます。

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<script src="config.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Tips一覧｜Skyarc LINKサポート</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="beta.css">
+<meta name="theme-color" content="#6E5FB5">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Zen Kaku Gothic New",sans-serif;background:#FCFBFF;color:#2A2438;padding:16px 14px 48px}
+.wrap{max-width:420px;margin:0 auto}
+.back-btn{display:inline-flex;align-items:center;gap:6px;color:#6E5FB5;font-size:13px;font-weight:700;text-decoration:none;margin-bottom:14px}
+h1{font-family:"Zen Maru Gothic",sans-serif;font-size:19px;font-weight:900;color:#4A3D8F;text-align:center;margin-bottom:4px}
+.lead{font-size:13px;color:#7A7390;text-align:center;line-height:1.8;margin-bottom:14px}
+#player{background:#fff;border:1px solid #E4E0F0;border-radius:18px;padding:12px;box-shadow:0 4px 14px rgba(60,42,110,.08);margin-bottom:16px}
+.list{display:flex;flex-direction:column;gap:8px}
+.list button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:1.5px solid #E4E0F0;background:#fff;border-radius:12px;padding:12px 14px;font-family:inherit;font-size:14.5px;font-weight:700;color:#3E3A50;cursor:pointer}
+.list button.on{border-color:#6E5FB5;background:#F0EDF9;color:#4A3D8F}
+.list button .n{flex:none;width:24px;height:24px;border-radius:50%;background:#6E5FB5;color:#fff;font-size:12px;display:grid;place-items:center}
+.back-btn2{display:block;padding:14px;border-radius:12px;background:#6E5FB5;color:#fff;text-align:center;font-size:15px;font-weight:700;text-decoration:none;margin-top:20px}
+</style>
+<script src="loading.js"></script>
+<script src="login.js"></script>
+<script src="tips.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <a href="index.html" class="back-btn">← ホームに戻る</a>
+  <h1>💡 Tips一覧</h1>
+  <p class="lead">LINKの豆知識を、短い動画（音なし）で見られます。<br>見たいものを押してください。</p>
+  <div id="player"></div>
+  <div class="list" id="list"></div>
+  <a href="index.html" class="back-btn2">← ホームに戻る</a>
+</div>
+<script>
+(function(){
+  var list = document.getElementById("list"), pl = document.getElementById("player"), cur = null;
+  function play(i){
+    if(cur) cur.stop();
+    cur = skyTips.mount(pl, { ids:[skyTips.list[i].id], controls:true });
+    list.querySelectorAll("button").forEach(function(b, k){ b.classList.toggle("on", k === i); });
+  }
+  list.innerHTML = skyTips.list.map(function(t, i){ return '<button type="button"><span class="n">' + (i + 1) + '</span>' + t.t + '</button>'; }).join("");
+  list.querySelectorAll("button").forEach(function(b, i){ b.addEventListener("click", function(){ play(i); window.scrollTo({top:0, behavior:"smooth"}); }); });
+  play(0);
+})();
+</script>
+<script src="track.js"></script>
+<script src="menu.js"></script>
+</body>
+</html>

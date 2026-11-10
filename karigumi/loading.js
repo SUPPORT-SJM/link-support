@@ -10,6 +10,24 @@
 ================================================================ */
 (function () {
   var box = null, showTimer = null, tick = null, sec = 0, showing = false;
+  /* 待っている間に、豆知識（Tips）の短い動画を流します（tips.js を、このファイルと同じ場所から読みます） */
+  var tipsSrc = (document.currentScript && document.currentScript.src || "").replace(/loading\.js(\?.*)?$/, "tips.js");
+  var tipsPlayer = null;
+  function startTips() {
+    var host = document.getElementById("sklTips"); if (!host) return;
+    stopTips();
+    host.style.display = "block";
+    document.getElementById("sklCard").classList.add("tips");
+    var go = function () { if (showing && window.skyTips) tipsPlayer = window.skyTips.mount(host, { random: true, loop: true }); };
+    if (window.skyTips) { go(); return; }
+    if (!tipsSrc || document.getElementById("sklTipsJs")) return;
+    var sc = document.createElement("script"); sc.id = "sklTipsJs"; sc.src = tipsSrc; sc.onload = go; document.head.appendChild(sc);
+  }
+  function stopTips() {
+    if (tipsPlayer) { tipsPlayer.stop(); tipsPlayer = null; }
+    var host = document.getElementById("sklTips"); if (host) { host.style.display = "none"; host.innerHTML = ""; }
+    var card = document.getElementById("sklCard"); if (card) card.classList.remove("tips");
+  }
 
   function build() {
     if (box) return;
@@ -41,7 +59,9 @@
       + '.skl-btn{margin-top:18px;padding:13px 26px;border-radius:12px;border:none;cursor:pointer;'
       + 'background:#6E5FB5;color:#fff;font-size:14px;font-weight:700;display:none;'
       + 'font-family:inherit;}'
-      + '.skl-btn.show{display:inline-block;}';
+      + '.skl-btn.show{display:inline-block;}'
+      + '.skl-card.tips{max-width:360px;padding:22px 18px 18px;}'
+      + '#sklTips{display:none;margin-top:16px;}';
     document.head.appendChild(css);
 
     box = document.createElement("div");
@@ -53,6 +73,7 @@
       +     '<span class="skl-dots" id="sklDots">…</span></p>'
       +   '<p class="skl-sub" id="sklSub">しばらくお待ちください</p>'
       +   '<div class="skl-bar"><i></i></div>'
+      +   '<div id="sklTips"></div>'
       +   '<button class="skl-btn" id="sklBtn">とじる</button>'
       + '</div>';
     document.body.appendChild(box);
@@ -92,6 +113,7 @@
       document.getElementById("sklBtn").className = "skl-btn";
       box.classList.add("show");
       startTick();
+      startTips();
     }, 1000);
   };
 
@@ -109,6 +131,7 @@
     box.classList.add("show");
     clearInterval(tick);
     startTick();
+    startTips();
   };
 
   /* ページを開くまで、ぐるぐるを出したままにします */
@@ -123,6 +146,7 @@
     document.getElementById("sklSub").textContent = "もうすぐです";
     document.getElementById("sklBtn").className = "skl-btn";
     box.classList.add("show");
+    stopTips();
     startTick();
     setTimeout(function () { location.href = url; }, 60);
   };
@@ -147,6 +171,7 @@
   window.skyLoadingDone = function () {
     clearTimeout(showTimer);
     clearInterval(tick);
+    stopTips();
     if (box && showing) { box.classList.remove("show"); showing = false; }
   };
 
@@ -160,6 +185,7 @@
     clearTimeout(showTimer);
     clearInterval(tick);
     build();
+    stopTips();
     showing = true;
     var card = document.getElementById("sklCard");
     card.className = "skl-card";
@@ -188,6 +214,7 @@
     clearTimeout(showTimer);
     clearInterval(tick);
     build();
+    stopTips();
     showing = true;
     document.getElementById("sklCard").className = "skl-card err";
     document.getElementById("sklMsg").textContent = message || "うまくいきませんでした";
