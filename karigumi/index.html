@@ -119,6 +119,12 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body)
 #taskSheet .fjnote{font-size:12.5px;color:#A1887F;text-align:center;margin-top:6px;line-height:1.7;}
 #taskSheet .fjnote.warn{color:#D84315;font-weight:700;}
 #taskSheet .fjnote.ready{color:#2E7D32;font-weight:700;}
+#fCopyAlert{position:fixed;inset:0;z-index:8300;background:rgba(40,30,20,.5);display:flex;align-items:center;justify-content:center;padding:20px;}
+#fCopyAlert[hidden]{display:none;}
+#fCopyAlert .fca-card{background:#fff;border-radius:18px;padding:20px 18px 16px;max-width:340px;width:100%;border:3px solid #FFB74D;box-shadow:0 10px 30px rgba(0,0,0,.25);animation:fShake .5s;}
+#fCopyAlert .fca-ttl{font-size:16px;font-weight:900;color:#D84315;text-align:center;margin-bottom:10px;}
+#fCopyAlert .fca-txt{font-size:14px;line-height:1.85;color:#5D4037;margin-bottom:8px;}
+#fCopyAlert #fcaOk{display:block;width:100%;margin-top:6px;padding:12px;border:none;border-radius:12px;background:#FF7043;color:#fff;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;}
 #taskSheet .fshake{animation:fShake .5s;}
 @keyframes fShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
 #taskSheet .fgate.off{opacity:.35;pointer-events:none;filter:grayscale(.6);}
@@ -376,6 +382,12 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body)
   </div>
 </div>
 <!-- 仮組み：ファーストサポートの各ステップの中身 -->
+<div id="fCopyAlert" hidden><div class="fca-card" role="alertdialog" aria-labelledby="fcaTtl">
+  <p class="fca-ttl" id="fcaTtl">⚠️ お名前をコピーしてください</p>
+  <p class="fca-txt">オープンチャットに入るときは、ご自身のお名前を<b>「名前／チーム名／系列名」</b>にします。文字数が多くなりすぎるときは、チーム名を省いて<b>「名前／系列名」</b>だけでも大丈夫です。</p>
+  <p class="fca-txt">参加のときに、このお名前を貼り付けます。先に<b>「📋 タップしてコピー」</b>を押して、お名前をコピーしてください。</p>
+  <button type="button" id="fcaOk">OK</button>
+</div></div>
 <div class="sheet" id="taskSheet" style="z-index:8100;" hidden>
   <div class="card note" role="dialog" aria-labelledby="taskTitle">
     <button type="button" class="close" id="taskClose" aria-label="とじる">×</button>
@@ -1225,9 +1237,12 @@ function flowGen(){
     e.preventDefault();
     const jn = $("#fJoinNote");
     if(jn){ jn.innerHTML = "⚠️ 先に <b>「📋 タップしてコピー」</b> を押してから参加してください<br><span style=\"font-weight:400\">参加のときに、コピーしたお名前を貼り付けます</span>"; jn.className = "fjnote warn"; }
-    btn.scrollIntoView({behavior:"smooth", block:"center"});
-    btn.classList.remove("fshake"); void btn.offsetWidth; btn.classList.add("fshake");
-    setTimeout(()=>btn.classList.remove("fshake"), 600);
+    /* ポップアップで「名前のルール」と「コピーしてください」をお知らせ → OKでカードに戻り、コピーボタンがブルブルします */
+    const al = $("#fCopyAlert"); al.hidden = false;
+    $("#fcaOk").onclick = ()=>{ al.hidden = true;
+      btn.scrollIntoView({behavior:"smooth", block:"center"});
+      btn.classList.remove("fshake"); void btn.offsetWidth; btn.classList.add("fshake");
+      setTimeout(()=>btn.classList.remove("fshake"), 600); };
   }));
 }
 let flowCopied = false;
