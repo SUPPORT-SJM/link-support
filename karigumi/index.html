@@ -116,6 +116,11 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body)
 #taskSheet h4{font-size:14px;color:#E65100;margin:12px 0 4px;}
 #taskSheet .frule{display:flex;gap:10px;align-items:flex-start;background:#FFF3E0;border:2px solid #FFB74D;border-radius:12px;padding:10px 12px;margin:8px 0;font-size:14px;line-height:1.8;cursor:pointer;}
 #taskSheet .frule input{width:22px;height:22px;margin-top:3px;flex:none;accent-color:#FF7043;}
+#taskSheet .fjnote{font-size:12.5px;color:#A1887F;text-align:center;margin-top:6px;line-height:1.7;}
+#taskSheet .fjnote.warn{color:#D84315;font-weight:700;}
+#taskSheet .fjnote.ready{color:#2E7D32;font-weight:700;}
+#taskSheet .fshake{animation:fShake .5s;}
+@keyframes fShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
 #taskSheet .fgate.off{opacity:.35;pointer-events:none;filter:grayscale(.6);}
 #taskSheet .fq{background:#F7F5FF;border-radius:12px;padding:8px 12px;margin:6px 0;}
 #taskSheet .fq p{margin:0 0 6px;font-size:14.5px;}
@@ -536,10 +541,7 @@ const TREE = [
     /* v1.2.007：「1stステップ参加確認」はなくしました */
     {ic:"🌈", nm:"Skyarcの\n交流＆PRチャット", g:"member", num:1, task:"u1", pass:true, wide:true, nameRule:true,
      note2:"Skyarcの仲間たちが、いろいろなお知らせをしてくれたり、良かったことの交流や自己紹介をし合ったりしているチャットです。<br>名前に<b>グループ名を必ず入れて</b>、マナーを守って楽しくご参加ください😊<br><b>ユーザーサポート会</b>で教えてもらう<b>合言葉</b>を入れると、2つのチャットにご招待できます。"},
-    {ic:"📣", nm:"LINK情報伝達\nチャット", g:"member", num:2, task:"u2", gen:true, wide:true, nameRule:true,
-     note2:"LINK全体の、<b>あなたにとって大事な情報</b>が常に来るチャットです（書きこみはできません）。しっかり毎日ご確認ください。<br>入る前に、下で名前を作ってコピーしておきましょう。",
-     html:'<a class="fbtn" href="https://line.me/ti/g2/gMA3NZL3Ypihck48K0xB9mHwJe8AV3ezmjXX6A?utm_source=invitation&utm_medium=link_copy&utm_campaign=default" target="_blank" rel="noopener">📲 LINK情報伝達チャットに入る</a>'},
-    {ic:"🏘", nm:"地域コミュニティ\nLINKサークル", g:"member", num:3, task:"u3", wide:true, nameRule:true,
+    {ic:"🏘", nm:"地域コミュニティ\nLINKサークル", g:"member", num:2, task:"u3", wide:true, nameRule:true,
      note2:"<b>地域コミュニティ</b>は、あなたの地域の仲間とつながれるチャットです。ぜひ入っておきましょう。<br>趣味・事業・興味に合うサークルは<b>「LINKサークル」</b>と呼ばれています。<br>📛 <b>LINK全体のチャット（情報伝達チャット）は、書きこみ禁止</b>です。<br>💡 LINKサークルは情報量が多くなるので、<b>最初は2つまで</b>にしておきましょう。慣れてきたら増やしてください。<br>LINK information でも、詳しく分かります。",
      quiz:[{q:"告知（PR）は、1つの事業掲載につき、週に1回だけである。", a:"o"},
            {q:"同じ日に、別のチャットであれば、同じ案件のPRをしても良い。", a:"x"}],
@@ -616,11 +618,12 @@ const TREE = [
      note2:"LINKの公式LINE「LINK information」を友だち追加します。詳しい使い方（リッチメニューなど）は、あとでお伝えします。いまは<b>「友だち追加」だけ</b>でOKです😊",
      html:'<a class="fbtn green" href="https://s.lmes.jp/landing-qr/2008524921-7QZ2vX3X?uLand=iRyJ9G" target="_blank" rel="noopener">📲 LINK information を友だち追加する</a>'
         + '<img class="fqr" src="img/qr-link-information.png" alt="LINK information の友だち追加のQRコード"><p class="fsmall">パソコンで見ているときは、スマホのカメラでこのQRコードを読みとってください</p>'},
-    {ic:"🫧", nm:"3つの\nオープンチャット", g:"member", num:2, task:"h2", gen:true,
-     note2:"オープンチャットでは、名前の後ろに<b>「チーム名／系列名」</b>を入れるのがルールです。学校で「山田くん」と言われても、何年何組か分からないと、担任の先生に連絡できないのと同じです。まず下で名前を作ってコピーしてから、3つに入りましょう。",
-     html:'<h4>① LINK情報伝達チャット（情報の宝箱）</h4><a class="fbtn" href="https://line.me/ti/g2/gMA3NZL3Ypihck48K0xB9mHwJe8AV3ezmjXX6A?utm_source=invitation&utm_medium=link_copy&utm_campaign=default" target="_blank" rel="noopener">📲 LINK情報伝達チャットに入る</a>'
-        + '<h4>② ユーザーサポートチャット（質問できる）</h4><a class="fbtn" href="https://line.me/ti/g2/yBQmWy1jkxlyWsEQ6hpzwTEyKK6VVSdt4B5mhw?utm_source=invitation&utm_medium=link_copy&utm_campaign=default" target="_blank" rel="noopener">📲 ユーザーサポートに参加する</a>'
-        + '<h4>③ 交流チャット（クラスメイト）</h4><p class="fsmall" style="text-align:left">（準備中）系列やグループの交流チャットは、ご紹介くださった方・サポーターから招待してもらってください。</p>'},
+    {ic:"🫧", nm:"必要最低限の\nオープンチャット", g:"member", num:2, task:"h2", gen:true, wide:true, nameRule:true,
+     note2:"オープンチャットでは、名前の後ろに<b>「チーム名／系列名」</b>を入れるのがルールです。学校で「山田くん」と言われても、何年何組か分からないと、担任の先生に連絡できないのと同じです。まず下で名前を作って<b>コピーしてから</b>、2つに入りましょう。",
+     html:'<h4>① LINK情報伝達チャット（情報の宝箱）</h4><p class="fsmall" style="text-align:left">LINK全体の、<b>あなたにとって大事な情報</b>が常に来るチャットです（書きこみはできません）。しっかり毎日ご確認ください。</p><a class="fbtn fjoin" href="https://line.me/ti/g2/gMA3NZL3Ypihck48K0xB9mHwJe8AV3ezmjXX6A?utm_source=invitation&utm_medium=link_copy&utm_campaign=default" target="_blank" rel="noopener">📲 LINK情報伝達チャットに入る</a>'
+        + '<h4>② 🌈Skyarcユーザーサポート（質問できる）</h4><a class="fbtn fjoin" href="https://line.me/ti/g2/yBQmWy1jkxlyWsEQ6hpzwTEyKK6VVSdt4B5mhw?utm_source=invitation&utm_medium=link_copy&utm_campaign=default" target="_blank" rel="noopener">📲 🌈Skyarcユーザーサポートに参加する</a>'
+        + '<p class="fjnote" id="fJoinNote">先に、上の「📋 タップしてコピー」を押してから参加してください</p>'
+        + '<h4>③ 交流チャット</h4><p class="fsmall" style="text-align:left">交流チャットは、<b>ユーザーサポートに参加した後</b>にご参加ください。<b>「LINKを使おう」が開いたら</b>、そこでご案内します。</p>'},
     {ic:"🔗", nm:"紹介URLを\n発行・保存", g:"member", num:3, task:"h3",
      note2:"いまは「紹介」なんて興味ないですよね（笑）。でも「LINK楽しいよ」と言っただけで「入りたい！」という人が出てきたときの、未来の自分のための準備です。",
      html:'<h4>📝 発行のしかた</h4><ol class="fhow">'
@@ -693,7 +696,7 @@ async function flowInherit(q){
   const t = v=>v === true || (typeof v === "string" && v !== "");
   if(t(G.G1)) out.h0 = true;                                   /* LINKポータルをホームに置く */
   if(t(G.G2)) out.h1 = true;                                   /* LINK information */
-  if(t(H.H1) && t(H.H2) && (t(G.G5) || t(S.S5))) out.h2 = true;  /* 3つのオープンチャット */
+  if(t(H.H1) && t(H.H2) && (t(G.G5) || t(S.S5))) out.h2 = true;  /* 必要最低限のオープンチャット */
   if(t(H.H3)) out.h3 = true;                                   /* 紹介URL */
   if(t(G.Gs)) out.k1 = true;                                   /* リッチメニューの解放 */
   if(t(S.S1) || t(V.u)) out.k2a = true;                        /* ユーザーサポート会 */
@@ -703,7 +706,6 @@ async function flowInherit(q){
   if(t(S.S8)) out.k3a = true;                                  /* SASAEAI */
   if(t(S.S7)) out.k3b = true;                                  /* LINK-BASE */
   if(t(S.S6) || t(H.H2)) out.u1 = true;                        /* チームのチャット（系列のオープンチャット） */
-  if(t(S.S5) || t(G.G5)) out.u2 = true;                        /* LINK全体のチャット */
   return out;
 }
 function flowPageItem(k){ return TREE.find(it=>it.flowPage === k); }
@@ -1214,8 +1216,21 @@ function flowGen(){
     if(window.skyNick) skyNick.render(box, n, k); };
   nm.addEventListener("input", up); sel.addEventListener("change", up); up();
   btn.onclick = async ()=>{ if(!nm.value.trim() || !sel.value || !window.skyNick) return;
-    const okc = await copyText(skyNick.make(nm.value.trim(), sel.value).text); btn.textContent = okc ? "✓ コピーしました" : "📋 タップしてコピー"; };
+    const okc = await copyText(skyNick.make(nm.value.trim(), sel.value).text); btn.textContent = okc ? "✓ コピーしました" : "📋 タップしてコピー";
+    if(okc){ flowCopied = true; const jn = $("#fJoinNote"); if(jn){ jn.textContent = "✅ 準備ができました。参加のときに、コピーしたお名前を貼り付けてください"; jn.className = "fjnote ready"; } } };
+  /* 名前をコピーしていないと、参加ボタンでは入れません（コピーボタンがブルブルします）。カードを開くたびにコピーし直します */
+  flowCopied = false;
+  document.querySelectorAll("#taskBody .fjoin").forEach(a=>a.addEventListener("click", e=>{
+    if(flowCopied) return;
+    e.preventDefault();
+    const jn = $("#fJoinNote");
+    if(jn){ jn.innerHTML = "⚠️ 先に <b>「📋 タップしてコピー」</b> を押してから参加してください<br><span style=\"font-weight:400\">参加のときに、コピーしたお名前を貼り付けます</span>"; jn.className = "fjnote warn"; }
+    btn.scrollIntoView({behavior:"smooth", block:"center"});
+    btn.classList.remove("fshake"); void btn.offsetWidth; btn.classList.add("fshake");
+    setTimeout(()=>btn.classList.remove("fshake"), 600);
+  }));
 }
+let flowCopied = false;
 /* 全部できたときのお祝い：系列の絵文字が、下から噴水のように湧いて落ちてきます（自分の系列の絵文字は多めに） */
 function flowEmojis(){
   const re = /\p{Extended_Pictographic}️?/gu;
