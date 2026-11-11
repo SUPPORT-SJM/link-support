@@ -243,7 +243,7 @@ function fill(){
 
   /* 段階の「アドバンス」は「クリエアドバンス」と出します */
   const rank = member.role ? member.role.split(/[,、\s]+/).filter(x=>x).map(x=>x === "アドバンス" ? "クリエアドバンス" : x).join(" / ")
-             : (member.crie ? "クリエイターズ" : (member.sup ? "サポーター" : "メンバー"));
+             : (member.crie ? "クリエーターズ" : (member.sup ? "サポーター" : "メンバー"));
   set("#vRank", rank);
   set("#vJoin", member.linkJoin);
   if(member.linkJoin) $("#inJoin").value = String(member.linkJoin).replace(/\//g, "-");

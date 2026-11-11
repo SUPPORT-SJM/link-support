@@ -292,7 +292,7 @@ const KIND = {
   "event":     { ic:"🎪", note:
       "⚠️ <b>オープンチャットのお名前と、お申し込みのお名前をそろえてください。</b>" },
   "crie":      { ic:"🌱", note:
-      "⚠️ <b>クリエイターズ以上の方向けの申込みです。</b>" },
+      "⚠️ <b>クリエーターズ以上の方向けの申込みです。</b>" },
 };
 /* 予定の分け方（管理画面で足した申込みシートは、えらんだ「出す場所」に入ります） */
 const catOf = e => e.cat || e.book;
@@ -305,7 +305,7 @@ const CATS = [
   { key:"kouryu-re", ic:"🤝", nm:"チーム交流会(リアル)",      sub:"実際にお会いできます" },
   { key:"douga",     ic:"🎬", nm:"動画視聴会",               sub:"みんなで一緒に見ます" },
   { key:"event",     ic:"🎪", nm:"そのほかの催し",            sub:"合同の会など", onlyIf:true },
-  { key:"crie",      ic:"🌱", nm:"クリエ以上の申込み",        sub:"クリエイターズ以上の方向け", onlyIf:true },
+  { key:"crie",      ic:"🌱", nm:"クリエ以上の申込み",        sub:"クリエーターズ以上の方向け", onlyIf:true },
 ];
 
 function $(q){ return document.querySelector(q); }

@@ -9,7 +9,7 @@
 ================================================================ */
 
 /* ---------------- ① バージョン ---------------- */
-window.SKY_VERSION = "v1.2.025";
+window.SKY_VERSION = "v1.2.026";
 window.SKY_VERSION_DATE = "2026/11/11";
 
 /* ---------------- ② GASのURL ----------------
@@ -229,7 +229,7 @@ window.skyDebug = (function () {
   function labelOf(d) {
     if (!d) return "オフ";
     if (d.mode === "admin") return "管理者";
-    var t = (d.roles || []).slice(-1)[0] || (d.crie ? "クリエイターズ" : d.sup ? "サポーター" : "メンバー");
+    var t = (d.roles || []).slice(-1)[0] || (d.crie ? "クリエーターズ" : d.sup ? "サポーター" : "メンバー");
     return t;
   }
   /* 本当の会員情報 → いまの状態で見せる会員情報 */
@@ -379,7 +379,7 @@ window.skyDebug = (function () {
         + '<button type="button" class="adm" data-a="admin">🔐 管理者としてすべて見る</button>'
         + '<p class="s" style="margin:12px 0 0;">または、下で状態をえらんで試します。どれも、押すとつく・もう一度押すと外れる、だけです（ほかのものは自動でつきません）。</p>'
         + '<div class="lb">立場（何もつけない＝メンバー）</div><div class="g">'
-        + chip(st.sup, "サポーター", "f:sup") + chip(st.crie, "クリエイターズ", "f:crie")
+        + chip(st.sup, "サポーター", "f:sup") + chip(st.crie, "クリエーターズ", "f:crie")
         + ROLES.map(function (r) { return chip(st.roles.indexOf(r) >= 0, r, "r:" + r); }).join("") + '</div>'
         + '<div class="lb">部門</div><select data-a="dept"><option value="">なし（未所属）</option>'
         + DEPTS.map(function (k) { return '<option value="' + k + '"' + (st.dept === k ? " selected" : "") + '>' + k + '</option>'; }).join("") + '</select>'
@@ -451,14 +451,14 @@ window.skyCelebrate = (function () {
     step1:  { fx:["petal","cracker","star"], em:"🌈", title:"活用の1stステップまで、<br>すべてコンプリート！", msg:"ファーストサポート修了認定です。<br>お楽しみ様でした。<br>どんどん活用しましょう！", btn:"ありがとう！" },
     sup:    { fx:["petal","cracker"], em:"🐣", title:"サポーター認定、<br>飛躍していきましょう！", msg:"これから、チームのみなさんのサポートを<br>一緒にしていきましょう。", btn:"よろしくお願いします！" },
     piyo:   { fx:["petal","cracker"], em:"🐔", title:"ぴよぴよ卒業、<br>ますます楽しみですね！", msg:"サポートの基本が身につきました。", btn:"ありがとう！" },
-    crie:   { fx:["star","petal"], em:"🌱", title:"クリエイターズへ、<br>ようこそ。", msg:"ここからがスタートです。<br>これからよろしくお願いします。<br>一緒に走っていきましょう！", btn:"よろしくお願いします！" },
+    crie:   { fx:["star","petal"], em:"🌱", title:"クリエーターズへ、<br>ようこそ。", msg:"ここからがスタートです。<br>これからよろしくお願いします。<br>一緒に走っていきましょう！", btn:"よろしくお願いします！" },
     gr:     { fx:["petal","cracker","star"], em:"🌳", title:"グルコンリーダー育成修了、<br>お楽しみ様でした！", msg:"場をつくり、人を導く力が育ちました。", btn:"ありがとう！" },
     adv:    { fx:["star","petal"], em:"🗝️", title:"アドバンスへ、<br>ようこそ。", msg:"これから、<br>一緒にやっていきましょう！", btn:"よろしくお願いします！" },
     keirep: { fx:["star"], em:"🔥", title:"系列代表として、<br>よろしくお願いします。", msg:"覚悟を持って、一緒にやっていきましょう。", btn:"一緒にやっていきます！" },
     team:   { fx:["star"], em:"👑", title:"チーム代表、<br>いつもありがとうございます。", msg:"みんなの夢を、<br>一緒に虹にしていきます。", btn:"ありがとう。" }
   };
   var LABEL = { hajime:"はじめの一歩", guide:"初期サポートガイド", step1:"活用の1stステップ", sup:"サポーター", piyo:"ぴよぴよ卒業",
-                crie:"クリエイターズ", gr:"グルコンリーダー修了", adv:"アドバンス", keirep:"系列代表", team:"チーム代表" };
+                crie:"クリエーターズ", gr:"グルコンリーダー修了", adv:"アドバンス", keirep:"系列代表", team:"チーム代表" };
   var reduce = false; try { reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) {}
   function css() {
     if (document.getElementById("skyCelebCss")) return;

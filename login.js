@@ -228,7 +228,7 @@
     var here = location.pathname;
     var up = (here.indexOf("/ikusei/") >= 0 || here.indexOf("/first-support/") >= 0) ? "../" : "./";
     if (!m || !m.id) return up + "index.html";
-    /* 役職をお持ちの方は、クリエイターズのページへ */
+    /* 役職をお持ちの方は、クリエーターズのページへ */
     var role = String(m.role || "");
     if (role) return up + "ikusei/portal-creators.html";
     if (m.crie === true) return up + "ikusei/portal-creators.html";

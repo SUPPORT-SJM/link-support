@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ぴよぴよ脱出クイズ|クリエイターズ育成プログラム①</title>
+<title>ぴよぴよ脱出クイズ|クリエーターズ育成プログラム①</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
@@ -170,10 +170,10 @@
   <div class="login-card">
     <div class="prog-badges">
       <span class="pb">① サポーター育成マニュアル</span>
-      <span class="pb hot">クリエイターズ育成プログラム ①</span>
+      <span class="pb hot">クリエーターズ育成プログラム ①</span>
     </div>
     <h1>🐣 ぴよぴよ脱出クイズ</h1>
-    <p class="sub">クリエイターズに上がるまでに、この7問を答えられるようになりましょう。<br>答え合わせは担当のクリエイターズまたはアドバンスと行います。</p>
+    <p class="sub">クリエーターズに上がるまでに、この7問を答えられるようになりましょう。<br>答え合わせは担当のクリエーターズまたはアドバンスと行います。</p>
     <div class="login-err" id="loginErr"></div>
     <div class="field">
       <label>会員番号</label>
@@ -182,7 +182,7 @@
     <div class="field">
       <label>パスコード(4桁の数字)</label>
       <input type="password" id="inPin" inputmode="numeric" maxlength="4" placeholder="初回は好きな4桁の数字を決めてください" autocomplete="current-password">
-      <small>※忘れた場合は担当のクリエイターズまたはアドバンスにご確認ください。</small>
+      <small>※忘れた場合は担当のクリエーターズまたはアドバンスにご確認ください。</small>
     </div>
     <div class="field">
       <label>系列</label>
@@ -212,7 +212,7 @@
         <div>
           <div class="prog-badges">
             <span class="pb">① サポーター育成マニュアル</span>
-            <span class="pb hot">クリエイターズ育成プログラム ①</span>
+            <span class="pb hot">クリエーターズ育成プログラム ①</span>
           </div>
           <h1>🐣 ぴよぴよ脱出クイズ</h1>
           <p id="helloLine">Skyarcの基本、7問に挑戦!</p>
@@ -257,13 +257,13 @@
       <div id="gradCard">
         <div class="big">🐣→🐔</div>
         <h3>ぴよぴよ卒業、おめでとう!</h3>
-        <p>7問すべてに先生の丸がそろいました!すばらしい🎉<br>つぎのステップは、担当のクリエイターズまたはアドバンスから案内があります。おたのしみに🌱</p>
+        <p>7問すべてに先生の丸がそろいました!すばらしい🎉<br>つぎのステップは、担当のクリエーターズまたはアドバンスから案内があります。おたのしみに🌱</p>
       </div>
     </div>
   </section>
 
   <footer>
-    クリエイターズ育成プログラム ①<br>
+    クリエーターズ育成プログラム ①<br>
     Presented by Skyarc-team
     <div class="verTag" style="margin-top:8px;color:rgba(255,255,255,.4);"></div>
 </footer>
@@ -402,7 +402,7 @@ async function login(){
       const j = await res.json();
     if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
       if(j.ok === false && j.error === "pin"){
-        err.textContent = "パスコードが一致しません。忘れた場合は担当のクリエイターズまたはアドバンスにご確認ください。";
+        err.textContent = "パスコードが一致しません。忘れた場合は担当のクリエーターズまたはアドバンスにご確認ください。";
         err.style.display = "block";
         member = null;
         return;

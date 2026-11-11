@@ -188,7 +188,7 @@
 <div id="loginView" style="display:none;">
   <div class="lcard">
     <h1>🗺 クリエマップ</h1>
-    <p class="sub">クリエイターズの系統図です<br>アドバンス以上の方がご覧いただけます</p>
+    <p class="sub">クリエーターズの系統図です<br>アドバンス以上の方がご覧いただけます</p>
     <div class="inapp-warn" id="inappWarn">
       <b>⚠️ アプリ内ブラウザで開いています</b>
       LINEなどのアプリ内では、Googleログインがご利用いただけません。
@@ -245,7 +245,7 @@
         </select>
         <button onclick="backToPortal()">‹ ポータルへ</button>
         <button onclick="location.href='../index.html'">🏠 ホーム</button>
-        <button onclick="location.href='./kanri-x7k2m9.html'">🔐 管理画面</button>
+        <button onclick="location.href='./kanri-x7k2m9.html'">🔐 メンバーマネジメントルーム</button>
       </div>
     </div>
   </div>
@@ -289,10 +289,10 @@
     <h2 style="font-family:'Zen Maru Gothic',sans-serif;font-weight:900;color:var(--deep);font-size:18px;margin:8px 0 10px;">クリエマップ</h2>
     <p style="font-size:13px;color:#77748A;line-height:1.9;margin-bottom:18px;">
       ご覧いただくには、ログインが必要です。<br>
-      管理画面からお進みください。
+      メンバーマネジメントルームからお進みください。
     </p>
     <button onclick="skyLoginRequired(function(){ location.reload(); })" style="display:block;width:100%;padding:14px;border-radius:12px;background:var(--leaf);color:#fff;border:none;cursor:pointer;font-family:'Zen Maru Gothic',sans-serif;font-weight:700;font-size:14px;margin-bottom:10px;">🌱 ここでログインする</button>
-    <a href="./kanri-x7k2m9.html" style="display:block;padding:14px;border-radius:12px;background:var(--deep);color:#fff;text-decoration:none;font-family:'Zen Maru Gothic',sans-serif;font-weight:700;font-size:14px;max-width:380px;margin-left:auto;margin-right:auto;">🔐 管理画面へ</a>
+    <a href="./kanri-x7k2m9.html" style="display:block;padding:14px;border-radius:12px;background:var(--deep);color:#fff;text-decoration:none;font-family:'Zen Maru Gothic',sans-serif;font-weight:700;font-size:14px;max-width:380px;margin-left:auto;margin-right:auto;">🔐 メンバーマネジメントルームへ</a>
     <a href="../index.html" style="display:block;margin-top:10px;font-size:12px;color:#8B889E;max-width:380px;margin-left:auto;margin-right:auto;">‹ ホームに戻る</a>
   </div>
 </div>
@@ -339,7 +339,7 @@ async function load(isLogin){
     }
     if(j.ok === false){
       const msg = {pin:"パスコードが違います",
-                   noperm:"クリエイターズ以上の方がご覧になれます",
+                   noperm:"クリエーターズ以上の方がご覧になれます",
                    nomember:"会員番号が見つかりません"}[j.error] || "読み込めませんでした";
       toast(msg);
       if(j.error === "noperm" || j.error === "pin"){
@@ -352,7 +352,7 @@ async function load(isLogin){
     keiOrder = (j.keiOrder || []).map(x=>x.kei).filter(Boolean);
     canEdit = j.canEdit === true;
     buildIndex();
-    $("#meLine").textContent = (j.viewerName||"") + "さん｜クリエイターズ全体図";
+    $("#meLine").textContent = (j.viewerName||"") + "さん｜クリエーターズ全体図";
 
     buildRootSelect();
     render();
@@ -528,9 +528,9 @@ function render(){
   }else if(mode === "kei"){
     crumbEl.innerHTML = '<a onclick="changeRoot()">全体</a><span class="sep">›</span>'
       + `<span class="now">${esc(selKei || "系列をえらんでください")}</span>`
-      + `<span class="cnt">${selKei ? "この系列のクリエイターズ以上 " + keiMembers(selKei).length + " 名" : ""}</span>`;
+      + `<span class="cnt">${selKei ? "この系列のクリエーターズ以上 " + keiMembers(selKei).length + " 名" : ""}</span>`;
   }else{
-    crumbEl.innerHTML = `<span class="now">全体</span><span class="cnt">クリエイターズ以上 ${members.length} 名</span>`;
+    crumbEl.innerHTML = `<span class="now">全体</span><span class="cnt">クリエーターズ以上 ${members.length} 名</span>`;
   }
   renderEdit();
   if(view === "chart") renderChart(); else renderTree();
@@ -691,7 +691,7 @@ function lineageTree(m, depth){
   </div>`;
 }
 
-/* ---------- 直す（直アップクリエ・クリエイターズかどうか） ---------- */
+/* ---------- 直す（直アップクリエ・クリエーターズかどうか） ---------- */
 function descendantsOf(id, out){
   out = out || {};
   (children[id]||[]).forEach(c=>{ const k = norm(c.id); if(!out[k]){ out[k] = 1; descendantsOf(k, out); } });
@@ -714,9 +714,9 @@ function renderEdit(){
       ${!curIn ? `<option value="${esc(m.upline)}" selected>今の番号：${esc(m.upline)}（マップにいない方）</option>` : ""}
       ${cands.map(x=>`<option value="${norm(x.id)}" ${norm(x.id)===cur?"selected":""}>${esc(x.name||x.id)}（${esc(x.keiretsu||"系列なし")}）</option>`).join("")}
     </select>
-    <label class="ck"><input type="checkbox" id="edCrie" ${m.crie ? "checked" : ""}>クリエイターズ</label>
+    <label class="ck"><input type="checkbox" id="edCrie" ${m.crie ? "checked" : ""}>クリエーターズ</label>
     <div class="row"><button onclick="saveEdit('${id}')" id="edSave">この内容で保存</button></div>
-    <p class="note">・クリエイターズを外すと、このマップには出なくなります（役職のある方は出たままです）。<br>・ご本人や、この方の下の方は、アップにえらべません。</p>
+    <p class="note">・クリエーターズを外すと、このマップには出なくなります（役職のある方は出たままです）。<br>・ご本人や、この方の下の方は、アップにえらべません。</p>
     <div class="msg" id="edMsg"></div>
   </div>`;
 }
@@ -742,7 +742,7 @@ async function saveEdit(id){
     members = j.members || [];
     keiOrder = (j.keiOrder || []).map(x=>x.kei).filter(Boolean);
     buildIndex(); buildRootSelect();
-    if(!byId[id]){ mode = "all"; rootId = null; toast("クリエイターズから外したので、マップから外れました"); }
+    if(!byId[id]){ mode = "all"; rootId = null; toast("クリエーターズから外したので、マップから外れました"); }
     else toast("保存しました");
     render();
   }catch(e){

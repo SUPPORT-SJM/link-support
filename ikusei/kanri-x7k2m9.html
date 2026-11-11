@@ -3,13 +3,14 @@
 <head>
 <script src="../config.js"></script>
 <script src="../sky-find.js"></script>
+<script src="./shoki-core.js"></script>
 <meta charset="UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex,nofollow">
-<title>管理画面</title>
+<title>メンバーマネジメントルーム</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
@@ -499,6 +500,67 @@
 .mm-f.ck-ng{background:#FFF1F4;border:1.5px solid #F3B6C4;border-radius:11px;padding:10px 11px;}
 .mm-f.ck-ng input{border-color:#EFA3B5;}
 .ck-hint{color:#C0392B;font-size:11px;line-height:1.7;margin-top:5px;}
+  /* ===== メンバーマネジメントルーム：1人1枚のカード（横に長くならない形） ===== */
+  .mlist{display:flex;flex-direction:column;gap:10px;}
+  .mgrp{background:#F0EDF9;color:#4A3F7A;font-weight:900;font-size:13px;padding:9px 12px;border-radius:12px;border-top:2px solid #D9D2F3;}
+  .mgrp small{font-weight:700;color:#7A7390;margin-left:6px;}
+  .mrole{font-size:11.5px;font-weight:900;color:#7A7390;margin:6px 2px -2px;letter-spacing:.05em;}
+  .mc{background:#fff;border-radius:14px;box-shadow:0 2px 10px rgba(60,50,110,.07);padding:12px 14px;display:flex;flex-direction:column;gap:9px;font-size:13px;}
+  .mc.row-check{background:#FFFDF5;} .mc.row-auto{background:#F7FAFE;}
+  .mc.row-hid > *:not(.mc-top){opacity:.45;}
+  .mc-top{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:flex-start;justify-content:space-between;}
+  .mc-who{min-width:0;flex:1 1 220px;line-height:1.55;}
+  .mc-who .nm{font-size:14.5px;}
+  .mc-who .sub{font-size:11.5px;color:#8A84A0;}
+  .mc-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex:0 1 auto;}
+  .mc-people{display:flex;flex-wrap:wrap;gap:2px 14px;font-size:11.5px;color:#7A7390;line-height:1.6;}
+  .mc-people .me{color:#2F7A5C;}
+  .mc-foot{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;font-size:12px;color:#6A6480;border-top:1px dashed #ECE9F5;padding-top:8px;}
+  .mc-foot .lb{font-size:11px;color:#A8A4BC;font-weight:700;margin-right:3px;}
+  .mc-foot .dept-chip,.mc-foot .hidchk{margin-top:0;}
+  .mc-foot .edit-row{margin-left:auto;}
+  .ss-chips{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;}
+  @media (max-width:700px){ .ss-chips{grid-template-columns:1fr 1fr;} }
+  .ss-chip{display:flex;align-items:flex-start;gap:7px;text-align:left;background:#FAF9FD;border:1.5px solid #E2E0EA;border-radius:11px;padding:7px 8px;min-height:50px;width:100%;font-family:inherit;cursor:pointer;}
+  .ss-chip:hover{border-color:#C9C2EC;}
+  .ss-chip.pend,.plink.pend{outline:2.5px dashed #E5A823;outline-offset:1px;}
+  .ss-dot{flex:0 0 auto;width:12px;height:12px;border-radius:50%;margin-top:4px;}
+  .ss-dot.g{background:#3DAA6E;} .ss-dot.y{background:#E5A823;} .ss-dot.r{background:#E0566A;}
+  .ss-chip .t{font-size:10.5px;color:#8A84A0;font-weight:700;line-height:1.4;}
+  .ss-chip .v{font-size:12px;color:#22222A;line-height:1.45;}
+  .ss-chip .me{display:block;font-size:10.5px;color:#2F7A5C;line-height:1.45;margin-top:2px;}
+  .ss-note{font-size:11.5px;color:#A8A4BC;}
+  .ss-note.err{color:#B3352F;}
+  .ss-legend{font-size:11.5px;color:#7A7390;margin:0 2px 10px;line-height:1.7;}
+  .plink{color:inherit;text-decoration:underline;text-decoration-color:#C9C2EC;text-underline-offset:2px;cursor:pointer;}
+  .idlechk{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:#fff;background:rgba(255,255,255,.14);padding:6px 11px;border-radius:999px;cursor:pointer;white-space:nowrap;}
+  .idlechk input{width:14px;height:14px;margin:0;}
+  .ss-modal{display:none;position:fixed;inset:0;z-index:70;background:rgba(30,26,50,.55);align-items:center;justify-content:center;padding:14px;}
+  .ss-modal.show{display:flex;}
+  .ss-modal .sheet{background:#fff;border-radius:18px;width:100%;max-width:460px;max-height:90vh;overflow-y:auto;padding:20px 18px;}
+  .ss-modal h3{font-size:16px;font-weight:900;color:#4A3F7A;}
+  .ss-modal .who2{font-size:12.5px;color:#7A7390;margin-bottom:10px;}
+  .ss-modal label{display:block;font-size:12px;font-weight:700;color:#4A3F7A;margin:10px 0 4px;}
+  .ss-modal input{width:100%;padding:10px;border-radius:9px;border:1.5px solid #E1DCF2;font-size:15px;font-family:inherit;}
+  .ss-modal .find{margin-top:12px;width:100%;padding:11px;border-radius:11px;background:#F0EDF9;color:#6E5FB5;font-weight:700;font-size:14px;border:none;font-family:inherit;cursor:pointer;}
+  .ss-modal .clear{margin-top:12px;background:none;border:none;color:#8A84A0;font-size:12.5px;text-decoration:underline;font-family:inherit;cursor:pointer;}
+  .ss-modal .sem{border-top:1px solid #F0EDF9;padding:10px 0;}
+  .ss-modal .sem:first-of-type{border-top:none;}
+  .ss-modal .sem .lb{font-size:13px;font-weight:700;color:#3B3550;margin-bottom:6px;}
+  .ss-modal .states{display:flex;flex-wrap:wrap;gap:6px;}
+  .ss-modal .states button{padding:7px 11px;border-radius:999px;border:1.5px solid #E1DCF2;background:#fff;color:#5A5470;font-size:12.5px;font-weight:700;font-family:inherit;cursor:pointer;}
+  .ss-modal .states button.on{background:#6E5FB5;border-color:#6E5FB5;color:#fff;}
+  .ss-modal .dt{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:12px;color:#6A6480;}
+  .ss-modal .dt input{width:auto;padding:7px 9px;font-size:14px;}
+  .ss-modal .dt .x{background:none;border:none;color:#9A96AE;font-size:12px;text-decoration:underline;cursor:pointer;}
+  .ss-modal .msg{display:none;border-radius:10px;padding:9px 12px;font-size:12.5px;margin:10px 0 0;line-height:1.7;}
+  .ss-modal .msg.err{display:block;background:#FDEBEB;color:#B3352F;}
+  .ss-modal .msg.ok{display:block;background:#EAF7F0;color:#2F7A5C;}
+  .ss-modal .btns{display:flex;gap:8px;margin-top:14px;}
+  .ss-modal .btns button{flex:1;padding:12px;border-radius:11px;font-weight:700;font-size:14px;border:none;font-family:inherit;cursor:pointer;}
+  .ss-modal .btns .save{background:#6E5FB5;color:#fff;}
+  .ss-modal .btns .close{background:#F0EDF9;color:#6E5FB5;}
+  .ss-modal .upd{font-size:11px;color:#A8A4BC;margin-top:8px;}
 </style>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <link rel="stylesheet" href="../beta.css">
@@ -510,8 +572,8 @@
 <!-- ===== LOGIN ===== -->
 <div id="loginView" style="display:none;">
   <div class="lcard">
-    <h1>🔐 育成システム 管理画面</h1>
-    <p class="sub">クリエイターズ以上の方がお使いいただけます<br>Googleアカウントで本人確認します</p>
+    <h1>🔐 メンバーマネジメントルーム</h1>
+    <p class="sub">クリエーターズ以上の方がお使いいただけます<br>Googleアカウントで本人確認します</p>
     <div class="inapp-warn" id="inappWarn">
       <b>⚠️ アプリ内ブラウザで開いています</b>
       LINEなどのアプリ内では、Googleログインがご利用いただけません。
@@ -556,7 +618,7 @@
   <div class="head">
     <div class="wrap row">
       <div>
-        <h1>🔐 育成システム 管理画面</h1>
+        <h1>🔐 メンバーマネジメントルーム</h1>
         <div class="me" id="meLine"></div>
         <button type="button" id="btnSelfEdit" onclick="openSelfEdit()" style="display:none;margin-top:6px;background:rgba(255,255,255,.22);color:#fff;border:1.5px solid rgba(255,255,255,.55);border-radius:999px;padding:5px 13px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;">✏️ 自分の会員情報を編集する</button>
       </div>
@@ -581,7 +643,8 @@
         <button class="btn-add" id="btnTree" onclick="openTree()" style="display:none;background:#8A6FD1;">🌳 系列のつながり</button>
         <button class="btn-add" id="btnEvb" onclick="openEvb()" style="display:none;background:#5E8FD8;">📅 申込みシート</button>
         <button class="btn-add" id="btnLnk" onclick="openLnk()" style="display:none;background:#26A69A;">🔗 リンク先の変更</button>
-        <button class="btn-add" id="btnSupport" onclick="goLeave(()=>location.href='shoki-support-k5w2.html')" style="background:#3DAA6E;">🌱 初期サポートマネジメント</button>
+        <label class="idlechk" title="最後のログインから30日以上たっている方だけを出します"><input type="checkbox" id="fIdle" onchange="render()">30日以上ログインなし</label>
+        <button class="btn-add" id="btnReport" onclick="saveReport()" style="background:#3DAA6E;">📄 初期サポートを報告用に保存</button>
         <button id="btnStats" onclick="openStats()" style="display:none;">📊 アクセス</button>
         <button id="btnHome" class="sky-home" onclick="goLeave(()=>location.href='../index.html')">🏠 ホーム</button>
         <button onclick="goLeave(()=>location.href='./creamap-x7k2m9.html')">🗺 クリエマップ</button>
@@ -613,32 +676,21 @@
     </div>
 
     <div class="wrap" id="listArea">
-      <div class="tblwrap"><table>
-        <thead>
-          <tr>
-            <th>会員</th>
-            <th>系列</th>
-            <th>① ぴよぴよ</th>
-            <th>② グルコン</th>
-            <th>権限</th>
-            <th>最終</th>
-          </tr>
-        </thead>
-        <tbody id="tbody"></tbody>
-      </table></div>
+      <div class="ss-legend">初期サポート：🟢 OK　🟡 そろそろ・返事待ち　🔴 未案内・日付が過ぎた　／　（ク）アップクリエ（担）サポート担当（紹）紹介者（説）アドバイザー</div>
+      <div id="tbody" class="mlist"></div>
       <div class="legend">
         ⭕ = 先生の丸の数 / 🐣 = 本人チェックの数<br>
 「サポーター」を押すと①ぴよぴよが、「クリエ」を押すと②③の教材が解放されます。<br>
-        サポーター認定は<b>紹介者が1人以上出た方</b>に、クリエイターズ以上が行います(系列の制限なし)。<br>
-        権限は積み重ね式です:管理画面に入るには「アドバンス」が必要で、そこに「系列代表」「チーム代表」を追加します。<br>
+        サポーター認定は<b>紹介者が1人以上出た方</b>に、クリエーターズ以上が行います(系列の制限なし)。<br>
+        権限は積み重ね式です:メンバーマネジメントルームですべての方を見るには「アドバンス」が必要で、そこに「系列代表」「チーム代表」を追加します。<br>
         操作できる範囲<br>
         ・チーム代表/管理者:全員の閲覧・全フラグ・担当系列の設定<br>
         ・系列代表:担当系列の閲覧、クリエ/アドバンスの付与<br>
         ・アドバンス:担当系列の閲覧、クリエの付与<br>
         ・サポーター:あなたが担当・紹介された方が見えます(①②③の丸つけ)<br>
-        ・クリエイターズ:所属系列の方が見えます(＋🐣ぴよぴよの丸つけ)<br>
+        ・クリエーターズ:所属系列の方が見えます(＋🐣ぴよぴよの丸つけ)<br>
         ※ 丸つけは系列に関係なく全会員が対象です<br>
-        ※ クリエマップは、クリエイターズ以上なら全体をご覧いただけます<br>
+        ※ クリエマップは、クリエーターズ以上なら全体をご覧いただけます<br>
         ※ <b>⚠️ 要確認</b> … 紹介者やアップの欄に、会員番号ではなくお名前が入っています。<br>
         　 同じお名前の方が複数いるか、まだご登録のない方です。手で番号を入れてください<br>
         ※ <b>🔎 確認待ち</b> … お名前から会員番号を見つけて、自動でうめました。<br>
@@ -646,7 +698,7 @@
         <br>
         <b>会員の登録・編集</b>(管理者/チーム代表のみ)<br>
         ・右上「＋会員を追加」… 新しい会員を登録(代表陣の事前登録などに)<br>
-        ・右上「🔔 新規登録の依頼」… 届いている依頼を見て、登録できます(クリエイターズ以上)<br>
+        ・右上「🔔 新規登録の依頼」… 届いている依頼を見て、登録できます(クリエーターズ以上)<br>
         ・各行の「編集」… 名前・系列・パスコード・役職・担当系列の変更<br>
         ・名前をクリック → 詳細画面で先生の丸と本人チェックを修正できます
       </div>
@@ -926,18 +978,18 @@
       </div>
 
       <div class="mm-f mm-full">
-        <label>クリエイターズ</label>
+        <label>クリエーターズ</label>
         <label style="display:flex;align-items:center;gap:8px;padding:9px 11px;border:1.5px solid var(--line);border-radius:9px;cursor:pointer;font-size:13px;" id="mmCrieWrap">
           <input type="checkbox" id="mmCrie" style="width:17px;height:17px;accent-color:var(--leaf);"
             onchange="document.getElementById('mmCrieWrap').style.background=this.checked?'#EAF7F0':'#fff'">
-          <span>クリエイターズ(②③の教材が解放されます)</span>
+          <span>クリエーターズ(②③の教材が解放されます)</span>
         </label>
       </div>
 
       <div class="mm-f mm-full">
         <label>役職</label>
         <div class="mm-roles" id="mmRoles"></div>
-        <p class="hint">管理画面に入るには「アドバンス」以上が必要です(クリエは①の丸つけのみ)</p>
+        <p class="hint">メンバーマネジメントルームですべての方を見るには「アドバンス」以上が必要です(クリエは①の丸つけのみ)</p>
       </div>
 
       <!-- 部門（管理者・チーム代表・系列代表が決めます。部門統括・スケジュール入力担当の印は管理者だけ） -->
@@ -975,7 +1027,7 @@
         <input type="text" id="mmUpline" placeholder="会員番号（お名前でも照合できます）">
         <button type="button" class="mm-find" onclick="mmFind('mmUpline')">🔎 照合する</button>
         <div id="mmUplineFind"></div>
-        <p class="hint">この方を紹介・育成したクリエイターズの会員番号です。クリエマップ(系統図)に使われます。<br>
+        <p class="hint">この方を紹介・育成したクリエーターズの会員番号です。クリエマップ(系統図)に使われます。<br>
         <span style="color:#8A6D00;">※ お名前が入っている場合は、正しい会員番号に直してください</span></p>
       </div>
 
@@ -1060,6 +1112,36 @@
 </div>
 
 <div id="toast"></div>
+<!-- 初期サポート：状態を変える画面／アップクリエ・サポート担当の設定 -->
+<div id="ssed" class="ss-modal" onclick="if(event.target===this)SS.closeEd()">
+  <div class="sheet">
+    <h3 id="ssedTitle"></h3>
+    <div class="who2" id="ssedWho"></div>
+    <div id="ssedBody"></div>
+    <div class="msg" id="ssedMsg"></div>
+    <div class="btns">
+      <button class="close" onclick="SS.closeEd()">とじる</button>
+      <button class="save" id="ssedSave" onclick="SS.saveEd()">この内容にする</button>
+    </div>
+    <div class="upd" id="ssedUpd"></div>
+  </div>
+</div>
+<div id="sspp" class="ss-modal" onclick="if(event.target===this)SS.closePeople()">
+  <div class="sheet">
+    <h3 id="ssppTitle"></h3>
+    <div class="who2" id="ssppWho"></div>
+    <p style="font-size:12.5px;color:#6A6480;line-height:1.8;">会員番号か、お名前のどちらかを入れて「照合する」を押してください。お名前は、名字だけ・下の名前だけでもさがせます。</p>
+    <label for="ssppId">会員番号</label>
+    <input id="ssppId" inputmode="numeric" placeholder="例：00012345">
+    <label for="ssppName">お名前</label>
+    <input id="ssppName" placeholder="例：さかいあたる">
+    <button class="find" onclick="SS.findPeople()">🔎 照合する</button>
+    <div id="ssppRes"></div>
+    <div class="msg" id="ssppMsg"></div>
+    <button class="clear" id="ssppClear" onclick="SS.pickPerson('', '')">未設定にもどす</button>
+    <div class="btns"><button class="close" onclick="SS.closePeople()">とじる</button></div>
+  </div>
+</div>
 
 <div id="pendBar"><div class="in">
   <div class="t"><span id="pendCount">0</span>件の変更があります<small>まだ保存していません。「変更を保存する」でまとめて保存します</small></div>
@@ -1564,7 +1646,7 @@ async function approveReq(row, show){
         exists:"その会員番号は、すでに登録されています",
         notyours: j.message || "その番号の方は、ご担当の範囲外の方です",
         done:"この依頼は、すでに処理ずみです",
-        noperm:"この操作はクリエイターズ以上の方がお使いいただけます",
+        noperm:"この操作はクリエーターズ以上の方がお使いいただけます",
         busy:"いま混み合っています。少しおいてお試しください"
       }[j.error] || "登録できませんでした", "err");
     }
@@ -1747,7 +1829,7 @@ async function load(isLogin){
     const lvl = j.isFull ? "全体管理"
               : j.isKeiRep ? "系列代表"
               : j.isAdv ? "アドバンス"
-              : j.isCrie ? "クリエイターズ"
+              : j.isCrie ? "クリエーターズ"
               : "サポーター";
     /* ご自身の名前の左にもマーク。ご自身の情報を編集するボタン */
     const selfM = (j.members || []).find(x=>String(x.id).replace(/^0+/, "") === String(admin && admin.id || "").replace(/^0+/, ""));
@@ -1772,6 +1854,8 @@ async function load(isLogin){
     prunePending();   /* 保存していない変更は、読み直しても残します */
     render();
     drawPendBar();
+    /* 初期サポート（タブ「サポート状況」）も読みこんで、同じカードに出します */
+    if(window.SS) SS.load(admin, { onChange: ()=>{ render(); drawPendBar(); }, toast: toast });
     return true;
   }catch(e){
     if(typeof skyLoadingDone === "function") skyLoadingDone();
@@ -1783,7 +1867,7 @@ async function load(isLogin){
 }
 
 function has(role, flag){ return String(role||"").indexOf(flag) >= 0; }
-/* クリエイターズは専用フラグ */
+/* クリエーターズは専用フラグ */
 function hasCrie(m){ return m.crie === true; }
 function hasSup(m){ return m.sup === true; }
 
@@ -1836,7 +1920,26 @@ function uplineLabel(rows, byId){
   if(/^\d+$/.test(u)) return nm ? nm + "（" + u + "）" : "会員番号 " + u;
   return u;
 }
+/* 役職の順（いつもこれが先）：管理者 → チーム代表 → 系列代表 → アドバンス → クリエーターズ → サポーター → メンバー
+   保存ずみの役職で並べます（保存前にボタンを押しても、その方は同じ場所にいます） */
+const ROLE_NAMES = ["管理者","チーム代表","系列代表","アドバンス","クリエーターズ","サポーター","メンバー"];
+function roleRank(m){
+  const r = String(m.role || "");
+  if(/管理者/.test(r)) return 0;
+  if(/チーム代表/.test(r)) return 1;
+  if(/系列代表/.test(r)) return 2;
+  if(/アドバンス/.test(r)) return 3;
+  if(hasCrie(m)) return 4;
+  if(hasSup(m)) return 5;
+  return 6;
+}
+function byRole(rows){ return rows.map((m,i)=>[m,i]).sort((a,b)=>(roleRank(a[0]) - roleRank(b[0])) || (a[1] - b[1])).map(x=>x[0]); }
 function arrange(list){
+  const out = arrange0(list);
+  out.forEach(g=>{ g.rows = byRole(g.rows); });
+  return out;
+}
+function arrange0(list){
   const mode = ($("#sortMode") && $("#sortMode").value) || "";
   const cmp = (a,b)=> sortKeyName(a).localeCompare(sortKeyName(b), "ja");
   if(mode === "name") return [{ head:"", rows: list.slice().sort((a,b)=>cmp(a.name, b.name)) }];
@@ -1869,19 +1972,48 @@ function render(){
     if(kf && (m.keiretsu || "") !== kf) return false;     /* えらんだ系列だけ */
     /* 非表示にしてある方は出しません（非表示：OFF のとき・保存前に変えた方は出します） */
     if(!showHidden && hiddenOrig[hk(m.id)] && !(hk(m.id) in pendingHide)) return false;
+    if($("#fIdle") && $("#fIdle").checked && !idle30(m)) return false;
     if(!q) return true;
     return (m.name||"").toLowerCase().includes(q) || String(m.id).includes(q);
   });
   drawHidBtn();
   const tb = $("#tbody");
+  lastShown = [];
   if(list.length === 0){
-    tb.innerHTML = '<tr><td colspan="6" class="empty">該当する方がいません</td></tr>';
+    tb.innerHTML = '<div class="empty">該当する方がいません</div>';
     return;
   }
   const escH = t=>String(t == null ? "" : t).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-  tb.innerHTML = arrange(list).map(g=>
-    (g.head ? `<tr class="grp"><td colspan="6">${escH(g.head)}<small>${g.rows.length}名</small></td></tr>` : "")
-    + rowsHtml(g.rows)).join("");
+  tb.innerHTML = arrange(list).map(g=>{
+    g.rows.forEach(m=>lastShown.push(m.id));
+    /* 役職が変わるところに、小さな見出しを入れます */
+    let prev = -1;
+    const body = g.rows.map(m=>{ const r = roleRank(m); const h = r !== prev ? `<div class="mrole">${ROLE_NAMES[r]}</div>` : ""; prev = r; return h + rowsHtml([m]); }).join("");
+    return (g.head ? `<div class="mgrp">${escH(g.head)}<small>${g.rows.length}名</small></div>` : "") + body;
+  }).join("");
+}
+let lastShown = [];
+/* 30日以上ログインなし（管理の一覧の日付は「月/日」なので、今日より先なら去年として数えます） */
+function idle30(m){
+  const ss = window.SS && SS.get(m.id);
+  let d = null;
+  const full = String((ss && ss.lastSeen) || "").match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})/);
+  if(full) d = new Date(+full[1], +full[2] - 1, +full[3]);
+  else{
+    const md = String(m.lastSeen || "").match(/^(\d{1,2})\/(\d{1,2})$/);
+    if(md){ const t = new Date(); d = new Date(t.getFullYear(), +md[1] - 1, +md[2]); if(d > t) d.setFullYear(d.getFullYear() - 1); }
+  }
+  if(!d) return true;   /* ログインの記録がない方も、出します */
+  return (Date.now() - d.getTime()) >= 30 * 86400000;
+}
+/* 初期サポートを報告用に保存（いま表示している方） */
+function saveReport(){
+  if(pendCount()){ toast("先に「💾 一覧の変更を保存」を押してから、報告用に保存してください"); return; }
+  const parts = [];
+  const kf = $("#keiFilter"); if(kf && kf.value && kf.selectedOptions[0]) parts.push(kf.selectedOptions[0].textContent);
+  if($("#fIdle") && $("#fIdle").checked) parts.push("30日以上ログインなし");
+  if($("#search").value.trim()) parts.push("検索：" + $("#search").value.trim());
+  SS.saveReport(lastShown, parts.join("／") || "すべて");
 }
 
 function rowsHtml(list){
@@ -1914,34 +2046,44 @@ function rowsHtml(list){
     };
     const scopeBtn = effFlag(m, "アドバンス")
       ? (canFull
-          ? `<br><button class="scope-btn" onclick="openScope('${m.id}')">担当系列: ${m.scope || "未設定"} ▾</button>`
-          : `<br><span class="scope-view">担当系列: ${m.scope || "未設定"}</span>`)
+          ? `<button class="scope-btn" onclick="openScope('${m.id}')">担当系列: ${m.scope || "未設定"} ▾</button>`
+          : `<span class="scope-view">担当系列: ${m.scope || "未設定"}</span>`)
       : "";
 
     const hidOn = effHidden(m), hidPend = hidOn !== !!hiddenOrig[hk(m.id)];
-    return `<tr class="${m.needCheck ? "row-check" : (m.autoFill ? "row-auto" : "")} ${hidOn ? "row-hid" : ""}">
-      <td><a href="#" class="nm nm-link" onclick="openDetail('${m.id}');return false;">${m.grow && window.skyGrowth ? `<span title="${window.skyGrowth.label(window.skyGrowth.stage(m.grow))}" style="text-decoration:none;display:inline-block;margin-right:3px;">${window.skyGrowth.mark(window.skyGrowth.stage(m.grow))}</span>` : ""}${m.name || "(名前未登録)"}</a>${m.realName && m.realName !== m.name ? `<br><span style="font-size:10.5px;color:#A8A4BC;">(${m.realName})</span>` : ""}<br><span class="id">${m.id}</span>
-        <br><label class="hidchk ${hidPend ? "pend" : ""}" title="あなたの画面だけで非表示にします"><input type="checkbox" ${hidOn ? "checked" : ""} onchange="toggleHide('${m.id}', this.checked)">非表示</label>
-        <br><button type="button" class="dept-chip ${m.dept ? "has" : ""}" onclick="openDeptPick('${m.id}')" title="部門">🏷 ${m.dept ? String(m.dept).split(",").join("・") : "部門：未所属"}</button></td>
-      <td class="kei">${m.keiretsu || "–"}${m.area ? `<br><span style="font-size:10px;color:#A8A4BC;">${m.area}</span>` : ""}${hasSup(m) && !hasCrie(m) ? '<br><span style="font-size:10px;color:#B8860B;font-weight:700;">サポーター</span>' : ""}</td>
-      <td class="prog">${piyo}</td>
-      <td class="prog">${gr}</td>
-      <td><div class="flags">${fb("サポーター","sup")}${fb("クリエ","")}${fb("アドバンス","adv")}${fb("系列代表","kei")}${fb("チーム代表","rep")}${fb("管理者","adm")}</div>${scopeBtn}</td>
-      <td class="kei">${m.lastSeen || "–"}${(() => {
-        /* 要確認・確認待ちのマークは、名前ではなく「編集」の左に置きます
-           （名前を押すと進捗の画面なので、取り違えないようにするためです） */
-        const open = `onclick='openMember(${JSON.stringify(m).replace(/'/g,"&#39;")})'`;
-        const canEd = canFull || m.edit === true;   /* 系列代表・アドバンス・クリエは、編集できる方だけ（GASが決めます） */
-        const marks =
-            (m.needCheck ? `<span class="need-check" ${canEd ? open : ""} title="会員番号の欄にお名前が入っています。編集で直してください">⚠️ 要確認</span>` : "")
-          + (m.autoFill ? (/まとめて更新/.test(m.autoFill)
-              ? `<span class="auto-fill" ${canEd ? open : ""} title="一部のデータがまとめて更新されています：${m.autoFill}">📝 要確認</span>`
-              : `<span class="auto-fill" ${canEd ? open : ""} title="お名前から自動でうめました：${m.autoFill}">🔎 確認待ち</span>`) : "")
-          + (m.temp ? `<span class="temp-id" ${canEd ? open : ""} title="会員番号が分からないまま登録された方です">🔗 番号まち</span>` : "");
-        const btn = canEd ? `<button class="scope-btn" ${open}>編集</button>` : "";
-        return (marks || btn) ? `<div class="edit-row">${marks}${btn}</div>` : "";
-      })()}</td>
-    </tr>`;
+    const growMark = m.grow && window.skyGrowth ? `<span title="${window.skyGrowth.label(window.skyGrowth.stage(m.grow))}" style="text-decoration:none;display:inline-block;margin-right:3px;">${window.skyGrowth.mark(window.skyGrowth.stage(m.grow))}</span>` : "";
+    const editRow = (() => {
+      /* 要確認・確認待ちのマークは、名前ではなく「編集」の左に置きます
+         （名前を押すと進捗の画面なので、取り違えないようにするためです） */
+      const open = `onclick='openMember(${JSON.stringify(m).replace(/'/g,"&#39;")})'`;
+      const canEd = canFull || m.edit === true;   /* 系列代表・アドバンス・クリエは、編集できる方だけ（GASが決めます） */
+      const marks =
+          (m.needCheck ? `<span class="need-check" ${canEd ? open : ""} title="会員番号の欄にお名前が入っています。編集で直してください">⚠️ 要確認</span>` : "")
+        + (m.autoFill ? (/まとめて更新/.test(m.autoFill)
+            ? `<span class="auto-fill" ${canEd ? open : ""} title="一部のデータがまとめて更新されています：${m.autoFill}">📝 要確認</span>`
+            : `<span class="auto-fill" ${canEd ? open : ""} title="お名前から自動でうめました：${m.autoFill}">🔎 確認待ち</span>`) : "")
+        + (m.temp ? `<span class="temp-id" ${canEd ? open : ""} title="会員番号が分からないまま登録された方です">🔗 番号まち</span>` : "");
+      const btn = canEd ? `<button class="scope-btn" ${open}>編集</button>` : "";
+      return (marks || btn) ? `<div class="edit-row">${marks}${btn}</div>` : "";
+    })();
+    const ssPeople = window.SS ? SS.peopleHtml(m.id) : "";
+    return `<div class="mc ${m.needCheck ? "row-check" : (m.autoFill ? "row-auto" : "")} ${hidOn ? "row-hid" : ""}">
+      <div class="mc-top">
+        <div class="mc-who"><a href="#" class="nm nm-link" onclick="openDetail('${m.id}');return false;">${growMark}${m.name || "(名前未登録)"}</a>${m.realName && m.realName !== m.name ? ` <span style="font-size:10.5px;color:#A8A4BC;">(${m.realName})</span>` : ""}
+          <div class="sub"><span class="id">${m.id}</span>｜${m.keiretsu || "系列未設定"}${m.area ? "｜" + m.area : ""}</div></div>
+        <div class="mc-right"><div class="flags">${fb("サポーター","sup")}${fb("クリエ","")}${fb("アドバンス","adv")}${fb("系列代表","kei")}${fb("チーム代表","rep")}${fb("管理者","adm")}</div>${scopeBtn}</div>
+      </div>
+      ${ssPeople ? `<div class="mc-people">${ssPeople}</div>` : ""}
+      ${window.SS ? SS.cardHtml(m.id) : ""}
+      <div class="mc-foot">
+        <span><span class="lb">① ぴよぴよ</span>${piyo}</span>
+        <span><span class="lb">② グルコン</span>${gr}</span>
+        <span><span class="lb">最終</span>${m.lastSeen || "–"}</span>
+        <button type="button" class="dept-chip ${m.dept ? "has" : ""}" onclick="openDeptPick('${m.id}')" title="部門">🏷 ${m.dept ? String(m.dept).split(",").join("・") : "部門：未所属"}</button>
+        <label class="hidchk ${hidPend ? "pend" : ""}" title="あなたの画面だけで非表示にします"><input type="checkbox" ${hidOn ? "checked" : ""} onchange="toggleHide('${m.id}', this.checked)">非表示</label>
+        ${editRow}
+      </div>
+    </div>`;
   }).join("");
 }
 
@@ -1961,7 +2103,8 @@ function effFlag(m, flag){
 }
 function pendCount(){
   return Object.keys(pendingRoles).reduce((n, id)=>n + Object.keys(pendingRoles[id]).length, 0)
-       + Object.keys(pendingHide).length;
+       + Object.keys(pendingHide).length
+       + (window.SS ? SS.pendCount() : 0);   /* 初期サポートの変更も */
 }
 
 /* ---------- 非表示（あなたの画面だけ。初期サポートマネジメントと同じ設定です） ---------- */
@@ -2015,13 +2158,30 @@ function undoPending(){
   if(!pendCount()) return;
   if(!confirm("保存していない変更（" + pendCount() + "件）を元にもどします。よろしいですか？")) return;
   pendingRoles = {}; pendingHide = {};
+  if(window.SS) SS.discard();
   render(); drawPendBar();
 }
 
 async function savePending(){
   const okRoles = await saveRolesPart();
   const okHide = await saveHidePart();
-  return okRoles && okHide;
+  const okSs = await saveSsPart();
+  return okRoles && okHide && okSs;
+}
+/* 初期サポート（状態・アップクリエ・サポート担当）の保存 */
+async function saveSsPart(){
+  if(!window.SS || !SS.pendCount()) return true;
+  if(typeof skyBusy === "function" && skyBusy("sssave")) return false;
+  if(typeof skyLoading === "function") skyLoading("初期サポートの変更を保存しています", "しばらくお待ちください");
+  try{
+    const ok = await SS.save();
+    if(ok) toast("✅ 初期サポートの変更を保存しました");
+    return ok;
+  }finally{
+    if(typeof skyLoadingDone === "function") skyLoadingDone();
+    if(typeof skyBusyEnd === "function") skyBusyEnd("sssave");
+    render(); drawPendBar();
+  }
 }
 async function saveHidePart(){
   const hideIds = Object.keys(pendingHide).filter(k=>pendingHide[k]);
@@ -2110,7 +2270,7 @@ async function leaveChoose(c){
   const next = leaveNext; leaveNext = null;
   if(c === "stay" || !next) return;
   if(c === "save"){ const ok = await savePending(); if(!ok) return; }
-  if(c === "discard"){ pendingRoles = {}; pendingHide = {}; render(); drawPendBar(); }
+  if(c === "discard"){ pendingRoles = {}; pendingHide = {}; if(window.SS) SS.discard(); render(); drawPendBar(); }
   next();
 }
 /* メニューなどのリンクで移るとき */
@@ -3375,7 +3535,7 @@ async function bulkRun(mode){
     /* すでにいる方を更新するのに、更新できる列がひとつもえらばれていないとき */
     const UPD_F = ["linkJoin","intro","introName","upline","uplineName","helper","helperName","area","realName"];
     if(upd && !document.getElementById("bkAllowNew").checked && !bkMap.some(f=>UPD_F.indexOf(f) >= 0)){
-      bkSay("bkMsg2", "更新に使う列がえらばれていません。<br>たとえば「クリエイターズ」の列なら、上の表で「アップクリエのお名前」（番号なら「アップクリエの会員番号」）をえらんでください", "err"); return;
+      bkSay("bkMsg2", "更新に使う列がえらばれていません。<br>たとえば「クリエーターズ」の列なら、上の表で「アップクリエのお名前」（番号なら「アップクリエの会員番号」）をえらんでください", "err"); return;
     }
     /* 入会日の列があるときは、LINKに入会した日かをおたずねします */
     const jc = bkMap.indexOf("linkJoin");

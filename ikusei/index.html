@@ -181,7 +181,7 @@
     <p class="note">
       <a href="#" onclick="if(confirm('この端末に保存された学習の記録を消します。よろしいですか?\n(スプレッドシート側の記録は消えません)')){clearSkyLocal();location.reload();}return false;" style="color:#9AA8A0;">この端末の記録をリセット</a><br>
       Presented by Skyarc-team<br>
-      <a href="./kanri-x7k2m9.html" style="color:#B8B4C8;font-size:10.5px;">管理画面(クリエイターズ以上)</a>
+      <a href="./kanri-x7k2m9.html" style="color:#B8B4C8;font-size:10.5px;">メンバーマネジメントルーム</a>
     </p>
     <div class="verTag"></div>
   </div>
@@ -443,7 +443,7 @@ function goTo(member){
   $("#loading").style.display = "block";
   $("#loadMsg").textContent = (member.name ? (window.skyGrowth ? skyGrowth.selfTag(member.id) : "") + member.name + "さん、" : "") + "ようこそ!";
   $("#loadSub").textContent = isCrie
-    ? "クリエイターズのページをひらいています…"
+    ? "クリエーターズのページをひらいています…"
     : "サポーターのページをひらいています…";
   setTimeout(()=>{ location.href = isCrie ? PAGE_CRIE : PAGE_SUPPORTER; }, 900);
 }

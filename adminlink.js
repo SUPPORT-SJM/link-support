@@ -30,7 +30,7 @@
 
     var box = document.createElement("div");
     box.className = "sky-adminbar";
-    box.innerHTML = '<a href="' + url + '">🔐 管理ページへ</a>';
+    box.innerHTML = '<a href="' + url + '">🔐 メンバーマネジメントルームへ</a>';
 
     /* ページのいちばん下（すべての内容の後ろ）に置きます */
     document.body.appendChild(box);

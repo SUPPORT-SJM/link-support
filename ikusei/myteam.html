@@ -124,7 +124,7 @@
       「🎓」は修了、「—」はまだ始めていない状態です。<br><br>
       <b>⚠️ 要確認</b> … 紹介者やアップの欄に、お名前が入っている状態です。<br>
       <b>🔎 確認待ち</b> … お名前から会員番号を見つけて、自動でうめた状態です。<br>
-      どちらも、管理画面から直していただけます。
+      どちらも、メンバーマネジメントルームから直していただけます。
     </p>
 
     <div class="verTag"></div>
@@ -240,7 +240,7 @@ function render(){
   list.innerHTML = shown.map(m=>{
     const helperOnly = m.isHelper && !m.isIntro;
     const rank = m.role ? m.role.split(/[,、\s]+/).filter(x=>x)[0]
-               : (m.crie ? "クリエイターズ" : (m.sup ? "サポーター" : "メンバー"));
+               : (m.crie ? "クリエーターズ" : (m.sup ? "サポーター" : "メンバー"));
 
     const steps = APPS.map(a=>{
       const p = (m.progress && m.progress[a.key]) || {marks:0, items:0, done:false};

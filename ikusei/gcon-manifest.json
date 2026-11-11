@@ -1,7 +1,7 @@
 {
-  "name": "クリエイターズ育成 マイページ",
+  "name": "クリエーターズ育成 マイページ",
   "short_name": "クリエ育成",
-  "description": "Skyarc クリエイターズ育成プログラム",
+  "description": "Skyarc クリエーターズ育成プログラム",
   "start_url": "./gcon-mypage.html",
   "scope": "./",
   "display": "standalone",
