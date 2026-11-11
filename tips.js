@@ -35,6 +35,11 @@
   }
 
   var TIPS = window.SKY_TIPS = [
+    { id: "reset", t: "バージョンアップのあとは、進み具合を確認", scenes: [
+      { art: big("🆙", "tp-pop"), cap: "このサイトは、ときどきバージョンアップします", sec: 4 },
+      { art: '<div class="tp-row"><i class="tp-ball">👋</i><i class="tp-ball">🔎</i><i class="tp-ball">🚀</i></div>', cap: "バージョンアップにより、進み具合がリセットされていることがあります", sec: 5 },
+      { art: big("✅", "tp-pop tp-glow"), cap: "終わっているものは、改めてチェックしてください", sec: 4.5 }
+    ] },
     { id: "base-only", t: "告知ができるのは、だれ？", scenes: [
       { art: big("📣", "tp-pop"), cap: "オープンチャットで、事業の告知（PR）ができるのは…", sec: 4 },
       { art: '<div class="tp-row">' + big("🏢", "tp-pop") + '<div class="tp-tag">LINK-BASE<br>掲載ずみ</div></div>', cap: "LINK-BASEに、事業を掲載している人だけです", sec: 4.5 },

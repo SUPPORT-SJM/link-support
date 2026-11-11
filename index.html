@@ -724,21 +724,21 @@ async function flowInherit(q){
 }
 /* 前の3つの項目（H＝はじめの一歩／G＝初期サポートガイド／S＝活用の1stステップ）を、新しい項目に合わせます */
 function flowMapOld(H, G, S, V){
+  /* 中身がまったく同じ項目だけを引きつぎます（1つの前の項目は、1つの新しい項目にだけ）。
+     中身が変わったもの・ほかの項目とまざったもの（必要最低限のオープンチャット、Skyarcの交流＆PRチャット、
+     地域コミュニティ・LINKサークル）は、引きつぎません */
   const out = {};
   const t = v=>v === true || (typeof v === "string" && v !== "");
-  if(t(G.G1)) out.h0 = true;                                   /* LINKポータルをホームに置く */
-  if(t(G.G2)) out.h1 = true;                                   /* LINK information */
-  if(t(H.H1) && (t(G.G5) || t(S.S5))) out.h2 = true;            /* 必要最低限のオープンチャット（ユーザーサポート＋情報伝達） */
-  if(t(H.H3)) out.h3 = true;                                   /* 紹介URL */
-  if(t(G.Gs)) out.k1 = true;                                   /* リッチメニューの解放 */
-  if(t(S.S1) || t(V.u)) out.k2a = true;                        /* ユーザーサポート会 */
+  if(t(G.G1)) out.h0 = true;                                   /* ホーム画面に置く（前：初期サポートガイド①） */
+  if(t(G.G2)) out.h1 = true;                                   /* LINK information の友だち追加（前：ガイド②） */
+  if(t(H.H3)) out.h3 = true;                                   /* 紹介URL（前：はじめの一歩③） */
+  if(t(G.Gs)) out.k1 = true;                                   /* リッチメニューの解放（前：ガイド★） */
+  if(t(S.S1) || t(V.u)) out.k2a = true;                        /* ユーザーサポート会（前：1stステップ） */
   if(t(S.S3) || ["s1","s2","s3","s4","s5"].every(k=>t(V[k]))) out.k2b = true;   /* LINKセミナー */
   if(t(S.S2) || t(V.g1) || t(V.g2) || t(V.g3)) out.k2c = true; /* グルコン */
   if(t(S.S4) || t(V.k)) out.k2d = true;                        /* チーム交流会 */
   if(t(S.S8)) out.k3a = true;                                  /* SASAEAI */
   if(t(S.S7)) out.k3b = true;                                  /* LINK-BASE */
-  if(t(S.S6) || t(H.H2)) out.u1 = true;                        /* チームのチャット（系列のオープンチャット） */
-  if(t(G.G5) || t(S.S5)) out.u3 = true;                        /* 地域コミュニティ・LINKサークル（前の「オープンチャットに入る」） */
   return out;
 }
 function flowPageItem(k){ return TREE.find(it=>it.flowPage === k); }
