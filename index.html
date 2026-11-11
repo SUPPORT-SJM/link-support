@@ -97,8 +97,14 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body)
 @media (prefers-reduced-motion: reduce){ .bub.fme .ball,.bub.fnext .ball{animation:none;} }
 .fconf{position:fixed;top:-20px;z-index:9000;font-size:20px;pointer-events:none;animation:fFall linear forwards;}
 @keyframes fFall{to{transform:translateY(110vh) rotate(540deg)}}
-#taskSheet .fdone{display:block;width:100%;padding:14px;border-radius:14px;border:none;background:#29B6F6;color:#fff;font-family:inherit;font-weight:900;font-size:16px;margin-top:12px;cursor:pointer;}
-#taskSheet .fdone.undo{background:#ECEFF1;color:#546E7A;font-size:14px;}
+/* できたのボタン：まだ＝空のチェック（できたら押してね）／できた＝青／先生の丸もついた＝虹色（ホームの丸と同じ） */
+#taskSheet .fdone{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:13px;border-radius:14px;border:2.5px solid #29B6F6;background:#fff;color:#0288D1;font-family:inherit;font-weight:900;font-size:16px;margin-top:12px;cursor:pointer;}
+#taskSheet .fdone .fbox{width:24px;height:24px;border-radius:7px;border:2.5px solid #29B6F6;background:#fff;display:grid;place-items:center;font-size:16px;line-height:1;color:#29B6F6;flex:none;}
+#taskSheet .fdone.on{background:#29B6F6;color:#fff;}
+#taskSheet .fdone.on .fbox{border-color:#fff;}
+#taskSheet .fdone.rb{border:3px solid transparent;background:linear-gradient(#29B6F6,#29B6F6) padding-box,conic-gradient(var(--rainbow)) border-box;
+  box-shadow:0 0 0 3px rgba(255,255,255,.9),0 0 14px rgba(244,154,193,.55);}
+#taskSheet .fclose{display:block;width:100%;padding:11px;border-radius:12px;border:none;background:#ECEFF1;color:#546E7A;font-family:inherit;font-weight:700;font-size:14.5px;margin-top:10px;cursor:pointer;}
 #taskSheet .flink{display:block;padding:12px;border-radius:12px;border:2px solid #90CAF9;background:#F2F8FF;color:#1565C0;font-weight:700;font-size:14.5px;text-align:center;text-decoration:none;margin-top:10px;}
 #taskSheet .fbtn{display:block;padding:12px;border-radius:12px;background:#FF7043;color:#fff;font-weight:700;font-size:14.5px;text-align:center;text-decoration:none;margin-top:8px;}
 #taskSheet .fbtn.green{background:#06C755;}
@@ -625,7 +631,7 @@ const TREE = [
   ]},
   {ic:"👋", nm:"はじめの一歩", g:"member", flowPage:"hajime", kids:[
     {ic:"📲", nm:"便利な2つを\nホームに置く", g:"member", num:0, task:"h0",
-     note2:"「LINKポータル」と「このサイト（LINKサポート）」の2つを、スマホのホーム画面に置きます。アプリみたいにワンタップで開けて、ずっと楽になります✨<br>下のボタンから、iPhone・Android・パソコンそれぞれの置き方が見られます。置けたら「もどる」でここに戻って、「できた！」を押してください。",
+     note2:"「LINKポータル」と「このサイト（LINKサポート）」の2つを、スマホのホーム画面に置きます。アプリみたいにワンタップで開けて、ずっと楽になります✨<br>下のボタンから、iPhone・Android・パソコンそれぞれの置き方が見られます。置けたら「もどる」でここに戻って、「できたら押してね」を押してください。",
      link:{t:"📲 ホーム画面に置く案内をひらく", u:B+"app.html"}},
     {ic:"💬", nm:"LINK information\nを追加", g:"member", num:1, task:"h1",
      note2:"LINKの公式LINE「LINK information」を友だち追加します。詳しい使い方（リッチメニューなど）は、あとでお伝えします。いまは<b>「友だち追加」だけ</b>でOKです😊",
@@ -1152,8 +1158,7 @@ function openTask(it){
   if(it.pass) h += '<div class="fgen"><label for="fPass">🔑 合言葉（ヒント：この会社名をカタカナで）</label><input id="fPass" type="text" autocomplete="off" placeholder="ユーザーサポート会で教わった合言葉"><button type="button" id="fPassOk">合言葉を入れる</button><p class="fsmall" id="fPassMsg" style="margin-top:6px"></p><div id="fPassBox"></div></div>';
   if(it.nameRule) h += '</div>';
   if(it.link) h += `<a class="flink" id="taskLink" href="${it.link.u}"${/^https?:/.test(it.link.u) ? ' target="_blank" rel="noopener"' : ""}>${it.link.t}</a>`;
-  h += done ? '<button type="button" class="fdone undo" id="taskDone">もどす（まだ終わっていない）</button>' : '<button type="button" class="fdone" id="taskDone">✅ できた！</button>';
-  if(done) h += FLOW_MARKS.indexOf(it.task) >= 0 ? '<p class="fwait" style="color:#8E24AA">🌈 サポーターの確認もついています</p>' : '<p class="fwait" style="color:#0288D1">🔵 サポーターの確認を待っています</p>';
+  h += '<button type="button" class="fdone" id="taskDone"></button><button type="button" class="fclose" id="taskClose2">とじる</button>';
   $("#taskBody").innerHTML = h;
   $("#taskSheet").hidden = false;
   const l = $("#taskLink"); if(l && !/^https?:/.test(it.link.u)) l.addEventListener("click", saveReturn);
@@ -1175,13 +1180,22 @@ function openTask(it){
       ans[+d.dataset.i] = b.dataset.a; d.querySelectorAll("button").forEach(x=>x.classList.toggle("on", x === b)); judge();
     })));
   }
+  /* できたのボタンの見た目（押しても閉じません。閉じるのは下の「とじる」） */
+  const paintDone = ()=>{
+    const b = $("#taskDone"), on = !!FLOW[it.task], rb = on && FLOW_MARKS.indexOf(it.task) >= 0;
+    b.className = "fdone" + (on ? " on" : "") + (rb ? " rb" : "");
+    b.innerHTML = on ? '<span class="fbox">✓</span>できた！' : '<span class="fbox"></span>できたら押してね';
+    b.setAttribute("aria-pressed", on ? "true" : "false");
+  };
+  paintDone();
+  $("#taskClose2").onclick = closeTask;
   $("#taskDone").onclick = ()=>{
     const pageK = path.length ? path[0].flowPage : "";
     const wasPage = pageK ? flowDone(pageK) : false;
     const grp = path.length > 1 ? path[path.length-1] : null, wasGrp = grp ? flowItemDone(grp) : false;
     const ch = {};
     if(FLOW[it.task]){ delete FLOW[it.task]; ch[it.task] = false; } else { FLOW[it.task] = true; ch[it.task] = true; }
-    saveFlow(ch); closeTask(); flowPaintAll(); reflowLevel();
+    saveFlow(ch); paintDone(); flowPaintAll(); reflowLevel();
     if(pageK === "use" && !wasPage && flowDone(pageK)) flowCelebrate("🎉 3つとも終わりました！ホームに「チーム情報」が開きました。光っている「もっと使いこなすには」も見てみてください");
     else if(pageK && !wasPage && flowDone(pageK)) flowCelebrate("🎉 " + flowPageItem(pageK).nm.replace(/\n/g,"") + "、ぜんぶできました！" + (grp ? "「もどる」から、👍 の丸で次へ進めます" : "👍 の丸から次へ進めます"));
     else if(grp && !wasGrp && flowItemDone(grp)) flowCelebrate("🎉 " + grp.nm.replace(/\n/g,"") + "、ぜんぶできました！");
@@ -1207,7 +1221,7 @@ async function flowSaveRef(){
     const j = await r.json();
     if(j && j.ok){
       me.refUrl = v; try{ localStorage.setItem("skyarc_member", JSON.stringify(me)); }catch(e){}
-      msg.textContent = "✅ 会員情報に反映されました。下の「できた！」を押してください"; msg.style.color = "#2E7D32";
+      msg.textContent = "✅ 会員情報に反映されました。下の「できたら押してね」を押してください"; msg.style.color = "#2E7D32";
     }else{ msg.textContent = "保存できませんでした。もう一度お試しください"; msg.style.color = "#C62828"; }
   }catch(e){ msg.textContent = "電波のよいところで、もう一度お試しください"; msg.style.color = "#C62828"; }
 }
