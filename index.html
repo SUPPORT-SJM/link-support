@@ -732,6 +732,7 @@ async function syncFlow(){
   }
   if(Object.keys(localOnly).length) saveFlow(localOnly); else saveFlowLocal();
   if(JSON.stringify([FLOW, FLOW_MARKS]) !== before){ flowPaintAll(); if(typeof reflowLevel === "function" && !drag) reflowLevel(); }
+  refreshGrow();
 }
 async function flowInherit(q){
   const [h, g, s1] = await Promise.all([q("hajime"), q("guide"), q("step1")]);
@@ -2225,6 +2226,23 @@ function paintPoint(){
     if(!on && has){ n.el.classList.remove("pointed"); has.remove(); }
   });
 }
+/* 育ちのマーク（🫘🌱🌷🌈）：新しい3つが、それぞれ先生の丸でぜんぶうまっているか
+   （名前は前のまま hajime／guide／step1 ＝ はじめの一歩／LINKを知ろう／LINKを使おう）
+   管理者モードで試しているときは、えらんだ3つのとおりにします */
+function flowGrowDone(){
+  const dp = flowDbg();
+  if(dp) return { hajime: !!dp.h, guide: !!dp.g, step1: !!dp.s };
+  const all = k=>{ const t = flowTasks(flowPageItem(k)); return t.length > 0 && t.every(x=>FLOW_MARKS.indexOf(x) >= 0); };
+  return { hajime: all("hajime"), guide: all("know"), step1: all("use") };
+}
+function refreshGrow(){
+  if(!me) return;
+  const done = flowGrowDone();
+  if(pointProg && JSON.stringify(pointProg) === JSON.stringify(done)) return;
+  pointProg = done;
+  try{ localStorage.setItem(POINT_KEY, JSON.stringify({ id: me.id, done: done })); }catch(e){}
+  setHello();
+}
 async function loadPoint(){
   if(!me || !me.id || !me.pin || !GAS_URL) return;
   try{
@@ -2235,8 +2253,7 @@ async function loadPoint(){
       try{ localStorage.setItem(LINKS_KEY, JSON.stringify(j.links)); }catch(e){}
     }
     if(!j || j.ok !== true || !j.progress) return;
-    const done = {};
-    POINT_ORDER.forEach(o=>{ done[o.app] = !!(j.progress[o.app] && j.progress[o.app].done); });
+    const done = flowGrowDone();   /* 育ちのマークは、新しい3つ（はじめの一歩・LINKを知ろう・LINKを使おう）で決めます */
     const wasG3 = ok({ need:"grow3" }), wasTeam = ok({ need:"team" });
     pointProg = done;
     try{ localStorage.setItem(POINT_KEY, JSON.stringify({ id: me.id, done: done })); }catch(e){}
