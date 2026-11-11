@@ -537,7 +537,8 @@
   .sum{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
   .sum > div{flex:1;min-width:96px;background:#fff;border-radius:13px;padding:11px 10px;text-align:center;box-shadow:0 2px 8px rgba(110,95,181,.08);}
   .sum .n{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:22px;color:#6E5FB5;line-height:1.2;}
-  .sum .l{font-size:11px;color:#8A8598;margin-top:2px;}
+  .sum .l{font-size:11px;color:#8A8598;margin-top:2px;line-height:1.5;}
+  .sum .l small{display:block;font-size:9.5px;color:#A8A4BC;}
   .rfilters{display:flex;gap:7px;margin-bottom:12px;flex-wrap:wrap;}
   .rfilters button{background:#fff;border:1.5px solid #E7E4F0;color:#7A7590;border-radius:999px;padding:7px 15px;font-size:12.5px;font-weight:700;font-family:inherit;cursor:pointer;}
   .rfilters button.on{background:#6E5FB5;border-color:#6E5FB5;color:#fff;}
@@ -700,8 +701,8 @@
     <div class="wrap" id="listArea">
       <div class="sum" id="sumBox">
         <div><div class="n" id="nAll">0</div><div class="l">表示中</div></div>
-        <div><div class="n" id="nIntro">0</div><div class="l">紹介した方</div></div>
-        <div><div class="n" id="nHelper">0</div><div class="l">サポート中</div></div>
+        <div><div class="n" id="nIntro">0</div><div class="l">紹介した方<small>（非表示を含む）</small></div></div>
+        <div><div class="n" id="nHelper">0</div><div class="l">サポート中<small>（非表示を含む）</small></div></div>
       </div>
       <div class="rfilters" id="relFilters">
         <button class="on" data-f="" onclick="setRel('')">すべて</button>
