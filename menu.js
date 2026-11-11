@@ -45,7 +45,6 @@
     { ic:"🗓", nm:"LINK公式スケジュールサイト",
       sub:"LINK全体の講座・セミナーはこちら",
       url:"https://link-event-x.com/", ext:true, need:"" },
-    { ic:"🤝", nm:"サポートメンバー状況",  url: up+"ikusei/myteam.html",        need:"sup" },
     { ic:"📝", nm:"新規登録の依頼",
       sub:"新しく入られた方の登録をお願いする",
       url: up+"ikusei/shinki-irai.html", need:"" },

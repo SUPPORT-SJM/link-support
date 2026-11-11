@@ -505,20 +505,42 @@
   .mgrp{background:#F0EDF9;color:#4A3F7A;font-weight:900;font-size:13px;padding:9px 12px;border-radius:12px;border-top:2px solid #D9D2F3;}
   .mgrp small{font-weight:700;color:#7A7390;margin-left:6px;}
   .mrole{font-size:11.5px;font-weight:900;color:#7A7390;margin:6px 2px -2px;letter-spacing:.05em;}
-  .mc{background:#fff;border-radius:14px;box-shadow:0 2px 10px rgba(60,50,110,.07);padding:12px 14px;display:flex;flex-direction:column;gap:9px;font-size:13px;}
-  .mc.row-check{background:#FFFDF5;} .mc.row-auto{background:#F7FAFE;}
-  .mc.row-hid > *:not(.mc-top){opacity:.45;}
-  .mc-top{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:flex-start;justify-content:space-between;}
-  .mc-who{min-width:0;flex:1 1 220px;line-height:1.55;}
-  .mc-who .nm{font-size:14.5px;}
-  .mc-who .sub{font-size:11.5px;color:#8A84A0;}
-  .mc-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex:0 1 auto;}
+  .mc{background:#fff;border-radius:15px;padding:14px 15px;box-shadow:0 2px 9px rgba(110,95,181,.09);border-left:5px solid #D9D2F3;display:flex;flex-direction:column;gap:8px;font-size:13px;}
+  .mc.is-intro{border-left-color:#4FB08C;}
+  .mc.is-helper{border-left-color:#F5C452;background:#FFFDF7;}
+  .mc.row-check{box-shadow:0 0 0 2px #F0C86A inset,0 2px 9px rgba(110,95,181,.09);}
+  .mc.row-hid > *:not(.mc-top):not(.mc-foot){opacity:.45;}
+  .mc-top{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;}
+  .mc-top .nm{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:16px;color:#6E5FB5;}
+  .mc-top .rn{font-size:10.5px;color:#A8A4BC;}
+  .mc-top .id{font-family:monospace;font-size:11px;color:#A8A4BC;}
+  .mc-top .tags{display:flex;gap:5px;flex-wrap:wrap;margin-left:auto;}
+  .tag{font-size:10.5px;font-weight:700;border-radius:999px;padding:2px 9px;white-space:nowrap;}
+  .tag.intro{background:#E4F5EC;color:#2F7A5C;}
+  .tag.helper{background:#FDF3DC;color:#8A6D00;}
+  .tag.rank{background:#EDEAF9;color:#6E5FB5;}
+  .mc-meta{font-size:11.5px;color:#8A8598;margin-top:-4px;}
+  .steps{display:flex;gap:6px;flex-wrap:wrap;}
+  .step{flex:1;min-width:92px;background:#FBF8FE;border-radius:10px;padding:7px 8px;text-align:center;}
+  .step .t{font-size:10px;color:#8A8598;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .step .v{font-family:monospace;font-size:12.5px;font-weight:700;color:#5A5570;}
+  .step.done{background:#E4F5EC;} .step.done .v{color:#4FB08C;}
+  .step.self{background:#E3F4FD;} .step.self .v{color:#0288D1;}
+  .step.none .v{color:#C4C0D2;}
+  @media (max-width:600px){ .step{min-width:calc(33.3% - 6px);} }
   .mc-people{display:flex;flex-wrap:wrap;gap:2px 14px;font-size:11.5px;color:#7A7390;line-height:1.6;}
   .mc-people .me{color:#2F7A5C;}
-  .mc-foot{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;font-size:12px;color:#6A6480;border-top:1px dashed #ECE9F5;padding-top:8px;}
-  .mc-foot .lb{font-size:11px;color:#A8A4BC;font-weight:700;margin-right:3px;}
+  .mc-foot{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:12px;color:#6A6480;border-top:1px dashed #ECE9F5;padding-top:8px;}
   .mc-foot .dept-chip,.mc-foot .hidchk{margin-top:0;}
   .mc-foot .edit-row{margin-left:auto;}
+  .mc-foot .flags{max-width:none;}
+  .sum{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
+  .sum > div{flex:1;min-width:96px;background:#fff;border-radius:13px;padding:11px 10px;text-align:center;box-shadow:0 2px 8px rgba(110,95,181,.08);}
+  .sum .n{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:22px;color:#6E5FB5;line-height:1.2;}
+  .sum .l{font-size:11px;color:#8A8598;margin-top:2px;}
+  .rfilters{display:flex;gap:7px;margin-bottom:12px;flex-wrap:wrap;}
+  .rfilters button{background:#fff;border:1.5px solid #E7E4F0;color:#7A7590;border-radius:999px;padding:7px 15px;font-size:12.5px;font-weight:700;font-family:inherit;cursor:pointer;}
+  .rfilters button.on{background:#6E5FB5;border-color:#6E5FB5;color:#fff;}
   .ss-chips{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;}
   @media (max-width:700px){ .ss-chips{grid-template-columns:1fr 1fr;} }
   .ss-chip{display:flex;align-items:flex-start;gap:7px;text-align:left;background:#FAF9FD;border:1.5px solid #E2E0EA;border-radius:11px;padding:7px 8px;min-height:50px;width:100%;font-family:inherit;cursor:pointer;}
@@ -531,7 +553,7 @@
   .ss-chip .me{display:block;font-size:10.5px;color:#2F7A5C;line-height:1.45;margin-top:2px;}
   .ss-note{font-size:11.5px;color:#A8A4BC;}
   .ss-note.err{color:#B3352F;}
-  .ss-legend{font-size:11.5px;color:#7A7390;margin:0 2px 10px;line-height:1.7;}
+  .ss-legend{font-size:11.5px;color:#7A7390;margin:0 0 10px;line-height:1.8;background:#fff;border-radius:12px;padding:9px 12px;box-shadow:0 1px 6px rgba(110,95,181,.06);}
   .plink{color:inherit;text-decoration:underline;text-decoration-color:#C9C2EC;text-underline-offset:2px;cursor:pointer;}
   .idlechk{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:#fff;background:rgba(255,255,255,.14);padding:6px 11px;border-radius:999px;cursor:pointer;white-space:nowrap;}
   .idlechk input{width:14px;height:14px;margin:0;}
@@ -676,7 +698,17 @@
     </div>
 
     <div class="wrap" id="listArea">
-      <div class="ss-legend">初期サポート：🟢 OK　🟡 そろそろ・返事待ち　🔴 未案内・日付が過ぎた　／　（ク）アップクリエ（担）サポート担当（紹）紹介者（説）アドバイザー</div>
+      <div class="sum" id="sumBox">
+        <div><div class="n" id="nAll">0</div><div class="l">表示中</div></div>
+        <div><div class="n" id="nIntro">0</div><div class="l">紹介した方</div></div>
+        <div><div class="n" id="nHelper">0</div><div class="l">サポート中</div></div>
+      </div>
+      <div class="rfilters" id="relFilters">
+        <button class="on" data-f="" onclick="setRel('')">すべて</button>
+        <button data-f="intro" onclick="setRel('intro')">紹介した方</button>
+        <button data-f="helper" onclick="setRel('helper')">🤝 サポート中</button>
+      </div>
+      <div class="ss-legend">初期サポート：🟢 OK　🟡 そろそろ・返事待ち　🔴 未案内・日付が過ぎた　／　（ク）アップクリエ（担）サポート担当（紹）紹介者（説）アドバイザー<br>枠の色：緑＝あなたが紹介した方　黄色＝あなたがサポート担当の方　／　下の段：⭕＝先生の丸の数　✓＝本人の「できた」の数　🎓＝修了　—＝まだ</div>
       <div id="tbody" class="mlist"></div>
       <div class="legend">
         ⭕ = 先生の丸の数 / 🐣 = 本人チェックの数<br>
@@ -1973,12 +2005,17 @@ function render(){
     /* 非表示にしてある方は出しません（非表示：OFF のとき・保存前に変えた方は出します） */
     if(!showHidden && hiddenOrig[hk(m.id)] && !(hk(m.id) in pendingHide)) return false;
     if($("#fIdle") && $("#fIdle").checked && !idle30(m)) return false;
+    if(relF === "intro" && !relOf(m).intro) return false;
+    if(relF === "helper" && !relOf(m).helper) return false;
     if(!q) return true;
     return (m.name||"").toLowerCase().includes(q) || String(m.id).includes(q);
   });
   drawHidBtn();
   const tb = $("#tbody");
   lastShown = [];
+  $("#nAll").textContent = list.length;
+  $("#nIntro").textContent = data.members.filter(x=>relOf(x).intro).length;
+  $("#nHelper").textContent = data.members.filter(x=>relOf(x).helper).length;
   if(list.length === 0){
     tb.innerHTML = '<div class="empty">該当する方がいません</div>';
     return;
@@ -1993,6 +2030,13 @@ function render(){
   }).join("");
 }
 let lastShown = [];
+/* 紹介した方・サポート中でしぼりこみ */
+let relF = "";
+function setRel(f){
+  relF = f;
+  document.querySelectorAll("#relFilters button").forEach(b=>b.classList.toggle("on", b.dataset.f === f));
+  render();
+}
 /* 30日以上ログインなし（管理の一覧の日付は「月/日」なので、今日より先なら去年として数えます） */
 function idle30(m){
   const ss = window.SS && SS.get(m.id);
@@ -2067,24 +2111,67 @@ function rowsHtml(list){
       return (marks || btn) ? `<div class="edit-row">${marks}${btn}</div>` : "";
     })();
     const ssPeople = window.SS ? SS.peopleHtml(m.id) : "";
-    return `<div class="mc ${m.needCheck ? "row-check" : (m.autoFill ? "row-auto" : "")} ${hidOn ? "row-hid" : ""}">
+    const rel = relOf(m);
+    const rank = roleLabel(m);
+    return `<div class="mc ${rel.intro ? "is-intro" : (rel.helper ? "is-helper" : "")} ${m.needCheck ? "row-check" : (m.autoFill ? "row-auto" : "")} ${hidOn ? "row-hid" : ""}">
       <div class="mc-top">
-        <div class="mc-who"><a href="#" class="nm nm-link" onclick="openDetail('${m.id}');return false;">${growMark}${m.name || "(名前未登録)"}</a>${m.realName && m.realName !== m.name ? ` <span style="font-size:10.5px;color:#A8A4BC;">(${m.realName})</span>` : ""}
-          <div class="sub"><span class="id">${m.id}</span>｜${m.keiretsu || "系列未設定"}${m.area ? "｜" + m.area : ""}</div></div>
-        <div class="mc-right"><div class="flags">${fb("サポーター","sup")}${fb("クリエ","")}${fb("アドバンス","adv")}${fb("系列代表","kei")}${fb("チーム代表","rep")}${fb("管理者","adm")}</div>${scopeBtn}</div>
+        <a href="#" class="nm nm-link" onclick="openDetail('${m.id}');return false;">${growMark}${m.name || "(名前未登録)"}</a>${m.realName && m.realName !== m.name ? `<span class="rn">(${m.realName})</span>` : ""}
+        <span class="id">${m.id}</span>
+        <span class="tags">
+          <span class="tag rank">${rank}</span>
+          ${rel.intro ? '<span class="tag intro">紹介</span>' : ""}
+          ${rel.helper ? '<span class="tag helper">🤝 サポート</span>' : ""}
+        </span>
       </div>
-      ${ssPeople ? `<div class="mc-people">${ssPeople}</div>` : ""}
+      <div class="mc-meta">${m.keiretsu || "系列未設定"}${m.area ? "　・" + m.area : ""}　・最終 ${m.lastSeen || "–"}</div>
       ${window.SS ? SS.cardHtml(m.id) : ""}
+      <div class="steps">${stepsHtml(m)}</div>
+      ${ssPeople ? `<div class="mc-people">${ssPeople}</div>` : ""}
       <div class="mc-foot">
-        <span><span class="lb">① ぴよぴよ</span>${piyo}</span>
-        <span><span class="lb">② グルコン</span>${gr}</span>
-        <span><span class="lb">最終</span>${m.lastSeen || "–"}</span>
+        <div class="flags">${fb("サポーター","sup")}${fb("クリエ","")}${fb("アドバンス","adv")}${fb("系列代表","kei")}${fb("チーム代表","rep")}${fb("管理者","adm")}</div>${scopeBtn}
         <button type="button" class="dept-chip ${m.dept ? "has" : ""}" onclick="openDeptPick('${m.id}')" title="部門">🏷 ${m.dept ? String(m.dept).split(",").join("・") : "部門：未所属"}</button>
         <label class="hidchk ${hidPend ? "pend" : ""}" title="あなたの画面だけで非表示にします"><input type="checkbox" ${hidOn ? "checked" : ""} onchange="toggleHide('${m.id}', this.checked)">非表示</label>
         ${editRow}
       </div>
     </div>`;
   }).join("");
+}
+/* あなたとの関係（紹介した方・サポート担当の方） */
+function relOf(m){
+  const me = hk(admin && admin.id);
+  return { intro: !!me && hk(m.intro) === me, helper: !!me && hk(m.helper) === me };
+}
+function roleLabel(m){
+  const r = String(m.role || "").split(/[,、\s]+/).filter(x=>x);
+  const top = ["管理者","チーム代表","系列代表","アドバンス"].find(x=>r.indexOf(x) >= 0);
+  return top || (hasCrie(m) ? "クリエーターズ" : (hasSup(m) ? "サポーター" : "メンバー"));
+}
+/* 下の行：はじめの一歩・LINKを知ろう・LINKを使おう・ぴよぴよ・グルコンリーダー */
+const FLOW_STEPS = [
+  { label:"👋 はじめの一歩", items:["h0","h1","h2","h3"] },
+  { label:"🔎 LINKを知ろう", items:["k1","k2a","k2b","k2c","k2d","k3a","k3b"] },
+  { label:"🚀 LINKを使おう", items:["u1","u3"] }
+];
+function stepBox(label, v, cls, title){
+  return `<div class="step ${cls}" title="${title || ""}"><div class="t">${label}</div><div class="v">${v}</div></div>`;
+}
+function stepsHtml(m){
+  const f = m.flow;
+  const flow = FLOW_STEPS.map(st=>{
+    if(!f) return stepBox(st.label, "—", "none", "まだ始めていません");
+    const n = st.items.length;
+    const mk = st.items.filter(k=>(f.m || []).indexOf(k) >= 0).length;
+    const dn = st.items.filter(k=>(f.d || []).indexOf(k) >= 0).length;
+    if(mk >= n) return stepBox(st.label, "🎓", "done", "先生の丸がぜんぶついています");
+    if(mk) return stepBox(st.label, `⭕${mk}/${n}`, "", `先生の丸 ${mk}/${n}・できた ${dn}/${n}`);
+    if(dn) return stepBox(st.label, `✓${dn}/${n}`, dn >= n ? "self" : "", `できた ${dn}/${n}（先生の丸はまだ）`);
+    return stepBox(st.label, "—", "none", "まだ始めていません");
+  }).join("");
+  const piyo = m.piyoDone ? stepBox("🐣 ぴよぴよ", "🎓", "done")
+    : (m.piyoMark ? stepBox("🐣 ぴよぴよ", `⭕${m.piyoMark}/${m.piyoItems || "–"}`, "") : (m.piyoSelf ? stepBox("🐣 ぴよぴよ", `✓${m.piyoSelf}`, "") : stepBox("🐣 ぴよぴよ", "—", "none")));
+  const gr = m.grDone ? stepBox("🌱 グルコンリーダー", "🎓", "done")
+    : (m.grMark ? stepBox("🌱 グルコンリーダー", `⭕${m.grMark}/${m.grItems || "–"}`, "") : (m.grSelf ? stepBox("🌱 グルコンリーダー", `✓${m.grSelf}/${m.grItems || "–"}`, "") : stepBox("🌱 グルコンリーダー", "—", "none")));
+  return flow + piyo + gr;
 }
 
 /* ================================================================
