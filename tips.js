@@ -63,6 +63,12 @@
       { art: '<div class="tp-row">' + big("💬", "tp-pop") + big("👥", "tp-pop tp-d1") + '</div>', cap: "系列ごとに、仲間が集まるオープンチャットがあります", sec: 4.5 },
       { art: big("🎪", "tp-pop tp-glow"), cap: "Skyarc全体でも、交流会などが開かれています", sec: 4.5 }
     ] },
+    { id: "just-talk", t: "LINKのことは、話すだけでOK", scenes: [
+      { art: big("😊", "tp-pop"), cap: "上手に説明しなくて大丈夫です（詳しい人に話してもらおう）", sec: 4.5 },
+      { art: '<div class="tp-col">' + big("💬", "tp-pop") + chip("「LINKっていうのをやってて、楽しいよ」") + '</div>', cap: "「LINKっていうのをやってて、楽しいよ」と言うだけ", sec: 5 },
+      { art: '<div class="tp-row">' + big("🙋", "tp-sm tp-pop") + '<span class="tp-op">→</span>' + big("🤝", "tp-sm tp-pop tp-d1") + '</div>', cap: "「気になる」と言われたら、アップに一言", sec: 4.5 },
+      { art: big("🎤", "tp-pop tp-glow"), cap: "説明は、アドバイザーがします", sec: 4 }
+    ] },
     { id: "profile", t: "自分の情報を設定しよう", scenes: [
       { art: big("📝", "tp-pop"), cap: "このサイトで、自分の情報を細かく設定しておくと…", sec: 4 },
       { art: '<div class="tp-row">' + big("👤", "tp-sm tp-pop") + '<span class="tp-op">←</span>' + big("🤝", "tp-sm tp-pop tp-d1") + '</div>', cap: "サポーターやアップラインの人から、フォローを受けやすくなります", sec: 5 },

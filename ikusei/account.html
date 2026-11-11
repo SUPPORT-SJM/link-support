@@ -402,7 +402,7 @@ function doLogout(){
 function goBack(){
   if(!member){ location.href = "../index.html"; return; }
   location.href = member.crie ? "./portal-creators.html"
-                : (member.sup ? "./portal-supporter.html" : "../first-support/");
+                : (member.sup ? "./portal-supporter.html" : "../index.html");
 }
 </script>
 <script src="../track.js"></script>

@@ -10,12 +10,12 @@
 <link rel="icon" type="image/png" sizes="64x64" href="../img/portal-icon-64.png">
 <link rel="apple-touch-icon" href="../img/portal-icon-180.png">
 <meta name="apple-mobile-web-app-title" content="LINKポータル">
-<meta name="theme-color" content="#F06A6A">
+<meta name="theme-color" content="#29A3DC">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../app-install.css">
-<style>:root{ --c:#E9566E; --c2:#FF8A5B; --mist:#FFF0EE; --line:#F6DCD8; --paper:#FFFBF8; }</style>
+<style>:root{ --c:#1E96D2; --c2:#4FC3F0; --mist:#EAF6FD; --line:#CFE8F5; --paper:#F7FCFF; }</style>
 <script>
 window.SKY_APP = { tool:"portal", base:"../", name:"LINKポータル", open:"./open.html", pcUrl:"https://app.link-event-x.com", sw:"./sw.js" };
 </script>
@@ -23,5 +23,7 @@ window.SKY_APP = { tool:"portal", base:"../", name:"LINKポータル", open:"./o
 </head>
 <body>
 <div class="ai-wrap" id="aiRoot"></div>
+<!-- 仮組み：「もどる」はページのいちばん下のまんなかに -->
+<div style="text-align:center;padding:10px 0 calc(env(safe-area-inset-bottom) + 56px)"><a href="../index.html" id="aiBackHome" style="display:inline-block;background:#fff;border:2px solid #A9D9F0;border-radius:999px;padding:10px 26px;font-size:15px;font-weight:700;color:#1E86BE;text-decoration:none;box-shadow:0 2px 8px rgba(60,42,110,.12)">← もどる</a></div>
 </body>
 </html>
