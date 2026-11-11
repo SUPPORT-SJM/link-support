@@ -52,6 +52,12 @@
   .about .warn span{opacity:.8;font-size:12.5px}
 
   /* 診断パネル */
+  /* 月の切り替え */
+  .months{display:flex;gap:8px;margin:0 0 16px;flex-wrap:wrap}
+  .months a{flex:1;min-width:64px;text-align:center;text-decoration:none;color:#fff;
+    background:rgba(255,255,255,.18);border-radius:20px;padding:9px 0;font-size:14px;font-weight:700}
+  .months a.on{background:#fff;color:#33517a}
+
   #diag{
     background:#fffbe6;border:1px solid #e0c060;border-radius:12px;
     padding:16px 18px;font-size:13px;line-height:1.8;color:#5c4600;word-break:break-all;
@@ -94,10 +100,27 @@
     </p>
   </section>
 
+  <!-- 月の切り替え。月を足すときは、この行を1本コピーして ?m= の値を変える -->
+  <nav class="months">
+    <a href="index.html" data-m="">9月期</a>
+    <a href="index.html?m=2026-10" data-m="2026-10">10月期</a>
+    <a href="index.html?m=2026-11" data-m="2026-11">11月期</a>
+    <a href="index.html?m=2026-12" data-m="2026-12">12月期</a>
+  </nav>
+
   <div id="mount"></div>
 </div>
 
-<script src="data/manifest.js"></script>
+<script>
+(function(){
+  var m = new URLSearchParams(location.search).get('m') || '';
+  if(!/^\d{4}-\d{2}$/.test(m) || m==='2026-09') m = '';
+  window.BAM_MONTH = m;
+  document.write('<script src="' + (m ? 'data/' + m + '/' : 'data/') + 'manifest.js"><\/script>');
+  var as = document.querySelectorAll('.months a');
+  for(var i=0;i<as.length;i++){ if(as[i].getAttribute('data-m')===m) as[i].className='on'; }
+})();
+</script>
 <script>
 (function(){
   var store={
@@ -106,6 +129,8 @@
   };
   var mount=document.getElementById('mount');
   var mf=window.BAM_MANIFEST;
+  var MON=window.BAM_MONTH||'';
+  var KP=MON? MON+'-' : '';
 
   /* ---- manifest.js が読めていない場合は原因を表示 ---- */
   if(!mf || !mf.length){
@@ -158,11 +183,11 @@
   var ul=document.createElement('ul');
   mf.forEach(function(m){
     var ready = (m.ready !== false);
-    var read  = parseInt(store.get('bam-progress-'+m.day,'0'),10)||0;
+    var read  = parseInt(store.get('bam-progress-'+KP+m.day,'0'),10)||0;
     var li=document.createElement('li');
     var a=document.createElement(ready ? 'a' : 'div');
     a.className='card'+(ready&&read>0?' done':'')+(ready?'':' soon');
-    if(ready) a.href='viewer.html?day='+m.day;
+    if(ready) a.href='viewer.html?day='+m.day+(MON?'&m='+MON:'');
     a.innerHTML='<div class="num">'+m.day+'</div>'
       +'<div class="body"><div class="ttl"></div>'
       +'<div class="state">'

@@ -249,22 +249,29 @@
 
 <!-- ===========================================================
      データ読み込み。
-     動的読み込みは file:// でブロックされることがあるので、
-     ここに静的に並べる。存在しない日は黙って無視される。
-     Day9以降を足すときは、この行を1本コピーして増やす。
+     ?m=2026-10 のように月を付けると data/2026-10/ を読む。
+     月が無いとき（これまでのURL）は 9月期（data/ 直下）を読む。
+     document.write で並べるので、file:// でも読み込める。
      =========================================================== -->
-<script src="data/manifest.js"></script>
-<script src="data/notes.js"></script>
-<script src="data/day0.js"></script>
-<script src="data/day1.js"></script>
-<script src="data/day2.js"></script>
-<script src="data/day3.js"></script>
-<script src="data/day4.js"></script>
-<script src="data/day5.js"></script>
-<script src="data/day6.js"></script>
-<script src="data/day7.js"></script>
-<script src="data/day8.js"></script>
-<script src="data/day9.js"></script>
+<script>
+(function(){
+  var m = new URLSearchParams(location.search).get('m') || '';
+  if(!/^\d{4}-\d{2}$/.test(m) || m==='2026-09') m = '';
+  window.BAM_MONTH = m;
+  window.BAM_DATA_DIR = m ? 'data/' + m + '/' : 'data/';
+  document.write('<script src="' + window.BAM_DATA_DIR + 'manifest.js"><\/script>'
+               + '<script src="data/notes.js"><\/script>');
+})();
+</script>
+<script>
+(function(){
+  var mf = window.BAM_MANIFEST || [], s = '';
+  for(var i=0;i<mf.length;i++){
+    if(mf[i].ready !== false) s += '<script src="' + window.BAM_DATA_DIR + 'day' + mf[i].day + '.js"><\/script>';
+  }
+  document.write(s);
+})();
+</script>
 
 <script>
 (function(){
@@ -278,6 +285,12 @@
   var sigSeen={};
   var dayNum = new URLSearchParams(location.search).get('day');
   if(dayNum===null) dayNum = '0';
+  /* 月ごとの切り替え。9月期は月なし（これまでの記録・URLをそのまま使う） */
+  var MON = window.BAM_MONTH || '';
+  var MQ  = MON ? '&m=' + MON : '';
+  var KD  = (MON ? MON + '-' : '') + dayNum;
+  var TOC = 'index.html' + (MON ? '?m=' + MON : '');
+  var tocA = document.querySelector('#bar a'); if(tocA) tocA.href = TOC;
 
   var manifest = window.BAM_MANIFEST || null;
   var days     = window.BAM_DAYS || null;
@@ -321,19 +334,19 @@
         + (made.length ? made.map(function(k){return k+'日目';}).join('、') : 'なし')
         + '</b></div>'
         + '<hr>'
-        + 'エラーではありません。<code>data/day' + esc(dayNum) + '.js</code> を作れば表示されます。'
+        + 'エラーではありません。<code>' + esc(window.BAM_DATA_DIR||'data/') + 'day' + esc(dayNum) + '.js</code> を作れば表示されます。'
         + '<br><br>作り方は <code>day0.js</code> をコピーして、'
         + '<code>window.BAM_DAYS[0]</code> の <b>0</b> を <b>' + esc(dayNum) + '</b> に変えるだけです。'
         + '<br><span style="opacity:.75">※ この番号を変え忘れると、0日目の中身を上書きしてしまうので注意してください。</span>';
     }
 
-    d.innerHTML = h + '<button onclick="location.href=\'index.html\'">目次に戻る</button>';
+    d.innerHTML = h + '<button onclick="location.href=\''+TOC+'\'">目次に戻る</button>';
     chat.appendChild(d);
     return;
   }
 
   var nodes=[], idx=0, soundOn = store.get('bam-sound','on')==='on',
-      PKEY = 'bam-progress-' + dayNum;
+      PKEY = 'bam-progress-' + KD;
   soundBtn.textContent = soundOn ? '🔔' : '🔕';
 
   document.title = data.title || ('BAM ' + dayNum + '日目');
@@ -358,8 +371,8 @@
   var hasNext=false;
   if(manifest){
     var pos = manifest.map(function(m){return String(m.day);}).indexOf(String(dayNum));
-    if(pos>-1 && manifest[pos+1]){
-      nextBtn.href='viewer.html?day='+manifest[pos+1].day;
+    if(pos>-1 && manifest[pos+1] && manifest[pos+1].ready!==false){
+      nextBtn.href='viewer.html?day='+manifest[pos+1].day+MQ;
       nextBtn.textContent=(manifest[pos+1].title||'次の日')+' →';
       hasNext=true;
     }
@@ -435,7 +448,7 @@
       v.addEventListener('click',function(e){ e.stopPropagation(); });
 
       /* --- 視聴状況の記録 --- */
-      var VKEY='bam-vid-'+dayNum+'-'+msig;
+      var VKEY='bam-vid-'+KD+'-'+msig;
       var badge=document.createElement('div');
       badge.className='vprog';
       var seen=parseFloat(store.get(VKEY,'0'))||0;
@@ -480,7 +493,7 @@
 
     /* --- チェックボタン（この端末にだけ残る） --- */
     if(m.type!=='note'){
-      var CKEY='bam-chk-'+dayNum+'-'+msig;
+      var CKEY='bam-chk-'+KD+'-'+msig;
       chk=document.createElement('button');
       chk.className='check';
       chk.type='button';
