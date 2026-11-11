@@ -46,6 +46,7 @@
   .bare video{max-width:100%;border-radius:12px;display:block;background:#000}
   /* Googleドライブの埋め込み */
   .gdrive{width:100%;aspect-ratio:16/9;border:0;border-radius:12px;display:block;background:#000}
+  .gdrive.tate{width:min(100%,300px);margin:0 auto}
   /* チェックボタン（リアクション） */
   .msg{align-items:flex-end;gap:7px}
   .check{
@@ -433,6 +434,8 @@
       b.className+=' bare';
       var fr=document.createElement('iframe');
       fr.className='gdrive';
+      /* 縦長の動画は data に ratio:"9/16" を書いておくと、その形の枠で出す（無ければ横長 16/9） */
+      if(m.ratio){ fr.style.aspectRatio=m.ratio; if(m.ratio==='9/16') fr.className+=' tate'; }
       fr.src=m.src;
       fr.loading='lazy';
       fr.allowFullscreen=true;
