@@ -9,7 +9,7 @@
 ================================================================ */
 
 /* ---------------- ① バージョン ---------------- */
-window.SKY_VERSION = "v1.2.027";
+window.SKY_VERSION = "v1.2.028";
 window.SKY_VERSION_DATE = "2026/11/11";
 
 /* ---------------- ② GASのURL ----------------
@@ -385,7 +385,7 @@ window.skyDebug = (function () {
         + DEPTS.map(function (k) { return '<option value="' + k + '"' + (st.dept === k ? " selected" : "") + '>' + k + '</option>'; }).join("") + '</select>'
         + '<div class="g" style="margin-top:6px;">' + chip(st.lead, "部門統括", "lead") + chip(st.sched, "スケジュール入力担当", "sched") + '</div>'
         + '<div class="lb">ファーストサポートの3つ（1つずつ押して、終わった・まだを切りかえ）</div><div class="g">'
-        + chip(st.prog.h, "① はじめの一歩", "p:h") + chip(st.prog.g, "② 初期サポートガイド", "p:g") + chip(st.prog.s, "③ 活用の1stステップ", "p:s") + '</div>'
+        + chip(st.prog.h, "① はじめの一歩", "p:h") + chip(st.prog.g, "② LINKを知ろう", "p:g") + chip(st.prog.s, "③ LINKを使おう", "p:s") + '</div>'
         + '<p class="s" style="margin:6px 0 0;">名前の左のマーク：<b style="font-size:15px;">' + markNow() + '</b>（🫘 → 🌱 → 🌷 → 🌈）</p>'
         + '<div class="lb">その先の進み具合</div><div class="g">'
         + chip(st.prog.p, "ぴよぴよ卒業", "p:p") + chip(st.prog.r, "グルコンリーダー修了", "p:r") + '</div>'
@@ -447,8 +447,8 @@ window.skyDebug = (function () {
 window.skyCelebrate = (function () {
   var C = {
     hajime: { fx:["petal"], em:"🌱", title:"はじめの一歩、<br>お楽しみ様でした！", msg:"芽が出ました。ここからが、はじまりです。", btn:"ありがとう！" },
-    guide:  { fx:["petal","cracker"], em:"🌷", title:"初期サポートガイド、<br>コンプリートやりましたね！", msg:"花が咲きました。いい調子です！", btn:"ありがとう！" },
-    step1:  { fx:["petal","cracker","star"], em:"🌈", title:"活用の1stステップまで、<br>すべてコンプリート！", msg:"ファーストサポート修了認定です。<br>お楽しみ様でした。<br>どんどん活用しましょう！", btn:"ありがとう！" },
+    guide:  { fx:["petal","cracker"], em:"🌷", title:"LINKを知ろう、<br>コンプリートやりましたね！", msg:"花が咲きました。いい調子です！", btn:"ありがとう！" },
+    step1:  { fx:["petal","cracker","star"], em:"🌈", title:"LINKを使おうまで、<br>すべてコンプリート！", msg:"ファーストサポート修了認定です。<br>お楽しみ様でした。<br>どんどん活用しましょう！", btn:"ありがとう！" },
     sup:    { fx:["petal","cracker"], em:"🐣", title:"サポーター認定、<br>飛躍していきましょう！", msg:"これから、チームのみなさんのサポートを<br>一緒にしていきましょう。", btn:"よろしくお願いします！" },
     piyo:   { fx:["petal","cracker"], em:"🐔", title:"ぴよぴよ卒業、<br>ますます楽しみですね！", msg:"サポートの基本が身につきました。", btn:"ありがとう！" },
     crie:   { fx:["star","petal"], em:"🌱", title:"クリエーターズへ、<br>ようこそ。", msg:"ここからがスタートです。<br>これからよろしくお願いします。<br>一緒に走っていきましょう！", btn:"よろしくお願いします！" },
@@ -457,7 +457,7 @@ window.skyCelebrate = (function () {
     keirep: { fx:["star"], em:"🔥", title:"系列代表として、<br>よろしくお願いします。", msg:"覚悟を持って、一緒にやっていきましょう。", btn:"一緒にやっていきます！" },
     team:   { fx:["star"], em:"👑", title:"チーム代表、<br>いつもありがとうございます。", msg:"みんなの夢を、<br>一緒に虹にしていきます。", btn:"ありがとう。" }
   };
-  var LABEL = { hajime:"はじめの一歩", guide:"初期サポートガイド", step1:"活用の1stステップ", sup:"サポーター", piyo:"ぴよぴよ卒業",
+  var LABEL = { hajime:"はじめの一歩", guide:"LINKを知ろう", step1:"LINKを使おう", sup:"サポーター", piyo:"ぴよぴよ卒業",
                 crie:"クリエーターズ", gr:"グルコンリーダー修了", adv:"アドバンス", keirep:"系列代表", team:"チーム代表" };
   var reduce = false; try { reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) {}
   function css() {

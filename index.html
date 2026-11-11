@@ -620,6 +620,8 @@ const TREE = [
      サポーターの印がつくと、ここが「サポーターの部屋」に変わります */
   /* 仮組み：「サポーターとは」は、ホームからなくして「LINKを使おう」の「もっと使いこなすには」に移しました */
   /* 2回つづけて押すと、裏返って「サポーターとは」になります（もう一度見たくなったとき用） */
+  /* 「LINKを使おう」まで終わって、まだサポーターでない方に（「もっと使いこなすには」が出るのと同時に開きます） */
+  {ic:"🐣", nm:"サポーター\nとは", g:"sup", need:"supIntro", url:B+"first-support/to-supporter.html"},
   {ic:"🐣", nm:"サポーターの\n部屋", g:"sup", need:"sup",
    flip:{ic:"🐣", nm:"サポーター\nとは", g:"sup", url:B+"first-support/to-supporter.html"}, kids:[
     {ic:"💌", nm:"新規の方への\n最初のメッセージ", g:"sup", url:B+"ikusei/first-message.html"},
@@ -664,15 +666,27 @@ const FLOW_ORDER = ["hajime","know","use"];
 const FLOW_APP = "flow";   /* スプレッドシートのタブ「flow進捗」に記録します（先生の丸もこのタブ） */
 let FLOW = {}, FLOW_MARKS = [];
 function flowKey(){ return "sky_flow_v1_" + (me && me.id ? String(me.id) : "guest"); }
+/* 管理者モードで「この状態で試す」のときは、えらんだ3つ（① はじめの一歩 ② LINKを知ろう ③ LINKを使おう）を終わった状態にして見せます。
+   試しているあいだは、本当の記録（この端末・スプレッドシート）には書きません */
+function flowDbg(){
+  try{ const d = window.skyDebug && window.skyDebug.get ? window.skyDebug.get() : null; return d && d.mode === "custom" ? (d.prog || {}) : null; }catch(e){ return null; }
+}
 function loadFlow(){
+  const dp = flowDbg();
+  if(dp){
+    FLOW = {}; FLOW_MARKS = [];
+    [["h","hajime"],["g","know"],["s","use"]].forEach(x=>{ if(dp[x[0]]) flowTasks(flowPageItem(x[1])).forEach(k=>{ FLOW[k] = true; }); });
+    return;
+  }
   try{ const o = JSON.parse(localStorage.getItem(flowKey()) || "{}") || {}; FLOW = o.d ? o.d : o; FLOW_MARKS = o.m || []; }catch(e){ FLOW = {}; FLOW_MARKS = []; }
 }
-function saveFlowLocal(){ try{ localStorage.setItem(flowKey(), JSON.stringify({ d: FLOW, m: FLOW_MARKS })); }catch(e){} }
+function saveFlowLocal(){ if(flowDbg()) return; try{ localStorage.setItem(flowKey(), JSON.stringify({ d: FLOW, m: FLOW_MARKS })); }catch(e){} }
 function flowAllTasks(){ return FLOW_ORDER.flatMap(k=>flowTasks(flowPageItem(k))); }
 /* スプレッドシートへ記録します（できた＝true／もどした＝false。2台で使っても消えないよう、変えた項目だけ送ります） */
 let flowSaveT = 0, flowPending = {};
 function saveFlow(changed){
   saveFlowLocal();
+  if(flowDbg()) return;   /* 管理者モードで試しているあいだは、記録しません */
   if(!me || !me.id || !me.pin || !GAS_URL) return;
   Object.assign(flowPending, changed || {});
   clearTimeout(flowSaveT);
@@ -687,6 +701,7 @@ function saveFlow(changed){
 /* スプレッドシートから読みます。はじめて使う方は、今までの3つ（はじめの一歩・初期サポートガイド・活用の1stステップ）と
    本人の記録で終わっていることを、新しい3つに引きつぎます（同じ作業をしたものは、できた扱い） */
 async function syncFlow(){
+  if(flowDbg()) return;
   if(!me || !me.id || !me.pin || !GAS_URL) return;
   const q = (app, items)=> fetch(`${GAS_URL}?action=load&app=${app}&id=${encodeURIComponent(me.id)}&pin=${encodeURIComponent(me.pin)}` + (items ? `&items=${encodeURIComponent(items)}` : "")).then(r=>r.json()).catch(()=>null);
   const j = await q(FLOW_APP, flowAllTasks().join(","));
@@ -795,7 +810,8 @@ function ok(it){
     if(String(me.role || "") || me.sup === true || me.crie === true) return true;
     return flowAllDone();
   }
-  if(String(it.need).indexOf("flow:") === 0) return flowDone(String(it.need).slice(5));   /* 仮組み：次のステップへの丸 */
+  if(String(it.need).indexOf("flow:") === 0) return flowDone(String(it.need).slice(5));
+  if(it.need === "supIntro") return me.sup !== true && me.crie !== true && !String(me.role || "") && flowDone("use");   /* 仮組み：次のステップへの丸 */
   if(it.need === "adv") return isAdv();
   if(it.need === "cal"){
     const r = String(me.role || "");
@@ -2262,7 +2278,7 @@ function celebrateGrowth(){
   try{ localStorage.setItem(KEY, JSON.stringify({ id: me.id, s: g })); }catch(e){}
   if(g === 0 || (seen != null && g <= seen)) return;
   const MSG = ["", "🌱 芽が出ました！ はじめの一歩、おつかれさまでした",
-               "🌷 花が咲きました！ 初期サポートガイド、おつかれさまでした",
+               "🌷 花が咲きました！ LINKを知ろう、おつかれさまでした",
                "🌈 ファーストサポート修了認定！ ここまで、本当におつかれさまでした"];
   showToast(MSG[g], 5200);
 }

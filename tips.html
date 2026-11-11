@@ -43,10 +43,11 @@ h1{font-family:"Zen Maru Gothic",sans-serif;font-size:19px;font-weight:900;color
   var list = document.getElementById("list"), pl = document.getElementById("player"), cur = null;
   function play(i){
     if(cur) cur.stop();
-    cur = skyTips.mount(pl, { ids:[skyTips.list[i].id], controls:true });
+    cur = skyTips.mount(pl, { ids:[V[i].id], controls:true });
     list.querySelectorAll("button").forEach(function(b, k){ b.classList.toggle("on", k === i); });
   }
-  list.innerHTML = skyTips.list.map(function(t, i){ return '<button type="button"><span class="n">' + (i + 1) + '</span>' + t.t + '</button>'; }).join("");
+  var V = skyTips.visible();
+  list.innerHTML = V.map(function(t, i){ return '<button type="button"><span class="n">' + (i + 1) + '</span>' + t.t + '</button>'; }).join("");
   list.querySelectorAll("button").forEach(function(b, i){ b.addEventListener("click", function(){ play(i); window.scrollTo({top:0, behavior:"smooth"}); }); });
   play(0);
 })();

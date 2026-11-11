@@ -40,6 +40,12 @@
       { art: '<div class="tp-row"><i class="tp-ball">👋</i><i class="tp-ball">🔎</i><i class="tp-ball">🚀</i></div>', cap: "バージョンアップにより、進み具合がリセットされていることがあります", sec: 5 },
       { art: big("✅", "tp-pop tp-glow"), cap: "終わっているものは、改めてチェックしてください", sec: 4.5 }
     ] },
+    { id: "sup-flip", t: "サポーターの部屋の、ちょっとした仕掛け", need: "sup", scenes: [
+      { art: big("🐣", "tp-pop"), cap: "サポーターの部屋には、ちょっと面白い仕掛けがあります", sec: 4 },
+      { art: '<div class="tp-row"><i class="tp-ball">🐣</i><span class="tp-op">👆👆</span></div>', cap: "ホームの「サポーターの部屋」の丸を、2回つづけて押す（ダブルクリック）と…", sec: 5 },
+      { art: big("🔄", "tp-pop tp-glow"), cap: "くるっとひっくり返って「サポーターとは」になります", sec: 4.5 },
+      { art: '<div class="tp-row">' + big("💬", "tp-sm tp-pop") + '<span class="tp-op">→</span>' + big("🙋", "tp-sm tp-pop tp-d1") + '</div>', cap: "サポーターになりたい人に、サポーターのことを伝えるときに使えます", sec: 5 }
+    ] },
     { id: "base-only", t: "告知ができるのは、だれ？", scenes: [
       { art: big("📣", "tp-pop"), cap: "オープンチャットで、事業の告知（PR）ができるのは…", sec: 4 },
       { art: '<div class="tp-row">' + big("🏢", "tp-pop") + '<div class="tp-tag">LINK-BASE<br>掲載ずみ</div></div>', cap: "LINK-BASEに、事業を掲載している人だけです", sec: 4.5 },
@@ -141,6 +147,8 @@
     opt = opt || {};
     addCss();
     var list = (opt.ids ? opt.ids.map(function (id) { return TIPS.filter(function (t) { return t.id === id; })[0]; }).filter(Boolean) : TIPS.slice());
+    /* サポーター以上の方だけに見せるもの（need:"sup"）は、ほかの方には出しません */
+    list = list.filter(function (t) { return t.need !== "sup" || isSup(); });
     if (opt.random) list.sort(function () { return Math.random() - 0.5; });
     var ti = 0, si = 0, timer = null, stopped = false;
     el.innerHTML = '<div class="tp-box"><div class="tp-head"><span class="tp-lbl">💡 Tips</span><span class="tp-t"></span></div>'
@@ -174,5 +182,8 @@
     return { stop: function () { stopped = true; clearTimeout(timer); } };
   }
 
-  window.skyTips = { list: TIPS, mount: mount };
+  function isSup() {
+    try { var m = JSON.parse(localStorage.getItem("skyarc_member") || "null"); return !!m && (m.sup === true || m.crie === true || !!String(m.role || "")); } catch (e) { return false; }
+  }
+  window.skyTips = { list: TIPS, mount: mount, visible: function () { return TIPS.filter(function (t) { return t.need !== "sup" || isSup(); }); } };
 })();
