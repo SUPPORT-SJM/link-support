@@ -671,7 +671,7 @@
         <button id="btnStats" onclick="openStats()" style="display:none;">📊 アクセス</button>
         <button id="btnHome" class="sky-home" onclick="goLeave(()=>location.href='../index.html')">🏠 ホーム</button>
         <button onclick="goLeave(()=>location.href='./creamap-x7k2m9.html')">🗺 クリエマップ</button>
-        <button id="btnShowHid" onclick="toggleShowHidden()">🙈 非表示：ON</button>
+        <button id="btnShowHid" onclick="toggleShowHidden()">🙈 表示フィルター：ON</button>
       </div>
     </div>
   </div>
@@ -2003,7 +2003,7 @@ function render(){
   const q = $("#search").value.trim().toLowerCase();
   const list = data.members.filter(m=>{
     if(kf && (m.keiretsu || "") !== kf) return false;     /* えらんだ系列だけ */
-    /* 非表示にしてある方は出しません（非表示：OFF のとき・保存前に変えた方は出します） */
+    /* 非表示にしてある方は出しません（表示フィルター：OFF のとき・保存前に変えた方は出します） */
     if(!showHidden && hiddenOrig[hk(m.id)] && !(hk(m.id) in pendingHide)) return false;
     if($("#fIdle") && $("#fIdle").checked && !idle30(m)) return false;
     if(relF === "intro" && !relOf(m).intro) return false;
@@ -2208,7 +2208,7 @@ function toggleShowHidden(){ showHidden = !showHidden; render(); }
 function drawHidBtn(){
   const n = data ? data.members.filter(m=>hiddenOrig[hk(m.id)]).length : 0;
   /* ON＝非表示にした方をかくしている／OFF＝非表示にした方も（うすく）出している */
-  $("#btnShowHid").textContent = "🙈 非表示：" + (showHidden ? "OFF" : "ON") + (n ? "（" + n + "名）" : "");
+  $("#btnShowHid").textContent = "🙈 表示フィルター：" + (showHidden ? "OFF" : "ON") + (n ? "（非表示 " + n + "名）" : "");
   $("#btnShowHid").title = showHidden ? "押すと、非表示にした方をかくします" : "押すと、非表示にした方もうすく出します（チェックを外すと表示に戻せます）";
 }
 /* 読み直したあとに、もう同じになっているものは外します */
