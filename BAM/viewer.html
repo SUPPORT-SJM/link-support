@@ -45,8 +45,11 @@
   .bare img,.bubble img{max-width:100%;height:auto;border-radius:12px;display:block;cursor:zoom-in}
   .bare video{max-width:100%;border-radius:12px;display:block;background:#000}
   /* Googleドライブの埋め込み */
-  .gdrive{width:100%;aspect-ratio:16/9;border:0;border-radius:12px;display:block;background:#000}
-  .gdrive.tate{width:min(100%,300px);margin:0 auto}
+  /* Googleドライブの動画枠。ドライブは枠が小さいと絵を切って出すので、
+     中身は大きい枠（横640×縦360／縦長は360×640）で読み込み、見た目だけ縮める */
+  .gdbox{position:relative;width:min(300px,78vw);aspect-ratio:16/9;overflow:hidden;border-radius:12px;background:#000}
+  .gdbox.tate{aspect-ratio:9/16}
+  .gdbox iframe{position:absolute;left:0;top:0;border:0;transform-origin:0 0;display:block}
   /* チェックボタン（リアクション） */
   .msg{align-items:flex-end;gap:7px}
   .check{
@@ -432,15 +435,25 @@
          別サイト扱いになるため、何%まで見たかは取得できない。 */
       wrap.className+=' center';
       b.className+=' bare';
+      /* 縦長の動画は data に ratio:"9/16" を書いておくと、縦長の枠で出す（無ければ横長 16/9） */
+      var tate=(m.ratio==='9/16');
+      var box=document.createElement('div');
+      box.className='gdbox'+(tate?' tate':'');
       var fr=document.createElement('iframe');
-      fr.className='gdrive';
-      /* 縦長の動画は data に ratio:"9/16" を書いておくと、その形の枠で出す（無ければ横長 16/9） */
-      if(m.ratio){ fr.style.aspectRatio=m.ratio; if(m.ratio==='9/16') fr.className+=' tate'; }
+      var BW=tate?360:640, BH=tate?640:360;
+      fr.style.width=BW+'px'; fr.style.height=BH+'px';
       fr.src=m.src;
       fr.loading='lazy';
       fr.allowFullscreen=true;
       fr.setAttribute('allow','autoplay; fullscreen');
-      b.appendChild(fr);
+      box.appendChild(fr);
+      b.appendChild(box);
+      (function(box,fr,BW){
+        function fit(){ var w=box.clientWidth; if(w) fr.style.transform='scale('+(w/BW)+')'; }
+        if(window.ResizeObserver){ new ResizeObserver(fit).observe(box); }
+        else { window.addEventListener('resize',fit); }
+        setTimeout(fit,0);
+      })(box,fr,BW);
 
     } else if(m.type==='video'){
       wrap.className+=' center';
