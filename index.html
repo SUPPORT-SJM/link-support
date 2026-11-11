@@ -692,27 +692,39 @@ async function syncFlow(){
   const localOnly = {}; Object.keys(FLOW).forEach(k=>{ if(FLOW[k] && d[k] === undefined) localOnly[k] = true; });
   Object.keys(d).forEach(k=>{ if(d[k] === true) FLOW[k] = true; else if(d[k] === false) delete FLOW[k]; });
   FLOW_MARKS = Array.isArray(j.marks) ? j.marks : [];
+  /* 前のサイトでついていた「先生の丸」を、新しい項目にも出します（この端末に控えておき、新しい丸と合わせて見せます） */
+  const omKey = "sky_flow_oldmarks_" + me.id;
+  let oldMarks = []; try{ oldMarks = JSON.parse(localStorage.getItem(omKey) || "[]") || []; }catch(e){}
+  FLOW_MARKS = Array.from(new Set(FLOW_MARKS.concat(oldMarks)));
   /* 前のサイト（はじめの一歩・初期サポートガイド・活用の1stステップ）で終わっていることを、新しい項目にも引きつぎます。
      はじめての方だけでなく、まだ終わっていない項目があるときは毎回（この端末で開いている間に1回）見にいきます。
      ご本人が「もどす」を押した項目（記録が false）は、引きつぎません */
   const inhKey = "sky_flow_inh_" + me.id;
   let inhDone = false; try{ inhDone = sessionStorage.getItem(inhKey) === "1"; }catch(e){}
-  const missing = flowAllTasks().some(k=>!FLOW[k] && d[k] !== false);
+  const missing = flowAllTasks().some(k=>(!FLOW[k] && d[k] !== false) || FLOW_MARKS.indexOf(k) < 0);
   if(j.newUser || !j.data || (missing && !inhDone)){
-    const inh = await flowInherit(q);
+    const both = await flowInherit(q), inh = both.done;
     Object.keys(inh).forEach(k=>{ if(!FLOW[k] && d[k] !== false){ FLOW[k] = true; localOnly[k] = true; } });
+    const om = Object.keys(both.marks);
+    try{ localStorage.setItem(omKey, JSON.stringify(om)); }catch(e){}
+    FLOW_MARKS = Array.from(new Set(FLOW_MARKS.concat(om)));
     try{ sessionStorage.setItem(inhKey, "1"); }catch(e){}
   }
   if(Object.keys(localOnly).length) saveFlow(localOnly); else saveFlowLocal();
   if(JSON.stringify([FLOW, FLOW_MARKS]) !== before){ flowPaintAll(); if(typeof reflowLevel === "function" && !drag) reflowLevel(); }
 }
 async function flowInherit(q){
-  const out = {};
   const [h, g, s1] = await Promise.all([q("hajime"), q("guide"), q("step1")]);
   const P = x=>{ try{ return x && x.ok && x.data ? (JSON.parse(x.data) || {}) : {}; }catch(e){ return {}; } };
-  const H = P(h), G = P(g), S = P(s1);
+  /* 先生の丸は、そのタブの丸の列（項目の名前の並び）に入っているものです */
+  const M = x=>{ const o = {}; (x && x.ok && Array.isArray(x.marks) ? x.marks : []).forEach(k=>{ o[k] = true; }); return o; };
   let V = {};
   try{ const r = await fetch(GAS_URL + "?action=selfGet&id=" + encodeURIComponent(me.id) + "&pin=" + encodeURIComponent(me.pin)); const jj = await r.json(); if(jj && jj.ok) V = jj.vals || {}; }catch(e){}
+  return { done: flowMapOld(P(h), P(g), P(s1), V), marks: flowMapOld(M(h), M(g), M(s1), {}) };
+}
+/* 前の3つの項目（H＝はじめの一歩／G＝初期サポートガイド／S＝活用の1stステップ）を、新しい項目に合わせます */
+function flowMapOld(H, G, S, V){
+  const out = {};
   const t = v=>v === true || (typeof v === "string" && v !== "");
   if(t(G.G1)) out.h0 = true;                                   /* LINKポータルをホームに置く */
   if(t(G.G2)) out.h1 = true;                                   /* LINK information */
