@@ -116,7 +116,7 @@
   var m = new URLSearchParams(location.search).get('m') || '';
   if(!/^\d{4}-\d{2}$/.test(m) || m==='2026-09') m = '';
   window.BAM_MONTH = m;
-  document.write('<script src="' + (m ? 'data/' + m + '/' : 'data/') + 'manifest.js"><\/script>');
+  document.write('<script src="' + (m ? 'data/' + m + '/' : 'data/') + 'manifest.js?v=20261112-2"><\/script>');
   var as = document.querySelectorAll('.months a');
   for(var i=0;i<as.length;i++){ if(as[i].getAttribute('data-m')===m) as[i].className='on'; }
 })();
