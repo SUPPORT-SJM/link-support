@@ -514,8 +514,8 @@ const TREE = [
   {ic:"💌", nm:"新しい仲間へ\nこのサイトを教える", g:"common", url:B+"ikusei/first-message.html", wide:true, moon:true},
   /* 2つめの月：「新しい仲間へ」と、アカウントをはさんで反対側を、同じ通り道でまわります */
   {ic:"🧰", nm:"便利な\n情報一覧", g:"common", url:B+"first-support/benri.html", moon:true},
-  /* 3つめの月「LINKに入りたいと言われたら」（いちばん小さい丸） */
-  {ic:"❓", nm:"LINKに入りたいと\n言われたら", g:"common", moon:true, tiny:true, flowInfo:"join"},
+  /* 3つめの月「LINKの話を聞きたい・入りたいと言われたら」（いちばん小さい丸） */
+  {ic:"❓", nm:"LINKの話を聞きたい\n入りたいと言われたら", g:"common", moon:true, tiny:true, wide:true, flowInfo:"join"},
   /* ===== 仮組み：ファーストサポートの新しい流れ（はじめの一歩 → LINKを知ろう → LINKを使おう） ===== */
   {ic:"🔎", nm:"LINKを\n知ろう", g:"member", flowPage:"know", lockAfter:"hajime", kids:[
     /* v1.2.006：0番は、いったんなくしました（思い出したら入れます） */
@@ -1047,7 +1047,7 @@ function tap(n, e){
   if(it.lockAfter && !flowDone(it.lockAfter)){ showToast("先に「" + flowPageItem(it.lockAfter).nm.replace(/\n/g,"") + "」を進めましょう"); return; }
   if(it.ph){ showToast("0番は、準備中です"); return; }
   if(it.task){ openTask(it); return; }
-  if(it.flowInfo){ openInfoSheet("❓ LINKに入りたいと言われたら", "", '<p>「LINKに入りたい」「LINKが気になる」と言われたら、最低限これだけはやりましょう。</p>'
+  if(it.flowInfo){ openInfoSheet("❓ LINKの話を聞きたい・入りたいと言われたら", "", '<p>「LINKに入りたい」「LINKが気になる」と言われたら、最低限これだけはやりましょう。</p>'
     + '<ol class="fol"><li><b>まずはアップに相談</b>しましょう。</li>'
     + '<li><b>説明会の日にちを決めます。</b>説明は、<b>アドバイザーの資格をもった人</b>にしてもらいます。</li>'
     + '<li>説明会までの間に、その方と<b>一緒にやりたいこと</b>を考えます。相手のやりたいことを改めて聞いて、<b>一緒に叶えられる夢</b>を作ります（できれば）。</li></ol>'
