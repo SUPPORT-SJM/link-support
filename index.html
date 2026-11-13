@@ -589,8 +589,8 @@ const TREE = [
         {ic:"🏋️", nm:"Bトレ", g:"sup", link:"btore", note:"btore"},
         {ic:"📞", nm:"アポ部屋", g:"sup", link:"apoheya", note:"apoheya"},
         {ic:"🎬", nm:"動画視聴会", g:"sup", link:"douga", note:"douga-sup"},
-        /* 部門のあるサポーターの方も、ここから予定のかぶりチェックを見られます（アドバンス以上・部門のあるクリエの方にも出ます） */
-        {ic:"🔎", nm:"予定の\nかぶりチェック", g:"sup", need:"cal", url:B+"first-support/calendar.html"}
+        /* 部門のあるサポーターの方も、ここから見られます（クリエ以上向けの「カレンダー形式表示」と同じページ。アドバンス以上・部門のあるクリエの方にも出ます） */
+        {ic:"🗓️", nm:"カレンダー形式表示\n（予定かぶりチェック）", g:"sup", wide:true, need:"cal", url:B+"first-support/calendar.html"}
       ]},
       {ic:"🌱", nm:"クリエ以上\n向け", g:"crie", need:"crie", kids:[
         {ic:"🌟", nm:"月初スペシャル\nミーティング", g:"crie", link:"c-monthly"},
@@ -601,12 +601,10 @@ const TREE = [
           {ic:"⚡", nm:"リンカー特訓", g:"crie", link:"c-tokkun-linker"}
         ]},
         {ic:"🤝", nm:"グルコン予定", g:"crie", link:"c-gcon"},
-        /* 予定のかぶりチェック：アドバンス以上と、部門に入っているクリエ・サポーターにだけ出ます */
-        {ic:"🔎", nm:"予定の\nかぶりチェック", g:"crie", need:"cal", url:B+"first-support/calendar.html"},
         {ic:"✨", nm:"その他", g:"crie", link:"c-sonota"},
-        /* カレンダー形式は、ただいま工事中（押すと、お知らせだけが出ます。いつか空き日程の吸い出しもここで） */
-        {ic:"🗓️", nm:"カレンダー\n形式でみる", g:"crie", info:{
-          text:"🚧 カレンダー形式でみる は、ただいま工事中です。できあがったら、またお知らせします。"}},
+        /* カレンダー形式表示（予定かぶりチェック）：「カレンダー形式でみる」と「予定のかぶりチェック」を1つにしました（v1.2.045）。
+           アドバンス以上と、部門に入っているクリエ・サポーターにだけ出ます */
+        {ic:"🗓️", nm:"カレンダー形式表示\n（予定かぶりチェック）", g:"crie", wide:true, need:"cal", url:B+"first-support/calendar.html"},
       ]}
     ]}
     /* 各種スケジュール情報は「公式公認」と「チーム独自」だけ。予定のかぶりチェック・カレンダー形式は「クリエ以上向け」に移しました（v1.205） */

@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<title>予定のかぶりチェック｜Skyarc</title>
+<title>カレンダー形式表示（予定かぶりチェック）｜Skyarc</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
@@ -247,7 +247,7 @@
 <header class="hero">
   <div class="wrap">
     <div class="em">🗓️</div>
-    <h1>予定のかぶりチェック</h1>
+    <h1>カレンダー形式表示<br><span style="font-size:15px;">（予定かぶりチェック）</span></h1>
     <p>その日・その時間に入っている予定（公式公認・翔子さん・チーム）を確かめます</p>
   </div>
 </header>
@@ -296,17 +296,6 @@
       <div class="cal">
         <div class="wk"><span>日</span><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span></div>
         <div class="days" id="days"></div>
-      </div>
-      <div class="legend">
-        <span><i class="c-official"></i>公式公認</span>
-        <span><i class="okf"></i>公式（かぶってOK）</span>
-        <span><i class="c-shoko"></i>翔子さん</span>
-        <span><i class="c-support"></i>ユーザーサポート会</span>
-        <span><i class="c-kouryu-on"></i>交流会</span>
-        <span><i class="c-douga"></i>動画視聴会</span>
-        <span><i class="c-event"></i>そのほかの催し</span>
-        <span><i class="c-crie"></i>クリエ以上</span>
-        <span><i class="plan"></i>これから入れたいチームの予定</span>
       </div>
 
       <div class="dayhead">
@@ -585,10 +574,15 @@ function byDay(){
   ((data.link && data.link.items) || []).forEach(x => eachDay(x.date, x.endDate || x.date, d => { siteDays[d] = 1; }));
   Object.keys(siteDays).forEach(d => {
     const own = map[d] || [];
-    linkOnDay(d).filter(x => !own.some(o => o.kind === "official" && o.start === x.start &&
-      (normKey(o.title).indexOf(normKey(x.title).slice(0, 8)) >= 0 || normKey(x.title).indexOf(normKey(o.title).slice(0, 8)) >= 0)))
-      .forEach(x => put(d, x));
+    linkOnDay(d).forEach(x => {
+      const o = own.find(o => o.kind === "official" && o.start === x.start &&
+        (normKey(o.title).indexOf(normKey(x.title).slice(0, 8)) >= 0 || normKey(x.title).indexOf(normKey(o.title).slice(0, 8)) >= 0));
+      if(o){ o.col = x.col; return; }   /* 手で入れた同じ予定は、スケジュールサイトの色にそろえます */
+      put(d, x);
+    });
   });
+  /* 手で入れた公式公認で、スケジュールサイトに見つからないものは、スケジュールサイトのもとの色（赤）にします */
+  Object.keys(map).forEach(d => map[d].forEach(x => { if(x.kind === "official" && !x.col) x.col = SITE_BASE; }));
   const ord = { official:0, shoko:1, team:2 };
   Object.keys(map).forEach(d => map[d].sort((a, b) => {
     if(a.kind !== b.kind) return ord[a.kind] - ord[b.kind];
@@ -634,8 +628,9 @@ function draw(){
     if(key === today) cls.push("today");
     if(key === selDate) cls.push("sel");
     const max = 3;
-    const chips = list.slice(0, max).map(x => '<span class="chip c-' + esc(x.cat) + (x.src === "own" && x.kind === "team" ? " plan" : "") +
-      (x.kind === "official" && x.okFlag ? " okf" : "") + '">' + esc(label(x)) + '</span>').join("");
+    const chips = list.slice(0, max).map(x => x.col
+      ? '<span class="chip" style="background:' + x.col.bg + ';color:' + x.col.fg + ';box-shadow:inset 0 0 0 1px ' + x.col.bd + ';">' + esc(label(x)) + '</span>'
+      : '<span class="chip c-' + esc(x.cat) + (x.src === "own" && x.kind === "team" ? " plan" : "") + '">' + esc(label(x)) + '</span>').join("");
     const more = list.length > max ? '<span class="more">ほか' + (list.length - max) + '件</span>' : "";
     cells.push('<button class="' + cls.join(" ") + '" data-d="' + key + '" onclick="pickDay(\'' + key + '\')" aria-label="' + mdw(key) + ' ' + list.length + '件">' +
       '<span class="dn">' + d.getDate() + '</span>' + chips + more + '</button>');
@@ -662,7 +657,7 @@ function drawDay(map){
     if(x.src === "sheet" && x.url) acts += '<a href="' + esc(x.url) + '" target="_blank" rel="noopener">📋 申込みシートを開く</a>';
     if(x.src === "site" && x.url) acts += '<a href="' + esc(x.url) + '" target="_blank" rel="noopener">🗓 スケジュールサイトで見る</a>';
     if(x.src === "own" && canTouch(x.item)) acts += '<button onclick="openForm(\'' + esc(x.item.cid) + '\')">✏️ 変える</button><button class="del" onclick="delItem(\'' + esc(x.item.cid) + '\')">🗑 消す</button>';
-    return '<div class="item k-' + esc(x.cat) + '"><span class="tag">' + esc(tag) + '</span><span class="tm">' + esc(tmText(x)) + '</span>' +
+    return '<div class="item k-' + esc(x.cat) + '"' + (x.col ? ' style="border-left-color:' + (x.col.bg === "#fff" ? x.col.fg : x.col.bg) + ';"' : "") + '><span class="tag">' + esc(tag) + '</span><span class="tm">' + esc(tmText(x)) + '</span>' +
       (fl ? '<span class="flags">' + esc(fl) + '</span>' : "") +
       '<div class="tt">' + esc(label(x)) + '</div>' +
       (x.org ? '<div class="mm">主催：' + esc(x.org) + '</div>' : "") +
@@ -720,9 +715,25 @@ function linkOnDay(d){
     }
     out.push({ src:"site", kind:"official", lk:x.kind, org:x.org || "", cat:"official", date:d,
                start: s == null ? "" : hm(s), end: e == null ? "" : (e >= 24 * 60 ? "24:00" : hm(e)), s:s, e:e,
-               title:x.title || "", url:x.url || "", okFlag:guessOk(x.title), bef:false, aft:false, place:"" });
+               title:x.title || "", url:x.url || "", okFlag:guessOk(x.title), bef:false, aft:false, place:"",
+               col: siteColor(x.cat, x.src) });
   });
   return out;
+}
+/* スケジュールサイトと同じ色（サイトのカテゴリの色。カテゴリがいくつかあるときは、サイトと同じく後ろの色が勝ちます） */
+const SITE_BASE = { bg:"#BA3335", fg:"#fff", bd:"#BA3335" };
+const SITE_CAT = [
+  ["LINKを理解する", "#33AFB9"], ["LINKセミナー", "#67BA33"], ["リアル交流会", "#BA3335"], ["オンライン交流会", "#2858C5"],
+  ["つなぐマルシェ", "#E08031"], ["成長と学び", "#6C33BA"], ["紹介者作り", "#BA3371"], ["チームビルディングを学ぶ", "#381D10"]
+];
+function siteColor(cat, src){
+  const cs = String(cat || "").split("・");
+  let c = null;
+  SITE_CAT.forEach(p => { if(cs.indexOf(p[0]) >= 0) c = p[1]; });
+  if(c) return { bg:c, fg:"#fff", bd:c };
+  if(String(src || "").indexOf("全公式") < 0 && String(src || "").indexOf("LINKサポート無料講座") >= 0)
+    return { bg:"#fff", fg:"#FF6347", bd:"#CCCCCC" };   /* LINKサポート無料講座のページの色（白地に赤い字） */
+  return SITE_BASE;
 }
 function siteAtText(){
   const at = data && data.link && data.link.at;
