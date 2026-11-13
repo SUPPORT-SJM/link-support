@@ -46,13 +46,33 @@
   /* この日・この時間は大丈夫？ */
   .ask{background:#fff;border-radius:15px;box-shadow:var(--shadow);padding:14px 15px;margin-bottom:14px;}
   .ask h2{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:15px;color:var(--deep);margin-bottom:8px;}
-  .ask .row{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;}
-  .ask .row > div{flex:1;min-width:120px;}
-  .ask label{display:block;font-size:11.5px;font-weight:700;color:#A0603A;margin-bottom:3px;}
-  .ask input,.ask select{width:100%;font-size:16px;border:1.5px solid var(--line);border-radius:10px;padding:7px 9px;background:#fff;color:var(--ink);}
-  .ask .chk{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;font-size:13px;}
-  .ask .chk label{display:flex;align-items:center;gap:5px;font-size:13px;color:var(--ink);font-weight:500;margin:0;}
-  .ask .chk input{width:18px;height:18px;}
+  /* 日付は1行ぜんぶ、時間は「はじまり」「おわり」を半分ずつ。スマホの幅でも見切れないようにします */
+  .ask .row{display:grid;grid-template-columns:1fr 1fr;gap:8px 10px;}
+  .ask .row > div{min-width:0;}
+  .ask .row > .full{grid-column:1 / -1;}
+  .ask label{display:block;font-size:12px;font-weight:700;color:#A0603A;margin-bottom:3px;}
+  .ask input{display:block;width:100%;max-width:100%;min-width:0;height:46px;font-size:16px;border:1.5px solid var(--line);border-radius:10px;
+    padding:0 10px;background:#fff;color:var(--ink);-webkit-appearance:none;appearance:none;}
+  .ask input::-webkit-date-and-time-value{text-align:left;}
+  .ask .hint{font-size:11.5px;color:#8A6A57;margin-top:6px;line-height:1.7;}
+  .ask .clr{background:none;color:#A9917F;font-size:11.5px;text-decoration:underline;padding:2px 0;margin-top:4px;}
+  /* 試験運用中のお知らせ（ずっと出しておきます） */
+  .trial{background:#FFF8E1;border:2.5px solid #F9A825;border-radius:14px;padding:11px 14px;margin-bottom:14px;
+    font-size:12.5px;line-height:1.8;color:#5D4300;}
+  .trial b.big{display:block;font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:15.5px;color:#E65100;margin-bottom:3px;}
+  /* しらべた結果 */
+  .res .grp{margin-top:8px;border-radius:10px;padding:8px 10px;}
+  .res .grp h4{font-size:12.5px;font-weight:900;margin-bottom:2px;}
+  .res .grp .one{display:block;margin-top:4px;padding-top:4px;border-top:1px dashed rgba(0,0,0,.12);font-weight:400;color:var(--ink);}
+  .res .grp .one:first-of-type{border-top:none;padding-top:0;}
+  .res .grp .why{display:block;font-size:11.5px;color:#8A6A57;}
+  .res .g-bad{background:#FFF0F0;border:1.5px solid var(--clash);} .res .g-bad h4{color:var(--clash);}
+  .res .g-mid{background:#FFF8E1;border:1.5px solid #F9A825;} .res .g-mid h4{color:#B26A00;}
+  .res .g-low{background:#EEF8F3;border:1.5px solid #8FD3B6;} .res .g-low h4{color:#2E7D5B;}
+  .res .g-ref{background:#F5F3F1;border:1.5px solid #DDD3CB;} .res .g-ref h4{color:#6D5A4E;}
+  .res.info{background:#fff;border:1.5px solid var(--line);padding:10px 12px;}
+  .res .whenline{font-weight:900;font-size:13.5px;color:var(--deep);}
+  .res .trialnote{font-size:11px;color:#B26A00;margin-top:8px;}
   .ask .go{width:100%;margin-top:10px;padding:11px;border-radius:12px;background:var(--main);color:#fff;font-weight:700;font-size:14.5px;}
   .res{margin-top:10px;border-radius:12px;padding:10px 12px;font-size:13px;line-height:1.75;}
   .res.ok{background:#EEF8F3;color:#2E7D5B;font-weight:700;}
@@ -219,31 +239,33 @@
   <div class="wrap">
     <div class="em">🗓️</div>
     <h1>予定のかぶりチェック</h1>
-    <p>公式公認の予定・翔子さんの予定と、チームの予定が<br>かぶっていないかを確かめます</p>
+    <p>その日・その時間に入っている予定（公式公認・翔子さん・チーム）を確かめます</p>
   </div>
 </header>
 
 <main>
   <div class="wrap">
+    <!-- 試験運用中のお知らせ（ログインの前も後も、ずっと出しておきます） -->
+    <div class="trial">
+      <b class="big">🧪 この機能は試験運用中です（まだ完全ではありません）</b>
+      ここに出ていない予定がある場合があります。最後は、LINKのスケジュールサイトや、アップの方にも確かめてください。<br>
+      いま見ているのは「公式公認（管理者・スケジュール入力担当の方が入れたもの）」「翔子さん（チーム代表）の予定」「Skyarcの申込みシートの予定」です。<b>ほかのチームの独自イベントは、まだ読み込めていません。</b>
+    </div>
+
     <div id="firstLoad" class="empty">読み込んでいます…</div>
 
     <div id="body" style="display:none;">
       <!-- この日・この時間は大丈夫？ -->
       <div class="ask">
-        <h2>🔎 この日・この時間は大丈夫？</h2>
+        <h2>🔎 この日・この時間に、ほかの予定は入っている？</h2>
         <div class="row">
-          <div><label for="qDate">日付</label><input type="date" id="qDate"></div>
+          <div class="full"><label for="qDate">日付</label><input type="date" id="qDate"></div>
           <div><label for="qStart">はじまり</label><input type="time" id="qStart"></div>
           <div><label for="qEnd">おわり</label><input type="time" id="qEnd"></div>
         </div>
-        <div class="chk">
-          <label><input type="radio" name="qPlace" value="online" checked>オンライン</label>
-          <label><input type="radio" name="qPlace" value="real">リアル</label>
-          <label><input type="checkbox" id="qBef">ビフォーあり</label>
-          <label><input type="checkbox" id="qAft">アフターあり</label>
-          <label><input type="checkbox" id="qMarche">つなぐマルシェ inリアル</label>
-        </div>
-        <button class="go" onclick="askCheck()">かぶっていないか確かめる</button>
+        <button class="clr" type="button" onclick="clearTime()">時間を消す（1日まるごと見る）</button>
+        <p class="hint">ビフォー・アフターをするときは、その時間もふくめて「はじまり」「おわり」を入れてください。オンラインかリアルかは選ばなくて大丈夫です。</p>
+        <button class="go" onclick="askCheck()">この時間に入っている予定を見る</button>
         <div id="qRes"></div>
       </div>
 
@@ -284,7 +306,7 @@
       <div class="note">
         <b>かぶりの決まり</b><br>
         ・チームの予定が、<b>公式公認の予定</b>か<b>翔子さんの予定</b>と時間が重なると「被り」です。時間のない予定は、その日1日として見ます。<br>
-        ・<b>ビフォーあり</b>の予定は前を、<b>アフターあり</b>の予定は後ろを、あけます（オンラインは30分、リアルは1時間）。<br>
+        ・<b>ビフォーあり</b>の予定は前を、<b>アフターあり</b>の予定は後ろを、あけます（オンラインは30分、リアルは1時間）。上の「ほかの予定は入っている？」では、ご自分のビフォー・アフターは、その時間もふくめて入れてください。<br>
         ・<b>かぶってOKの公式</b>（BAM・江頭俊文Q&amp;A・アドバイザートレーニング・アドバイザー研修会・スキルアップleader編・事業者グルコン・ママさんグルコン）とは、かぶっても大丈夫です。<br>
         ・<b>つなぐマルシェ inリアル</b>だけは、アポイント勉強会・アポのイロハ実践会・トリプルグルコン・プレミアムダブルグルコン・ロープレ実践会・いとザップとも、かぶっても大丈夫です。<br>
         ・会社やアップの方から日にちのご依頼があって、どうしてもかぶるときは、配慮をお願いします。<br>
@@ -632,28 +654,58 @@ function moveMonth(n){
   draw();
 }
 
-/* ---------- この日・この時間は大丈夫？ ---------- */
+/* ---------- この日・この時間に、ほかの予定は入っている？ ----------
+   ・ダメかどうかは決めません。入っている予定と、決まりの上での重さだけをお知らせします
+   ・見る人のビフォー・アフターは、見る人が時間に入れてくれる前提です（チェックはありません）
+   ・相手の予定にビフォー・アフターがあるときは、その時間にかかるかも見ます
+------------------------------------------------------------------ */
+function clearTime(){ $("#qStart").value = ""; $("#qEnd").value = ""; }
+function hitOf(t, o){
+  const a = spanOf(t), b = spanOf(o);
+  if(a[0] < b[1] && b[0] < a[1]) return "time";
+  if(a[0] < b[1] + padA(o) && b[0] - padB(o) < a[1]) return "pad";
+  return "";
+}
+function levelOf(o){
+  if(o.kind === "official") return o.okFlag === "ok" ? "low" : o.okFlag === "marche" ? "mid" : "bad";
+  if(o.kind === "shoko") return "bad";
+  return "ref";
+}
+const LEVEL = {
+  bad:{ h:"🔴 かぶるとまずい予定", why:"公式公認・翔子さん（チーム代表）の予定は、かぶらないようにする決まりです" },
+  mid:{ h:"🟡 気をつけたい公式公認", why:"「つなぐマルシェ inリアル」とならかぶってOK。それ以外は、かぶらないようにする決まりです" },
+  low:{ h:"🟢 優先度は低め（かぶってOKの公式公認）", why:"かぶっても大丈夫とされている公式です" },
+  ref:{ h:"⚪ Skyarcのチームの予定（参考）", why:"" }
+};
 function askCheck(){
   const d = String($("#qDate").value || "").replace(/-/g, "/");
   const r = $("#qRes");
   if(!d){ r.className = "res ng"; r.innerHTML = "<b>日付を入れてください</b>"; return; }
   const st = $("#qStart").value, en = $("#qEnd").value;
   if(st && en && en <= st){ r.className = "res ng"; r.innerHTML = "<b>おわりの時間が、はじまりより前になっています</b>"; return; }
-  const t = { kind:"team", title:"これから決めたい予定", s:toMin(st), e:toMin(en),
-              place:(document.querySelector('input[name="qPlace"]:checked') || {}).value || "online",
-              bef:$("#qBef").checked, aft:$("#qAft").checked, marche:$("#qMarche").checked };
+  const t = { s:toMin(st), e:toMin(en) };
   const list = byDay()[d] || [];
-  const hits = list.filter(x => x.kind !== "team").map(o => ({ o:o, why:clashOf(t, o) })).filter(x => x.why);
-  const team = list.filter(x => x.kind === "team");
-  const when = mdw(d) + (st ? " " + st + (en ? "〜" + en : "〜") : "（時間なし＝1日）");
-  let h = hits.length
-    ? "<b>⚠️ " + esc(when) + " は、かぶる予定があります</b>" + hits.map(x => '<span class="one">' + esc(KIND_NAME[x.o.kind]) + "：" +
-        esc(tmText(x.o) + " " + label(x.o)) + "<br>→ " + esc(whyText(x.why, t, x.o)) + "</span>").join("")
-    : "✅ " + esc(when) + " は、公式公認・翔子さんの予定とかぶっていません";
-  if(team.length) h += '<div class="sub">同じ日のチームの予定：' + team.map(x => esc((x.start ? x.start + " " : "") + label(x))).join("・") + "</div>";
-  r.className = "res " + (hits.length ? "ng" : "ok");
+  const hits = list.map(o => ({ o:o, w:hitOf(t, o), lv:levelOf(o) })).filter(x => x.w);
+  const rest = list.filter(o => !hits.some(x => x.o === o));
+  const when = mdw(d) + (st ? " " + st + (en ? "〜" + en : "〜") : "（1日まるごと）");
+  let h = '<div class="whenline">' + esc(when) + '</div>';
+  if(!hits.length){
+    h += '<div style="margin-top:4px;">この時間に入っている予定は、見つかりませんでした。</div>';
+  }
+  ["bad","mid","low","ref"].forEach(lv => {
+    const g = hits.filter(x => x.lv === lv);
+    if(!g.length) return;
+    h += '<div class="grp g-' + lv + '"><h4>' + LEVEL[lv].h + '（' + g.length + '件）</h4>' +
+      (LEVEL[lv].why ? '<span class="why">' + esc(LEVEL[lv].why) + '</span>' : "") +
+      g.map(x => '<span class="one"><b>' + esc(x.o.kind === "team" ? (x.o.src === "sheet" ? "申込みシート" : "チームの予定") : KIND_NAME[x.o.kind] === "翔子さん" ? "翔子さん（チーム代表）" : KIND_NAME[x.o.kind]) + '</b>　' +
+        esc(tmText(x.o) + " " + label(x.o)) +
+        '<span class="why">' + esc(x.w === "time" ? "→ 時間が重なっています" : "→ この予定のビフォー・アフターの時間にかかっています") + '</span></span>').join("") + '</div>';
+  });
+  if(rest.length) h += '<div class="sub">同じ日の、時間が重ならない予定：' + rest.map(x => esc((x.start ? x.start + " " : "") + label(x))).join("・") + "</div>";
+  h += '<div class="trialnote">🧪 試験運用中のため、ここに出ていない予定がある場合があります。かぶっても進めるかどうかは、決まりを見て判断してください。</div>';
+  r.className = "res info";
   r.innerHTML = h;
-  if(d.slice(0, 7) !== selDate.slice(0, 7) || d !== selDate) pickDay(d);
+  if(d !== selDate) pickDay(d);
 }
 
 /* ---------- 予定を入れる・変える ---------- */
