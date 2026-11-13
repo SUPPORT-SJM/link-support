@@ -426,7 +426,8 @@ function hm(n){ n = Math.max(0, Math.min(24 * 60, n)); return Math.floor(n / 60)
   }
   $("#navWho").textContent = (member.name ? (window.skyGrowth ? skyGrowth.selfTag(member.id) : "") + member.name + "さん" : "会員番号 " + member.id)
     + (member.keiretsu ? "｜" + member.keiretsu : "");
-  load(false);
+  /* ページの下のほうの決まり（色など）がそろってから読み込みます（端末にとっておいた分を、すぐ使うときのため） */
+  setTimeout(function(){ load(false); }, 0);
 })();
 
 function withLimit(promise, ms){
