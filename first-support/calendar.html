@@ -450,7 +450,7 @@ function withLimit(promise, ms){
 
 /* ---------- この端末にとっておく（10分のあいだは、読み込みに行きません） ---------- */
 function keepMin(){ return 10; }   /* 関数にしておくと、ページの読みはじめ（上の読み込み）からも使えます */
-function keepKey(){ return "sky_cal_keep_" + member.id; }
+function keepKey(){ return "sky_cal_keep_" + member.id + "_" + (member.role || ""); }   /* 管理者モードで見え方を切りかえたときに、前の見え方の分を使わないように */
 function keepSave(j){
   try{ localStorage.setItem(keepKey(), JSON.stringify({ t: Date.now(), j: j })); }catch(e){}
 }
