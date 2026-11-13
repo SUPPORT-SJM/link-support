@@ -95,8 +95,8 @@
   .clashbox button b{color:var(--clash);}
   .okbox{background:#EEF8F3;border-radius:14px;padding:10px 14px;margin-bottom:14px;font-size:12.5px;color:#2E7D5B;font-weight:700;}
 
-  .tools{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
-  .tools button{background:#fff;box-shadow:var(--shadow);border-radius:999px;padding:8px 14px;font-size:12.5px;font-weight:700;color:var(--official);}
+  .ask .pastebtn{width:100%;margin-top:8px;padding:10px;border-radius:12px;background:#ECEFF1;color:var(--official);
+    border:1.5px solid #B0BEC5;font-weight:700;font-size:13.5px;}
 
   /* 月の切りかえ */
   .monthbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
@@ -273,14 +273,13 @@
         <button class="clr" type="button" onclick="clearTime()">時間を消す（1日まるごと見る）</button>
         <p class="hint">ビフォー・アフターをするときは、その時間もふくめて「はじまり」「おわり」を入れてください。オンラインかリアルかは選ばなくて大丈夫です。</p>
         <button class="go" onclick="askCheck()">この時間に入っている予定を見る</button>
+        <!-- 管理者・スケジュール入力担当の方にだけ出ます -->
+        <button class="pastebtn" id="tools" style="display:none;" onclick="openPaste()">📋 公式公認の予定を、文章から追加する</button>
         <div id="qRes"></div>
       </div>
 
       <div id="clashBox"></div>
 
-      <div class="tools" id="tools" style="display:none;">
-        <button onclick="openPaste()">📋 公式公認の予定を、文章から入れる</button>
-      </div>
 
       <div class="monthbar">
         <button id="prevM" onclick="moveMonth(-1)">‹ 前の月</button>
@@ -369,17 +368,17 @@
   </div>
 </div>
 
-<!-- 公式公認の予定を、文章から入れる -->
+<!-- 公式公認の予定を、文章から追加する -->
 <div class="ov" id="pv">
   <div class="card wide">
-    <h3>📋 公式公認の予定を、文章から入れる</h3>
+    <h3>📋 公式公認の予定を、文章から追加する</h3>
     <p class="hint">LINEなどで届いた文章を、そのまま貼りつけて「読みとる」を押してください。<br>
       「🔴イベント名」の次の行に「▶12/1(火)21:00-22:30」のように日付と時間がある形を読みとります。</p>
     <textarea id="pvText" style="min-height:150px;" placeholder="ここに貼りつけます"></textarea>
     <button class="go" onclick="readPaste()">読みとる</button>
     <div id="pvList"></div>
     <div class="msg" id="pvMsg"></div>
-    <button class="go" id="pvGo" style="display:none;" onclick="savePaste()">チェックした予定を入れる</button>
+    <button class="go" id="pvGo" style="display:none;" onclick="savePaste()">チェックした予定を追加する</button>
     <button class="cancel" onclick="closePaste()">とじる</button>
   </div>
 </div>
@@ -468,7 +467,7 @@ function take(j, first){
   $("#firstLoad").style.display = "none";
   $("#body").style.display = "block";
   $("#addBtn").style.display = canOfficial ? "inline-block" : "none";
-  $("#tools").style.display = canOfficial ? "flex" : "none";
+  $("#tools").style.display = canOfficial ? "block" : "none";
   draw();
   return "";
 }
@@ -945,7 +944,7 @@ function readPaste(){
 }
 function drawPaste(){
   const opt = (v, cur, t) => '<option value="' + v + '"' + (v === cur ? " selected" : "") + '>' + t + '</option>';
-  $("#pvList").innerHTML = '<p class="hint">' + pvRows.length + '件 読みとりました。場所・ビフォー・アフター・かぶってOKを確かめて、入れる予定にチェックしてください。</p>' +
+  $("#pvList").innerHTML = '<p class="hint">' + pvRows.length + '件 読みとりました。場所・ビフォー・アフター・かぶってOKを確かめて、追加する予定にチェックしてください。</p>' +
     '<div class="pvwrap"><table class="pv"><tr><th>入れる</th><th>日付</th><th>おわりの日</th><th>はじまり</th><th>おわり</th><th>名前</th><th>場所</th><th>ビフォー</th><th>アフター</th><th>かぶってOK</th></tr>' +
     pvRows.map((x, i) => '<tr class="' + (x.use ? "" : "skip") + '">' +
       '<td><input type="checkbox" ' + (x.use ? "checked" : "") + ' onchange="pvSet(' + i + ',\'use\',this.checked)">' + (x.dup ? '<div class="dup">すでにあります</div>' : "") + '</td>' +
@@ -962,7 +961,7 @@ function drawPaste(){
   const n = pvRows.filter(x => x.use).length;
   $("#pvGo").style.display = "block";
   $("#pvGo").disabled = n === 0;
-  $("#pvGo").textContent = n ? "チェックした " + n + " 件を入れる" : "入れる予定にチェックしてください";
+  $("#pvGo").textContent = n ? "チェックした " + n + " 件を追加する" : "追加する予定にチェックしてください";
 }
 function pvSet(i, k, v){
   if(!pvRows[i]) return;
@@ -977,7 +976,7 @@ async function savePaste(){
     if((x.start && toMin(x.start) == null) || (x.end && toMin(x.end) == null)){ $("#pvMsg").textContent = "「" + x.title + "」の時間を「21:00」の形で入れてください。"; return; }
     if(!x.title){ $("#pvMsg").textContent = ERR.notitle; return; }
   }
-  $("#pvGo").disabled = true; $("#pvMsg").textContent = "入れています…";
+  $("#pvGo").disabled = true; $("#pvMsg").textContent = "追加しています…";
   try{
     const items = list.map(x => ({ date:x.date, endDate:x.endDate, start:x.start, end:x.end, title:x.title,
                                    place:x.place, bef: x.bef ? "1" : "0", aft: x.aft ? "1" : "0", okFlag:x.okFlag }));
@@ -989,7 +988,7 @@ async function savePaste(){
       $("#pvGo").disabled = false; return;
     }
     closePaste();
-    alert((j.added || list.length) + " 件の公式公認の予定を入れました。");
+    alert((j.added || list.length) + " 件の公式公認の予定を追加しました。");
   }catch(e){
     $("#pvMsg").textContent = "通信できませんでした。電波のよい場所でお試しください。";
     $("#pvGo").disabled = false;
