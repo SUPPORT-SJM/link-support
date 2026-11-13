@@ -260,7 +260,7 @@
       ここに出ていない予定がある場合があります。<b>実際に予定を決めるときは、ご自身でも改めてLINKのスケジュールサイトなどでご確認ください。</b><br>
       <span id="lsAt">スケジュールサイトの予定：読み込み中…</span>
     </div>
-    <!-- 10分以内にまた来たときは、この端末にとっておいた分を使います。新しくしたいときは、このボタンで -->
+    <!-- 1時間以内にまた来たときは、この端末にとっておいた分を使います。新しくしたいときは、このボタンで -->
     <div class="reload" id="reloadWrap" style="display:none;">
       <button type="button" onclick="load(true)">🔄 改めて読み込む</button>
       <span id="loadedAt"></span>
@@ -447,8 +447,8 @@ function withLimit(promise, ms){
   });
 }
 
-/* ---------- この端末にとっておく（10分のあいだは、読み込みに行きません） ---------- */
-function keepMin(){ return 10; }   /* 関数にしておくと、ページの読みはじめ（上の読み込み）からも使えます */
+/* ---------- この端末にとっておく（1時間のあいだは、読み込みに行きません） ---------- */
+function keepMin(){ return 60; }   /* 関数にしておくと、ページの読みはじめ（上の読み込み）からも使えます */
 function keepKey(){ return "sky_cal_keep_" + member.id + "_" + (member.role || ""); }   /* 管理者モードで見え方を切りかえたときに、前の見え方の分を使わないように */
 function keepSave(j){
   try{ localStorage.setItem(keepKey(), JSON.stringify({ t: Date.now(), j: j })); }catch(e){}
@@ -462,7 +462,7 @@ function keepLoad(){
 }
 function showLoadedAt(t){
   const d = new Date(t);
-  $("#loadedAt").textContent = d.getHours() + ":" + pad(d.getMinutes()) + " に読み込んだ情報です（" + keepMin() + "分のあいだは、読み込み直しません）";
+  $("#loadedAt").textContent = d.getHours() + ":" + pad(d.getMinutes()) + " に読み込んだ情報です（1時間のあいだは、読み込み直しません）";
   $("#reloadWrap").style.display = "flex";
 }
 async function load(fresh){
