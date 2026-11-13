@@ -87,6 +87,15 @@
         cap: "紹介してくれた人や、説明をしてくれた人の名前・会員番号も、記入しておきましょう", sec: 6 },
       { art: big("🙌", "tp-pop tp-glow"), cap: "いろいろなサポートや、フォローが受けやすくなります", sec: 4 }
     ] },
+    { id: "same-name", t: "オープンチャットと申込みシートは、同じ名前で", scenes: [
+      { art: '<div class="tp-row">' + big("💬", "tp-sm tp-pop") + '<span class="tp-op">＝</span>' + big("📋", "tp-sm tp-pop tp-d1") + '</div>', cap: "オープンチャットに入れる名前と、申込みスプレッドシートに書く名前は…", sec: 5 },
+      { art: big("🟰", "tp-pop tp-glow"), cap: "同じ名前にしてください", sec: 4 }
+    ] },
+    { id: "name-format", t: "名前は「お名前／チーム名／系列名」", scenes: [
+      { art: '<div class="tp-row">' + big("💬", "tp-sm tp-pop") + big("🎥", "tp-sm tp-pop tp-d1") + '</div>', cap: "オープンチャットに登録するときや、Zoomに参加するときの自分の名前は…", sec: 5 },
+      { art: '<div class="tp-col">' + big("📛", "tp-pop") + chip("お名前／チーム名／系列名", "sky") + '</div>', cap: "「お名前／チーム名／系列名」にして、お名前・チーム名・系列名が分かるようにしてください", sec: 6 },
+      { art: '<div class="tp-col">' + big("✂️", "tp-pop") + chip("お名前／系列名") + '</div>', cap: "文字数の関係で難しいときは、チーム名を省略できます", sec: 5 }
+    ] },
     { id: "progress", t: "進み具合が、お互いに分かる", scenes: [
       { art: '<div class="tp-row"><i class="tp-ball">👋</i><i class="tp-ball me">🔎</i><i class="tp-ball">🚀</i></div>', cap: "あなたの作業の進み具合は、サポーターやアップラインの人にも分かります", sec: 5 },
       { art: '<div class="tp-row"><i class="tp-ball ok">👋</i><i class="tp-ball me">🔎</i><i class="tp-ball">🚀</i></div>', cap: "チェックしてもらえると、丸が虹色に光ります", sec: 4.5 },
