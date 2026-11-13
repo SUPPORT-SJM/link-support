@@ -285,7 +285,6 @@
         <div id="qRes"></div>
       </div>
 
-      <div id="clashBox"></div>
 
 
       <div class="monthbar">
@@ -615,18 +614,7 @@ function draw(){
   const map = byDay();
   const today = ymd(new Date());
 
-  /* 被りの一覧（今日から先） */
-  const days = Object.keys(map).filter(d => d >= today).sort();
-  const rows = [];
-  days.forEach(d => clashesOf(map[d]).forEach(c => rows.push(Object.assign({ d:d }, c))));
-  if(rows.length){
-    $("#clashBox").innerHTML = '<div class="clashbox"><h2>⚠️ かぶっている予定が ' + rows.length + ' 件あります</h2>' +
-      rows.map(c => '<button onclick="jumpTo(\'' + c.d + '\')"><b>' + mdw(c.d) + '</b>　チーム：' + esc((c.t.start ? c.t.start + " " : "") + label(c.t)) +
-        '<br>　　' + esc(KIND_NAME[c.o.kind]) + '：' + esc((c.o.start ? c.o.start + " " : "") + label(c.o)) +
-        '<br>　　<span style="color:#C62828;">' + esc(whyText(c.why, c.t, c.o)) + '</span></button>').join("") + '</div>';
-  }else{
-    $("#clashBox").innerHTML = '<div class="okbox">✅ これから先、かぶっているチームの予定はありません</div>';
-  }
+  /* 「かぶっている予定が◯件」の一覧はなくしました（v1.2.043）。かぶりは上の「この時間に入っている予定を見る」で見ます */
 
   /* 月の表 */
   $("#monthTitle").textContent = viewY + "年" + (viewM + 1) + "月";
@@ -645,7 +633,6 @@ function draw(){
     if(d.getDay() === 6) cls.push("sat");
     if(key === today) cls.push("today");
     if(key === selDate) cls.push("sel");
-    if(clashesOf(list).length) cls.push("clash");
     const max = 3;
     const chips = list.slice(0, max).map(x => '<span class="chip c-' + esc(x.cat) + (x.src === "own" && x.kind === "team" ? " plan" : "") +
       (x.kind === "official" && x.okFlag ? " okf" : "") + '">' + esc(label(x)) + '</span>').join("");
@@ -661,11 +648,9 @@ function canTouch(it){ return canEdit || (canOfficial && it.kind === "official")
 function drawDay(map){
   map = map || byDay();
   const list = map[selDate] || [];
-  const cl = clashesOf(list);
+  /* カレンダーと日ごとの一覧は、予定を並べるだけ（かぶりの印は出しません） */
   $("#dayTitle").textContent = mdw(selDate) + " の予定";
   let h = "";
-  if(cl.length) h += '<div class="clashnote">⚠️ この日は、かぶっている予定があります' +
-    cl.map(c => '<span>・' + esc(label(c.t)) + ' × ' + esc(label(c.o)) + '：' + esc(whyText(c.why, c.t, c.o)) + '</span>').join("") + '</div>';
   if(!list.length) h += '<div class="none">この日の予定はありません</div>';
   h += list.map(x => {
     const tag = x.kind === "official" ? (x.src === "site" ? (x.lk === "公式" ? "公式（会社主催）" : "公認公式（会員主催）") : "公式公認") + (x.okFlag === "ok" ? "｜かぶってOK" : x.okFlag === "marche" ? "｜マルシェだけOK" : "")
@@ -677,8 +662,7 @@ function drawDay(map){
     if(x.src === "sheet" && x.url) acts += '<a href="' + esc(x.url) + '" target="_blank" rel="noopener">📋 申込みシートを開く</a>';
     if(x.src === "site" && x.url) acts += '<a href="' + esc(x.url) + '" target="_blank" rel="noopener">🗓 スケジュールサイトで見る</a>';
     if(x.src === "own" && canTouch(x.item)) acts += '<button onclick="openForm(\'' + esc(x.item.cid) + '\')">✏️ 変える</button><button class="del" onclick="delItem(\'' + esc(x.item.cid) + '\')">🗑 消す</button>';
-    const hit = cl.some(c => c.t === x || c.o === x);
-    return '<div class="item k-' + esc(x.cat) + (hit ? " isclash" : "") + '"><span class="tag">' + esc(tag) + '</span><span class="tm">' + esc(tmText(x)) + '</span>' +
+    return '<div class="item k-' + esc(x.cat) + '"><span class="tag">' + esc(tag) + '</span><span class="tm">' + esc(tmText(x)) + '</span>' +
       (fl ? '<span class="flags">' + esc(fl) + '</span>' : "") +
       '<div class="tt">' + esc(label(x)) + '</div>' +
       (x.org ? '<div class="mm">主催：' + esc(x.org) + '</div>' : "") +
@@ -770,16 +754,15 @@ function askCheck(){
   const t = { s:toMin(st), e:toMin(en) };
   const list = byDay()[d] || [];   /* スケジュールサイトの予定も入っています（手で入れた同じ予定とは1つにまとめずみ） */
   const hits = list.map(o => ({ o:o, w:hitOf(t, o), lv:levelOf(o) })).filter(x => x.w);
-  const rest = list.filter(o => !hits.some(x => x.o === o));
   const when = mdw(d) + (st ? " " + st + (en ? "〜" + en : "〜") : "（1日まるごと）");
   let h = '<div class="whenline">' + esc(when) + '</div>';
   if(!hits.length){
-    h += '<div style="margin-top:4px;">この時間に入っている予定は、見つかりませんでした。</div>';
+    h += '<div style="margin-top:4px;font-weight:700;color:#2E7D5B;">かぶっている他の予定はありません。</div>';
   }
   ["bad","mid","low","ref"].forEach(lv => {
     const g = hits.filter(x => x.lv === lv);
     if(!g.length) return;
-    h += '<div class="grp g-' + lv + '"><h4>' + LEVEL[lv].h + '（' + g.length + '件）</h4>' +
+    h += '<div class="grp g-' + lv + '"><h4>' + LEVEL[lv].h + '</h4>' +
       (LEVEL[lv].why ? '<span class="why">' + esc(LEVEL[lv].why) + '</span>' : "") +
       g.map(x => '<span class="one"><b>' + esc(whoOf(x.o)) + '</b>　' +
         esc(tmText(x.o) + " " + label(x.o)) +
@@ -787,7 +770,6 @@ function askCheck(){
         (x.o.url ? '<a class="lnk" href="' + esc(x.o.url) + '" target="_blank" rel="noopener">詳しく見る ›</a>' : "") +
         '<span class="why">' + esc(x.w === "time" ? "→ 時間が重なっています" : "→ この予定のビフォー・アフターの時間にかかっています") + '</span></span>').join("") + '</div>';
   });
-  if(rest.length) h += '<div class="sub">同じ日の、時間が重ならない予定：' + rest.map(x => esc((x.start ? x.start + " " : "") + label(x))).join("・") + "</div>";
   h += '<div class="trialnote">🧪 試験運用中のため、ここに出ていない予定がある場合があります。かぶっても進めるかどうかは、決まりを見て判断してください。<br>' +
        esc(siteAtText()) + '。<b>実際に予定を決めるときは、ご自身でも改めてご確認ください。</b></div>';
   r.className = "res info";
