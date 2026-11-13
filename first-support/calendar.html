@@ -581,6 +581,15 @@ function byDay(){
              title:e.title || e.label || "", label:e.label || "", url:e.url || "",
              place: cat === "kouryu-re" ? "real" : "online", bef:false, aft:false, marche:isMarche(e.title || e.label) });
   });
+  /* LINKスケジュールサイトの予定も、カレンダーに入れます（手で入れた同じ予定とは1つにまとめます） */
+  const siteDays = {};
+  ((data.link && data.link.items) || []).forEach(x => eachDay(x.date, x.endDate || x.date, d => { siteDays[d] = 1; }));
+  Object.keys(siteDays).forEach(d => {
+    const own = map[d] || [];
+    linkOnDay(d).filter(x => !own.some(o => o.kind === "official" && o.start === x.start &&
+      (normKey(o.title).indexOf(normKey(x.title).slice(0, 8)) >= 0 || normKey(x.title).indexOf(normKey(o.title).slice(0, 8)) >= 0)))
+      .forEach(x => put(d, x));
+  });
   const ord = { official:0, shoko:1, team:2 };
   Object.keys(map).forEach(d => map[d].sort((a, b) => {
     if(a.kind !== b.kind) return ord[a.kind] - ord[b.kind];
@@ -588,11 +597,11 @@ function byDay(){
   }));
   return map;
 }
-/* その日の被り（チームの予定 × 公式公認・翔子さん） */
+/* その日の被り（チームの予定 × 公式公認・翔子さん）。スケジュールサイトの予定は数が多いので、ここ（上の一覧・カレンダーの「被り」）には入れません */
 function clashesOf(list){
   const out = [];
   (list || []).filter(x => x.kind === "team").forEach(t => {
-    (list || []).filter(x => x.kind !== "team").forEach(o => {
+    (list || []).filter(x => x.kind !== "team" && x.src !== "site").forEach(o => {
       const w = clashOf(t, o);
       if(w) out.push({ t:t, o:o, why:w });
     });
@@ -659,18 +668,20 @@ function drawDay(map){
     cl.map(c => '<span>・' + esc(label(c.t)) + ' × ' + esc(label(c.o)) + '：' + esc(whyText(c.why, c.t, c.o)) + '</span>').join("") + '</div>';
   if(!list.length) h += '<div class="none">この日の予定はありません</div>';
   h += list.map(x => {
-    const tag = x.kind === "official" ? "公式公認" + (x.okFlag === "ok" ? "｜かぶってOK" : x.okFlag === "marche" ? "｜マルシェだけOK" : "")
+    const tag = x.kind === "official" ? (x.src === "site" ? (x.lk === "公式" ? "公式（会社主催）" : "公認公式（会員主催）") : "公式公認") + (x.okFlag === "ok" ? "｜かぶってOK" : x.okFlag === "marche" ? "｜マルシェだけOK" : "")
       : x.kind === "shoko" ? "翔子さん"
       : (x.src === "sheet" ? "申込みシート｜" + (CAT_NAME[x.cat] || x.label) : "これから入れたい｜" + (CAT_NAME[x.cat] || ""));
     const fl = [x.place === "real" ? "リアル" : x.place === "online" ? "オンライン" : "", (x.bef && x.aft ? "ビフォー・アフターあり" : x.bef ? "ビフォーあり" : x.aft ? "アフターあり" : ""),
                 x.multi ? "〜" + mdw(x.endDate) + "まで" : ""].filter(Boolean).join("・");
     let acts = "";
     if(x.src === "sheet" && x.url) acts += '<a href="' + esc(x.url) + '" target="_blank" rel="noopener">📋 申込みシートを開く</a>';
+    if(x.src === "site" && x.url) acts += '<a href="' + esc(x.url) + '" target="_blank" rel="noopener">🗓 スケジュールサイトで見る</a>';
     if(x.src === "own" && canTouch(x.item)) acts += '<button onclick="openForm(\'' + esc(x.item.cid) + '\')">✏️ 変える</button><button class="del" onclick="delItem(\'' + esc(x.item.cid) + '\')">🗑 消す</button>';
     const hit = cl.some(c => c.t === x || c.o === x);
     return '<div class="item k-' + esc(x.cat) + (hit ? " isclash" : "") + '"><span class="tag">' + esc(tag) + '</span><span class="tm">' + esc(tmText(x)) + '</span>' +
       (fl ? '<span class="flags">' + esc(fl) + '</span>' : "") +
       '<div class="tt">' + esc(label(x)) + '</div>' +
+      (x.org ? '<div class="mm">主催：' + esc(x.org) + '</div>' : "") +
       (x.memo ? '<div class="mm">' + esc(x.memo) + '</div>' : "") +
       (acts ? '<div class="acts">' + acts + '</div>' : "") + '</div>';
   }).join("");
@@ -757,11 +768,7 @@ function askCheck(){
   const st = timeOf("qStart"), en = timeOf("qEnd");
   if(st && en && en <= st){ r.className = "res ng"; r.innerHTML = "<b>おわりの時間が、はじまりより前になっています</b>"; return; }
   const t = { s:toMin(st), e:toMin(en) };
-  const own = byDay()[d] || [];
-  /* 公式公認として手で入れたものと同じ予定（同じ日・同じはじまり・名前がにている）は、1つにまとめます */
-  const site = linkOnDay(d).filter(x => !own.some(o => o.kind === "official" && o.start === x.start &&
-    (normKey(o.title).indexOf(normKey(x.title).slice(0, 8)) >= 0 || normKey(x.title).indexOf(normKey(o.title).slice(0, 8)) >= 0)));
-  const list = own.concat(site);
+  const list = byDay()[d] || [];   /* スケジュールサイトの予定も入っています（手で入れた同じ予定とは1つにまとめずみ） */
   const hits = list.map(o => ({ o:o, w:hitOf(t, o), lv:levelOf(o) })).filter(x => x.w);
   const rest = list.filter(o => !hits.some(x => x.o === o));
   const when = mdw(d) + (st ? " " + st + (en ? "〜" + en : "〜") : "（1日まるごと）");
