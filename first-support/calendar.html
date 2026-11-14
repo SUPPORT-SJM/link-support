@@ -284,7 +284,6 @@
 
       <div class="dayhead">
         <h3 id="dayTitle"></h3>
-        <button class="addbtn" id="addBtn" style="display:none;" onclick="openForm(null)">＋ 予定を入れる</button>
       </div>
       <div id="dayList"></div>
 
@@ -486,7 +485,7 @@ function take(j, first){
   const la = document.getElementById("lsAt"); if(la) la.textContent = siteAtText() + "。";
   $("#firstLoad").style.display = "none";
   $("#body").style.display = "block";
-  $("#addBtn").style.display = canOfficial ? "inline-block" : "none";
+  /* 「＋ 予定を入れる」のボタンは、v1.2.058 でなくしました（予定は「文章から追加する」で入れます。必要になったら戻します） */
   $("#tools").style.display = canOfficial ? "block" : "none";
   draw();
   return "";
