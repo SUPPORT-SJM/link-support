@@ -96,6 +96,19 @@
       { art: '<div class="tp-col">' + big("📛", "tp-pop") + chip("お名前／チーム名／系列名", "sky") + '</div>', cap: "「お名前／チーム名／系列名」にして、お名前・チーム名・系列名が分かるようにしてください", sec: 6 },
       { art: '<div class="tp-col">' + big("✂️", "tp-pop") + chip("お名前／系列名") + '</div>', cap: "文字数の関係で難しいときは、チーム名を省略できます", sec: 5 }
     ] },
+    { id: "marche-entry", t: "マルシェに出店するには", scenes: [
+      { art: big("🛍️", "tp-pop"), cap: "マルシェに出店するには、申し込みが2つ必要です", sec: 4.5 },
+      { art: '<div class="tp-row">' + chip("① 参加申し込み") + '<span class="tp-op">＋</span>' + chip("② 出店申し込み") + '</div>', cap: "「参加申し込み」と「出店申し込み」の両方をしてください", sec: 5 },
+      { art: '<div class="tp-col">' + big("🆓", "tp-pop") + chip("① 参加申し込み") + '</div>', cap: "参加申し込みは無料です", sec: 4 },
+      { art: '<div class="tp-col">' + big("📋", "tp-pop tp-glow") + chip("② 出店申し込み") + '</div>', cap: "出店申し込みは、各マルシェの情報をしっかり見てから申し込みましょう", sec: 5.5 }
+    ] },
+    { id: "marche-sell", t: "マルシェで売れるコツ", scenes: [
+      { art: big("🤝", "tp-pop"), cap: "マルシェで売れるコツは、あらかじめみんなと仲良くなっておくこと", sec: 5 },
+      { art: '<div class="tp-row">' + big("😊", "tp-sm tp-pop") + big("💭", "tp-sm tp-pop tp-d1") + '</div>', cap: "交流の場で顔を知ってもらい、あなたのやりたいこと・夢を知ってもらいます", sec: 5.5 },
+      { art: big("📣", "tp-pop"), cap: "そのうえで、マルシェの告知をしていきましょう", sec: 4.5 },
+      { art: '<div class="tp-col">' + big("💖", "tp-pop tp-glow") + chip("あなたから買いたい", "sky") + '</div>', cap: "信頼を積み重ねて関係を育て、「あなたから買いたい」という人をどんどん増やしましょう", sec: 6 },
+      { art: '<div class="tp-row">' + big("🧑‍🏫", "tp-sm tp-pop") + big("📚", "tp-sm tp-pop tp-d1") + '</div>', cap: "売り上げが上がるコツは、知っている先輩や、LINKセミナーでも教えてもらえます", sec: 5.5 }
+    ] },
     { id: "progress", t: "進み具合が、お互いに分かる", scenes: [
       { art: '<div class="tp-row"><i class="tp-ball">👋</i><i class="tp-ball me">🔎</i><i class="tp-ball">🚀</i></div>', cap: "あなたの作業の進み具合は、サポーターやアップラインの人にも分かります", sec: 5 },
       { art: '<div class="tp-row"><i class="tp-ball ok">👋</i><i class="tp-ball me">🔎</i><i class="tp-ball">🚀</i></div>', cap: "チェックしてもらえると、丸が虹色に光ります", sec: 4.5 },
