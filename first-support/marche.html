@@ -38,6 +38,26 @@ body{font-family:"Zen Kaku Gothic New",sans-serif;background:radial-gradient(ell
 .closeb{display:block;width:100%;margin-top:10px;padding:12px;border-radius:12px;border:2px solid #CFD8DC;background:#fff;color:#455A64;font-family:inherit;font-weight:700;font-size:15px;cursor:pointer}
 .gob{display:block;width:100%;margin-top:14px;padding:13px;border-radius:12px;background:#FF7043;color:#fff;text-align:center;font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:16px;text-decoration:none}
 .ext{font-size:12.5px !important;color:#8D6E63 !important;margin:6px 0 0 !important;text-align:center}
+.pop h3{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:14.5px;color:#B85A12;margin:12px 0 4px}
+.pop ul.dots{padding-left:1.2em;font-size:13.5px;color:#5D4037;line-height:1.8}
+.pop ol.flow{counter-reset:st;list-style:none;font-size:13.5px;color:#5D4037;line-height:1.75}
+.pop ol.flow li{position:relative;padding-left:30px;margin-bottom:7px}
+.pop ol.flow li::before{counter-increment:st;content:counter(st);position:absolute;left:0;top:1px;width:22px;height:22px;border-radius:50%;background:#E08031;color:#fff;font-weight:700;font-size:12px;display:grid;place-items:center}
+.pop .must{background:#FFF0F0;border:1.5px solid #E53935;border-radius:11px;padding:8px 11px;font-size:13px;color:#5D4037;margin:8px 0;line-height:1.7}
+.pop .must b{color:#C62828}
+.pop p.asof,.pop p.asof2{font-size:11.5px;color:#8D6E63;margin:-4px 0 8px}
+.pop.wide{max-width:560px;padding:16px 10px 14px}
+/* 比較表：スマホの幅でも横にスクロールしないように、5つの列におさめます */
+table.cmp{width:100%;border-collapse:separate;border-spacing:0;font-size:11px;line-height:1.45;table-layout:fixed}
+table.cmp th{background:#FFF4E8;color:#B85A12;font-weight:700;padding:5px 3px;text-align:left;font-size:10.5px}
+table.cmp td{padding:6px 3px;border-bottom:1px solid #F3E4D6;vertical-align:top;color:#4E342E;word-break:break-word}
+table.cmp td:first-child{font-weight:700}
+table.cmp col.c1{width:17%} table.cmp col.c2{width:22%} table.cmp col.c3{width:27%} table.cmp col.c4{width:17%} table.cmp col.c5{width:17%}
+table.cmp tr.on td{background:#EEF4FF;border-bottom:none}
+table.cmp tr.on td:first-child{border-radius:9px 0 0 9px} table.cmp tr.on td:last-child{border-radius:0 9px 9px 0}
+table.cmp tr.gap td{padding:4px;border:none;background:none}
+table.cmp .na{color:#A1887F}
+.pop .foot{font-size:11px !important;color:#8D6E63 !important;line-height:1.7 !important;margin-top:8px !important}
 </style>
 <link rel="stylesheet" href="../beta.css">
 <script src="../loading.js"></script>
@@ -50,25 +70,91 @@ body{font-family:"Zen Kaku Gothic New",sans-serif;background:radial-gradient(ell
 <div id="stage">
   <div class="orb" id="orb"></div>
   <a class="bub sun back-btn" href="skyarc.html"><span class="ball">↩️</span><span class="nm">もどる</span></a>
-  <a class="bub ring" href="marche-info.html#real"><span class="ball">🏙️</span><span class="nm">リアルの
+  <a class="bub ring" href="marche-real.html"><span class="ball">🗾</span><span class="nm">リアルの
 マルシェ</span></a>
-  <a class="bub ring" href="marche-info.html#online"><span class="ball">💻</span><span class="nm">オンラインの
-マルシェ</span></a>
-  <a class="bub ring" href="marche-info.html#compare"><span class="ball">📊</span><span class="nm">くらべる表</span></a>
+  <button type="button" class="bub ring" data-pop="popOnline"><span class="ball">💻</span><span class="nm">オンラインの
+マルシェ</span></button>
+  <button type="button" class="bub ring" data-pop="popCompare"><span class="ball">📊</span><span class="nm">各地域の条件など
+比較表</span></button>
 </div>
 <div class="verTag"></div>
 
+<!-- オンラインのマルシェ（ポップアップ） -->
+<div class="sheet" id="popOnline" hidden><div class="pop" role="dialog" aria-modal="true">
+  <h2>💻 つなぐマルシェ in オンライン</h2>
+  <p class="asof" id="asofOnline"></p>
+  <h3>どんなイベント？</h3>
+  <ul class="dots">
+    <li>LINK公式のオンラインイベント「<b>オンラインBIG3</b>」のひとつです。</li>
+    <li>Zoomで開かれ、全国・海外からも参加できます。</li>
+    <li>ブレイクアウトルームに、いろいろな<b>出店ブース</b>と、LINKの各サークルの<b>交流ブース</b>があります。</li>
+    <li>LINKのオンラインイベントで<b>唯一、ビジター（非会員）も参加できる</b>イベントです。</li>
+    <li>参加費は、会員・ビジターとも<b>無料</b>。開催は<b>年に3〜4回</b>ほどです。</li>
+    <li>主催は「夢実現サークル」（高山翔子さんほか）です。</li>
+  </ul>
+  <h3>申し込みの流れ</h3>
+  <ol class="flow">
+    <li><b>参加申し込み</b>：イベントページの「参加申し込み」から入力します。</li>
+    <li>イベントページにある<b>「夢実現サークル」（オープンチャット）</b>に入ります（サークルの中のスプレッドシートに記入する形でも申し込めます）。</li>
+    <li><b>出店申し込み</b>（出店する方だけ）：<b>抽選</b>です。公式LINEから申し込みます（夢実現サークルの中で案内されています）。</li>
+  </ol>
+  <div class="must">⚠️ <b>出店する方も、必ず「参加申し込み」もしてください。</b>参加申し込みは出店申し込みではありません。</div>
+  <h3>気をつけること</h3>
+  <ul class="dots">
+    <li>ビジターの方を誘うときは、<b>必ずアテンド</b>してください。当日のZoomのURLは、参加が決まってから、誘った方から送ります。</li>
+    <li>開催の20日前までに、会員の参加表明が500人に届かないときは、開催が中止になります。</li>
+    <li>海外にお住まいで日本のオープンチャットに入れない方は、入らなくても参加できます。</li>
+  </ul>
+  <a class="gob" id="onlineGo" href="#" target="_blank" rel="noopener">🗓 スケジュールサイトで日程・申し込みを見る</a>
+  <p class="ext">※タップすると、LINKスケジュールサイト（新しいタブ）へ移動します</p>
+  <button type="button" class="closeb">← 戻る</button>
+</div></div>
+
+<!-- 各地域の条件など比較表（ポップアップ） -->
+<div class="sheet" id="popCompare" hidden><div class="pop wide" role="dialog" aria-modal="true">
+  <h2>📊 各地域の条件など比較表</h2>
+  <p class="asof2" id="asofCmp"></p>
+  <table class="cmp" id="cmp"></table>
+  <p class="foot">※「イベントページには記載なし」…地域コミュニティや、各マルシェの公式LINEなどに金額が書かれていることがあります。<br>
+    ※出店は、基本的に<b>会員のみ</b>できます（どの地域も）。<br>
+    ※出店の申し込みは、各マルシェの公式LINEから。出店する方も、必ず参加申し込みをしてください。</p>
+  <button type="button" class="closeb">← 戻る</button>
+</div></div>
+
+<script src="marche-data.js"></script>
 <script src="../track.js"></script>
 <script src="../menu.js"></script>
 <script>
 /* ================================================================
    マルシェ情報（チーム情報の「マルシェ情報」から）  v1.2.048
    ・まんなか：もどる（ブラウザの「戻る」と同じ）
-   ・まわりの3つ：リアルのマルシェ／オンラインのマルシェ／くらべる表（marche-info.html の3つの段）
+   ・まわりの3つ：リアルのマルシェ（marche-real.html：日本地図）／オンラインのマルシェ（ポップアップ）／各地域の条件など比較表（ポップアップ）  v1.2.049
    ・どの丸も、つまんで引っぱると「ビヨーン」とのび、はなすと元の場所へ（チーム情報と同じ）
 ================================================================ */
 const $ = s => document.querySelector(s);
 let popOpen = false;
+/* ---------- ポップアップ（オンライン・比較表） ---------- */
+function closePops(){ document.querySelectorAll(".sheet").forEach(s=>s.hidden = true); popOpen = false; }
+document.querySelectorAll(".bub[data-pop]").forEach(b=>b.addEventListener("click", ()=>{ $("#" + b.dataset.pop).hidden = false; popOpen = true; }));
+document.querySelectorAll(".sheet").forEach(s=>{
+  s.addEventListener("click", e=>{ if(e.target === s) closePops(); });
+  s.querySelector(".closeb").addEventListener("click", closePops);
+});
+document.addEventListener("keydown", e=>{ if(e.key === "Escape") closePops(); });
+(function(){
+  const M = window.MARCHE;
+  const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  $("#asofOnline").textContent = "（" + M.AS_OF + "現在の情報です。くわしくはスケジュールサイトのイベントページで）";
+  $("#onlineGo").href = M.LIST;
+  $("#asofCmp").textContent = "（" + M.AS_OF + "現在の条件になっております）";
+  const fee = f => f ? esc(f) : '<span class="na">イベントページには記載なし※</span>';
+  const O = M.ONLINE;
+  $("#cmp").innerHTML = '<colgroup><col class="c1"><col class="c2"><col class="c3"><col class="c4"><col class="c5"></colgroup>' +
+    '<tr><th>地域</th><th>開催の間隔</th><th>出店料</th><th>出店の申込</th><th>来場</th></tr>' +
+    '<tr class="on"><td>💻 ' + esc(O.nm) + '</td><td>' + esc(O.span) + '</td><td>' + esc(O.fee) + '</td><td>' + esc(O.apply) + '</td><td>' + esc(O.visit) + '</td></tr>' +
+    '<tr class="gap"><td colspan="5"></td></tr>' +
+    M.REG.map(r => '<tr><td>' + esc(r.short) + '</td><td>' + esc(r.span.replace(/（.*）/, "")) + '</td><td>' + fee(r.fee) + '</td><td>公式LINE</td><td>無料</td></tr>').join("");
+})();
 document.querySelectorAll("a.back-btn").forEach(a=>a.addEventListener("click", e=>{
   let same = false;
   try{ same = !!document.referrer && new URL(document.referrer).origin === location.origin; }catch(_){}
