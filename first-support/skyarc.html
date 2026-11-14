@@ -54,7 +54,7 @@ body{font-family:"Zen Kaku Gothic New",sans-serif;background:radial-gradient(ell
 専用サイト</span></button>
   <button type="button" class="bub ring" data-pop="popKouryu"><span class="ball">🤝</span><span class="nm">交流会・
 サポート会情報</span></button>
-  <button type="button" class="bub ring" data-pop="popMarche"><span class="ball">🛍️</span><span class="nm">マルシェ情報</span></button>
+  <a class="bub ring" href="marche.html"><span class="ball">🛍️</span><span class="nm">マルシェ情報</span></a>
   <a class="bub ring" href="skyarc-recruit.html"><span class="ball">🚀</span><span class="nm">紹介・ビジネス
 活動サポート</span></a>
 </div>
@@ -79,14 +79,6 @@ body{font-family:"Zen Kaku Gothic New",sans-serif;background:radial-gradient(ell
   <button type="button" class="closeb">← 戻る</button>
 </div></div>
 
-<!-- マルシェ情報（ポップアップ） -->
-<div class="sheet" id="popMarche" hidden><div class="pop" role="dialog" aria-modal="true">
-  <h2>🛍️ マルシェ情報</h2>
-  <p>LINKのマルシェ出店情報・申し込みをまとめています。</p>
-  <p>※マルシェ出店には<strong>LINKベースへの事業掲載</strong>が必要です。</p>
-  <div class="coming">🚧 マルシェ情報・申し込みリンクを準備中です</div>
-  <button type="button" class="closeb">← 戻る</button>
-</div></div>
 
 <script src="../track.js"></script>
 <script src="../menu.js"></script>
@@ -97,7 +89,7 @@ body{font-family:"Zen Kaku Gothic New",sans-serif;background:radial-gradient(ell
    ・まんなか：もどる（ブラウザの「戻る」と同じ）。ふわふわ浮いています
    ・まわりの4つ：Skyarc専用サイト（説明 → skyarc.life を新しいタブで）／
      交流会・サポート会情報（説明 → トップの「各種スケジュール情報」の段へ）／
-     マルシェ情報（ポップアップ）／紹介・ビジネス活動サポート（skyarc-recruit.html）
+     マルシェ情報（marche.html：リアル・オンライン・くらべる表。v1.2.048 でポップアップから変更）／紹介・ビジネス活動サポート（skyarc-recruit.html）
    ・どの丸も、つまんで引っぱると「ビヨーン」とのび、はなすと元の場所へ（ホームと同じ）
 ================================================================ */
 const $ = s => document.querySelector(s);

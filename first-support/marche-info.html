@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<script src="../config.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>マルシェ情報｜Skyarc</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../beta.css">
+<meta name="theme-color" content="#E08031">
+<style>
+  :root{ --ink:#3E2F28; --main:#E08031; --deep:#B85A12; --mist:#FFF4E8; --paper:#FFFBF7; --line:#F6D9BC; --shadow:0 3px 14px rgba(184,90,18,.10); }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{font-family:"Zen Kaku Gothic New",sans-serif;color:var(--ink);line-height:1.85;font-size:15px;background:var(--paper);}
+  a{color:var(--deep);}
+  .wrap{max-width:680px;margin:0 auto;padding:0 16px;}
+  #skyNav{position:sticky;top:0;z-index:30;background:rgba(184,90,18,.96);color:#fff;}
+  #skyNav .inner{max-width:680px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px;}
+  #skyNav a{background:rgba(255,255,255,.2);color:#fff;font-size:11.5px;font-weight:700;border-radius:999px;padding:6px 13px;text-decoration:none;}
+  @media (max-width:700px){ #skyNav .inner{padding-right:74px;} }
+  .hero{background:linear-gradient(150deg,#F5C16C,#E08031 60%,#B85A12);color:#fff;padding:22px 0 18px;text-align:center;}
+  .hero .em{font-size:30px;line-height:1;}
+  .hero h1{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:20px;margin:6px 0 2px;}
+  .hero p{font-size:12.5px;opacity:.95;}
+  main{padding:14px 0 60px;}
+
+  .asof{background:#FFF8E1;border:2px solid #F9A825;border-radius:13px;padding:10px 13px;font-size:12.5px;color:#5D4300;margin-bottom:14px;}
+  .asof b{color:#B26A00;}
+
+  /* 3つの切りかえ */
+  .tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:0 0 12px;}
+  .tabs button{border:1.5px solid var(--line);background:#fff;color:var(--deep);border-radius:12px;padding:9px 4px;font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:13.5px;cursor:pointer;}
+  .tabs button.on{background:var(--main);border-color:var(--main);color:#fff;}
+  section[hidden]{display:none;}
+
+  h2{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:17px;color:var(--deep);margin:16px 0 8px;}
+  h3{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:15px;color:var(--deep);margin:14px 0 6px;}
+  p{margin-bottom:8px;}
+  .card{background:#fff;border-radius:15px;box-shadow:var(--shadow);padding:13px 15px;margin-bottom:12px;}
+  .flow{counter-reset:st;list-style:none;}
+  .flow li{position:relative;padding-left:34px;margin-bottom:10px;}
+  .flow li::before{counter-increment:st;content:counter(st);position:absolute;left:0;top:2px;width:24px;height:24px;border-radius:50%;background:var(--main);color:#fff;font-weight:700;font-size:13px;display:grid;place-items:center;}
+  .must{background:#FFF0F0;border:1.5px solid #E53935;border-radius:11px;padding:9px 12px;font-size:13.5px;margin:8px 0;}
+  .must b{color:#C62828;}
+  ul.dots{padding-left:1.2em;margin-bottom:8px;} ul.dots li{margin-bottom:3px;}
+  .small{font-size:12px;color:#8A6A57;}
+
+  /* 地域のカード */
+  .reg{background:#fff;border-radius:15px;box-shadow:var(--shadow);padding:12px 14px;margin-bottom:10px;border-left:6px solid var(--main);}
+  .reg h3{margin:0 0 4px;}
+  .reg dl{display:grid;grid-template-columns:5.5em 1fr;gap:3px 8px;font-size:13.5px;}
+  .reg dt{color:#A0603A;font-weight:700;}
+  .reg dd{word-break:break-word;}
+  .reg .go{display:inline-block;margin-top:8px;font-size:13px;font-weight:700;background:var(--mist);border-radius:9px;padding:7px 12px;text-decoration:none;}
+  .na{color:#A9917F;}
+
+  /* くらべる表 */
+  .tblwrap{overflow-x:auto;-webkit-overflow-scrolling:touch;background:#fff;border-radius:13px;box-shadow:var(--shadow);}
+  table{border-collapse:collapse;font-size:12.5px;min-width:760px;}
+  th,td{border-bottom:1px solid #F3E4D6;padding:7px 8px;text-align:left;vertical-align:top;}
+  th{background:var(--mist);color:var(--deep);white-space:nowrap;position:sticky;top:0;}
+  td:first-child,th:first-child{position:sticky;left:0;background:#fff;font-weight:700;white-space:nowrap;}
+  th:first-child{background:var(--mist);}
+  .verTag{display:block;text-align:center;font-size:9.5px;color:#C4B8B0;font-family:monospace;padding:18px 0 24px;}
+</style>
+<script src="../loading.js"></script>
+</head>
+<body>
+
+<div id="skyNav"><div class="inner">
+  <a href="marche.html">↩️ マルシェ情報へ</a>
+  <a class="sky-home" href="../index.html">🏠 ホーム</a>
+</div></div>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="em">🛍️</div>
+    <h1>マルシェ情報</h1>
+    <p>つなぐマルシェ（リアル・オンライン）の申し込み方のまとめ</p>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <div class="asof">
+      📅 <b>2026年11月14日時点</b>で、LINKスケジュールサイトから読み取った「いま分かっている範囲」の情報です。マルシェごとに運営の方がちがい、やり方や金額は変わることがあります。<br>
+      <b>実際の申し込み・お問い合わせは、各イベントページと、そこに書かれている運営の公式LINEから</b>ご自身で行ってください。
+    </div>
+
+    <div class="tabs" role="tablist">
+      <button type="button" data-t="real">🏙️ リアル</button>
+      <button type="button" data-t="online">💻 オンライン</button>
+      <button type="button" data-t="compare">📊 くらべる表</button>
+    </div>
+
+    <!-- 共通：申し込みの流れ（3つとも、いちばん上に出します） -->
+    <div class="card">
+      <h2 style="margin-top:2px;">📝 申し込みの流れ（リアル・オンライン共通）</h2>
+      <p>申し込みは<b>2種類</b>あります。</p>
+      <ol class="flow">
+        <li><b>参加申し込み（来場の申し込み）</b><br>イベントページの「参加申し込み」「来場申し込み」ボタンから、スプレッドシートやフォームに名前などを入れます。</li>
+        <li><b>出店申し込み</b>（出店する方だけ）<br>イベントページの注意事項などに書かれている、そのマルシェの<b>公式LINE</b>から、別に申し込みます。</li>
+      </ol>
+      <div class="must">⚠️ <b>出店する方も、必ず「参加申し込み」もしてください。</b>参加申し込みは出店申し込みではありません。どのマルシェでも同じです。</div>
+      <ul class="dots small">
+        <li>出店できるのは、多くのマルシェで<b>LINK会員のみ</b>です（ビジターの出店は不可、というマルシェが多いです）。</li>
+        <li>出店を申し込んだあとのキャンセルは、<b>出店料100％のキャンセル料</b>がかかるマルシェが多いです。</li>
+        <li>マルシェへの出店には、<b>LINK-BASEへの事業掲載</b>が必要です。</li>
+        <li>来場（参加）は、ほとんどのマルシェで<b>無料</b>です（体験・商品の購入は実費）。</li>
+      </ul>
+    </div>
+
+    <!-- ===================== リアル ===================== -->
+    <section id="sec-real" hidden>
+      <h2>🏙️ リアルのマルシェ（各地域）</h2>
+      <p class="small">スケジュールサイトには、下の11の地域のマルシェが載っています。開催の間隔は、これまでの開催日から読み取ったものです。「ページに記載なし」は、イベントページに書かれていなかったものです（運営の公式LINEで案内されていることが多いです）。</p>
+      <div id="regList"></div>
+    </section>
+
+    <!-- ===================== オンライン ===================== -->
+    <section id="sec-online" hidden>
+      <h2>💻 つなぐマルシェ in オンライン</h2>
+      <div class="card">
+        <h3 style="margin-top:0;">どんなイベント？</h3>
+        <ul class="dots">
+          <li>LINK公式のオンラインイベント「<b>オンラインBIG3</b>」のひとつです。</li>
+          <li>Zoomで開かれ、全国・海外からも参加できます。</li>
+          <li>ブレイクアウトルームに、いろいろな<b>出店ブース</b>と、LINKの各サークルの<b>交流ブース</b>があります。</li>
+          <li>LINKのオンラインイベントで<b>唯一、ビジター（非会員）も参加できる</b>イベントです。</li>
+          <li>参加費は、会員・ビジターとも<b>無料</b>です。</li>
+          <li>開催は<b>年に3〜4回</b>ほどです（これまで：2025年11月8日／2026年2月11日・4月11日・7月5日・11月3日）。</li>
+          <li>主催は「夢実現サークル」（高山翔子さんほか）です。</li>
+        </ul>
+        <h3>参加の申し込み方</h3>
+        <ol class="flow">
+          <li>イベントページの「参加申し込み」から、必要なことを入力します（<b>出店する方も入力が必要</b>です）。</li>
+          <li>イベントページにある<b>「夢実現サークル」（オープンチャット）</b>に入ります。サークルの中で流れているスプレッドシートに記入する形でも申し込めます。</li>
+        </ol>
+        <p class="small">海外にお住まいで日本のオープンチャットに入れない方は、入らなくても参加できます。</p>
+        <h3>出店の申し込み方</h3>
+        <ul class="dots">
+          <li>出店は<b>抽選</b>です。</li>
+          <li>出店の申し込み・状況の確認は、<b>公式LINE</b>から行います（夢実現サークルの中で案内されています）。</li>
+        </ul>
+        <h3>気をつけること</h3>
+        <ul class="dots">
+          <li>ビジターの方を誘うときは、<b>必ずアテンド</b>してください。当日のZoomのURLは、参加が決まってから、誘った方から送ります。</li>
+          <li>開催の20日前までに、会員の参加表明が500人に届かないときは、開催が中止になります。</li>
+        </ul>
+        <a class="go" style="display:inline-block;margin-top:6px;font-weight:700;background:var(--mist);border-radius:9px;padding:8px 12px;text-decoration:none;" href="https://link-event-x.com/index.php/marche" target="_blank" rel="noopener">🗓 次回の日程・申し込みは、スケジュールサイトの「つなぐマルシェ」から ›</a>
+        <p class="small" style="margin-top:8px;">※2026年11月14日時点では、次回（11月3日のあと）のオンラインの日程はまだ載っていません。</p>
+      </div>
+    </section>
+
+    <!-- ===================== くらべる表 ===================== -->
+    <section id="sec-compare" hidden>
+      <h2>📊 くらべる表</h2>
+      <p class="small">表は横にスクロールできます。金額は会員の出店料です（来場はほとんど無料）。「記載なし」は、イベントページに書かれていなかったものです。</p>
+      <div class="tblwrap"><table id="cmp"></table></div>
+      <p class="small" style="margin-top:10px;">出店の受付が「何日前から」かは、ほとんどのマルシェでイベントページに書かれておらず、各運営の公式LINEで案内されています。書かれていたのは愛知だけ（2027年1月11日の回は、2026年10月27日〜11月3日。開催の約2か月半前の1週間）です。</p>
+    </section>
+
+    <div class="verTag"></div>
+  </div>
+</main>
+
+<script src="../track.js"></script>
+<script src="../menu.js"></script>
+<script>
+/* ================================================================
+   マルシェ情報（marche-info.html）  v1.2.048
+   ・#real / #online / #compare で、3つの段を切りかえます（マルシェ情報の丸から来ます）
+   ・中身は、2026/11/14 にLINKスケジュールサイト（つなぐマルシェ）から読み取ったもの。
+     直すときは、下の REG（地域ごと）を書きかえれば、リアルの段とくらべる表の両方に出ます
+================================================================ */
+const EV = "https://link-event-x.com/node/";
+const REG = [
+  { nm:"東京（つなぐマルシェ in Tokyo）", span:"2か月に1回（偶数月）", next:"2026年12月13日（日）11:00〜17:30", place:"IKUSA ARENA（東京都練馬区）",
+    fee:"チラシ出店 1,500円／ハーフ（3時間）2,500〜6,500円／通し（6時間30分）5,000〜13,000円（ブースの種類で変わります。会員のみ）", visitor:"来場は無料", org:"Swing by 山下亜希子さん", node:21002,
+    note:"規模がいちばん大きいマルシェです。出店資格が決まったあとのキャンセルは100％キャンセル料。" },
+  { nm:"西東京", span:"年3回ほど（3月・7月・11月）", next:"", last:"2026年11月8日（日）", place:"オープンイノベーションフィールド多摩 八王子館（東京都八王子市）",
+    fee:"", visitor:"来場は無料", org:"後藤良行さん（西東京コミュニティ班長）", node:20120 },
+  { nm:"埼玉", span:"約2か月ごと（年5〜6回）", next:"", last:"2026年11月14日（土）", place:"鹿島ビル4階 イベントスペース（埼玉県志木市）",
+    fee:"3,500円（35店舗ほど）。ビジターの出店は不可", visitor:"来場は無料", org:"村田大樹さん・あきえさん", node:20085,
+    note:"参加申し込みのシートは、1枚目に名前・チーム名・ビジター数・ビジターの名前を書きます（2枚目はさわらない）。" },
+  { nm:"千葉", span:"年3回ほど（3月・7月・11月）", next:"", last:"2026年11月8日（日）", place:"KeiyoGAS Community Terrace（千葉県市川市）",
+    fee:"2,500円（35店舗まで。前半・後半の分かれなし）", visitor:"", org:"片岡祐さん", node:20100 },
+  { nm:"神奈川", span:"年に数回（1月・3月・9月など）", next:"", last:"2026年9月12日（土）", place:"ビジョンセンター横浜西口（神奈川県横浜市）",
+    fee:"", visitor:"来場は無料", org:"樺良侑香里さん（ゆかりん。）", node:18193 },
+  { nm:"愛知", span:"年3回ほど（4月・8月・1月）", next:"2027年1月11日（月）10:30〜17:30", place:"名古屋市中小企業振興会館 9階 展望ホール（愛知県名古屋市）",
+    fee:"スタンダードブース 3,500円（施術・飲食ブースは＋1,000円）。ビジターの出店は募集なし", visitor:"来場は無料（定員700人）", org:"大橋美雪社長", node:20484,
+    note:"今回の出店の募集期間は 2026年10月27日 19:00〜11月3日 19:00 でした（終わっています）。" },
+  { nm:"大阪", span:"年3〜4回", next:"2026年12月27日（日）10:00〜16:00", place:"マイドーム大阪（大阪府大阪市）",
+    fee:"", visitor:"入場無料（定員1,000名）", org:"元木梨沙さん・ジュウザ（吉岡章寛）さん・高野佳子さん", node:20988 },
+  { nm:"福岡（博多）", span:"年3回ほど（3月・7月・11月）", next:"", last:"2026年11月15日（日）", place:"福岡国際会議場（福岡県福岡市）",
+    fee:"スタンダード ハーフ1,500円・通し3,000円〜プレミアム ハーフ5,000円・通し10,000円（ベッドのブースもあり。会員限定）", visitor:"来場は無料", org:"内川かおりさん", node:20044,
+    note:"来場する方は、会員もビジターも出店者もお手伝いの方も、全員が参加申し込みのシートに入力します。" },
+  { nm:"北海道（札幌）", span:"年2〜3回", next:"2026年12月13日（日）10:00〜16:00", place:"札幌ドーム 会議室（北海道札幌市）",
+    fee:"", visitor:"来場は無料", org:"杉田恵子さん", node:21109,
+    note:"出店の申し込みは公式LINEのみ。申し込み後のキャンセルは返金なし。" },
+  { nm:"秋田", span:"これまで年2回ほど（2026年の開催はまだ載っていません）", next:"", last:"2025年11月30日（日）", place:"道の駅あきた港セリオン（秋田県秋田市）",
+    fee:"会員 1,500円／ビジター 3,000円", visitor:"来場は無料", org:"高山順子さん", node:8697 },
+  { nm:"四国（高松）", span:"年1〜2回ほど（次回はまだ載っていません）", next:"", last:"2026年3月22日（日）", place:"高松シンボルタワー 1階 展示場（香川県高松市）",
+    fee:"ブースの大きさで 2,000円・4,000円（子ブースは前半・後半 各1,500円）", visitor:"来場は無料", org:"生谷直美さん", node:12331 }
+];
+const ONLINE = { nm:"オンライン", span:"年3〜4回", next:"まだ載っていません", fee:"出店は抽選（金額はページに記載なし）", visitor:"会員・ビジターとも無料（ビジター参加ができる唯一のオンラインイベント）",
+  how:"参加：イベントページから入力＋夢実現サークル／出店：公式LINE" };
+
+function esc(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+const NA = '<span class="na">ページに記載なし</span>';
+
+/* リアル：地域のカード */
+document.getElementById("regList").innerHTML = REG.map(r =>
+  '<div class="reg"><h3>📍 ' + esc(r.nm) + '</h3><dl>' +
+  '<dt>開催の間隔</dt><dd>' + esc(r.span) + '</dd>' +
+  (r.next ? '<dt>次回</dt><dd><b>' + esc(r.next) + '</b></dd>' : '<dt>直近</dt><dd>' + esc(r.last) + '（次回はまだ載っていません）</dd>') +
+  '<dt>会場</dt><dd>' + esc(r.place) + '</dd>' +
+  '<dt>出店料</dt><dd>' + (r.fee ? esc(r.fee) : NA) + '</dd>' +
+  '<dt>出店の申込</dt><dd>運営の公式LINEから（イベントページに案内）</dd>' +
+  '<dt>運営</dt><dd>' + esc(r.org) + '</dd>' +
+  (r.note ? '<dt>メモ</dt><dd>' + esc(r.note) + '</dd>' : '') +
+  '</dl><a class="go" href="' + EV + r.node + '" target="_blank" rel="noopener">🗓 イベントページを見る（申し込み・お問い合わせ）›</a></div>').join("");
+
+/* くらべる表 */
+(function(){
+  const head = ["地域","開催の間隔","次回","出店料（会員）","出店の申し込み","来場"];
+  const rows = REG.map(r => [r.nm.replace(/（.*）/, ""), r.span, r.next || ("未定（直近 " + r.last + "）"), r.fee || "記載なし", "運営の公式LINE", r.visitor || "記載なし"]);
+  rows.unshift([ONLINE.nm, ONLINE.span, ONLINE.next, ONLINE.fee, ONLINE.how, ONLINE.visitor]);
+  document.getElementById("cmp").innerHTML = '<tr>' + head.map(h => '<th>' + esc(h) + '</th>').join("") + '</tr>' +
+    rows.map(r => '<tr>' + r.map(c => '<td>' + esc(c) + '</td>').join("") + '</tr>').join("");
+})();
+
+/* 3つの切りかえ（#real / #online / #compare） */
+function show(t){
+  if(["real","online","compare"].indexOf(t) < 0) t = "real";
+  ["real","online","compare"].forEach(k => { document.getElementById("sec-" + k).hidden = k !== t; });
+  document.querySelectorAll(".tabs button").forEach(b => b.classList.toggle("on", b.dataset.t === t));
+}
+document.querySelectorAll(".tabs button").forEach(b => b.addEventListener("click", () => { history.replaceState(null, "", "#" + b.dataset.t); show(b.dataset.t); }));
+addEventListener("hashchange", () => show(location.hash.slice(1)));
+show(location.hash.slice(1));
+scrollTo(0, 0);   /* 丸から来たときは、いちばん上から */
+</script>
+</body>
+</html>

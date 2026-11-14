@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<script src="../config.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<meta name="googlebot" content="noindex, nofollow">
+<title>マルシェ情報 | Skyarc LINKサポート</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:"Zen Kaku Gothic New",sans-serif;background:radial-gradient(ellipse at 50% 45%,#FFFFFF 0%,#FFF8F0 55%,#FDEFE3 100%);color:#4E342E}
+.ttl{position:fixed;left:16px;top:calc(env(safe-area-inset-top) + 18px);z-index:20;font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:18px;color:#4E342E;pointer-events:none}
+.verTag{position:fixed;left:0;right:12px;bottom:calc(env(safe-area-inset-bottom) + 4px);text-align:right;font-size:9.5px;color:#C4B8B0;font-family:monospace;pointer-events:none}
+#stage{position:fixed;inset:0;overflow:hidden}
+.orb{position:absolute;left:0;top:0;border:1px dashed rgba(230,120,50,.16);border-radius:50%;pointer-events:none}
+.bub{position:absolute;left:0;top:0;width:110px;display:flex;flex-direction:column;align-items:center;gap:5px;text-decoration:none;color:#4E342E;
+  cursor:pointer;-webkit-tap-highlight-color:transparent;will-change:transform;background:none;border:none;font-family:inherit;padding:0;
+  touch-action:none;user-select:none;-webkit-user-select:none;-webkit-user-drag:none}
+.bub .ball{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;font-size:29px;background:#fff;border:3px solid #FF8A50;box-shadow:0 6px 16px rgba(140,70,30,.16)}
+.bub .nm{font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:12px;line-height:1.3;text-align:center;white-space:pre;background:rgba(255,255,255,.9);border-radius:8px;padding:2px 7px}
+.bub.grab{cursor:grabbing}
+.bub.grab .ball{box-shadow:0 14px 28px rgba(140,70,30,.28)}
+.bub.sun{width:120px}
+.bub.sun .ball{width:76px;height:76px;font-size:34px;border:3px solid #8E86C8;background:#fff;box-shadow:0 0 0 7px rgba(142,134,200,.14),0 6px 18px rgba(80,60,140,.18)}
+.bub.sun .nm{font-weight:900;font-size:14px;color:#6E5FB5}
+/* ポップアップ（マルシェ情報） */
+.sheet{position:fixed;inset:0;z-index:8500;background:rgba(60,30,10,.45);display:flex;align-items:center;justify-content:center;padding:16px}
+.sheet[hidden]{display:none}
+.pop{width:100%;max-width:420px;max-height:calc(100vh - 32px);overflow:auto;background:#fff;border-radius:20px;padding:18px 16px 16px;box-shadow:0 18px 40px rgba(0,0,0,.25)}
+.pop h2{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:17px;color:#E65100;margin:0 0 10px;padding-bottom:5px;border-bottom:3px solid #FFD6A0}
+.pop p{font-size:14px;color:#5D4037;line-height:1.9;margin-bottom:8px}
+.coming{background:#FFF8E1;border:2px dashed #FFD54F;border-radius:12px;padding:12px;text-align:center;font-size:14px;color:#6D4C41;margin-top:6px}
+.closeb{display:block;width:100%;margin-top:10px;padding:12px;border-radius:12px;border:2px solid #CFD8DC;background:#fff;color:#455A64;font-family:inherit;font-weight:700;font-size:15px;cursor:pointer}
+.gob{display:block;width:100%;margin-top:14px;padding:13px;border-radius:12px;background:#FF7043;color:#fff;text-align:center;font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:16px;text-decoration:none}
+.ext{font-size:12.5px !important;color:#8D6E63 !important;margin:6px 0 0 !important;text-align:center}
+</style>
+<link rel="stylesheet" href="../beta.css">
+<script src="../loading.js"></script>
+<script src="../login.js"></script>
+</head>
+<body>
+<div class="ttl">🛍️ マルシェ情報</div>
+
+<!-- まんなか：もどる／まわり：3つがぐるぐる（どの丸も、つまんで引っぱれます） -->
+<div id="stage">
+  <div class="orb" id="orb"></div>
+  <a class="bub sun back-btn" href="skyarc.html"><span class="ball">↩️</span><span class="nm">もどる</span></a>
+  <a class="bub ring" href="marche-info.html#real"><span class="ball">🏙️</span><span class="nm">リアルの
+マルシェ</span></a>
+  <a class="bub ring" href="marche-info.html#online"><span class="ball">💻</span><span class="nm">オンラインの
+マルシェ</span></a>
+  <a class="bub ring" href="marche-info.html#compare"><span class="ball">📊</span><span class="nm">くらべる表</span></a>
+</div>
+<div class="verTag"></div>
+
+<script src="../track.js"></script>
+<script src="../menu.js"></script>
+<script>
+/* ================================================================
+   マルシェ情報（チーム情報の「マルシェ情報」から）  v1.2.048
+   ・まんなか：もどる（ブラウザの「戻る」と同じ）
+   ・まわりの3つ：リアルのマルシェ／オンラインのマルシェ／くらべる表（marche-info.html の3つの段）
+   ・どの丸も、つまんで引っぱると「ビヨーン」とのび、はなすと元の場所へ（チーム情報と同じ）
+================================================================ */
+const $ = s => document.querySelector(s);
+let popOpen = false;
+document.querySelectorAll("a.back-btn").forEach(a=>a.addEventListener("click", e=>{
+  let same = false;
+  try{ same = !!document.referrer && new URL(document.referrer).origin === location.origin; }catch(_){}
+  if(same && history.length > 1){ e.preventDefault(); history.back(); }
+}));
+
+/* ---------- ぐるぐる・ふわふわ・つまむ ---------- */
+(function(){
+  const orb = $("#orb");
+  const reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const N = [];
+  N.push({ el: $(".bub.sun"), kind: "sun", ph: 0 });
+  const RN = document.querySelectorAll(".bub.ring").length;   /* まわりの丸の数（3つ） */
+  document.querySelectorAll(".bub.ring").forEach((el, i)=>N.push({ el, kind: "ring", k: i, ph: 1 + i * 1.7 }));
+  N.forEach(n=>{ n.x = null; n.y = null; n.vx = 0; n.vy = 0; n.s = 1; n.ts = 1; n.el.draggable = false; });
+  let W, H, cx, cy, R;
+  function size(){
+    W = innerWidth; H = innerHeight;
+    const yTop = 64 + 50, yBot = H - 50 - 60;
+    cx = W / 2; cy = (yTop + yBot) / 2;
+    R = { x: Math.min(W / 2 - 62, 190), y: 0 };
+    R.y = Math.min((yBot - yTop) / 2, R.x * 1.6);
+    orb.style.cssText = `width:${R.x*2}px;height:${R.y*2}px;transform:translate(${cx-R.x}px,${cy-R.y}px)`;
+    N.forEach(n=>{ n.lw = null; });
+  }
+  size(); addEventListener("resize", size);
+
+  let drag = null, lastDragEnd = 0;
+  N.forEach(n=>{
+    const el = n.el; let sx, sy, offx, offy, pid = null, moved = false;
+    el.addEventListener("pointerdown", e=>{
+      if(e.button !== undefined && e.button !== 0) return;
+      pid = e.pointerId; sx = e.clientX; sy = e.clientY; moved = false;
+      offx = e.clientX - n.x; offy = e.clientY - n.y;
+      try{ el.setPointerCapture(pid); }catch(_){}
+    });
+    el.addEventListener("pointermove", e=>{
+      if(pid !== e.pointerId) return;
+      if(!moved && Math.hypot(e.clientX - sx, e.clientY - sy) > 8){ moved = true; drag = n; n.ts = 1.12; el.classList.add("grab"); }
+      if(moved){ const nx = e.clientX - offx, ny = e.clientY - offy; n.vx = nx - n.x; n.vy = ny - n.y; n.x = nx; n.y = ny; }
+    });
+    const end = e=>{
+      if(pid !== e.pointerId) return;
+      pid = null;
+      if(moved){ drag = null; n.ts = 1; el.classList.remove("grab"); lastDragEnd = performance.now(); }
+    };
+    el.addEventListener("pointerup", end); el.addEventListener("pointercancel", end);
+    /* つまんで動かしたあとは、ページやポップアップは開かず、元の場所へもどるだけ */
+    el.addEventListener("click", e=>{ if(performance.now() - lastDragEnd < 400){ e.preventDefault(); e.stopImmediatePropagation(); } }, true);
+    el.addEventListener("dragstart", e=>e.preventDefault());
+  });
+
+  let last = null, sec = 0;
+  function frame(t){
+    const dt = last == null ? 0 : Math.min(64, t - last); last = t;
+    if(!reduce && !popOpen) sec += dt / 1000;
+    N.forEach(n=>{
+      let hx = cx, hy = cy;
+      if(n.kind === "ring"){
+        const a = sec * 2 * Math.PI / 40 + n.k * 2 * Math.PI / RN - Math.PI / 2;   /* 40秒でひとまわり */
+        hx = cx + R.x * Math.cos(a); hy = cy + R.y * Math.sin(a);
+      }
+      if(n.x == null){ n.x = hx; n.y = hy; }
+      if(n !== drag){
+        let ax = (hx - n.x) * .055, ay = (hy - n.y) * .055;
+        if(drag){
+          const dx = n.x - drag.x, dy = n.y - drag.y, d = Math.hypot(dx, dy) || 1, RR = 140;
+          if(d < RR){ const f = (RR - d) / RR * 7; ax += dx / d * f; ay += dy / d * f;
+            ax += (-dy / d) * .35 + (Math.random() - .5) * .9; ay += (dx / d) * .35 + (Math.random() - .5) * .9; }
+        }
+        n.vx = (n.vx + ax) * .84; n.vy = (n.vy + ay) * .84;
+        n.x += n.vx; n.y += n.vy;
+        if(n.lw == null){ const nm = n.el.querySelector(".nm"); n.lw = nm ? nm.offsetWidth : 0; }
+        const lim = Math.max(n.el.offsetWidth / 2, n.lw / 2) + 4;
+        n.x = Math.min(Math.max(n.x, lim), W - lim);
+      }
+      n.s += (n.ts - n.s) * .2;
+      const fy = reduce || n === drag ? 0 : Math.sin(t / 650 + n.ph) * (n.kind === "sun" ? 7 : 5);
+      const fx = reduce || n === drag ? 0 : Math.cos(t / 900 + n.ph) * 2.5;
+      const hb = n.el.querySelector(".ball").offsetHeight / 2;
+      n.el.style.transformOrigin = `50% ${hb}px`;
+      n.el.style.transform = `translate(${(n.x - n.el.offsetWidth / 2 + fx).toFixed(1)}px,${(n.y - hb + fy).toFixed(1)}px) scale(${n.s.toFixed(3)})`;
+      n.el.style.zIndex = n === drag ? 9 : (n.kind === "sun" ? 3 : 4);
+    });
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
