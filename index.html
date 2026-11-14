@@ -570,8 +570,10 @@ const TREE = [
   ]},
   /* チーム情報：ファーストサポートの3つが終わったら開きます（サポーター・クリエ・役割のある方も）。
      押すと、スカイアークチームのページへ（v1.216 で「チーム作り」からかわりました） */
-  {ic:"🌈", nm:"チーム情報", g:"team", need:"team", url:B+"first-support/skyarc.html"},
-  {ic:"📋", nm:"各種スケジュール情報", g:"apply", wide:true, kids:[
+  /* v1.2.051：「チーム情報」の名前を「もっとLINKを活用しよう」に。中に「各種スケジュール情報」も入りました */
+  {ic:"🌈", nm:"もっとLINKを\n活用しよう", g:"team", need:"team", url:B+"first-support/skyarc.html"},
+  /* 各種スケジュール情報：v1.2.051 からホームの丸には出さず、「もっとLINKを活用しよう」のページから（#sched）開きます */
+  {ic:"📋", nm:"各種スケジュール情報", g:"apply", wide:true, need:"hashOnly", kids:[
     {ic:"🗓", nm:"公式公認\nイベント", g:"apply", info:{
       text:"LINK公式・公認のイベントは、LINKのスケジュールサイトにまとまっています。こちらから日程を見て、お申し込みください。",
       btn:"🗓 スケジュールを見る", url:"https://link-event-x.com/"}},
@@ -798,6 +800,7 @@ function isAdv(){
 }
 function ok(it){
   if(!it.need) return true;
+  if(it.need === "hashOnly") return false;   /* ホームには出さない（#sched から開く） */
   if(!me) return false;
   if(it.need === "grow3"){
     let g = null;
@@ -1073,7 +1076,7 @@ function tap(n, e){
     + '<li>説明会までの間に、その方と<b>一緒にやりたいこと</b>を考えます。相手のやりたいことを改めて聞いて、<b>一緒に叶えられる夢</b>を作ります（できれば）。</li></ol>'
     + '<a class="fbtn" href="first-support/present.html">🎁 気になる人にLINKをプレゼントするコツ</a>'); return; }
   if(it.goPage){ const pg = flowPageItem(it.goPage); goTo(()=>{ path.length = 0; path.push(pg); }, n.x, n.y, n); return; }
-  if(it.goHome){ goTo(()=>{ path.length = 0; }, n.x, n.y, n); if(flowAllDone()) setTimeout(()=>flowCelebrate("🎉 3つとも終わりました！「チーム情報」が開きました"), 500); return; }
+  if(it.goHome){ goTo(()=>{ path.length = 0; }, n.x, n.y, n); if(flowAllDone()) setTimeout(()=>flowCelebrate("🎉 3つとも終わりました！「もっとLINKを活用しよう」が開きました"), 500); return; }
   /* 開ける方が決まっている丸：ほかの方には、お知らせだけを出します */
   if(it.lock === "adv" && !isAdv()){
     const shown = Object.assign({}, it, { url:"", link:"", lock:"", info: it.lockInfo });
@@ -1210,7 +1213,7 @@ function openTask(it){
     const ch = {};
     if(FLOW[it.task]){ delete FLOW[it.task]; ch[it.task] = false; } else { FLOW[it.task] = true; ch[it.task] = true; }
     saveFlow(ch); paintDone(); flowPaintAll(); reflowLevel();
-    if(pageK === "use" && !wasPage && flowDone(pageK)) flowCelebrate("🎉 3つとも終わりました！ホームに「チーム情報」が開きました。光っている「もっと使いこなすには」も見てみてください");
+    if(pageK === "use" && !wasPage && flowDone(pageK)) flowCelebrate("🎉 3つとも終わりました！ホームに「もっとLINKを活用しよう」が開きました。光っている「もっと使いこなすには」も見てみてください");
     else if(pageK && !wasPage && flowDone(pageK)) flowCelebrate("🎉 " + flowPageItem(pageK).nm.replace(/\n/g,"") + "、ぜんぶできました！" + (grp ? "「もどる」から、👍 の丸で次へ進めます" : "👍 の丸から次へ進めます"));
     else if(grp && !wasGrp && flowItemDone(grp)) flowCelebrate("🎉 " + grp.nm.replace(/\n/g,"") + "、ぜんぶできました！");
   };
@@ -1390,7 +1393,7 @@ function restoreReturn(){
     let list = TREE;
     for(const re of want){
       const it = list.find(x=>x.kids && re.test(x.nm));
-      if(!it || !ok(it)){ path.length = 0; return; }
+      if(!it || (it.need !== "hashOnly" && !ok(it))){ path.length = 0; return; }
       path.push(it); list = it.kids;
     }
     return;
@@ -1404,7 +1407,7 @@ function restoreReturn(){
   let list = TREE;
   for(const i of r.idx){
     const it = list[i];
-    if(!it || !it.kids || !ok(it)) { path.length = 0; return; }
+    if(!it || !it.kids || (it.need !== "hashOnly" && !ok(it))) { path.length = 0; return; }
     path.push(it); list = it.kids;
   }
 }
