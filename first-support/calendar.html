@@ -287,7 +287,7 @@
       <div id="dayList"></div>
 
       <!-- この日・この時間は大丈夫？ -->
-      <div class="ask">
+      <div class="ask" id="askBox" style="display:none;">
         <h2>🔎 この日・この時間に、ほかの予定は入っている？</h2>
         <div class="row">
           <div class="full"><label for="qDate">日付</label><input type="date" id="qDate"></div>
@@ -302,7 +302,7 @@
         <div id="qRes"></div>
       </div>
 
-      <details class="note">
+      <details class="note" id="ruleBox" style="display:none;">
         <summary><b>かぶりの決まり</b>（タップで開きます）</summary>
         ・チームの予定が、<b>公式公認の予定</b>か<b>チーム代表の予定</b>と時間が重なると「被り」です。時間のない予定は、その日1日として見ます。<br>
         ・<b>ビフォーあり</b>の予定は前を、<b>アフターあり</b>の予定は後ろを、あけます（オンラインは30分、リアルは1時間）。「ほかの予定は入っている？」では、ご自分のビフォー・アフターは、その時間もふくめて入れてください。<br>
@@ -325,7 +325,7 @@
     <label>だれの予定ですか</label>
     <div class="kinds" id="fKinds">
       <button data-k="official" onclick="setKind('official')">公式公認</button>
-      <button data-k="shoko" onclick="setKind('shoko')">翔子さん</button>
+      <button data-k="shoko" onclick="setKind('shoko')">チーム代表</button>
       <button data-k="team" onclick="setKind('team')">チーム</button>
     </div>
     <div class="two">
@@ -383,10 +383,10 @@ const CAT_NAME = {
   "support":"ユーザーサポート会", "kouryu-on":"交流会(オンライン)", "kouryu-re":"交流会(リアル)",
   "douga":"動画視聴会", "event":"そのほかの催し", "crie":"クリエ以上の申込み"
 };
-const KIND_NAME = { official:"公式公認", shoko:"翔子さん", team:"チーム" };
+const KIND_NAME = { official:"公式公認", shoko:"チーム代表", team:"チーム" };
 const ERR = {
   pin:"パスコードが違います。ログインし直してください。", nomember:"会員番号が見つかりません。",
-  noperm:"このページは、アドバンス以上の方と、部門に入っているクリエ・サポーターの方がご覧いただけます。",
+  noperm:"このページは、まだご覧いただけません。",
   email:"Googleアカウントが登録と違います。", busy:"ほかの方が保存中です。少しおいてお試しください。",
   badkind:"「だれの予定か」を選んでください。", baddate:"日付を確かめてください（おわりの日が、はじまりの日より前になっていませんか）。",
   badtime:"時間を確かめてください（おわりが、はじまりより前になっています）。",
@@ -480,6 +480,10 @@ function take(j, first){
     return m;
   }
   data = j; canEdit = j.canEdit === true; canOfficial = canEdit || j.canOfficial === true;
+  /* かぶりチェック（と、かぶりの決まり）は、アドバンス以上と部門などの印がある方だけ（v1.2.060）。カレンダーはメンバー全員が見られます */
+  const canCheck = j.canCheck !== false;
+  $("#askBox").style.display = canCheck ? "block" : "none";
+  $("#ruleBox").style.display = canCheck ? "block" : "none";
   if(!first){ keepSave(j); showLoadedAt(Date.now()); }   /* 予定を追加・変更したあとは、とっておく分も新しくします */
   const la = document.getElementById("lsAt"); if(la) la.textContent = siteAtText() + "。";
   $("#firstLoad").style.display = "none";
@@ -602,7 +606,7 @@ function clashesOf(list){
   });
   return out;
 }
-function label(x){ return x.title || (x.kind === "shoko" ? "翔子さんの予定" : CAT_NAME[x.cat] || ""); }
+function label(x){ return x.title || (x.kind === "shoko" ? "チーム代表の予定" : CAT_NAME[x.cat] || ""); }
 function tmText(x){ return x.start ? x.start + (x.end ? "〜" + x.end : "〜") : "時間の指定なし"; }
 
 function draw(){
@@ -650,7 +654,7 @@ function drawDay(map){
   if(!list.length) h += '<div class="none">この日の予定はありません</div>';
   h += list.map(x => {
     const tag = x.kind === "official" ? (x.src === "site" ? (x.lk === "公式" ? "公式（会社主催）" : "公認公式（会員主催）") : "公式公認") + (x.okFlag === "ok" ? "｜かぶってOK" : x.okFlag === "marche" ? "｜マルシェだけOK" : "")
-      : x.kind === "shoko" ? "翔子さん"
+      : x.kind === "shoko" ? "チーム代表"
       : (x.src === "sheet" ? "申込みシート｜" + (CAT_NAME[x.cat] || x.label) : "これから入れたい｜" + (CAT_NAME[x.cat] || ""));
     const fl = [x.place === "real" ? "リアル" : x.place === "online" ? "オンライン" : "", (x.bef && x.aft ? "ビフォー・アフターあり" : x.bef ? "ビフォーあり" : x.aft ? "アフターあり" : ""),
                 x.multi ? "〜" + mdw(x.endDate) + "まで" : ""].filter(Boolean).join("・");
@@ -744,7 +748,7 @@ function siteAtText(){
 function whoOf(o){
   if(o.src === "site") return (o.lk === "公式" ? "公式（会社主催）" : "公認公式（会員主催）");
   if(o.kind === "team") return o.src === "sheet" ? "申込みシート" : "チームの予定";
-  return o.kind === "shoko" ? "翔子さん（チーム代表）" : KIND_NAME[o.kind];
+  return o.kind === "shoko" ? "チーム代表" : KIND_NAME[o.kind];
 }
 function levelOf(o){
   if(o.kind === "official") return o.okFlag === "ok" ? "low" : o.okFlag === "marche" ? "mid" : "bad";
@@ -752,7 +756,7 @@ function levelOf(o){
   return "ref";
 }
 const LEVEL = {
-  bad:{ h:"🔴 かぶるとまずい予定", why:"公式公認・翔子さん（チーム代表）の予定は、かぶらないようにする決まりです" },
+  bad:{ h:"🔴 かぶるとまずい予定", why:"公式公認・チーム代表の予定は、かぶらないようにする決まりです" },
   mid:{ h:"🟡 気をつけたい公式公認", why:"「つなぐマルシェ inリアル」とならかぶってOK。それ以外は、かぶらないようにする決まりです" },
   low:{ h:"🟢 優先度は低め（かぶってOKの公式公認）", why:"かぶっても大丈夫とされている公式です" },
   ref:{ h:"⚪ Skyarcのチームの予定（参考）", why:"" }
@@ -901,7 +905,7 @@ async function saveForm(){
 async function delItem(cid){
   const it = (data.items || []).find(x => x.cid === cid);
   if(!it || !canTouch(it)) return;
-  if(!confirm(mdw(it.date) + "「" + (it.title || (it.kind === "shoko" ? "翔子さんの予定" : "")) + "」を消します。よろしいですか？")) return;
+  if(!confirm(mdw(it.date) + "「" + (it.title || (it.kind === "shoko" ? "チーム代表の予定" : "")) + "」を消します。よろしいですか？")) return;
   try{
     const j = await post({ action:"calDelete", cid:cid });
     if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
