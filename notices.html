@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<script src="config.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>通知・問い合わせ｜Skyarc</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="beta.css">
+<meta name="theme-color" content="#6E5FB5">
+<script src="loading.js"></script>
+<script src="login.js"></script>
+<style>
+  :root{ --ink:#2F2A44; --main:#6E5FB5; --deep:#4A3D8F; --soft:#F1EEFB; --line:#DCD6F2; --shadow:0 4px 18px rgba(80,60,160,.12); }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{font-family:"Zen Kaku Gothic New",sans-serif;color:var(--ink);line-height:1.8;font-size:15px;background:#FBF9FF;}
+  button,textarea,select{font-family:inherit;} button{cursor:pointer;border:none;}
+  #skyNav{position:sticky;top:0;z-index:30;background:rgba(74,61,143,.96);}
+  #skyNav .inner{max-width:600px;margin:0 auto;padding:10px 16px;display:flex;justify-content:space-between;gap:10px;}
+  #skyNav a{background:rgba(255,255,255,.2);color:#fff;font-size:11.5px;font-weight:700;border-radius:999px;padding:6px 13px;text-decoration:none;}
+  @media (max-width:700px){ #skyNav .inner{padding-right:74px;} .tabs{margin-right:0;} }
+  .wrap{max-width:600px;margin:0 auto;padding:14px 16px 40px;}
+  h1{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:20px;color:var(--deep);margin:4px 0 10px;}
+  .tabs{display:flex;gap:6px;margin-bottom:12px;}
+  .tabs button{flex:1;background:#fff;border:2px solid var(--line);color:#6C6588;border-radius:12px;padding:9px 4px;font-weight:700;font-size:13.5px;}
+  .tabs button.on{background:var(--main);border-color:var(--main);color:#fff;}
+  .it{background:#fff;border-radius:14px;box-shadow:var(--shadow);padding:12px 14px;margin:10px 0;border-left:5px solid transparent;}
+  .it.new{border-left-color:#FF7043;}
+  .it .k{display:inline-block;font-size:11px;font-weight:900;color:#fff;background:var(--main);border-radius:999px;padding:0 9px;margin-right:6px;}
+  .it .k.skill{background:#4E6FD8;} .it .k.req{background:#F2B33D;} .it .k.info{background:#3FA98A;}
+  .it .t{font-weight:700;font-size:15px;margin-top:4px;}
+  .it .w{font-size:12px;color:#7A72A0;}
+  .it .b{font-size:14px;white-space:pre-wrap;word-break:break-word;margin-top:4px;}
+  .it .acts{margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;}
+  .it .acts a,.it .acts button{background:var(--soft);color:var(--deep);border-radius:999px;padding:5px 13px;font-size:13px;font-weight:700;text-decoration:none;}
+  .empty{text-align:center;color:#8A83AA;font-size:14px;padding:30px 0;}
+  .allread{display:block;margin:0 0 6px auto;background:none;color:var(--deep);font-size:12.5px;font-weight:700;text-decoration:underline;}
+  .card{background:#fff;border-radius:18px;box-shadow:var(--shadow);padding:16px;}
+  .lab{font-weight:700;font-size:13.5px;color:var(--deep);margin:12px 0 4px;}
+  .opts label{display:flex;align-items:center;gap:9px;border:2px solid var(--line);border-radius:12px;padding:8px 11px;margin:5px 0;font-size:14.5px;cursor:pointer;}
+  .opts input{width:19px;height:19px;accent-color:var(--main);}
+  select,textarea{width:100%;font-size:16px;border:2px solid var(--line);border-radius:12px;padding:9px 11px;background:#FDFCFF;color:var(--ink);}
+  textarea{min-height:150px;resize:vertical;}
+  .note{background:#FFF8E1;border-radius:12px;padding:10px 12px;font-size:13.5px;margin:10px 0;}
+  .send{display:block;width:100%;background:var(--main);color:#fff;border-radius:13px;padding:13px;font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:16px;margin-top:10px;}
+  .msg{font-size:13.5px;font-weight:700;margin-top:8px;min-height:1em;}
+  #conf{position:fixed;inset:0;z-index:9000;background:rgba(40,30,70,.45);display:flex;align-items:center;justify-content:center;padding:16px;}
+  #conf .p{background:#fff;border-radius:18px;max-width:400px;width:100%;padding:18px 16px;}
+  #conf .row{display:flex;gap:8px;margin-top:12px;}
+  #conf .row button{flex:1;border-radius:12px;padding:12px;font-weight:700;font-size:15px;}
+  .verTag{display:block;text-align:center;font-size:9.5px;color:#C4B8D8;font-family:monospace;padding:16px 0 20px;}
+</style>
+</head>
+<body>
+<div id="skyNav"><div class="inner">
+  <a href="index.html" class="back-btn">↩️ もどる</a>
+  <a class="sky-home" href="index.html">🏠 ホーム</a>
+</div></div>
+<div class="wrap">
+  <h1>🔔 通知・問い合わせ</h1>
+  <div class="tabs">
+    <button type="button" data-t="inbox">🔔 届いた通知</button>
+    <button type="button" data-t="sent">📤 出したもの</button>
+    <button type="button" data-t="ask">✉️ 問い合わせる</button>
+  </div>
+  <div id="body"></div>
+  <div class="verTag"></div>
+</div>
+<script>
+/* ================================================================
+   通知・問い合わせ（v1.2.076）
+   ・届いた通知（読むと既読になります）／出したもの／問い合わせる
+   ・問い合わせの宛先：サポート担当・アップクリエ・アドバンス・系列代表・サイトのこと（交通整備課）
+   ・?tab=ask で問い合わせ、?ask=link で「LINKの話を聞きたい・入りたいと言われた」相談（アップクリエあて）
+   ・スキルアッププロの依頼は、通知から「開放する」を押せます
+================================================================ */
+const $ = q => document.querySelector(q);
+const GAS_URL = window.SKY_GAS_URL;
+let member = null;
+try{ const raw = localStorage.getItem("skyarc_member"); if(raw && raw !== "null") member = JSON.parse(raw); }catch(e){}
+if(member && !member.id) member = null;
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const qs = new URLSearchParams(location.search);
+let tab = qs.get("tab") || (qs.get("ask") ? "ask" : "inbox"), data = null;
+const TO = [["helper","サポート担当の方"],["upline","アップクリエの方"],["advance","アドバンスの方"],["keirep","系列代表の方"],["site","サイトのこと（交通整備課）"]];
+const TYPES = ["質問・相談", "LINKの話を聞きたい・入りたいと言われた", "サポーターになりたい", "サイトのこと（不具合・使い方）"];
+
+async function api(params, post){
+  const body = Object.assign({ id:member.id, pin:member.pin }, params);
+  const r = post ? await fetch(GAS_URL, { method:"POST", body:new URLSearchParams(body) })
+                 : await fetch(GAS_URL + "?" + new URLSearchParams(body).toString());
+  return r.json();
+}
+function setTab(t){
+  tab = t;
+  draw();
+  if(t !== "ask" && !data && member) load();
+}
+document.querySelectorAll(".tabs button").forEach(b => b.onclick = () => setTab(b.dataset.t));
+
+async function load(){
+  if(!member){ $("#body").innerHTML = '<p class="empty">通知を見るには、ログインが必要です。<br><br><button class="send" onclick="skyLoginRequired(function(){ location.reload(); })">🌱 ログインする</button></p>'; return; }
+  try{ data = await api({ action:"noticeList" }); }catch(e){ data = { ok:false }; }
+  if(tab !== "ask") draw();   /* 問い合わせを書いているときは、書きかけを消さないように描きなおしません */
+}
+function kindCls(k){ return k === "スキルアッププロ" ? "skill" : k === "新規登録の依頼" ? "req" : k === "お知らせ" ? "info" : ""; }
+function itemHtml(x, mine){
+  const who = mine ? "→ " + esc(x.toName || x.toId) + "さんへ" : esc(x.fromName || x.fromId) + "さんから";
+  let acts = "";
+  if(!mine && x.kind === "スキルアッププロ") acts = x.opened ? '<span style="font-size:13px;font-weight:700;color:#2E7D32;">✅ 開放ずみ</span>' : '<button type="button" data-open="' + esc(x.rel) + '">🚀 開放する</button>';
+  if(!mine && x.kind === "新規登録の依頼") acts = '<a href="ikusei/kanri-x7k2m9.html">🔐 メンバーマネジメントルームで見る</a>';
+  return '<div class="it' + (!mine && !x.read ? " new" : "") + '"><span class="k ' + kindCls(x.kind) + '">' + esc(x.kind) + '</span><span class="w">' + esc(x.at) + '　' + who + '</span>' +
+    '<p class="t">' + esc(x.title) + '</p>' + (x.body ? '<p class="b">' + esc(x.body) + '</p>' : "") +
+    (acts ? '<div class="acts">' + acts + '</div>' : "") + '</div>';
+}
+function draw(){
+  document.querySelectorAll(".tabs button").forEach(b => b.classList.toggle("on", b.dataset.t === tab));
+  const box = $("#body");
+  if(tab === "ask") return drawAsk();
+  if(!member) return;
+  if(!data){ box.innerHTML = '<p class="empty">読み込んでいます…</p>'; return; }
+  if(!data.ok){ box.innerHTML = '<p class="empty">' + (data.error === "unknown_action" ? "まだしくみが用意できていません（GASの更新待ち）。" : "読み込めませんでした。少しおいてお試しください。") + '</p>'; return; }
+  if(tab === "sent"){
+    box.innerHTML = data.sent.length ? data.sent.map(x => itemHtml(x, true)).join("") : '<p class="empty">まだ出したものはありません。</p>';
+    return;
+  }
+  const unread = data.inbox.filter(x => !x.read);
+  box.innerHTML = (unread.length ? '<button type="button" class="allread" id="allRead">すべて既読にする</button>' : "") +
+    (data.inbox.length ? data.inbox.map(x => itemHtml(x, false)).join("") : '<p class="empty">通知はまだありません。</p>');
+  if($("#allRead")) $("#allRead").onclick = () => markRead(unread);
+  box.querySelectorAll("[data-open]").forEach(b => b.onclick = () => confirmBox("この方のスキルアッププロを開放します。よろしいですか？", async () => {
+    b.disabled = true; b.textContent = "開放しています…";
+    try{ const j = await api({ action:"skillOpen", target:b.dataset.open }, true);
+      if(j && j.ok){ b.outerHTML = '<span style="font-size:13px;font-weight:700;color:#2E7D32;">✅ 開放しました（ご本人にも通知しました）</span>'; return; }
+      b.textContent = j && j.error === "noperm" ? "アップクリエの方だけが開放できます" : "開放できませんでした";
+    }catch(e){ b.textContent = "通信できませんでした"; }
+  }));
+  /* 開いて見たものは、少しあとで既読にします（ベルの数字が減ります） */
+  if(unread.length) setTimeout(() => markRead(unread, true), 1500);
+}
+async function markRead(list, quiet){
+  if(!list.length) return;
+  try{ await api({ action:"noticeRead", nids: list.map(x => x.nid).join(",") }, true); }catch(e){}
+  list.forEach(x => x.read = true);
+  if(!quiet) draw();
+}
+function drawAsk(){
+  const preset = qs.get("ask") === "link";
+  $("#body").innerHTML = '<div class="card">' +
+    '<p class="lab">① どなたに問い合わせますか？</p><div class="opts">' +
+      TO.map((t, i) => '<label><input type="radio" name="to" value="' + t[0] + '"' + ((preset ? t[0] === "upline" : i === 0) ? " checked" : "") + '> ' + t[1] + '</label>').join("") + '</div>' +
+    '<p class="lab">② どんなことですか？</p><select id="type">' + TYPES.map(t => '<option' + (preset && t === TYPES[1] ? " selected" : "") + '>' + t + '</option>').join("") + '</select>' +
+    '<p class="lab">③ 内容</p><textarea id="text" placeholder="' + (preset ? "どなたに、どんなふうに言われたかなど" : "質問・相談したいこと") + '"></textarea>' +
+    '<div class="note">こちらは、すぐにお返事が来るものではありません。問い合わせとして相手の方に通知が行きますので、お返事があるまで、しばらくお待ちください。<br><b>緊急のご連絡は、いつもどおり初期サポートラインや、個別にご連絡ください。</b></div>' +
+    '<button type="button" class="send" id="send">✉️ 問い合わせを送る</button><p class="msg" id="msg"></p></div>';
+  $("#send").onclick = () => {
+    if(!member) return skyLoginRequired(function(){ location.reload(); });
+    const to = document.querySelector('input[name=to]:checked').value, type = $("#type").value, text = $("#text").value.trim();
+    if(!text && type === TYPES[0]) return say("内容を書いてください", true);
+    const nm = TO.find(t => t[0] === to)[1];
+    confirmBox(nm + "に通知が行きますが、送りますか？", async () => {
+      say("送っています…"); $("#send").disabled = true;
+      try{
+        const j = await api({ action:"inquiry", toKind:to, type:type, text:text }, true);
+        if(j && j.ok){ say("✅ " + j.to.join("・") + "さんに送りました。お返事があるまで、しばらくお待ちください。"); $("#text").value = ""; data = null; }
+        else say(j && j.error === "noreceiver" ? "その宛先の方が、名簿で見つかりませんでした。ほかの宛先を選ぶか、アップラインの方に直接ご相談ください。" : j && j.error === "unknown_action" ? "まだしくみが用意できていません（GASの更新待ち）。" : "送れませんでした。少しおいてお試しください。", true);
+      }catch(e){ say("通信できませんでした。", true); }
+      $("#send").disabled = false;
+    });
+  };
+}
+function say(t, bad){ const m = $("#msg"); if(!m) return; m.style.color = bad ? "#C62828" : "#2E7D32"; m.textContent = t; }
+function confirmBox(text, yes){
+  const d = document.createElement("div"); d.id = "conf";
+  d.innerHTML = '<div class="p"><p>' + esc(text) + '</p><div class="row"><button type="button" style="background:#fff;border:2px solid #DCD6F2;color:#6C6588" id="cNo">いいえ</button><button type="button" style="background:#6E5FB5;color:#fff" id="cYes">はい</button></div></div>';
+  document.body.appendChild(d);
+  d.querySelector("#cNo").onclick = () => d.remove();
+  d.querySelector("#cYes").onclick = () => { d.remove(); yes(); };
+}
+draw(); load();
+</script>
+<script src="track.js"></script>
+<script src="menu.js"></script>
+</body>
+</html>

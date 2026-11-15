@@ -46,6 +46,18 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body)
   background:#6E5FB5 url("./img/app-icon-180.png") center/cover no-repeat;}   /* ホーム画面のアイコンと同じ絵 */
 .top h1{font-family:var(--f-head);font-weight:900;font-size:18px;line-height:1.35;margin:0;color:var(--deep);text-wrap:balance;}
 .top p{margin:0;font-size:12.5px;color:var(--sub);}
+/* v1.2.076：通知のベルと問い合わせ（おかえりなさいの右） */
+.ntc{margin-left:auto;display:flex;flex-direction:column;align-items:center;gap:4px;flex:none;}
+.ntc[hidden]{display:none;}
+.bell{position:relative;display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:#fff;box-shadow:var(--shadow);font-size:20px;text-decoration:none;filter:grayscale(.6);opacity:.75;}
+.bell.on{filter:none;opacity:1;background:#FFF6D6;box-shadow:0 0 0 3px rgba(255,193,7,.35),var(--shadow);animation:bellGlow 2.4s ease-in-out infinite;}
+@keyframes bellGlow{0%,100%{box-shadow:0 0 0 3px rgba(255,193,7,.35),var(--shadow)}50%{box-shadow:0 0 0 7px rgba(255,193,7,.12),var(--shadow)}}
+.bell b{position:absolute;top:-5px;right:-9px;min-width:19px;height:19px;padding:0 5px;border-radius:999px;background:#FF5252;color:#fff;font-size:10.5px;font-weight:900;line-height:19px;text-align:center;font-family:var(--f-body);}
+.bell b:empty{display:none;}
+.askb{font-size:10.5px;font-weight:700;color:var(--deep);text-decoration:none;white-space:nowrap;background:#fff;border-radius:999px;padding:1px 8px;box-shadow:var(--shadow);}
+@media (prefers-reduced-motion: reduce){ .bell.on{animation:none;} }
+/* スマホでは、題名がつぶれないように、ベルと問い合わせを見出しのすぐ下の右に並べます */
+@media (max-width:560px){ .top{flex-wrap:wrap;row-gap:2px;} .top > div:not(.ntc):not(.appicon){flex:1 1 150px;min-width:0;} .ntc{flex-direction:row;width:100%;justify-content:flex-end;gap:8px;margin:-2px -50px 0 0;} .bell{width:34px;height:34px;font-size:17px;} .askb{font-size:11px;padding:3px 10px;} }
 
 /* もどる */
 .crumb{display:flex;align-items:center;gap:10px;min-height:40px;margin-top:12px;}
@@ -342,6 +354,10 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body)
       <h1>Skyarc LINKサポート</h1>
       <p id="hello">ようこそ</p>
     </div>
+    <div class="ntc" id="ntc" hidden>
+      <a class="bell" id="bell" href="notices.html" aria-label="通知">🔔<b id="bellN"></b></a>
+      <a class="askb" href="notices.html?tab=ask">✉️ 問い合わせ</a>
+    </div>
   </div>
 
   <div class="crumb" id="crumb" hidden>
@@ -627,9 +643,14 @@ const TREE = [
   {ic:"🐣", nm:"サポーター\nとは", g:"sup", need:"supIntro", url:B+"first-support/to-supporter.html"},
   {ic:"🐣", nm:"サポーターの\n部屋", g:"sup", need:"sup",
    flip:{ic:"🐣", nm:"サポーター\nとは", g:"sup", url:B+"first-support/to-supporter.html"}, kids:[
+    {ic:"🐣", nm:"サポーター\nとは", g:"sup", url:B+"first-support/to-supporter.html"},
+    {ic:"🤝", nm:"入会直後の\nフォローの仕方", g:"sup", url:B+"first-support/sup-follow.html"},
     {ic:"💌", nm:"新規の方への\n最初のメッセージ", g:"sup", url:B+"ikusei/first-message.html"},
     {ic:"🐣", nm:"ぴよぴよ\n脱出クイズ", g:"sup", url:B+"ikusei/piyo-quiz.html"},
     {ic:"📝", nm:"新規登録の\n依頼", g:"sup", url:B+"ikusei/shinki-irai.html"},
+    {ic:"💬", nm:"アップに\n相談する", g:"sup", url:B+"notices.html?ask=link"},
+    {ic:"🌱", nm:"やりたいことを\n磨く", g:"sup", url:B+"first-support/yaritai.html"},
+    {ic:"🚀", nm:"スキルアッププロ\nシリーズを学ぶ", g:"sup", url:B+"first-support/skillup.html"},
     {ic:"🔐", nm:"メンバー\nマネジメントルーム", g:"sup", wide:true, url:B+"ikusei/kanri-x7k2m9.html"},
     {ic:"🏠", nm:"LINKポータル", g:"sup", url:"https://app.link-event-x.com"}
   ]},
@@ -850,6 +871,22 @@ function setHello(t){
   document.getElementById("hello").textContent = me && me.name ? mk + me.name + "さん、おかえりなさい" : "ようこそ";
 }
 setHello();
+
+/* v1.2.076：通知のベル（まだ読んでいない数。999より多いときは 999+） */
+async function loadBell(){
+  if(!me || !me.id) return;
+  document.getElementById("ntc").hidden = false;
+  try{
+    const r = await fetch(GAS_URL + "?action=noticeCount&id=" + encodeURIComponent(me.id) + "&pin=" + encodeURIComponent(me.pin || ""));
+    const j = await r.json();
+    if(!j || !j.ok) return;
+    const n = Number(j.n) || 0;
+    document.getElementById("bellN").textContent = n > 999 ? "999+" : (n ? String(n) : "");
+    document.getElementById("bell").classList.toggle("on", n > 0);
+    document.getElementById("bell").setAttribute("aria-label", n ? "通知 " + n + "件" : "通知");
+  }catch(e){}
+}
+setTimeout(loadBell, 400);
 
 const stage = document.getElementById("stage");
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;

@@ -110,13 +110,7 @@ document.querySelectorAll("a.back-btn").forEach(a=>a.addEventListener("click", e
   if(same && history.length > 1){ e.preventDefault(); history.back(); }
 }));
 
-/* ---------- やりたいことを見つける：精査が終わるまで、クリエ以上の方だけに出します（v1.2.068） ---------- */
-(function(){
-  let m = null;
-  try{ const raw = localStorage.getItem("skyarc_member"); if(raw && raw !== "null") m = JSON.parse(raw); }catch(e){}
-  const okCrie = !!(m && m.id && (m.crie === true || String(m.role || "")));
-  if(!okCrie){ const b = document.getElementById("bubYaritai"); if(b) b.remove(); }
-})();
+/* やりたいことを見つける：v1.2.076 から、どなたにも出します（クリエ以上だけの制限を外しました） */
 
 /* ---------- ポップアップ ---------- */
 let popOpen = false;
