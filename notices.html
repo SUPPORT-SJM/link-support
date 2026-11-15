@@ -30,7 +30,7 @@
   .it{background:#fff;border-radius:14px;box-shadow:var(--shadow);padding:12px 14px;margin:10px 0;border-left:5px solid transparent;}
   .it.new{border-left-color:#FF7043;}
   .it .k{display:inline-block;font-size:11px;font-weight:900;color:#fff;background:var(--main);border-radius:999px;padding:0 9px;margin-right:6px;}
-  .it .k.skill{background:#4E6FD8;} .it .k.req{background:#F2B33D;} .it .k.info{background:#3FA98A;}
+  .it .k.skill{background:#4E6FD8;} .it .k.sup{background:#E8A33D;} .it .k.req{background:#F2B33D;} .it .k.info{background:#3FA98A;}
   .it .t{font-weight:700;font-size:15px;margin-top:4px;}
   .it .w{font-size:12px;color:#7A72A0;}
   .it .b{font-size:14px;white-space:pre-wrap;word-break:break-word;margin-top:4px;}
@@ -74,6 +74,7 @@
    通知・問い合わせ（v1.2.076）
    ・届いた通知（読むと既読になります）／出したもの／問い合わせる
    ・問い合わせの宛先：サポート担当・アップクリエ・アドバンス・系列代表・サイトのこと（交通整備課）
+   ・?ask=sup で「サポーターになりたい」の専用の申し込み（v1.2.083）
    ・?tab=ask で問い合わせ、?ask=link で「LINKの話を聞きたい・入りたいと言われた」相談（アップクリエあて）
    ・スキルアッププロの依頼は、通知から「開放する」を押せます
 ================================================================ */
@@ -86,7 +87,8 @@ const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp
 const qs = new URLSearchParams(location.search);
 let tab = qs.get("tab") || (qs.get("ask") ? "ask" : "inbox"), data = null;
 const TO = [["helper","サポート担当の方"],["upline","アップクリエの方"],["advance","アドバンスの方"],["keirep","系列代表の方"],["site","サイトのこと（交通整備課）"]];
-const TYPES = ["質問・相談", "LINKの話を聞きたい・入りたいと言われた", "サポーターになりたい", "サイトのこと（不具合・使い方）"];
+const TYPES = ["質問・相談", "LINKの話を聞きたい・入りたいと言われた", "サイトのこと（不具合・使い方）"];   /* v1.2.083：「サポーターになりたい」は専用の申し込み（?ask=sup）に分けました */
+const NOTE_WAIT = 'こちらは、すぐにお返事が来るものではありません。通知を見たアップラインの方などが、<b>LINEなどでお返事をくださる</b>と思いますので、お待ちください。<br><b>緊急のご連絡は、いつもどおり初期サポートラインや、個別にご連絡ください。</b>';
 
 async function api(params, post){
   const body = Object.assign({ id:member.id, pin:member.pin }, params);
@@ -106,7 +108,7 @@ async function load(){
   try{ data = await api({ action:"noticeList" }); }catch(e){ data = { ok:false }; }
   if(tab !== "ask") draw();   /* 問い合わせを書いているときは、書きかけを消さないように描きなおしません */
 }
-function kindCls(k){ return k === "スキルアッププロ" ? "skill" : k === "新規登録の依頼" ? "req" : k === "お知らせ" ? "info" : ""; }
+function kindCls(k){ return k === "スキルアッププロ" ? "skill" : k === "新規登録の依頼" ? "req" : k === "お知らせ" ? "info" : k === "サポーターになりたい" ? "sup" : ""; }
 function itemHtml(x, mine){
   const who = mine ? "→ " + esc(x.toName || x.toId) + "さんへ" : esc(x.fromName || x.fromId) + "さんから";
   let acts = "";
@@ -148,13 +150,14 @@ async function markRead(list, quiet){
   if(!quiet) draw();
 }
 function drawAsk(){
+  if(qs.get("ask") === "sup") return drawSupApply();
   const preset = qs.get("ask") === "link";
   $("#body").innerHTML = '<div class="card">' +
     '<p class="lab">① どなたに問い合わせますか？</p><div class="opts">' +
       TO.map((t, i) => '<label><input type="radio" name="to" value="' + t[0] + '"' + ((preset ? t[0] === "upline" : i === 0) ? " checked" : "") + '> ' + t[1] + '</label>').join("") + '</div>' +
     '<p class="lab">② どんなことですか？</p><select id="type">' + TYPES.map(t => '<option' + (preset && t === TYPES[1] ? " selected" : "") + '>' + t + '</option>').join("") + '</select>' +
     '<p class="lab">③ 内容</p><textarea id="text" placeholder="' + (preset ? "どなたに、どんなふうに言われたかなど" : "質問・相談したいこと") + '"></textarea>' +
-    '<div class="note">こちらは、すぐにお返事が来るものではありません。問い合わせとして相手の方に通知が行きますので、お返事があるまで、しばらくお待ちください。<br><b>緊急のご連絡は、いつもどおり初期サポートラインや、個別にご連絡ください。</b></div>' +
+    '<div class="note">' + NOTE_WAIT + '</div>' +
     '<button type="button" class="send" id="send">✉️ 問い合わせを送る</button><p class="msg" id="msg"></p></div>';
   $("#send").onclick = () => {
     if(!member) return skyLoginRequired(function(){ location.reload(); });
@@ -165,8 +168,31 @@ function drawAsk(){
       say("送っています…"); $("#send").disabled = true;
       try{
         const j = await api({ action:"inquiry", toKind:to, type:type, text:text }, true);
-        if(j && j.ok){ say("✅ " + j.to.join("・") + "さんに送りました。お返事があるまで、しばらくお待ちください。"); $("#text").value = ""; data = null; }
+        if(j && j.ok){ say("✅ " + j.to.join("・") + "さんに送りました。LINEなどでお返事があるまで、しばらくお待ちください。"); $("#text").value = ""; data = null; }
         else say(j && j.error === "noreceiver" ? "その宛先の方が、名簿で見つかりませんでした。ほかの宛先を選ぶか、アップラインの方に直接ご相談ください。" : j && j.error === "unknown_action" ? "まだしくみが用意できていません（GASの更新待ち）。" : "送れませんでした。少しおいてお試しください。", true);
+      }catch(e){ say("通信できませんでした。", true); }
+      $("#send").disabled = false;
+    });
+  };
+}
+/* v1.2.083：サポーターになりたい（専用の申し込み）。アップクリエかサポート担当の方に通知が行きます */
+function drawSupApply(){
+  $("#body").innerHTML = '<div class="card"><p style="font-family:Zen Maru Gothic,sans-serif;font-weight:900;font-size:17px;color:#4A3D8F;">🐣 サポーターになりたい（申し込み）</p>' +
+    '<p class="lab">① どなたに申し込みますか？</p><div class="opts">' +
+      [["upline","アップクリエの方"],["helper","サポート担当の方"]].map((t, i) => '<label><input type="radio" name="to" value="' + t[0] + '"' + (i === 0 ? " checked" : "") + '> ' + t[1] + '</label>').join("") + '</div>' +
+    '<p class="lab">② ひとこと（そのままでも大丈夫です）</p><textarea id="text">私は、Skyarcの中でチームのサポートをしていきたいので、サポーターとして頑張りたいです。よろしくお願いします。</textarea>' +
+    '<div class="note">' + NOTE_WAIT + '</div>' +
+    '<button type="button" class="send" id="send">🐣 サポーターに申し込む</button><p class="msg" id="msg"></p></div>';
+  $("#send").onclick = () => {
+    if(!member) return skyLoginRequired(function(){ location.reload(); });
+    const to = document.querySelector('input[name=to]:checked').value, text = $("#text").value.trim();
+    const nm = to === "helper" ? "サポート担当の方" : "アップクリエの方";
+    confirmBox(nm + "に、サポーターになりたいという通知が行きますが、送りますか？", async () => {
+      say("送っています…"); $("#send").disabled = true;
+      try{
+        const j = await api({ action:"inquiry", toKind:to, type:"サポーターになりたい", text:text }, true);
+        if(j && j.ok){ say("✅ " + j.to.join("・") + "さんに申し込みました。LINEなどでお返事があるまで、しばらくお待ちください。"); data = null; }
+        else say(j && j.error === "noreceiver" ? "その方が、名簿で見つかりませんでした。もう一方を選ぶか、初期サポートラインでお伝えください。" : j && j.error === "unknown_action" ? "まだしくみが用意できていません（GASの更新待ち）。" : "送れませんでした。少しおいてお試しください。", true);
       }catch(e){ say("通信できませんでした。", true); }
       $("#send").disabled = false;
     });
