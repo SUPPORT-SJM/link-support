@@ -90,7 +90,7 @@
 
 <script>
 /* ================================================================
-   やりたいことを見つける（仮の名前）  v1.2.068
+   やりたいことを見つける（仮の名前）  v1.2.069
    ----------------------------------------------------------------
    ・1問ずつ答えていくと「ビッグWHY → 夢 → ビジョン」になり、最後の問いのあとは自動でまとめへ。まとめには「保存する」「編集する」だけ（v1.2.067）
    ・どの問いも「スキップ」できます
@@ -183,9 +183,9 @@ function sumHtml(a, focus){
   const sec = (cls, t, body) => body ? '<h3 class="' + cls + '">' + t + '</h3><dl>' + body + '</dl>' : "";
   let h = sec("why", "💗 ビッグWHY", row("幸せ", a["why.happy"]) + row("楽しい", a["why.fun"]) + row("嬉しい", a["why.glad"]) + row("なりたくない状態", a["why.dislike"])) +
     sec("dream", "🌟 夢", row("ベストなライフスタイル", a["dream.life"]) + row("送りたい人生", a["dream.route"]) + row("なりたい人", a["dream.person"])) +
-    sec("vision", "🌱 ビジョン", row("楽しいことで、やりたいこと", a["vision.fun"]) + row("幸せを感じたいことで、やりたいこと", a["vision.happy"]) +
-    row("お金がいくらでももらえたら", a["vision.money"] ? [a["vision.money"][0] && "欲しい金額：" + a["vision.money"][0], a["vision.money"][1]] : "") +
-    row("時間にゆとりがあったら", a["vision.time"]) + row("仲間がたくさんいたら", a["vision.friends"]) + row("そのほか叶えたいこと", a["vision.other"]));
+    sec("vision", "🌱 ビジョン", row("楽しい由来のビジョン", a["vision.fun"]) + row("幸せ由来のビジョン", a["vision.happy"]) +
+    row("お金に関するビジョン", a["vision.money"] ? [a["vision.money"][0] && "欲しい金額：" + a["vision.money"][0], a["vision.money"][1]] : "") +
+    row("時間の自由からのビジョン", a["vision.time"]) + row("仲間がいたらのビジョン", a["vision.friends"]) + row("その他のビジョン", a["vision.other"]));
   if(!h) h = '<p class="sub">まだ何も書かれていません。「編集する」で書いてみてくださいね。</p>';
   return h;
 }
