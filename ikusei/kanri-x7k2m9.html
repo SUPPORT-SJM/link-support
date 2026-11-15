@@ -122,6 +122,19 @@
   .prog .wip{color:#8B889E;}
   .flags{display:flex;gap:5px;flex-wrap:wrap;}
   /* 一覧の「部門」：押すと選べます（管理者・チーム代表・系列代表） */
+  /* v1.2.073：やりたいこと（担当の方が見る） */
+  .yari-btn{margin-top:5px;background:#E8F6EF;color:#2E8A6E;border:1.5px solid #9ED8BE;border-radius:999px;padding:3px 11px;font-size:11px;font-weight:700;font-family:inherit;cursor:pointer;line-height:1.5;white-space:nowrap;}
+  #yariPop{position:fixed;inset:0;z-index:9000;background:rgba(40,30,70,.45);display:flex;align-items:flex-start;justify-content:center;padding:16px;overflow:auto;}
+  #yariPop .yp{background:#fff;border-radius:18px;max-width:520px;width:100%;padding:16px 16px 14px;box-shadow:0 18px 40px rgba(0,0,0,.25);margin:auto 0;}
+  #yariPop .yp-h{font-weight:900;font-size:16px;color:#4A3D8F;margin-bottom:4px;}
+  #yariPop select{font-family:inherit;font-size:14px;padding:6px 8px;border:1.5px solid #DCD6F2;border-radius:10px;margin:4px 0 6px;max-width:100%;}
+  #yariPop .ysum h3{font-weight:900;font-size:14.5px;margin:12px 0 3px;}
+  #yariPop .ysum h3.why{color:#E07BA5;} #yariPop .ysum h3.dream{color:#C77A1C;} #yariPop .ysum h3.vision{color:#2E8A6E;}
+  #yariPop .ysum dl{font-size:13.5px;margin:0;}
+  #yariPop .ysum dt{color:#7A72A0;font-weight:700;font-size:12px;margin-top:6px;}
+  #yariPop .ysum dd{margin:0;white-space:pre-wrap;word-break:break-word;}
+  #yariPop .yp-msg{font-size:13.5px;color:#6C6588;padding:10px 0;}
+  #yariPop .yp-close{display:block;width:100%;margin-top:12px;padding:11px;border-radius:12px;border:2px solid #CFD8DC;background:#fff;color:#455A64;font-family:inherit;font-weight:700;font-size:15px;cursor:pointer;}
   .dept-chip{margin-top:5px;background:#F3F1F8;color:#8A84A0;border:1.5px dashed #CFC9E3;border-radius:999px;padding:3px 10px;font-size:11px;font-weight:700;font-family:inherit;cursor:pointer;text-align:left;line-height:1.5;max-width:180px;white-space:nowrap;}
   .dept-chip.has{background:#EAF7F0;color:#2F7A5C;border:1.5px solid #BFE3D1;}
   #deptPick{display:none;position:fixed;inset:0;z-index:85;background:rgba(30,26,50,.5);align-items:center;justify-content:center;padding:16px;}
@@ -589,6 +602,7 @@
 <link rel="stylesheet" href="../beta.css">
 <script src="../loading.js"></script>
 <script src="../login.js"></script>
+<script src="../first-support/yaritai-sum.js"></script>
 </head>
 <body>
 
@@ -2130,12 +2144,57 @@ function rowsHtml(list){
       ${ssPeople ? `<div class="mc-people">${ssPeople}</div>` : ""}
       <div class="mc-foot">
         <div class="flags">${fb("サポーター","sup")}${fb("クリエ","")}${fb("アドバンス","adv")}${fb("系列代表","kei")}${fb("チーム代表","rep")}${fb("管理者","adm")}</div>${scopeBtn}
+        ${canYari(m) ? `<button type="button" class="yari-btn" onclick="openYaritai('${m.id}')">🌱 やりたいこと</button>` : ""}
         <button type="button" class="dept-chip ${m.dept ? "has" : ""}" onclick="openDeptPick('${m.id}')" title="部門">🏷 ${m.dept ? String(m.dept).split(",").join("・") : "部門：未所属"}</button>
         <label class="hidchk ${hidPend ? "pend" : ""}" title="あなたの画面だけで非表示にします"><input type="checkbox" ${hidOn ? "checked" : ""} onchange="toggleHide('${m.id}', this.checked)">非表示</label>
         ${editRow}
       </div>
     </div>`;
   }).join("");
+}
+/* ================================================================
+   やりたいこと（v1.2.073）
+   ・クリエーターズ・アドバンス・系列代表・チーム代表・管理者 … どなたの分も
+   ・サポーターの方 … 自分がアップクリエかサポート担当になっている方の分だけ
+   （最後はGASでも確かめます）
+================================================================ */
+function canYari(m){
+  if(!data) return false;
+  if(data.isFull || data.isAdv || data.isKeiRep || data.isCrie) return true;
+  const me = hk(admin && admin.id);
+  return !!me && (hk(m.upline) === me || hk(m.helper) === me);
+}
+async function openYaritai(id){
+  const old = document.getElementById("yariPop"); if(old) old.remove();
+  const box = document.createElement("div"); box.id = "yariPop";
+  const m = (data && data.members || []).find(x => hk(x.id) === hk(id)) || {};
+  const e = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  box.innerHTML = '<div class="yp"><div class="yp-h">🌱 ' + e(m.name || id) + ' さんのやりたいこと</div><div id="ypBody"><p class="yp-msg">読み込んでいます…</p></div><button type="button" class="yp-close">とじる</button></div>';
+  document.body.appendChild(box);
+  const close = () => box.remove();
+  box.querySelector(".yp-close").onclick = close;
+  box.addEventListener("click", ev => { if(ev.target === box) close(); });
+  const body = box.querySelector("#ypBody");
+  try{
+    const url = `${GAS_URL}?action=yaritaiOf&id=${encodeURIComponent(admin.id)}&pin=${encodeURIComponent(admin.pin)}&email=${encodeURIComponent(admin.email || "")}&target=${encodeURIComponent(id)}`;
+    const j = await (await fetch(url)).json();
+    if(!j || !j.ok){
+      const why = j && j.error === "outofscope" ? "この方のやりたいことは、アップクリエ・サポート担当の方と、クリエーターズ以上の方が見られます。"
+                : j && j.error === "unknown_action" ? "GASがまだ新しい版になっていません（v1.2.073 以上が必要です）。"
+                : "読み込めませんでした。少しおいてお試しください。";
+      body.innerHTML = '<p class="yp-msg">' + why + '</p>'; return;
+    }
+    if(!j.list.length){ body.innerHTML = '<p class="yp-msg">まだ保存されていません。</p>'; return; }
+    const show = i => {
+      const h = window.yaritaiSum ? yaritaiSum(j.list[i].data && j.list[i].data.a) : "";
+      body.querySelector(".ysum").innerHTML = h || '<p class="yp-msg">この日の保存には、書かれた答えがありません。</p>';
+    };
+    body.innerHTML = '<label style="font-size:12.5px;color:#7A72A0;font-weight:700;">保存した日：</label>' +
+      '<select id="ypWhen">' + j.list.map((x, i) => '<option value="' + i + '">' + e(x.at) + (i === 0 ? '（いちばん新しい）' : '') + '</option>').join("") + '</select>' +
+      '<div class="ysum"></div>';
+    body.querySelector("#ypWhen").onchange = ev => show(+ev.target.value);
+    show(0);
+  }catch(err){ body.innerHTML = '<p class="yp-msg">通信できませんでした。電波のよい場所でお試しください。</p>'; }
 }
 /* あなたとの関係（紹介した方・サポート担当の方） */
 function relOf(m){

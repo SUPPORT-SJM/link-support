@@ -13,6 +13,7 @@
 <meta name="theme-color" content="#6E5FB5">
 <script src="../loading.js"></script>
 <script src="../login.js"></script>
+<script src="yaritai-sum.js"></script>
 <style>
   :root{ --ink:#2F2A44; --main:#6E5FB5; --deep:#4A3D8F; --soft:#F1EEFB; --line:#DCD6F2; --shadow:0 4px 18px rgba(80,60,160,.12);
     --why:#E07BA5; --dream:#F0A64A; --vision:#3FA98A; --focus:#4E8FD8; }
@@ -90,7 +91,7 @@
 
 <script>
 /* ================================================================
-   やりたいことを見つける（仮の名前）  v1.2.072
+   やりたいことを見つける（仮の名前）  v1.2.073
    ----------------------------------------------------------------
    ・1問ずつ答えていくと「ビッグWHY → 夢 → ビジョン」になり、最後の問いのあとは自動でまとめへ。まとめには「保存する」「編集する」だけ（v1.2.067）
    ・書かずに「次へ」で進んでも大丈夫です
@@ -178,16 +179,9 @@ function drawPre(){
 function sumIdx(){ return Q.findIndex(x => x.k === "sum"); }
 
 /* ---------- まとめ・保存 ---------- */
-function sumHtml(a, focus){
-  const row = (l, v) => { v = Array.isArray(v) ? v.filter(Boolean).join("\n") : v; return v && String(v).trim() ? '<dt>' + esc(l) + '</dt><dd>' + esc(v) + '</dd>' : ""; };
-  const sec = (cls, t, body) => body ? '<h3 class="' + cls + '">' + t + '</h3><dl>' + body + '</dl>' : "";
-  let h = sec("why", "💗 ビッグWHY", row("幸せ", a["why.happy"]) + row("楽しい", a["why.fun"]) + row("嬉しい", a["why.glad"]) + row("なりたくない状態", a["why.dislike"])) +
-    sec("dream", "🌟 夢", row("ベストなライフスタイル", a["dream.life"]) + row("送りたい人生", a["dream.route"]) + row("なりたい人", a["dream.person"])) +
-    sec("vision", "🌱 ビジョン", row("叶っていると言える状態", a["vision.done"]) + row("なぜ、叶ったと言えるのか", a["vision.why"]) +
-    row("いつまでに叶ったら最高か", a["vision.when"] ? [a["vision.when"][0] && "すべてそろっていたら：" + a["vision.when"][0], a["vision.when"][1] && "このくらいあればできそう：" + a["vision.when"][1]] : "") +
-    row("プラスしたら叶いそうなもの", a["vision.plus"]) + row("いま一番最初にすること", a["vision.first"]));
-  if(!h) h = '<p class="sub">まだ何も書かれていません。「編集する」で書いてみてくださいね。</p>';
-  return h;
+function sumHtml(a){
+  const h = window.yaritaiSum ? yaritaiSum(a) : "";   /* 見え方は yaritai-sum.js（メンバーマネジメントルームと同じ） */
+  return h || '<p class="sub">まだ何も書かれていません。「編集する」で書いてみてくださいね。</p>';
 }
 function drawSum(){
   $("#stage").innerHTML = '<div class="card sum"><span class="tag pre">まとめ</span><p class="q">あなたの「やりたいこと」</p>' + sumHtml(D.a, D.focus) +
