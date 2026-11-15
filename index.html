@@ -518,6 +518,8 @@ const NOTES = {
   "kouryu-re": { title:"🍽 リアル交流会", btn:"🍽 リアル交流会に申し込む", html:"<p class=\"koui\">🤝 同じLINK会員の方が、<b>ご好意（貢献の気持ち）</b>で運営してくださっている、チームの交流会です。会社の方が開いているものではありません。</p><p>画面越しではなく、<b>実際に仲間たちと会える会</b>です。一度お会いしておくと、その後のやりとりがぐっと近くなります。</p><p class=\"nm1\">📝 お知らせが届きやすくなるように、<b>申し込みのお名前は、オープンチャットのお名前と同じ</b>にしてください。</p>" },
   "btore": { title:"🏋️ Bトレ", btn:"🏋️ Bトレに申し込む", html:"<p class=\"koui\">🤝 同じLINK会員の方が、<b>ご好意（貢献の気持ち）</b>で開いてくださっている会です。会社の方が開いているものではありません。</p><p>おつなぎ役としての<b>「Bさん」のあり方</b>が学べます。全般的に<b>セールスの力も上がります</b>ので、ぜひ受講しましょう。</p><p>ご参加のときは：</p><ul><li>つながる<b>アドバイザーの方のプロフィール</b>を持った状態で来てください</li><li>なるべく、<b>説明会の日取りが決まっている</b>状態で来てください</li></ul><p class=\"nm1\">📝 お知らせが届きやすくなるように、<b>申し込みのお名前は、オープンチャットのお名前と同じ</b>にしてください。</p>" },
   "apoheya": { title:"📞 アポ部屋", btn:"📞 アポ部屋に申し込む", html:"<p class=\"koui\">🤝 同じLINK会員の方が、<b>ご好意（貢献の気持ち）</b>で開いてくださっている会です。会社の方が開いているものではありません。</p><p>LINKを紹介する<b>アポイントのコツ</b>を教わったり、いろいろなパターンの<b>アポイントへの懸念を解消</b>したりできる会への申し込みになります。</p><p>実際に行動に移していく部分も多いので、<b>リストアップが終わっている状態</b>が望ましいです。</p><p><a class=\"nlink\" href=\"./first-support/listup.html\">📝 リストアップとは？（やり方を見る） ›</a></p><p class=\"nm1\">📝 お知らせが届きやすくなるように、<b>申し込みのお名前は、オープンチャットのお名前と同じ</b>にしてください。</p>" },
+  /* v1.2.081：クリエの部屋「グルコンリーダー育成」：先にこのお話を出して、「わかりました」で育成の流れのページへ */
+  "gcon": { title:"🌱 グルコンリーダー育成", btn:"わかりました。進みます ›", same:true, html:"<p>メンバーさんと講師の<b>「架け橋」</b>になって、みんなの夢の実現を加速させる人。それが<b>グルコンリーダー</b>です。</p><p>あなた自身の夢も、いちばん早く叶っていきます。</p>" },
   "douga-sup": { title:"🎬 動画視聴会（サポーター向け）", btn:"🎬 動画視聴会に申し込む", html:"<p class=\"koui\">🤝 同じLINK会員の方が、<b>ご好意（貢献の気持ち）</b>で開いてくださっている動画視聴会です。会社の方が開いているものではありません。</p><p>ここからは、<b>サポートする側としての感覚</b>も身につけていってください。</p><p>動画視聴会の担当の会員さんに、<b>あなたが新しく紹介したメンバーさんの動画視聴会</b>の依頼をかけることができます。</p><p>あなたがサポートできない時間帯を、ほかの会員さんが補ってくださいます。<b>感謝の気持ちを持って</b>依頼をかけましょう。</p><p class=\"nm1\">📝 お知らせが届きやすくなるように、<b>申し込みのお名前は、オープンチャットのお名前と同じ</b>にしてください。</p>" }
 };
 const LINKS_KEY = "skyarc_links";
@@ -632,10 +634,10 @@ const TREE = [
   ]},
   {ic:"🌱", nm:"クリエの部屋", g:"crie", need:"crie", kids:[
     /* v1.2.077：学びのポータルは、いったん出しません（見るものがまだないため） */
-    {ic:"🌱", nm:"グルコン\nリーダー育成", g:"crie", url:B+"ikusei/gcon-roadmap.html"},
-    {ic:"🏃", nm:"追いかけミーティング\nマニュアル", g:"crie", url:B+"first-support/wip.html?t=" + encodeURIComponent("追いかけミーティングマニュアル")},
-    {ic:"🌏", nm:"戦略マップの\n書き方", g:"crie", url:B+"first-support/wip.html?t=" + encodeURIComponent("戦略マップの書き方")},
-    {ic:"🧭", nm:"戦略ミーティング\nマニュアル", g:"crie", url:B+"first-support/wip.html?t=" + encodeURIComponent("戦略ミーティングマニュアル")},
+    {ic:"🌱", nm:"グルコン\nリーダー育成", g:"crie", note:"gcon", url:B+"ikusei/gcon-roadmap.html"},
+    {ic:"🏃", nm:"追いかけミーティング\nマニュアル", g:"crie", wip:true},
+    {ic:"🌏", nm:"戦略マップの\n書き方", g:"crie", wip:true},
+    {ic:"🧭", nm:"戦略ミーティング\nマニュアル", g:"crie", wip:true},
     {ic:"🚀", nm:"スキルアッププロ\nシリーズを学ぶ", g:"crie", url:B+"first-support/skillup.html"},
     {ic:"🌳", nm:"クリエマップ", g:"crie", url:B+"ikusei/creamap-x7k2m9.html"}
   ]},
@@ -1127,6 +1129,8 @@ function tap(n, e){
     goTo(()=> path.push(shown), n.x, n.y, n);
     return;
   }
+  /* v1.2.081：まだできていない丸は、工事中のお知らせだけを出します */
+  if(it.wip){ openNote({ title:"🚧 " + it.nm.replace(/\n/g, ""), html:"<p>ただいま工事中です。<br>できあがるまで、しばらくお待ちください。</p>", noGo:true }, ""); return; }
   /* 説明のある丸：先に説明を出して、「〇〇に申し込む」でシートを開きます */
   if(it.note && NOTES[it.note]){
     const url = linkOf(it);
@@ -1396,7 +1400,9 @@ function openNote(nt, url){
   $("#noteTitle").textContent = nt.title;
   $("#noteBody").innerHTML = nt.html;
   const a = $("#noteGo");
-  a.textContent = nt.btn; a.href = url;
+  a.textContent = nt.btn || ""; a.href = url || "#";
+  a.hidden = !!nt.noGo;                                   /* v1.2.081：工事中のお知らせは、進むボタンを出しません */
+  if(nt.same){ a.removeAttribute("target"); } else { a.setAttribute("target", "_blank"); }   /* 同じ画面で開くもの */
   $("#noteSheet").hidden = false;
 }
 function closeNote(){ $("#noteSheet").hidden = true; }
