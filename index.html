@@ -559,7 +559,7 @@ const TREE = [
   {ic:"🚀", nm:"LINKを\n使おう", g:"member", flowPage:"use", lockAfter:"know", kids:[
     /* v1.2.007：「1stステップ参加確認」はなくしました */
     {ic:"🌈", nm:"Skyarcの\n交流＆PRチャット", g:"member", num:1, task:"u1", pass:true, wide:true, nameRule:true,
-     note2:"Skyarcの仲間たちが、いろいろなお知らせをしてくれたり、良かったことの交流や自己紹介をし合ったりしているチャットです。<br>名前に<b>グループ名を必ず入れて</b>、マナーを守って楽しくご参加ください😊<br><b>ユーザーサポート会</b>で教えてもらう<b>合言葉</b>を入れると、2つのチャットにご招待できます。"},
+     note2:"Skyarcの仲間たちが、いろいろなお知らせをしてくれたり、良かったことの交流や自己紹介をし合ったりしているチャットです。<br>名前に<b>グループ名を必ず入れて</b>、マナーを守って楽しくご参加ください😊<br><b>ユーザーサポート会</b>で教えてもらったことについての質問に答えると、2つのチャットにご招待できます。"},
     {ic:"🏘", nm:"地域コミュニティ\nLINKサークル", g:"member", num:2, task:"u3", wide:true, nameRule:true,
      note2:"<b>地域コミュニティ</b>は、あなたの地域の仲間とつながれるチャットです。ぜひ入っておきましょう。<br>趣味・事業・興味に合うサークルは<b>「LINKサークル」</b>と呼ばれています。<br>📛 <b>LINK全体のチャット（情報伝達チャット）は、書きこみ禁止</b>です。<br>💡 LINKサークルは情報量が多くなるので、<b>最初は2つまで</b>にしておきましょう。慣れてきたら増やしてください。<br>LINK information でも、詳しく分かります。",
      quiz:[{q:"告知（PR）は、1つの事業掲載につき、週に1回だけである。", a:"o"},
@@ -1164,7 +1164,7 @@ function openTask(it){
   $("#taskTitle").textContent = it.ic + " " + it.nm.replace(/\n/g,"");
   let h = it.note2 ? `<p>${it.note2}</p>` : '';
   /* 名前のルール：「理解しました」にチェックしないと、この先が使えません */
-  if(it.nameRule) h += '<div class="frule"><span>LINKで活動するために各種オープンチャットに入るときは、ご自身のお名前を<br><b>「名前／チーム名／系列名」</b><br>にします。文字数が多くなりすぎるときは、チーム名を省いて<br><b>「名前／系列名」</b><br>だけでも大丈夫です。</span><label class="frule-ok"><input type="checkbox" id="fRule"><b>理解しました</b></label></div><div id="fGate" class="fgate off">';
+  if(it.nameRule && !it.pass) h += '<div class="frule"><span>LINKで活動するために各種オープンチャットに入るときは、ご自身のお名前を<br><b>「名前／チーム名／系列名」</b><br>にします。文字数が多くなりすぎるときは、チーム名を省いて<br><b>「名前／系列名」</b><br>だけでも大丈夫です。</span><label class="frule-ok"><input type="checkbox" id="fRule"><b>理解しました</b></label></div><div id="fGate" class="fgate off">';
   if(it.gen) h += '<div class="fgen"><label for="fgName">👤 あなたのお名前</label><input id="fgName" type="text" autocomplete="nickname" placeholder="例：しょうこ">'
     + '<label for="fgKei">🏷️ 系列</label><select id="fgKei"></select><div class="res" id="fgRes">👆 お名前と系列を入れてください</div><button type="button" id="fgCopy">📋 タップしてコピー</button></div>';
   if(it.thanks) h += '<p class="koui">🤝 同じ会員の立場の方が、<b>貢献の気持ち</b>で開いてくださっている会です。そのことを理解して、<b>感謝しながら</b>参加していただければと思います。</p>';
@@ -1175,8 +1175,11 @@ function openTask(it){
   if(it.pages) it.pages.forEach((pg, i)=>{ h += `<button type="button" class="fbtn fpage" data-i="${i}" style="width:100%;border:none;cursor:pointer;font-family:inherit;background:#6E5FB5">${pg.t}</button>`; });
   if(it.quiz) h += '</div>';
   if(it.refSave) h += '<div class="fgen"><input id="fRef" type="url" inputmode="url" autocapitalize="off" spellcheck="false" placeholder="https://…" value="' + String((me && me.refUrl) || "").replace(/"/g, "&quot;") + '"><button type="button" id="fRefOk">OK（会員情報に保存する）</button><p class="fsmall" id="fRefMsg" style="margin-top:6px"></p></div>';
-  if(it.pass) h += '<div class="fgen"><label for="fPass">🔑 合言葉（ヒント：この会社名をカタカナで）</label><input id="fPass" type="text" autocomplete="off" placeholder="ユーザーサポート会で教わった合言葉"><button type="button" id="fPassOk">合言葉を入れる</button><p class="fsmall" id="fPassMsg" style="margin-top:6px"></p><div id="fPassBox"></div></div>';
-  if(it.nameRule) h += '</div>';
+  /* v1.2.061：合言葉をやめて、質問に答える形に（質問 → 名前のルール・マナーに「分かりました」 → 2つのチャットのURL） */
+  if(it.pass) h += '<div class="fgen"><label for="fPass">❓ ユーザーサポート会で、最初にホーム画面に置くように言われたサイトの名前は何ですか？（カタカナで）</label><input id="fPass" type="text" autocomplete="off" placeholder="カタカナで入れてください"><button type="button" id="fPassOk">答える</button><p class="fsmall" id="fPassMsg" style="margin-top:6px"></p>'
+    + '<div id="fPassRule" hidden><div class="frule"><span>オープンチャットに入るときは、ご自身のお名前を<br><b>「名前／チーム名／系列名」</b><br>にします。文字数が多くなりすぎるときは、チーム名を省いて<br><b>「名前／系列名」</b><br>だけでも大丈夫です。<br>チャットでは<b>マナーを守って</b>、楽しくご参加ください。</span><label class="frule-ok"><input type="checkbox" id="fPassAgree"><b>分かりました</b></label></div></div>'
+    + '<div id="fPassBox"></div></div>';
+  if(it.nameRule && !it.pass) h += '</div>';
   if(it.link) h += `<a class="flink" id="taskLink" href="${it.link.u}"${/^https?:/.test(it.link.u) ? ' target="_blank" rel="noopener"' : ""}>${it.link.t}</a>`;
   h += '<button type="button" class="fdone" id="taskDone"></button><button type="button" class="fclose" id="taskClose2">とじる</button>';
   $("#taskBody").innerHTML = h;
@@ -1186,7 +1189,7 @@ function openTask(it){
   document.querySelectorAll("#taskBody .fpage").forEach(b=>b.addEventListener("click", ()=>openPage(it.pages[+b.dataset.i])));
   if(it.refSave) $("#fRefOk").onclick = flowSaveRef;
   if(it.pass) $("#fPassOk").onclick = flowPass;
-  if(it.nameRule){ const r = $("#fRule"), g = $("#fGate"); r.checked = false; g.classList.add("off");
+  if(it.nameRule && !it.pass){ const r = $("#fRule"), g = $("#fGate"); r.checked = false; g.classList.add("off");
     r.onchange = ()=>{ g.classList.toggle("off", !r.checked); }; }   /* 開くたびに、チェックしてから進みます */
   if(it.quiz){
     const ans = {};
@@ -1245,12 +1248,20 @@ async function flowSaveRef(){
     }else{ msg.textContent = "保存できませんでした。もう一度お試しください"; msg.style.color = "#C62828"; }
   }catch(e){ msg.textContent = "電波のよいところで、もう一度お試しください"; msg.style.color = "#C62828"; }
 }
-/* Skyarcの交流チャット＆PRチャット：合言葉（仮：リンク）で、招待のURLとQRコードを出します */
-const FLOW_PASS = "リンク";
+/* Skyarcの交流チャット＆PRチャット：質問（答え：リンクポータル）に答えて、名前のルール・マナーに「分かりました」をすると、
+   招待のURLとQRコードを出します（v1.2.061：合言葉はなくしました） */
+const FLOW_PASS = "リンクポータル";
 function flowPass(){
-  const v = $("#fPass").value.trim().replace(/\s/g, ""), msg = $("#fPassMsg");
-  if(v !== FLOW_PASS){ msg.textContent = "合言葉がちがうようです。ユーザーサポート会で教えてもらってください"; msg.style.color = "#C62828"; $("#fPassBox").innerHTML = ""; return; }
-  msg.textContent = "✅ 合言葉が合いました！ 2つのチャットにご招待します"; msg.style.color = "#2E7D32";
+  let v = $("#fPass").value; try{ v = v.normalize("NFKC"); }catch(e){}
+  v = v.trim().replace(/[\s・･]/g, "");
+  const msg = $("#fPassMsg");
+  $("#fPassBox").innerHTML = "";
+  if(v !== FLOW_PASS){ msg.textContent = "ちがうようです。ユーザーサポート会で教えてもらったことを、思い出してみてください（カタカナで）"; msg.style.color = "#C62828"; $("#fPassRule").hidden = true; return; }
+  msg.textContent = "✅ 正解です！ 次の決まりを読んで「分かりました」にチェックしてください"; msg.style.color = "#2E7D32";
+  const ag = $("#fPassAgree"); ag.checked = false; $("#fPassRule").hidden = false;
+  ag.onchange = ()=>{ if(ag.checked) flowPassShow(); else $("#fPassBox").innerHTML = ""; };
+}
+function flowPassShow(){
   $("#fPassBox").innerHTML =
       '<h4>🌈 Skyarc（スカイアーク）チームの交流チャット</h4><a class="fbtn" href="https://line.me/ti/g2/TJLFirmMubg3EgD_Eu1NFg-0dak0Mggqg4l-Hw?utm_source=invitation&utm_medium=link_copy&utm_campaign=default" target="_blank" rel="noopener">📲 タップして参加する</a><img class="fqr" src="img/qr-skyarc-chat.png" alt="交流チャットのQRコード">'
     + '<h4>🌈 PR・体験受講 専用チャット</h4><a class="fbtn" href="https://line.me/ti/g2/gbb3x61l5IuzViBiZ6xVG9NeyGN57yxlA9GBFw?utm_source=invitation&utm_medium=link_copy&utm_campaign=default" target="_blank" rel="noopener">📲 タップして参加する</a><img class="fqr" src="img/qr-skyarc-pr.png" alt="PRチャットのQRコード">'
