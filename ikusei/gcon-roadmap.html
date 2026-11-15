@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>グルコンリーダーになる4週間の地図|Skyarc</title>
+<title>グルコンリーダー育成の流れ|Skyarc</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
@@ -309,6 +309,11 @@
     font-size:9.5px;color:#B4B0C4;letter-spacing:.05em;
     padding:6px 0 10px;font-family:monospace;
   }
+  /* v1.2.077 */
+  .next-btn{display:block;width:100%;max-width:420px;margin:18px auto 0;text-align:center;background:var(--green-leaf, #2E9E6A);color:#fff;border:none;border-radius:14px;padding:14px;font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:16px;text-decoration:none;cursor:pointer;}
+  .next-btn[aria-disabled="true"]{opacity:.4;}
+  .learned{display:flex;align-items:center;justify-content:center;gap:10px;max-width:420px;margin:18px auto 0;background:#fff;border:2px solid #CFE8DA;border-radius:14px;padding:12px;font-weight:700;cursor:pointer;}
+  .learned input{width:22px;height:22px;}
 </style>
 <link rel="stylesheet" href="../beta.css">
 <script src="../login.js"></script>
@@ -317,7 +322,7 @@
 <body>
 
 <div id="skyNav"><div class="sky-inner">
-  <a class="sky-back" id="navBack" href="./portal-supporter.html">‹ ポータル</a><a class="sky-back sky-home" href="../index.html">🏠 ホーム</a>
+  <a class="sky-back" id="navBack" href="../index.html">‹ もどる</a><a class="sky-back sky-home" href="../index.html">🏠 ホーム</a>
   <span class="sky-badges" id="navBadges"></span><span class="sky-who" id="navWho"></span>
   <a class="sky-admin" id="navAdmin" href="./kanri-x7k2m9.html" style="display:none;">🔐 管理</a>
   <button class="sky-out" onclick="skyLogout()">ログアウト</button>
@@ -325,13 +330,8 @@
 <header class="hero">
   <div class="wrap">
     <span class="eyebrow">Skyarc|クリエーターズ育成部門</span>
-    <h1>グルコンリーダーになる<br><span class="accent">4週間</span>の地図</h1>
+    <h1>グルコンリーダー<br><span class="accent">育成の流れ</span></h1>
     <p>メンバーさんと講師の「架け橋」になって、みんなの夢の実現を加速させる人。それがグルコンリーダーです。あなた自身の夢も、いちばん早く叶っていきます。</p>
-    <div class="badges">
-      <span class="badge">📱 スマホだけでOK</span>
-      <span class="badge">⏰ 1日30分</span>
-      <span class="badge">🤝 コーチが伴走</span>
-    </div>
   </div>
 </header>
 
@@ -350,7 +350,7 @@
       <div class="skill-card reveal">
         <span class="icon">🌟</span>
         <div>
-          <h3>Tアップ</h3>
+          <h3>ティーアップ</h3>
           <p>講師の魅力を、相手に合わせて30秒で伝える力。あなたはキューピット役です。</p>
         </div>
       </div>
@@ -373,84 +373,77 @@
         <div class="day-step">
           <span class="em">🎬</span>
           <b>動画を見る</b>
-          <small>10分だけ</small>
         </div>
         <span class="day-arrow">›</span>
         <div class="day-step">
-          <span class="em">🗣️</span>
-          <b>声に出す</b>
-          <small>真似でOK</small>
+          <span class="em">💡</span>
+          <b>理解する</b>
         </div>
         <span class="day-arrow">›</span>
         <div class="day-step">
-          <span class="em">📞</span>
-          <b>聞いてもらう</b>
-          <small>担当の方に</small>
+          <span class="em">✍️</span>
+          <b>アップクリエにレビューを書く</b>
         </div>
       </div>
-      <p class="tip">💡 <b>なぜ聞いてもらう?</b> ひとりで練習していると、できているつもりになりがちです。担当の方に電話かZoomで聞いてもらうと、その場で直せます。</p>
+      <p class="tip">✅ アップクリエの方の確認が取れたら、そのステップがクリアになります。</p>
+      <button type="button" class="next-btn" id="toRoad">次へ ›</button>
     </div>
   </div>
 </section>
 
-<section class="road-sec">
+<section class="road-sec" id="road" hidden>
   <div class="wrap">
     <h2 class="sec-label">4週間の道のり</h2>
-    <p class="sec-note">1週間にひとつずつ。順番に進めば、ゴールに着きます。</p>
     <div class="road">
 
-      <div class="stop reveal">
+      <div class="stop">
         <span class="week-tag">WEEK 1</span>
         <div class="stop-card">
           <h3>🔍 フォーカス週</h3>
           <p>「5つの質問」を覚えて、夢を聞ける人になる週。</p>
-          <div class="can"><b>この週のゴール</b>質問を見ないで、順番どおり聞けるようになる</div>
-          <div class="phone"><span class="p-ico">📞</span><span>週2回、コーチから電話が来ます(10分)。一緒に練習する時間です。</span></div>
         </div>
       </div>
 
-      <div class="stop reveal">
+      <div class="stop">
         <span class="week-tag">WEEK 2</span>
         <div class="stop-card">
-          <h3>🌟 Tアップ週</h3>
-          <p>相手のタイプ別に(経営者さん・会社員さん…)、講師の魅力を30秒で伝える練習。</p>
-          <div class="can"><b>この週のゴール</b>気持ちを乗せて、棒読みじゃなく話せるようになる</div>
-          <div class="phone"><span class="p-ico">📞</span><span>電話で「私を経営者だと思ってやってみて」と練習します。</span></div>
+          <h3>🌟 ティーアップ週</h3>
+          <p>相手のタイプ別に、講師の魅力を30秒で伝える練習。</p>
         </div>
       </div>
 
-      <div class="stop reveal">
+      <div class="stop">
         <span class="week-tag">WEEK 3</span>
         <div class="stop-card">
-          <h3>🔥 アフター週(いちばん大事!)</h3>
-          <p>リストアップの案内、連絡文づくり、「今やる理由」の伝え方。グルコンの本番はここ。</p>
-          <div class="can"><b>この週のゴール</b>アポ出しまでの流れを、ひとりで進行できるようになる</div>
-          <div class="phone"><span class="p-ico">📞💬</span><span>電話+LINEで連絡文の添削もします。</span></div>
+          <h3>🔥 アフター週（いちばん大事！）</h3>
+          <p>リストアップの案内、連絡文づくり、「今やる理由」の使い方。<br><b>隠れたグルコンの本番は、ここ。</b></p>
         </div>
       </div>
 
-      <div class="stop reveal">
+      <div class="stop">
         <span class="week-tag">WEEK 4</span>
         <div class="stop-card">
-          <h3>🎪 実戦週</h3>
+          <h3>🎪 実践週</h3>
           <p>本物のグルコンに、先輩と一緒にサブとして参加。体験シェアを1回話してみます。</p>
-          <div class="can"><b>この週のゴール</b>現場の空気を体験して、振り返りまでやる</div>
         </div>
       </div>
 
-      <div class="stop goal reveal">
-        <span class="week-tag">⭐ 判定日(月1回)</span>
+      <div class="stop goal">
+        <span class="week-tag">⭐ 判定日（月1回）</span>
         <div class="stop-card">
-          <h3>🎉 デビュー!</h3>
-          <p>先輩2人の前で通し練習をして、OKが出たらグルコンリーダーデビュー。最初の回は先輩が隣で見守ります。</p>
-          <div class="can"><b>もし届かなくても</b>予備週でその部分だけ練習して、もう一度チャレンジできます。焦らなくて大丈夫。</div>
+          <h3>🎉 デビュー！</h3>
+          <p>先輩2人の前で通し練習をして、OKが出たらグルコンリーダーデビュー。最初の回は、先輩が隣で見守ります。</p>
         </div>
       </div>
 
     </div>
+    <label class="learned"><input type="checkbox" id="learned"> 覚えました</label>
+    <a class="next-btn" id="startBtn" href="./gcon-mypage.html?w=0" aria-disabled="true">はじめる ›</a>
   </div>
 </section>
 
+<!-- v1.2.077：「グルコン1回の流れ」「忙しくても、大丈夫。」は、いったん出さないでおきます -->
+<div hidden>
 <section>
   <div class="wrap">
     <h2 class="sec-label">グルコン1回の流れ</h2>
@@ -498,9 +491,10 @@
   </div>
 </section>
 
+</div>
+
 <footer>
   <div class="f-title">Presented by Skyarc-team</div>
-  4週間後、一緒にみんなの夢を加速させましょう 🚀
   <div class="verTag" style="margin-top:8px;color:rgba(255,255,255,.4);"></div>
 </footer>
 
@@ -510,6 +504,14 @@
     entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('show'); io.unobserve(e.target);} });
   },{threshold:.12});
   document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+  /* v1.2.077：「次へ」で4週間の道のりを出し、「覚えました」にチェックすると「はじめる」（第1週のページへ）が押せます */
+  document.getElementById("toRoad").onclick = function(){
+    const r = document.getElementById("road"); r.hidden = false; this.hidden = true;
+    r.scrollIntoView({ behavior:"smooth", block:"start" });
+  };
+  const st = document.getElementById("startBtn");
+  st.addEventListener("click", e => { if(st.getAttribute("aria-disabled") === "true") e.preventDefault(); });
+  document.getElementById("learned").onchange = e => st.setAttribute("aria-disabled", e.target.checked ? "false" : "true");
 </script>
 
 <script>
@@ -532,9 +534,6 @@
     if(typeof skyNotAllowed === "function"){ skyNotAllowed(); return; }
   }
 
-  const isCrie = m.crie === true;
-  const back = document.getElementById("navBack");
-  if(back) back.href = isCrie ? "./portal-creators.html" : "./portal-supporter.html";
 
   const who = document.getElementById("navWho");
   if(who) who.textContent = (m.name ? (window.skyGrowth ? skyGrowth.selfTag(m.id) : "") + m.name + "さん" : "会員番号 "+m.id) + (m.keiretsu ? "｜"+m.keiretsu : "");

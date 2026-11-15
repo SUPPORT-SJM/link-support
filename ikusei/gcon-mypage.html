@@ -164,6 +164,15 @@
   .task.done .chk{background:var(--green-leaf);border-color:var(--green-leaf);color:var(--white);}
   .chk:disabled{opacity:.45;cursor:default;}
   .making-note{margin-top:10px;font-size:12px;color:#8A8A80;}
+  /* v1.2.077：合格の印と、週の移動 */
+  .pass{margin-top:10px;font-size:12.5px;font-weight:700;color:#8A6D00;background:var(--amber-soft);border-radius:10px;padding:6px 10px;}
+  .pass.on{color:#fff;background:var(--green-leaf);}
+  .wk-nav{display:flex;gap:8px;align-items:stretch;margin-top:6px;}
+  .wk-prev{flex:0 0 auto;display:flex;align-items:center;background:var(--white);border:2px solid var(--green-mist);color:#5E7068;border-radius:14px;padding:12px 14px;font-weight:700;font-size:14px;text-decoration:none;}
+  .wk-next{flex:1;background:var(--green-leaf);color:var(--white);border-radius:14px;padding:14px;font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:16px;}
+  .wk-next:disabled{opacity:.4;}
+  .wk-last{flex:1;background:var(--white);border-radius:14px;padding:12px 14px;font-size:13.5px;font-weight:700;color:var(--green-deep);}
+  .wk-hint{font-size:12px;color:#7A8A80;text-align:center;margin-top:8px;}
 
   /* ===== install banner ===== */
   #installBanner{
@@ -311,7 +320,7 @@
 <!-- ========== APP ========== -->
 <div id="appView">
 <div id="skyNav"><div class="sky-inner">
-  <a class="sky-back" id="navBack" href="./portal-supporter.html">‹ ポータル</a><a class="sky-back sky-home" href="../index.html">🏠 ホーム</a>
+  <a class="sky-back" id="navBack" href="./gcon-roadmap.html">‹ 育成の流れ</a><a class="sky-back sky-home" href="../index.html">🏠 ホーム</a>
   <span class="sky-badges" id="navBadges"></span><span class="sky-who" id="navWho"></span>
   <a class="sky-admin" id="navAdmin" href="./kanri-x7k2m9.html" style="display:none;">🔐 管理</a>
   <button class="sky-out" onclick="skyLogout()">ログアウト</button>
@@ -342,8 +351,6 @@
   </main>
 
   <footer>
-    クリエーターズ育成プログラム<br>
-    ① ぴよぴよ脱出クイズ|② グルコンリーダー育成(このページ)<br>
     Presented by Skyarc-team<br>
     <a href="#" onclick="showInstallHelp();return false;" style="color:var(--green-leaf);font-weight:700;">📲 ホーム画面に追加する方法</a>
     <div class="verTag" style="margin-top:8px;color:rgba(255,255,255,.4);"></div>
@@ -434,11 +441,6 @@ const yt = (id,sec)=>`https://youtu.be/${id}?t=${sec}`;
    making:true = 制作中(チェック不可・分母に含めない)
 ================================================================ */
 const WEEKS = [
-  {tag:"はじめに", title:"オリエンテーション", sub:"最初にここだけ見てね", tasks:[
-    {id:"GR0_1", no:"0-1", title:"「4週間の地図」を読む", rec:"読み終わったら、いちばん気になった週を担当コーチにLINEしてみよう",
-      link:{url:"./gcon-roadmap.html", label:"🗺 地図をひらく", end:""}},
-    {id:"GR0_2", no:"0-2", title:"担当の方との確認のしかた(電話・Zoom)", making:true},
-  ]},
   {tag:"WEEK 1", title:"🔍 フォーカス週", sub:"夢を聞ける人になる", tasks:[
     {id:"GR1_1", no:"1-1", title:"フォーカスとは?目的は「自分ごとにさせる」", rec:"目的を自分の言葉で30秒、話せるようにしておこう",
       link:{url:yt(V_TRAINING,545), label:"▶ 動画をみる(9:05から)", end:"〜10:47まで"}},
@@ -450,7 +452,7 @@ const WEEKS = [
       link:{url:yt(V_TRAINING,787), label:"▶ 動画をみる(13:07から)", end:"〜14:28まで"}},
     {id:"GR1_5", no:"1-5", title:"フォーカスNG例→OK例 くらべてみよう", making:true},
   ]},
-  {tag:"WEEK 2", title:"🌟 Tアップ週", sub:"30秒で人を輝かせる", tasks:[
+  {tag:"WEEK 2", title:"🌟 ティーアップ週", sub:"30秒で人を輝かせる", tasks:[
     {id:"GR2_1", no:"2-1", title:"Tアップとは?「解説」とのちがい・キューピット役", rec:"ちがいを自分の言葉で30秒、話せるようにしておこう",
       link:{url:yt(V_TRAINING,868), label:"▶ 動画をみる(14:28から)", end:"〜16:24まで"}},
     {id:"GR2_2", no:"2-2", title:"お手本:経営者さん向けTアップ30秒", making:true},
@@ -478,7 +480,7 @@ const WEEKS = [
     {id:"GR3_8", no:"3-8", title:"【確認】導員トークを聞いてもらう(セレモニー・LINKセミナー)", rec:"セレモニーとLINKセミナーへの導員トークを、担当の方に電話かZoomで聞いてもらおう",
       link:{url:yt(V_DEMO,6612), label:"▶ お手本をみる(1:50:12から)", end:"〜1:52:14まで", alt:true}},
   ]},
-  {tag:"WEEK 4", title:"🎪 実戦週", sub:"本物の現場へ", tasks:[
+  {tag:"WEEK 4", title:"🎪 実践週", sub:"本物の現場へ", tasks:[
     {id:"GR4_1", no:"4-1", title:"グルコン本番のながれ 通し観察(長いので2〜3日に分けてOK)", rec:"自分ならどの体験シェアを話すか、まとめておこう",
       link:{url:yt(V_DEMO,1691), label:"▶ 動画をみる(28:11から)", end:"〜1:30:03まで", alt:true}},
     {id:"GR4_2", no:"4-2", title:"実戦サブ参加の心得(当日なにをするか)", making:true},
@@ -490,6 +492,8 @@ const WEEKS = [
 /* ================================================================ */
 let member = null;          // {id, pin, name}
 let progress = {};          // {taskId:true}
+let marks = [];             // v1.2.077：アップクリエ（担当の方）がつけた「合格」の印
+let curWeek = -1;           // v1.2.077：いま見ている週（1週＝1ページ）
 const $ = (s)=>document.querySelector(s);
 
 const availTasks = WEEKS.flatMap(w=>w.tasks).filter(t=>!t.making);
@@ -549,6 +553,7 @@ async function login(){
         member = null;
         return;
       }
+      if(j.ok && Array.isArray(j.marks)) marks = j.marks;
       if(j.ok && j.data){
         const server = JSON.parse(j.data);
         progress = Object.assign({}, server, progress); // ローカルとマージ
@@ -578,51 +583,64 @@ function enterApp(){
   render();
 }
 
-/* ---------- render ---------- */
+/* ---------- render（v1.2.077：1週ずつ1ページ。「できたら押す」→「できた」と「合格」→ 次のステップへ） ---------- */
+function weekDone(wi){ const a = WEEKS[wi].tasks.filter(t=>!t.making); return a.length > 0 && a.every(t=>progress[t.id]); }
 function render(){
   const root = $("#weeksRoot");
-  // 描き直す前に、いま開いている週を記憶しておく(初回だけ自動判定)
-  const prevOpen = Array.from(root.querySelectorAll(".week")).map(el=>el.classList.contains("open"));
+  if(curWeek < 0){
+    let w = -1;
+    try{ const q = new URLSearchParams(location.search).get("w"); if(q !== null) w = Math.max(0, Math.min(WEEKS.length-1, Number(q)||0)); }catch(e){}
+    curWeek = w >= 0 ? w : WEEKS.findIndex((x, i)=>isCurrentWeek(i));
+    if(curWeek < 0) curWeek = 0;
+  }
+  const w = WEEKS[curWeek], wi = curWeek;
+  const avail = w.tasks.filter(t=>!t.making);
+  const done = avail.filter(t=>progress[t.id]).length;
   root.innerHTML = "";
-  WEEKS.forEach((w, wi)=>{
-    const avail = w.tasks.filter(t=>!t.making);
-    const done = avail.filter(t=>progress[t.id]).length;
-    const sec = document.createElement("section");
-    const isOpen = prevOpen.length ? prevOpen[wi] : isCurrentWeek(wi);
-    sec.className = "week" + (isOpen ? " open" : "");
-    sec.innerHTML = `
-      <button class="week-head" onclick="this.parentElement.classList.toggle('open')">
-        <span class="tag">${w.tag}</span>
-        <span class="t"><b>${w.title}</b><small>${w.sub}</small></span>
-        <span class="mini-bar">
-          <span class="bar"><i style="width:${avail.length? done/avail.length*100 : 0}%"></i></span>
-          <small>${done}/${avail.length}</small>
-        </span>
-        <span class="chev">▼</span>
-      </button>
-      <div class="week-body"></div>`;
-    const body = sec.querySelector(".week-body");
-    w.tasks.forEach(t=>{
-      const el = document.createElement("div");
-      el.className = "task" + (t.making ? " making" : (progress[t.id] ? " done" : ""));
-      el.innerHTML = `
-        <div class="task-top">
-          <span class="task-no">${t.no}</span>
-          <h4>${t.title}${t.making ? '<span class="badge-making">🎥 制作中</span>' : ""}</h4>
-        </div>
-        ${t.rec && !t.making ? `<div class="rec"><b>🗣️ 話せるようにしよう:</b>${t.rec}</div>` : ""}
-        <div class="task-actions">
-          ${t.link && !t.making ? `<a class="btn-video ${t.link.alt?'alt':''}" href="${t.link.url}" target="_blank" rel="noopener">${t.link.label}${t.link.end?` <span class="end">${t.link.end}</span>`:""}</a>` : ""}
-          ${t.making
-            ? `<span class="making-note">公開されたらお知らせします。おたのしみに!</span>`
-            : `<button class="chk" onclick="toggle('${t.id}')">${progress[t.id] ? "✓ できた!" : "できたら押す"}</button>`}
-        </div>`;
-      body.appendChild(el);
-    });
-    root.appendChild(sec);
+  const sec = document.createElement("section");
+  sec.className = "week open";
+  sec.innerHTML = `
+    <div class="week-head">
+      <span class="tag">${w.tag}</span>
+      <span class="t"><b>${w.title}</b><small>${w.sub}</small></span>
+      <span class="mini-bar">
+        <span class="bar"><i style="width:${avail.length? done/avail.length*100 : 0}%"></i></span>
+        <small>${done}/${avail.length}</small>
+      </span>
+    </div>
+    <div class="week-body"></div>`;
+  const body = sec.querySelector(".week-body");
+  w.tasks.forEach(t=>{
+    const el = document.createElement("div");
+    const ok = marks.indexOf(t.id) >= 0;
+    el.className = "task" + (t.making ? " making" : (progress[t.id] ? " done" : ""));
+    el.innerHTML = `
+      <div class="task-top">
+        <span class="task-no">${t.no}</span>
+        <h4>${t.title}${t.making ? '<span class="badge-making">🎥 制作中</span>' : ""}</h4>
+      </div>
+      ${t.rec && !t.making ? `<div class="rec"><b>🗣️ 話せるようにしよう:</b>${t.rec}</div>` : ""}
+      <div class="task-actions">
+        ${t.link && !t.making ? `<a class="btn-video ${t.link.alt?'alt':''}" href="${t.link.url}" target="_blank" rel="noopener">${t.link.label}${t.link.end?` <span class="end">${t.link.end}</span>`:""}</a>` : ""}
+        ${t.making
+          ? `<span class="making-note">公開されたらお知らせします。おたのしみに!</span>`
+          : `<button class="chk" onclick="toggle('${t.id}')">${progress[t.id] ? "✓ できた!" : "できたら押す"}</button>`}
+      </div>
+      ${!t.making && progress[t.id] ? `<div class="pass ${ok ? "on" : ""}">${ok ? "🎉 合格" : "⏳ 合格まち（アップクリエの方の確認待ち）"}</div>` : ""}`;
+    body.appendChild(el);
   });
+  root.appendChild(sec);
+  const last = wi === WEEKS.length - 1;
+  const nav = document.createElement("div");
+  nav.className = "wk-nav";
+  nav.innerHTML = (wi > 0 ? `<button class="wk-prev" onclick="goWeek(${wi-1})">‹ 前の週</button>` : `<a class="wk-prev" href="./gcon-roadmap.html">‹ 育成の流れ</a>`) +
+    (last ? `<div class="wk-last">${weekDone(wi) ? "🎉 4週間おつかれさまでした！月1回の判定日に、先輩2人の前で通し練習をしましょう。" : "ぜんぶ「できた」になったら、判定日に進めます。"}</div>`
+          : `<button class="wk-next" onclick="goWeek(${wi+1})" ${weekDone(wi) ? "" : "disabled"}>次のステップへ ›</button>`);
+  root.appendChild(nav);
+  if(!last && !weekDone(wi)){ const p = document.createElement("p"); p.className = "wk-hint"; p.textContent = "この週を、ぜんぶ「できたら押す」にすると、次のステップへ進めます。"; root.appendChild(p); }
   updateOverall();
 }
+function goWeek(n){ curWeek = Math.max(0, Math.min(WEEKS.length-1, n)); render(); scrollTo(0, 0); }
 
 /* 今やるべき週を推定して最初から開く(順番に埋まっていく前提) */
 function isCurrentWeek(wi){
@@ -771,7 +789,21 @@ if(!isStandalone && (isIOS || isLINE)){
   localStorage.setItem("gcon_member", JSON.stringify(m));
   progress = JSON.parse(localStorage.getItem('gcon_progress_v2_'+m.id) || '{}');
   enterApp();
-  saveAll();
+  /* v1.2.077：「合格」の印（アップクリエの方がつけた丸）と、ほかの端末の進み具合を読みます */
+  (async function(){
+    try{
+      const u = gasUrlFor(m.keiretsu || "");
+      if(!u) return;
+      const j = await (await fetch(`${u}?action=load&app=${APP_ID}&id=${encodeURIComponent(m.id)}&pin=${encodeURIComponent(m.pin)}&items=${encodeURIComponent(ITEM_IDS)}`)).json();
+      if(j && j.ok){
+        if(Array.isArray(j.marks)) marks = j.marks;
+        if(j.data){ try{ progress = Object.assign({}, JSON.parse(j.data), progress); }catch(e){} }
+        localStorage.setItem("gcon_progress_v2_"+m.id, JSON.stringify(progress));
+        render();
+      }
+    }catch(e){}
+    saveAll();
+  })();
 })();
 </script>
 
@@ -790,9 +822,8 @@ if(!isStandalone && (isIOS || isLINE)){
     return;
   }
 
-  const isCrie = m.crie === true;
   const back = document.getElementById("navBack");
-  if(back) back.href = isCrie ? "./portal-creators.html" : "./portal-supporter.html";
+  if(back){ back.href = "./gcon-roadmap.html"; back.textContent = "‹ 育成の流れ"; }   /* v1.2.077：学びのポータルはお休み中なので、育成の流れへ */
 
   const who = document.getElementById("navWho");
   if(who) who.textContent = (m.name ? (window.skyGrowth ? skyGrowth.selfTag(m.id) : "") + m.name + "さん" : "会員番号 "+m.id) + (m.keiretsu ? "｜"+m.keiretsu : "");

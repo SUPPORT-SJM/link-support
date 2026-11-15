@@ -183,6 +183,16 @@
 <script src="../loading.js"></script>
 </head>
 <body>
+<!-- v1.2.077：クリエマップを見る前のお願い（「わかりました」で閉じて、マップが見えます） -->
+<div id="cmNote" style="position:fixed;inset:0;z-index:9500;background:rgba(40,30,70,.55);display:flex;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#fff;border-radius:20px;max-width:420px;width:100%;padding:22px 18px;box-shadow:0 18px 40px rgba(0,0,0,.25);font-family:'Zen Kaku Gothic New',sans-serif;color:#2F2A44;line-height:1.9;font-size:15px;">
+    <p style="font-family:'Zen Maru Gothic',sans-serif;font-weight:900;font-size:18px;color:#4A3D8F;margin:0 0 8px;">📍 クリエマップについて</p>
+    <p style="margin:0 0 8px;">クリエマップは、みなさんが<b>正確な情報を入れることで、正確なマップ</b>になっていきます。みなさんで完成させてください。</p>
+    <p style="margin:0 0 8px;">それぞれが<b>登録情報をしっかり書いて</b>、<b>アップクリエーターズ</b>を書くことで、しっかりと紐づけられていきます。</p>
+    <p style="margin:0 0 14px;font-size:14px;color:#6C6588;">それが終わるまでは、不具合のような図が表示されることがありますが、ご容赦ください。</p>
+    <button type="button" onclick="document.getElementById('cmNote').remove()" style="display:block;width:100%;background:#6E5FB5;color:#fff;border:none;border-radius:13px;padding:13px;font-family:'Zen Maru Gothic',sans-serif;font-weight:900;font-size:16px;cursor:pointer;">わかりました</button>
+  </div>
+</div>
 
 <!-- ===== LOGIN ===== -->
 <div id="loginView" style="display:none;">
