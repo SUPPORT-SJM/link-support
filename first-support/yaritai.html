@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<script src="../config.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>やりたいことを見つける｜Skyarc</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../beta.css">
+<meta name="theme-color" content="#6E5FB5">
+<script src="../loading.js"></script>
+<script src="../login.js"></script>
+<style>
+  :root{ --ink:#2F2A44; --main:#6E5FB5; --deep:#4A3D8F; --soft:#F1EEFB; --line:#DCD6F2; --shadow:0 4px 18px rgba(80,60,160,.12);
+    --why:#E07BA5; --dream:#F0A64A; --vision:#3FA98A; --focus:#4E8FD8; }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{font-family:"Zen Kaku Gothic New",sans-serif;color:var(--ink);line-height:1.85;font-size:15px;background:#FBF9FF;}
+  button,textarea,input{font-family:inherit;}
+  button{cursor:pointer;border:none;}
+  #skyNav{position:sticky;top:0;z-index:30;background:rgba(74,61,143,.96);color:#fff;}
+  #skyNav .inner{max-width:560px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px;}
+  #skyNav a{background:rgba(255,255,255,.2);color:#fff;font-size:11.5px;font-weight:700;border-radius:999px;padding:6px 13px;text-decoration:none;}
+  @media (max-width:700px){ #skyNav .inner{padding-right:74px;} }
+  .wrap{max-width:560px;margin:0 auto;padding:14px 16px 40px;}
+  /* 進み具合 */
+  .prog{display:flex;align-items:center;gap:8px;margin:2px 0 12px;}
+  .prog .bar{flex:1;height:8px;border-radius:9px;background:#E6E1F6;overflow:hidden;}
+  .prog .bar i{display:block;height:100%;width:0;border-radius:9px;background:linear-gradient(90deg,var(--why),var(--dream),var(--vision),var(--focus));transition:width .35s;}
+  @media (max-width:700px){ .prog{padding-right:66px;} }
+  .prog span{font-size:11.5px;color:#7A72A0;font-weight:700;min-width:3.5em;text-align:right;}
+  /* 1問ずつのカード */
+  .card{background:#fff;border-radius:20px;box-shadow:var(--shadow);padding:18px 16px 16px;animation:cin .35s ease both;}
+  @keyframes cin{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  .tag{display:inline-block;font-size:11.5px;font-weight:900;color:#fff;border-radius:999px;padding:1px 11px;margin-bottom:8px;}
+  .tag.why{background:var(--why);} .tag.dream{background:var(--dream);} .tag.vision{background:var(--vision);} .tag.focus{background:var(--focus);} .tag.pre{background:var(--main);}
+  .q{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:18px;line-height:1.6;color:var(--ink);margin-bottom:6px;}
+  .sub{font-size:13px;color:#6C6588;margin-bottom:10px;}
+  textarea{width:100%;min-height:150px;font-size:16px;line-height:1.7;border:2px solid var(--line);border-radius:14px;padding:11px 12px;background:#FDFCFF;color:var(--ink);resize:vertical;}
+  textarea:focus{outline:none;border-color:var(--main);}
+  input[type=text]{width:100%;font-size:16px;border:2px solid var(--line);border-radius:12px;padding:10px 12px;background:#FDFCFF;color:var(--ink);}
+  .lab{font-size:12.5px;font-weight:700;color:var(--deep);margin:10px 0 4px;}
+  .mic{font-size:11.5px;color:#8A83AA;margin-top:6px;}
+  .nav{display:flex;gap:8px;margin-top:14px;}
+  .nav .back{flex:0 0 auto;background:#fff;border:2px solid var(--line);color:#6C6588;border-radius:13px;padding:12px 16px;font-weight:700;font-size:14px;}
+  .nav .next{flex:1;background:var(--main);color:#fff;border-radius:13px;padding:13px;font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:16px;}
+  .skip{display:block;margin:10px auto 0;background:none;color:#8A83AA;font-size:12.5px;text-decoration:underline;}
+  .pre p{font-size:15px;line-height:1.9;margin-bottom:8px;}
+  .pre .big{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:17px;color:var(--deep);background:var(--soft);border-radius:14px;padding:12px 14px;margin:6px 0 10px;line-height:1.75;}
+  .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:8px 0 6px;}
+  .steps div{border-radius:11px;padding:7px 4px;text-align:center;font-size:11.5px;font-weight:700;color:#fff;line-height:1.4;}
+  /* ビジョンを選ぶ */
+  .pick{display:flex;flex-direction:column;gap:6px;margin:6px 0;}
+  .pick button{text-align:left;background:#F6FBF9;border:2px solid #CBE9DF;border-radius:12px;padding:9px 12px;font-size:14px;color:var(--ink);}
+  .pick button.on{background:var(--vision);border-color:var(--vision);color:#fff;font-weight:700;}
+  /* まとめ */
+  .sum h3{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:15px;margin:14px 0 4px;}
+  .sum h3.why{color:var(--why);} .sum h3.dream{color:#C77A1C;} .sum h3.vision{color:#2E8A6E;} .sum h3.focus{color:#3A75BE;}
+  .sum dl{font-size:13.5px;}
+  .sum dt{color:#7A72A0;font-weight:700;font-size:12px;margin-top:6px;}
+  .sum dd{white-space:pre-wrap;word-break:break-word;}
+  .sum .fc{background:#F3F8FE;border-radius:12px;padding:9px 11px;margin-top:8px;}
+  .msg{font-size:13px;font-weight:700;margin-top:10px;min-height:1em;}
+  .done{background:linear-gradient(135deg,#FFF6E5,#F1EEFB);border-radius:16px;padding:14px 15px;margin-top:14px;font-size:14px;line-height:1.9;}
+  .done b{color:var(--deep);}
+  .hist{font-size:12px;color:#7A72A0;margin-top:10px;}
+  .verTag{display:block;text-align:center;font-size:9.5px;color:#C4B8D8;font-family:monospace;padding:16px 0 20px;}
+</style>
+</head>
+<body>
+<div id="skyNav"><div class="inner">
+  <a href="skyarc.html" class="back-btn">↩️ LINK活用法へ</a>
+  <a class="sky-home" href="../index.html">🏠 ホーム</a>
+</div></div>
+
+<div class="wrap">
+  <div class="prog"><div class="bar"><i id="pbar"></i></div><span id="ptxt"></span></div>
+  <div id="stage"></div>
+  <div class="verTag"></div>
+</div>
+
+<script>
+/* ================================================================
+   やりたいことを見つける（仮の名前）  v1.2.062
+   ----------------------------------------------------------------
+   ・1問ずつ答えていくと「ビッグWHY → 夢 → ビジョン」が形になり、5つの質問でビジョンを1つずつ形にします
+   ・答えは書いているあいだ、この端末に下書きとして残ります（とちゅうでやめても続きから）
+   ・最後に「保存する」で、日付つきでGAS（タブ「やりたいことアーカイブ」）に残ります。何度でも書き直せます
+   ・見られるのは：その方のアップクリエ・サポート担当・系列リーダーと、クリエーターズ以上（見る画面はこれから）
+   ・AIは使っていません（質問に本人が答える形）
+================================================================ */
+const $ = q => document.querySelector(q);
+const GAS_URL = window.SKY_GAS_URL;
+let member = null;
+try{ const raw = localStorage.getItem("skyarc_member"); if(raw && raw !== "null") member = JSON.parse(raw); }catch(e){}
+if(member && !member.id) member = null;
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+/* ---------- 質問 ---------- */
+const MIC = "💬 文字を打つか、スマホのキーボードのマイクで話して入れられます";
+const Q = [
+  { k:"pre" },
+  { k:"why.happy", tag:"why", t:"ビッグWHY", q:"あなたは、どんな状態なら心から「幸せ」と思えますか？" },
+  { k:"why.fun",   tag:"why", t:"ビッグWHY", q:"あなたは、どんな状態なら心から「楽しい」と思えますか？" },
+  { k:"why.glad",  tag:"why", t:"ビッグWHY", q:"あなたは、どんな状態なら心から「嬉しい」と思えますか？" },
+  { k:"why.dislike", tag:"why", t:"ビッグWHY", q:"あなたにとって、どんな状態だけは心から嫌だと思いますか？「この状態にだけはなりたくない」という状態は、どんな状態ですか？",
+    sub:"書きたくないときは「ある」「ない」だけでも大丈夫です。" },
+  { k:"dream.life",   tag:"dream", t:"夢", q:"あなたは、どんなライフスタイルがベストですか？" },
+  { k:"dream.route",  tag:"dream", t:"夢", q:"あなたは、どういう人生を送りたいですか？" },
+  { k:"dream.person", tag:"dream", t:"夢", q:"あなたは、どういう人になりたいですか？" },
+  { k:"vision.fun",   tag:"vision", t:"ビジョン", q:"あなたが「楽しい」と思えることで、やりたいことを、いくつでも書いてください。", sub:"1行に1つずつ書くと、あとで1つずつ形にできます。" },
+  { k:"vision.happy", tag:"vision", t:"ビジョン", q:"あなたが「幸せ」と感じたいことで、やりたいことを、いくつでも書いてください。", sub:"1行に1つずつ書くと、あとで1つずつ形にできます。" },
+  { k:"vision.money", tag:"vision", t:"ビジョン", q:"もし、お金がいくらでももらえるとしたら、いくら欲しいですか？それで何をしたいですか？", two:["いくら欲しいですか？","それで何をしたいですか？"] },
+  { k:"vision.time",  tag:"vision", t:"ビジョン", q:"もし、時間がとてもゆとりがあったら、何に時間を使いたいですか？" },
+  { k:"vision.friends", tag:"vision", t:"ビジョン", q:"もし、仲間がたくさんいたら、何をしたいですか？", sub:"小さいことでも、壮大なことでも、何でもあげてみてください。" },
+  { k:"vision.other", tag:"vision", t:"ビジョン", q:"そのほかに、叶えたいことがあったら、いくつでも書いてください。", sub:"1行に1つずつ書くと、あとで1つずつ形にできます。" },
+  { k:"focus" },
+  { k:"sum" }
+];
+/* 5つの質問（ビジョンを1つ形にする） */
+const FQ = [
+  { k:"done", q:"何がどうなったら、そのビジョンは「叶った」と言えますか？", sub:"できるだけ具体的に。金額や人数などにできるものは、数字でも。" },
+  { k:"when", q:"それは、いつまでに叶えたいですか？", sub:"できるかどうかではなく、理想の時期で。" },
+  { k:"need", q:"それを叶えるには、何がどのくらい必要ですか？どれくらいの所得があればできますか？", sub:"時間・お金・人脈・学びや成長など、「これさえあればなぁ」というもの。" },
+  { k:"first", q:"そのために、いま目の前で、いちばん最初に何をしたらいいと思いますか？" }
+];
+
+/* ---------- 下書き（この端末） ---------- */
+function dkey(){ return "sky_yaritai_draft_" + (member ? member.id : "guest"); }
+let D = { a:{}, focus:[], step:0, fi:-1, fs:0 };
+function saveDraft(){ try{ localStorage.setItem(dkey(), JSON.stringify(D)); }catch(e){} }
+try{ const o = JSON.parse(localStorage.getItem(dkey()) || "null"); if(o && o.a) D = Object.assign(D, o); }catch(e){}
+
+/* ---------- 画面 ---------- */
+function setProg(){
+  const n = Q.length - 1, i = Math.min(D.step, n);
+  $("#pbar").style.width = Math.round(i / n * 100) + "%";
+  $("#ptxt").textContent = D.step === 0 ? "はじめに" : (Q[D.step].k === "sum" ? "まとめ" : i + " / " + (n - 1));
+}
+function draw(){
+  setProg();
+  const it = Q[D.step];
+  if(it.k === "pre") return drawPre();
+  if(it.k === "focus") return drawFocus();
+  if(it.k === "sum") return drawSum();
+  const v = D.a[it.k] || (it.two ? ["",""] : "");
+  let h = '<div class="card"><span class="tag ' + it.tag + '">' + it.t + '</span><p class="q">' + esc(it.q) + '</p>' + (it.sub ? '<p class="sub">' + esc(it.sub) + '</p>' : "");
+  if(it.two) h += it.two.map((l, i) => '<p class="lab">' + esc(l) + '</p><textarea id="ta' + i + '" style="min-height:90px">' + esc(v[i] || "") + '</textarea>').join("");
+  else h += '<textarea id="ta0">' + esc(v) + '</textarea>';
+  h += '<p class="mic">' + MIC + '</p>' + navHtml() + '</div>';
+  $("#stage").innerHTML = h; bindNav();
+}
+function navHtml(nextLabel){ return '<div class="nav"><button type="button" class="back" id="bBack">‹ もどる</button><button type="button" class="next" id="bNext">' + (nextLabel || "次へ ›") + '</button></div>'; }
+function readAns(){
+  const it = Q[D.step];
+  if(!it || ["pre","focus","sum"].indexOf(it.k) >= 0) return;
+  D.a[it.k] = it.two ? [$("#ta0").value, $("#ta1").value] : $("#ta0").value;
+  saveDraft();
+}
+function bindNav(){
+  const b = $("#bBack"), n = $("#bNext");
+  if(b) b.onclick = () => { readAns(); if(D.step > 0){ D.step--; saveDraft(); draw(); scrollTo(0, 0); } };
+  if(n) n.onclick = () => { readAns(); D.step++; saveDraft(); draw(); scrollTo(0, 0); };
+}
+function drawPre(){
+  $("#stage").innerHTML = '<div class="card pre"><span class="tag pre">はじめに</span>' +
+    '<p class="q">あなたの「やりたいこと」を、いっしょに見つけていきましょう</p>' +
+    '<div class="big">この質問は、LINKをやる・やらないや、いまのお仕事とは一度切りはなして、あなたの人生として考えてください。<br>何でもできる、すべての自由が手に入るとしたら——という前提で、考えてみてくださいね。</div>' +
+    '<p>このあと、次の順に質問が出ます。思いつくまま、気軽に書いてみてください。</p>' +
+    '<div class="steps"><div style="background:var(--why)">ビッグ<br>WHY</div><div style="background:var(--dream)">夢</div><div style="background:var(--vision)">ビジョン</div><div style="background:var(--focus)">形に<br>する</div></div>' +
+    '<p class="sub">書いたものは、とちゅうでやめても、この端末に残ります。最後に「保存する」を押すと、あなたのアップクリエ・サポート担当・系列リーダーなどが見られるようになります（見られてもよい内容で書いてください）。</p>' +
+    '<div class="nav"><button type="button" class="next" id="bNext">はじめる ›</button></div></div>';
+  $("#bNext").onclick = () => { D.step = 1; saveDraft(); draw(); scrollTo(0, 0); };
+}
+
+/* ---------- 形にする（5つの質問） ---------- */
+function candidates(){
+  const out = [];
+  ["vision.fun","vision.happy","vision.time","vision.friends","vision.other"].forEach(k => String(D.a[k] || "").split(/\n+/).forEach(l => { l = l.replace(/^[\s・\-●○◎◉✅]+/, "").trim(); if(l && out.indexOf(l) < 0) out.push(l); }));
+  const m = D.a["vision.money"]; if(m && String(m[1] || "").trim()) String(m[1]).split(/\n+/).forEach(l => { l = l.trim(); if(l && out.indexOf(l) < 0) out.push(l); });
+  return out;
+}
+function drawFocus(){
+  /* fi < 0：どのビジョンを形にするか選ぶ画面 */
+  if(D.fi < 0){
+    const c = candidates(), shaped = D.focus.map(f => f.title);
+    let h = '<div class="card"><span class="tag focus">形にする</span><p class="q">書いたビジョンの中から1つ選んで、形にしてみましょう</p>' +
+      '<p class="sub">選んだビジョンに、4つの質問をします。いくつでも、くり返し形にできます。</p>' +
+      (shaped.length ? '<p class="lab">✅ 形にしたビジョン：' + shaped.map(esc).join("／") + '</p>' : "") +
+      '<div class="pick" id="pick">' + c.map((t, i) => '<button type="button" data-i="' + i + '">' + (shaped.indexOf(t) >= 0 ? "✅ " : "🌱 ") + esc(t) + '</button>').join("") + '</div>' +
+      '<p class="lab">リストにないものを書く</p><input type="text" id="ownV" placeholder="形にしたいビジョン">' +
+      '<div class="nav"><button type="button" class="back" id="bBack">‹ もどる</button><button type="button" class="next" id="bGo">このビジョンを形にする ›</button></div>' +
+      '<button type="button" class="skip" id="bSum">' + (shaped.length ? "まとめへ進む ›" : "今回は形にしないで、まとめへ ›") + '</button></div>';
+    $("#stage").innerHTML = h;
+    let sel = "";
+    document.querySelectorAll("#pick button").forEach(b => b.onclick = () => { document.querySelectorAll("#pick button").forEach(x => x.classList.remove("on")); b.classList.add("on"); sel = c[+b.dataset.i]; $("#ownV").value = ""; });
+    $("#ownV").oninput = () => { document.querySelectorAll("#pick button").forEach(x => x.classList.remove("on")); sel = ""; };
+    $("#bBack").onclick = () => { D.step--; saveDraft(); draw(); scrollTo(0, 0); };
+    $("#bSum").onclick = () => { D.step++; saveDraft(); draw(); scrollTo(0, 0); };
+    $("#bGo").onclick = () => {
+      const t = ($("#ownV").value.trim() || sel);
+      if(!t){ alertBox("形にしたいビジョンを、1つ選ぶか書いてください"); return; }
+      let i = D.focus.findIndex(f => f.title === t);
+      if(i < 0){ D.focus.push({ title:t }); i = D.focus.length - 1; }
+      D.fi = i; D.fs = 0; saveDraft(); draw(); scrollTo(0, 0);
+    };
+    return;
+  }
+  const f = D.focus[D.fi], q = FQ[D.fs];
+  let h = '<div class="card"><span class="tag focus">形にする ' + (D.fs + 1) + ' / ' + FQ.length + '</span>' +
+    '<p class="lab">🌱 ' + esc(f.title) + '</p><p class="q">' + esc(q.q) + '</p><p class="sub">' + esc(q.sub || "") + '</p>' +
+    '<textarea id="fta">' + esc(f[q.k] || "") + '</textarea><p class="mic">' + MIC + '</p>' +
+    navHtml(D.fs === FQ.length - 1 ? "このビジョンを形にした ✓" : "次へ ›") + '</div>';
+  $("#stage").innerHTML = h;
+  const keep = () => { f[q.k] = $("#fta").value; saveDraft(); };
+  $("#bBack").onclick = () => { keep(); if(D.fs > 0) D.fs--; else D.fi = -1; saveDraft(); draw(); scrollTo(0, 0); };
+  $("#bNext").onclick = () => { keep(); if(D.fs < FQ.length - 1) D.fs++; else { D.fi = -1; D.fs = 0; } saveDraft(); draw(); scrollTo(0, 0); };
+}
+function alertBox(t){ let m = $("#amsg"); if(!m){ m = document.createElement("p"); m.id = "amsg"; m.className = "msg"; m.style.color = "#C62828"; $(".card").appendChild(m); } m.textContent = t; }
+
+/* ---------- まとめ・保存 ---------- */
+function sumHtml(a, focus){
+  const row = (l, v) => { v = Array.isArray(v) ? v.filter(Boolean).join("\n") : v; return v && String(v).trim() ? '<dt>' + esc(l) + '</dt><dd>' + esc(v) + '</dd>' : ""; };
+  const sec = (cls, t, body) => body ? '<h3 class="' + cls + '">' + t + '</h3><dl>' + body + '</dl>' : "";
+  let h = sec("why", "💗 ビッグWHY", row("幸せ", a["why.happy"]) + row("楽しい", a["why.fun"]) + row("嬉しい", a["why.glad"]) + row("なりたくない状態", a["why.dislike"])) +
+    sec("dream", "🌟 夢", row("ベストなライフスタイル", a["dream.life"]) + row("送りたい人生", a["dream.route"]) + row("なりたい人", a["dream.person"])) +
+    sec("vision", "🌱 ビジョン", row("楽しいことで、やりたいこと", a["vision.fun"]) + row("幸せを感じたいことで、やりたいこと", a["vision.happy"]) +
+    row("お金がいくらでももらえたら", a["vision.money"] ? [a["vision.money"][0] && "欲しい金額：" + a["vision.money"][0], a["vision.money"][1]] : "") +
+    row("時間にゆとりがあったら", a["vision.time"]) + row("仲間がたくさんいたら", a["vision.friends"]) + row("そのほか叶えたいこと", a["vision.other"]));
+  if(!h) h = '<p class="sub">まだ何も書かれていません。「もどる」で書いてみてくださいね。</p>';
+  if(focus && focus.length){
+    h += '<h3 class="focus">🎯 形にしたビジョン</h3>' + focus.map(f => '<div class="fc"><b>' + esc(f.title) + '</b><dl>' + row("叶ったと言える状態", f.done) + row("いつまでに", f.when) + row("必要なもの・所得", f.need) + row("最初の一歩", f.first) + '</dl></div>').join("");
+  }
+  return h;
+}
+function drawSum(){
+  $("#stage").innerHTML = '<div class="card sum"><span class="tag pre">まとめ</span><p class="q">あなたの「やりたいこと」</p>' + sumHtml(D.a, D.focus) +
+    '<div class="nav"><button type="button" class="back" id="bBack">‹ もどる</button><button type="button" class="next" id="bSave">💾 保存する</button></div>' +
+    '<p class="msg" id="sMsg"></p><p class="hist" id="hist"></p>' +
+    '<div class="done">🎉 おつかれさまでした。<br>これをもとに、<b>アップラインの方と相談しながら、あなたのやりたいことを叶えていきましょう。</b><br><br>' +
+    'やりたいことがまだはっきりしない方こそ、<b>練習のような感覚で、日々思い出したときに</b>やってみてください。答えは変わっていって大丈夫です。書き直すたびに、日付つきで残っていきます。</div></div>';
+  $("#bBack").onclick = () => { D.step--; saveDraft(); draw(); scrollTo(0, 0); };
+  $("#bSave").onclick = saveIt;
+  showHist();
+}
+async function post(params){
+  const body = Object.assign({ id:member.id, pin:member.pin }, params);
+  const r = await fetch(GAS_URL, { method:"POST", body:new URLSearchParams(body) });
+  return r.json();
+}
+async function saveIt(){
+  const m = $("#sMsg");
+  if(!member){
+    m.style.color = "#C62828"; m.textContent = "保存するには、ログインが必要です";
+    if(typeof skyLoginRequired === "function") skyLoginRequired(function(){ location.reload(); });
+    return;
+  }
+  $("#bSave").disabled = true; m.style.color = "#6C6588"; m.textContent = "保存しています…";
+  try{
+    const j = await post({ action:"yaritaiSave", data: JSON.stringify({ a:D.a, focus:D.focus }) });
+    if(j && j.ok){ m.style.color = "#2E7D32"; m.textContent = "✅ 保存しました（" + j.at + "）"; showHist(true); }
+    else { m.style.color = "#C62828"; m.textContent = (j && j.error === "unknown_action") ? "まだ保存のしくみが用意できていません（GASの更新待ち）。下書きはこの端末に残っています。" : "保存できませんでした。少しおいてお試しください。"; }
+  }catch(e){ m.style.color = "#C62828"; m.textContent = "通信できませんでした。電波のよい場所でお試しください（下書きはこの端末に残っています）。"; }
+  $("#bSave").disabled = false;
+}
+async function showHist(){
+  if(!member) return;
+  try{
+    const r = await fetch(GAS_URL + "?action=yaritaiMine&id=" + encodeURIComponent(member.id) + "&pin=" + encodeURIComponent(member.pin));
+    const j = await r.json();
+    if(j && j.ok && j.list && j.list.length) $("#hist").textContent = "これまでの保存：" + j.list.map(x => x.at).join("／");
+  }catch(e){}
+}
+
+/* はじめて開いたとき（下書きがないとき）は、前に保存した分を読み込んで、続きから書き直せるようにします */
+(async function(){
+  if(member && !Object.keys(D.a).length){
+    try{
+      const r = await fetch(GAS_URL + "?action=yaritaiMine&id=" + encodeURIComponent(member.id) + "&pin=" + encodeURIComponent(member.pin));
+      const j = await r.json();
+      if(j && j.ok && j.list && j.list[0] && j.list[0].data){ const d = j.list[0].data; D.a = d.a || {}; D.focus = d.focus || []; saveDraft(); }
+    }catch(e){}
+  }
+  draw();
+})();
+</script>
+<script src="../track.js"></script>
+<script src="../menu.js"></script>
+</body>
+</html>
