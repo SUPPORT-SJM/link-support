@@ -173,6 +173,12 @@
   .wk-next:disabled{opacity:.4;}
   .wk-last{flex:1;background:var(--white);border-radius:14px;padding:12px 14px;font-size:13.5px;font-weight:700;color:var(--green-deep);}
   .wk-hint{font-size:12px;color:#7A8A80;text-align:center;margin-top:8px;}
+  #clipPop{position:fixed;inset:0;z-index:9000;background:rgba(20,40,30,.55);display:flex;align-items:center;justify-content:center;padding:14px;}
+  #clipPop .cp{background:#fff;border-radius:18px;max-width:560px;width:100%;padding:14px;max-height:calc(100vh - 28px);overflow:auto;}
+  #clipPop .cp-t{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:15px;color:var(--green-deep);margin-bottom:8px;}
+  #clipPop .cp-play{display:block;width:100%;padding:0;border:0;background:none;cursor:pointer;}
+  #clipPop .cp-n{font-size:13px;color:#5E7068;margin:10px 0 8px;}
+  #clipPop .cp-close{display:block;width:100%;margin-top:12px;padding:11px;border-radius:12px;border:2px solid #D7E2DC;background:#fff;color:#4A5A52;font-weight:700;font-size:15px;}
 
   /* ===== install banner ===== */
   #installBanner{
@@ -351,9 +357,8 @@
   </main>
 
   <footer>
-    Presented by Skyarc-team<br>
-    <a href="#" onclick="showInstallHelp();return false;" style="color:var(--green-leaf);font-weight:700;">📲 ホーム画面に追加する方法</a>
-    <div class="verTag" style="margin-top:8px;color:rgba(255,255,255,.4);"></div>
+    Presented by Skyarc-team
+    <div class="verTag" style="margin-top:4px;color:#9AA8A0;font-family:monospace;font-size:10px;"></div>
 </footer>
 </div>
 
@@ -435,6 +440,20 @@ const V_TRAINING = "Rc2ZCkBIarw";   // ①グルコンリーダートレーニ�
 const V_DEMO     = "MHVJhdArGl4";   // ②グルコンのビフォア&アフターのコツ(デモ)
 
 const yt = (id,sec)=>`https://youtu.be/${id}?t=${sec}`;
+
+/* ================================================================
+   v1.2.079：切り抜き動画（その部分だけを切り出して、はじめと終わりをフェード）
+   ・Googleドライブ「Skyarc LINKサポートコンテンツ」に置いた動画を、ポップアップで見ます
+   ・drive に、ドライブの動画のID（URLの /d/ と /view のあいだ）を入れると、その場で再生できます
+   ・drive が空のあいだは「準備中」と出して、元の動画（YouTube）の該当部分へのボタンを出します
+================================================================ */
+const CLIPS = {
+  GR1_1: { no:"1-1", drive:"" },
+  GR1_3: { no:"1-3", drive:"" },
+  GR1_4: { no:"1-4", drive:"" },
+  GR2_1: { no:"2-1", drive:"" },
+  GR4_3: { no:"4-3", drive:"" },
+};
 
 /* ================================================================
    カリキュラムデータ
@@ -621,7 +640,9 @@ function render(){
       </div>
       ${t.rec && !t.making ? `<div class="rec"><b>🗣️ 話せるようにしよう:</b>${t.rec}</div>` : ""}
       <div class="task-actions">
-        ${t.link && !t.making ? `<a class="btn-video ${t.link.alt?'alt':''}" href="${t.link.url}" target="_blank" rel="noopener">${t.link.label}${t.link.end?` <span class="end">${t.link.end}</span>`:""}</a>` : ""}
+        ${t.link && !t.making ? (CLIPS[t.id]
+            ? `<button type="button" class="btn-video ${t.link.alt?'alt':''}" onclick="openClip('${t.id}')">▶ 動画を見る</button>`
+            : `<a class="btn-video ${t.link.alt?'alt':''}" href="${t.link.url}" target="_blank" rel="noopener">${t.link.label}${t.link.end?` <span class="end">${t.link.end}</span>`:""}</a>`) : ""}
         ${t.making
           ? `<span class="making-note">公開されたらお知らせします。おたのしみに!</span>`
           : `<button class="chk" onclick="toggle('${t.id}')">${progress[t.id] ? "✓ できた!" : "できたら押す"}</button>`}
@@ -639,6 +660,24 @@ function render(){
   root.appendChild(nav);
   if(!last && !weekDone(wi)){ const p = document.createElement("p"); p.className = "wk-hint"; p.textContent = "この週を、ぜんぶ「できたら押す」にすると、次のステップへ進めます。"; root.appendChild(p); }
   updateOverall();
+}
+/* 切り抜き動画のポップアップ */
+function openClip(id){
+  const c = CLIPS[id]; if(!c) return;
+  const t = WEEKS.flatMap(w=>w.tasks).find(x=>x.id === id) || {};
+  const d = document.createElement("div"); d.id = "clipPop";
+  const thumb = `<img src="../img/gcon/${c.no}.png" alt="" style="display:block;width:100%;border-radius:12px;border:1px solid #E4E8E5;">`;
+  d.innerHTML = `<div class="cp"><p class="cp-t">${t.no} ${t.title}</p>
+    <div class="cp-v">${c.drive ? `<button type="button" class="cp-play" aria-label="再生する">${thumb}</button>` : thumb}</div>
+    ${c.drive ? "" : `<p class="cp-n">🎬 切り抜き動画は、ただいま準備中です。それまでは、元の動画の該当部分をご覧ください。</p>
+      <a class="btn-video" href="${t.link.url}" target="_blank" rel="noopener">${t.link.label}${t.link.end ? ` <span class="end">${t.link.end}</span>` : ""}</a>`}
+    <button type="button" class="cp-close">とじる</button></div>`;
+  document.body.appendChild(d);
+  const close = () => d.remove();
+  d.querySelector(".cp-close").onclick = close;
+  d.addEventListener("click", e => { if(e.target === d) close(); });
+  const pl = d.querySelector(".cp-play");
+  if(pl) pl.onclick = () => { d.querySelector(".cp-v").innerHTML = `<iframe src="https://drive.google.com/file/d/${c.drive}/preview" allow="autoplay; fullscreen" allowfullscreen style="display:block;width:100%;aspect-ratio:4/3;border:0;border-radius:12px;background:#000;"></iframe>`; };
 }
 function goWeek(n){ curWeek = Math.max(0, Math.min(WEEKS.length-1, n)); render(); scrollTo(0, 0); }
 
