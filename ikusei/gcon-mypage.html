@@ -176,7 +176,6 @@
   #clipPop{position:fixed;inset:0;z-index:9000;background:rgba(20,40,30,.55);display:flex;align-items:center;justify-content:center;padding:14px;}
   #clipPop .cp{background:#fff;border-radius:18px;max-width:560px;width:100%;padding:14px;max-height:calc(100vh - 28px);overflow:auto;}
   #clipPop .cp-t{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:15px;color:var(--green-deep);margin-bottom:8px;}
-  #clipPop .cp-play{display:block;width:100%;padding:0;border:0;background:none;cursor:pointer;}
   #clipPop .cp-n{font-size:13px;color:#5E7068;margin:10px 0 8px;}
   #clipPop .cp-close{display:block;width:100%;margin-top:12px;padding:11px;border-radius:12px;border:2px solid #D7E2DC;background:#fff;color:#4A5A52;font-weight:700;font-size:15px;}
 
@@ -671,23 +670,23 @@ function render(){
   if(!last && !weekDone(wi)){ const p = document.createElement("p"); p.className = "wk-hint"; p.textContent = "この週を、ぜんぶ「できたら押す」にすると、次のステップへ進めます。"; root.appendChild(p); }
   updateOverall();
 }
-/* 切り抜き動画のポップアップ */
+/* 切り抜き動画のポップアップ
+   v1.2.084：サムネはやめて、開いたらすぐドライブの動画を出します（動画の中の ▶ を押すと再生）。
+   ドライブの動画は、サムネを押して自動で再生させることができないため、ひと手間を減らしました */
 function openClip(id){
   const c = CLIPS[id]; if(!c) return;
   const t = WEEKS.flatMap(w=>w.tasks).find(x=>x.id === id) || {};
   const d = document.createElement("div"); d.id = "clipPop";
-  const thumb = `<img src="../img/gcon/${c.no}.png" alt="" style="display:block;width:100%;border-radius:12px;border:1px solid #E4E8E5;">`;
   d.innerHTML = `<div class="cp"><p class="cp-t">${t.no} ${t.title}</p>
-    <div class="cp-v">${c.drive ? `<button type="button" class="cp-play" aria-label="再生する">${thumb}</button>` : thumb}</div>
-    ${c.drive ? "" : `<p class="cp-n">🎬 切り抜き動画は、ただいま準備中です。それまでは、元の動画の該当部分をご覧ください。</p>
-      <a class="btn-video" href="${t.link.url}" target="_blank" rel="noopener">${t.link.label}${t.link.end ? ` <span class="end">${t.link.end}</span>` : ""}</a>`}
+    <div class="cp-v">${c.drive
+      ? `<iframe src="https://drive.google.com/file/d/${c.drive}/preview" allow="autoplay; fullscreen" allowfullscreen style="display:block;width:100%;aspect-ratio:4/3;border:0;border-radius:12px;background:#000;"></iframe>`
+      : `<p class="cp-n">🎬 切り抜き動画は、ただいま準備中です。それまでは、元の動画の該当部分をご覧ください。</p>
+         <a class="btn-video" href="${t.link.url}" target="_blank" rel="noopener">${t.link.label}${t.link.end ? ` <span class="end">${t.link.end}</span>` : ""}</a>`}</div>
     <button type="button" class="cp-close">とじる</button></div>`;
   document.body.appendChild(d);
   const close = () => d.remove();
   d.querySelector(".cp-close").onclick = close;
   d.addEventListener("click", e => { if(e.target === d) close(); });
-  const pl = d.querySelector(".cp-play");
-  if(pl) pl.onclick = () => { d.querySelector(".cp-v").innerHTML = `<iframe src="https://drive.google.com/file/d/${c.drive}/preview" allow="autoplay; fullscreen" allowfullscreen style="display:block;width:100%;aspect-ratio:4/3;border:0;border-radius:12px;background:#000;"></iframe>`; };
 }
 function goWeek(n){ curWeek = Math.max(0, Math.min(WEEKS.length-1, n)); render(); scrollTo(0, 0); }
 
