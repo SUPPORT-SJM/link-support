@@ -87,7 +87,7 @@
 
 <script>
 /* ================================================================
-   やりたいことを見つける（仮の名前）  v1.2.065
+   やりたいことを見つける（仮の名前）  v1.2.066
    ----------------------------------------------------------------
    ・1問ずつ答えていくと「ビッグWHY → 夢 → ビジョン」が形になり、5つの質問でビジョンを1つずつ形にします
    ・答えは書いているあいだ、この端末に下書きとして残ります（とちゅうでやめても続きから）
@@ -202,22 +202,19 @@ function drawFocus(){
     const cg = candidates(), c = cg.flat;
     const isShaped = o => D.focus.some(f => f.title === o.t && (f.from || "") === o.from);
     let h = '<div class="card"><span class="tag focus">形にする</span><p class="q">書いたビジョンの中から1つ選んで、形にしてみましょう</p>' +
-      '<p class="sub">選んだビジョンに、4つの質問をします。いくつでも、くり返し形にできます。</p>' +
+      '<p class="sub">選んだビジョンに、4つの質問をします。いくつでも、くり返し形にできます。✅の付いたものを選ぶと、前に書いた答えを練り直せます。</p>' +
       (D.focus.length ? '<p class="lab">✅ 形にしたビジョン：' + D.focus.map(f => esc(f.title)).join("／") + '</p>' : "") +
       '<div class="pick" id="pick">' + cg.groups.map(g => '<p class="gh">' + esc(g.nm) + '</p>' + g.items.map(o => '<button type="button" data-i="' + o.i + '">' + (isShaped(o) ? "✅ " : "🌱 ") + esc(o.t) + '</button>').join("")).join("") + '</div>' +
-      '<p class="lab">リストにないビジョンを書く</p><input type="text" id="ownV" placeholder="形にしたいビジョン">' +
       '<div class="big2"><button type="button" class="b1" id="bGo">このビジョンを形にする ›</button><button type="button" class="b2" id="bSum">まとめに進む ›</button></div>' +
       '<button type="button" class="skip" id="bBack">‹ もどる</button></div>';
     $("#stage").innerHTML = h;
     let sel = null;
-    document.querySelectorAll("#pick button").forEach(b => b.onclick = () => { document.querySelectorAll("#pick button").forEach(x => x.classList.remove("on")); b.classList.add("on"); sel = c[+b.dataset.i]; $("#ownV").value = ""; });
-    $("#ownV").oninput = () => { document.querySelectorAll("#pick button").forEach(x => x.classList.remove("on")); sel = null; };
+    document.querySelectorAll("#pick button").forEach(b => b.onclick = () => { document.querySelectorAll("#pick button").forEach(x => x.classList.remove("on")); b.classList.add("on"); sel = c[+b.dataset.i]; $("#bGo").textContent = isShaped(sel) ? "このビジョンを練り直す ›" : "このビジョンを形にする ›"; });
     $("#bBack").onclick = () => { D.step--; saveDraft(); draw(); scrollTo(0, 0); };
     $("#bSum").onclick = () => { D.step = sumIdx(); saveDraft(); draw(); scrollTo(0, 0); };
     $("#bGo").onclick = () => {
-      const own = $("#ownV").value.trim();
-      const t = own || (sel && sel.t), from = own ? "追加したビジョン" : (sel && sel.from);
-      if(!t){ alertBox("形にしたいビジョンを、1つ選ぶか書いてください"); return; }
+      const t = sel && sel.t, from = sel && sel.from;
+      if(!t){ alertBox("形にしたいビジョンを、1つ選んでください"); return; }
       let i = D.focus.findIndex(f => f.title === t && (f.from || "") === from);
       if(i < 0){ D.focus.push({ title:t, from:from }); i = D.focus.length - 1; }
       D.fi = i; D.fs = 0; saveDraft(); draw(); scrollTo(0, 0);
