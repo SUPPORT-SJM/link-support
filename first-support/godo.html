@@ -44,7 +44,13 @@
   .nav .next{flex:1;background:var(--main);color:#fff;border-radius:13px;padding:13px;font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:16px;}
   .nav .next:disabled{opacity:.4;}
   .adv{margin-top:12px;}
-  .adv .an{font-weight:900;color:var(--deep);font-size:14.5px;margin-bottom:4px;}
+  .adv .an{font-weight:900;color:var(--deep);font-size:14.5px;margin-bottom:4px;display:flex;align-items:center;gap:8px;}
+  .allck{margin-left:auto;display:flex;align-items:center;gap:5px;font-size:12.5px;font-weight:700;color:#7A6258;background:#fff;border:1.5px solid var(--line);border-radius:999px;padding:3px 10px;cursor:pointer;}
+  .allck input{width:17px;height:17px;accent-color:var(--main);}
+  .pick label{display:flex;align-items:center;gap:10px;border:2px solid var(--line);border-radius:12px;padding:9px 11px;margin:6px 0;font-size:14.5px;cursor:pointer;}
+  .pick input{width:20px;height:20px;accent-color:var(--main);}
+  input[type=text]{width:100%;font-size:16px;border:2px solid var(--line);border-radius:12px;padding:9px 12px;}
+  .urls{background:var(--soft);border-radius:12px;padding:10px 12px;font-size:13.5px;word-break:break-all;}
   .slot{display:flex;align-items:center;gap:10px;border:2px solid var(--line);border-radius:12px;padding:9px 11px;margin:6px 0;background:#fff;cursor:pointer;font-size:14.5px;}
   .slot input{width:20px;height:20px;accent-color:var(--main);flex:0 0 auto;}
   .slot.on{border-color:var(--main);background:var(--soft);}
@@ -76,15 +82,16 @@
 
 <script>
 /* ================================================================
-   合同説明会（v1.2.074）
+   合同説明会（v1.2.075）
    ----------------------------------------------------------------
    ① はじめに（流れを理解してから使ってください → 「わかりました」）
    ② アドバイザーの合同説明会の日程（スプレッドシートから、その時の最新を読みます）
       ・同席できる日にチェック → カレンダーに入れる／文章をコピー
-   ③ 紹介したい方への日程調整の連絡（文章をコピー）
-   ④ 説明会の前に（やりたいことを聞く・もう一度話す）
-   ⑤ 説明会の当日・終わったら
-   ⑥ スプレッドシートに書く
+   ③ 紹介したい方への日程調整の連絡（アドバイザーごとに日程を並べた文章をコピー）
+   ④ 日程が決まったら：詳細の文章（日時・Zoom・アドバイザーのプロフィール）をコピーして送る（v1.2.075）
+   ⑤ スプレッドシートに書く
+   ⑥ 説明会の前に（本当にやりたいことを、直前の電話で聞く）
+   ⑦ 説明会の当日・終わったら（登録が終わったら、Skyarc LINKサポートとLINKポータルを教える）
    ・いまはいと・すけさん・佐藤律子さんの合同説明会だけ。高山翔子さんの分などは、アップラインの方へ
 ================================================================ */
 const $ = q => document.querySelector(q);
@@ -94,8 +101,8 @@ try{ const raw = localStorage.getItem("skyarc_member"); if(raw && raw !== "null"
 if(member && !member.id) member = null;
 const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 
-let step = 0, agreed = false, data = null, picked = {}, msgText = null;
-const STEPS = 6;
+let step = 0, agreed = false, data = null, picked = {}, msgText = null, decided = null, guest = "", detText = null;
+const STEPS = 7;
 
 function setProg(){ $("#prog").innerHTML = Array.from({length:STEPS}, (_, i) => '<i class="' + (i <= step ? "on" : "") + '"></i>').join(""); }
 function go(n){ step = n; draw(); scrollTo(0, 0); }
@@ -115,7 +122,7 @@ function key(x){ return x.adv + "|" + x.date + "|" + x.start; }
 
 function draw(){
   setProg();
-  [drawIntro, drawSlots, drawMsg, drawBefore, drawDay, drawSheet][step]();
+  [drawIntro, drawSlots, drawMsg, drawDecided, drawSheet, drawBefore, drawDay][step]();
   bindNav();
 }
 
@@ -136,17 +143,11 @@ function drawSlots(){
     '<p class="sub">いまご案内しているのは、<b>いと・すけさん</b>と<b>佐藤律子さん</b>の合同説明会です。<br>高山翔子さんの合同説明会などについては、<b>アップラインの方に直接お尋ねください</b>。</p>' +
     '<div class="box">あなたが<b>同席できる日</b>にチェックしてください。<br>説明会は<b>はじめの1時間が説明</b>、<b>あとの1時間が質疑応答</b>の、あわせて2時間です。</div>' +
     '<div id="slots"><p class="sub">日程を読み込んでいます…</p></div>' +
-    '<div class="acts"><button type="button" class="b1" id="bCal">📅 チェックした日をカレンダーに入れる</button>' +
-    '<button type="button" class="b2" id="bCopy1">📋 チェックした日の文章をコピー</button></div>' +
+    '<div class="acts"><button type="button" class="b1" id="bCal">📅 チェックした日をカレンダーに入れる</button></div>' +
     '<div id="calArea"></div><p class="msg" id="m1"></p>' +
     nav("紹介したい方への連絡へ ›") + '</div>';
   $("#stage").innerHTML = h;
   $("#bCal").onclick = showCal;
-  $("#bCopy1").onclick = () => {
-    const l = pickedList();
-    if(!l.length) return say("#m1", "先に、同席できる日にチェックしてください", true);
-    copy(l.map(x => "・" + slotText(x) + "　" + x.adv + "さん").join("\n"), "#m1");
-  };
   if(data) drawSlotList(); else loadSlots(false);
 }
 async function loadSlots(fresh){
@@ -171,13 +172,19 @@ function drawSlotList(){
   (data.sheets || []).forEach(s => { if(advs.indexOf(s.adv) < 0) advs.push(s.adv); });
   box.innerHTML = advs.map(a => {
     const items = data.list.map((x, i) => ({ x, i })).filter(o => o.x.adv === a);
-    return '<div class="adv"><p class="an">🎤 ' + esc(a) + 'さん</p>' +
+    const allOn = items.length && items.every(o => picked[o.i]);
+    return '<div class="adv"><p class="an">🎤 ' + esc(a) + 'さん' +
+      (items.length ? '<label class="allck"><input type="checkbox" data-adv="' + esc(a) + '"' + (allOn ? " checked" : "") + '> すべてチェック</label>' : "") + '</p>' +
       (items.length ? items.map(o => '<label class="slot' + (picked[o.i] ? " on" : "") + '"><input type="checkbox" data-i="' + o.i + '"' + (picked[o.i] ? " checked" : "") + '>' +
         '<span>' + esc(slotText(o.x)) + '</span><span class="cnt">いま' + o.x.n + '名</span></label>').join("")
         : '<p class="sub">これからの日程は、まだ入っていません。</p>') + '</div>';
   }).join("") +
   '<p class="at">' + esc(data.at) + ' に読み込んだ日程です（「いま◯名」は、スプレッドシートに名前が入っている人数）。<a href="#" id="reload">🔄 もう一度読み込む</a></p>';
-  box.querySelectorAll(".slot input").forEach(c => c.onchange = () => { picked[+c.dataset.i] = c.checked; c.closest(".slot").classList.toggle("on", c.checked); msgText = null; $("#calArea").innerHTML = ""; });
+  box.querySelectorAll(".slot input").forEach(c => c.onchange = () => { picked[+c.dataset.i] = c.checked; msgText = null; decided = null; $("#calArea").innerHTML = ""; drawSlotList(); });
+  box.querySelectorAll(".allck input").forEach(c => c.onchange = () => {
+    data.list.forEach((x, i) => { if(x.adv === c.dataset.adv) picked[i] = c.checked; });
+    msgText = null; decided = null; $("#calArea").innerHTML = ""; drawSlotList();
+  });
   $("#reload").onclick = e => { e.preventDefault(); box.innerHTML = '<p class="sub">日程を読み込んでいます…</p>'; loadSlots(true); };
 }
 /* カレンダーに入れる：Googleカレンダーは1件ずつ、iPhone（iCloud）は .ics でまとめて */
@@ -216,8 +223,9 @@ function downloadIcs(l){
 /* ③ 日程調整の連絡 */
 function defaultMsg(){
   const l = pickedList();
+  const advs = []; l.forEach(x => { if(advs.indexOf(x.adv) < 0) advs.push(x.adv); });
   return "〇〇さん、LINKの合同説明会の日程をお送りしますね😊\n次の中から、ご都合のよい日を教えてください。\n\n" +
-    (l.length ? l.map(x => "・" + slotText(x)).join("\n") : "・（日程）") +
+    (l.length ? advs.map(a => "【" + a + "さんの合同説明会】\n" + l.filter(x => x.adv === a).map(x => "・" + slotText(x)).join("\n")).join("\n\n") : "・（日程）") +
     "\n\nはじめの1時間が説明会、あとの1時間が質問の時間です（Zoomで参加できます）。\n私も一緒に参加します！よろしくお願いします。";
 }
 function drawMsg(){
@@ -233,18 +241,55 @@ function drawMsg(){
   $("#bCopy2").onclick = () => copy($("#msg").value, "#m2");
 }
 
-/* ④ 説明会の前に */
+/* ④ 日程が決まったら：詳細の文章 */
+function sheetOf(adv){ return (data && data.sheets || []).filter(s => s.adv === adv)[0] || {}; }
+function detailMsg(){
+  if(!decided) return "";
+  const sh = sheetOf(decided.adv);
+  const p = decided.date.split("/");
+  return (guest || "〇〇") + "さん、" + Number(p[1]) + "月" + Number(p[2]) + "日（" + decided.wd + "）" + decided.start + "から、LINKの説明会のお申し込み、ありがとうございます😊\n" +
+    "私も一緒に参加しますので、ご安心くださいね。\n\n" +
+    "では、当日のオンライン（Zoom）の情報をお送りします。\n" + (sh.zoom || "（Zoomの情報）") + "\n\n" +
+    "当日、LINKのことを説明してくださる" + decided.adv + "さんのプロフィールをお預かりしていますので、お送りしますね。\n\n" +
+    (sh.profile || "（プロフィール）") + "\n\n" +
+    "改めまして、当日よろしくお願いします。\n" +
+    "当日はオンラインでの参加になりますので、電波状況の確認のために、お電話させていただくこともありますが、よろしくお願いしますね。";
+}
+function drawDecided(){
+  const l = pickedList().length ? pickedList() : (data && data.list || []);
+  let h = '<div class="card"><span class="tag">日程が決まったら</span><h2>決まった日の詳細を送りましょう</h2>' +
+    '<p>日程が決まったら、「この日でお願いします、ありがとうございます。では詳細をお送りしますね」とお返事して、次の文章を送ります。</p>' +
+    '<p class="lab" style="font-weight:700;font-size:13.5px;margin-top:8px;">① 決まった日を選んでください</p>' +
+    (l.length ? '<div class="pick">' + l.map(x => { const i = data.list.indexOf(x);
+      return '<label><input type="radio" name="dec" data-i="' + i + '"' + (decided === x ? " checked" : "") + '><span>' + esc(slotText(x)) + '　' + esc(x.adv) + 'さん</span></label>'; }).join("") + '</div>'
+      : '<p class="sub">日程が読み込まれていません。「もどる」で日程の画面へ。</p>') +
+    '<p class="lab" style="font-weight:700;font-size:13.5px;margin-top:8px;">② お相手のお名前（なくても大丈夫です）</p><input type="text" id="guest" placeholder="〇〇" value="' + esc(guest) + '">' +
+    '<p class="lab" style="font-weight:700;font-size:13.5px;margin-top:10px;">③ 送る文章（書きかえてからコピーできます）</p>' +
+    '<textarea id="det" style="min-height:300px"></textarea>' +
+    '<div class="acts"><button type="button" class="b1" id="bCopy3">📋 この文章をコピー</button></div><p class="msg" id="m3"></p>' +
+    nav("コピーして送ったら、次へ ›") + '</div>';
+  $("#stage").innerHTML = h;
+  const refresh = () => { detText = detailMsg(); $("#det").value = detText || "先に、決まった日を選んでください。"; };
+  if(detText) $("#det").value = detText; else refresh();
+  document.querySelectorAll('.pick input').forEach(r => r.onchange = () => { decided = data.list[+r.dataset.i]; refresh(); });
+  $("#guest").oninput = e => { guest = e.target.value.trim(); if(decided) refresh(); };
+  $("#det").oninput = e => { detText = e.target.value; };
+  $("#bCopy3").onclick = () => { if(!decided) return say("#m3", "先に、決まった日を選んでください", true); copy($("#det").value, "#m3"); };
+}
+
+/* ⑥ 説明会の前に */
 function drawBefore(){
   $("#stage").innerHTML = '<div class="card"><span class="tag">説明会の前に</span><h2>その方の「本当にやりたいこと」を聞いておきましょう</h2>' +
+    '<p>説明会の<b>直前の電話</b>（電波状況の確認のお電話）で、聞いておきましょう。</p>' +
     '<p>LINKが気になる方は、たとえば「集客」など、何かの目的があって説明会を聞きに来ます。<br>その奥にある、<b>その方が人生で本当にやりたいこと</b>を聞いておきましょう。</p>' +
-    '<p>説明会の前（できれば直前）に、もう一度お話しします。たとえば、こんなふうに伝えます。</p>' +
+    '<p>たとえば、こんなふうに伝えます。</p>' +
     '<div class="talk">「私は、人生でこういうことをやりたいと思っていて、それを叶えるのに、LINKってすごく使えるなと思ってやっているんです。\n〇〇さんは、〇〇（集客など）のことでLINKが気になるっておっしゃっていましたよね。〇〇さんも、やりたいことってあるんですか？」</div>' +
     '<p>（その方のお話を聞いてから）</p>' +
     '<div class="talk">「それだったら、そういうことも叶うかもしれない、という感覚で、楽しみながら聞いてほしいんです。\n私も、一緒にそれを叶えていく仲間になれたらいいなと思っていて。\nじゃあ、また後ほど、合同説明会を一緒に楽しんで聞きましょうね！」</div>' +
     nav("次へ ›") + '</div>';
 }
 
-/* ⑤ 当日・終わったら */
+/* ⑦ 当日・終わったら */
 function drawDay(){
   $("#stage").innerHTML = '<div class="card"><span class="tag">当日</span><h2>説明会の当日と、終わったあと</h2>' +
     '<h3>説明を聞いているあいだ</h3><p>あなたが<b>楽しそうに、わくわくしながら</b>聞いていることが大切です。</p>' +
@@ -252,13 +297,18 @@ function drawDay(){
     '<div class="talk">「登録作業は15分ほどで、すぐ終わります。私がサポートしますので、ぜひ一緒に飛び込みましょう！」</div>' +
     '<p>そのあとのやり方や、おつなぎの上手なやり方などは、<b>Bトレ</b>を受けて勉強してください。</p>' +
     '<div class="acts"><a class="b2" href="skyarc-recruit.html">🚀 紹介・ビジネス活動サポート（Bトレ）</a></div>' +
-    nav("次へ ›") + '</div>';
+    '<h3>登録が終わったら</h3><p>その方に、<b>Skyarc LINKサポート</b>と<b>LINKポータル</b>を教えてあげてください。</p>' +
+    '<div class="urls" id="urls">Skyarc LINKサポート\nhttps://support-sjm.github.io/link-support/\n\nLINKポータル\nhttps://support-sjm.github.io/link-support/link-portal/</div>' +
+    '<div class="acts"><button type="button" class="b2" id="bCopy4">📋 2つのURLをコピー</button></div><p class="msg" id="m4"></p>' +
+    nav(null) + '</div>';
+  $("#urls").style.whiteSpace = "pre-wrap";
+  $("#bCopy4").onclick = () => copy($("#urls").textContent, "#m4");
 }
 
-/* ⑥ スプレッドシートに書く */
+/* ⑤ スプレッドシートに書く（日程が決まったら） */
 function drawSheet(){
   const sheets = data && data.sheets || [];
-  $("#stage").innerHTML = '<div class="card"><span class="tag">記入</span><h2>合同説明会のスプレッドシートに書きましょう</h2>' +
+  $("#stage").innerHTML = '<div class="card"><span class="tag">記入</span><h2>日程が決まったら、合同説明会のスプレッドシートに書きましょう</h2>' +
     '<p>合同説明会は、アドバイザーさんのスプレッドシートに記入して申し込みます。</p>' +
     '<ul class="lst"><li>一緒に同席する<b>あなたのお名前</b></li><li>新規でお話を聞く<b>方のお名前</b></li>' +
     '<li>質疑応答の時間に先輩に手伝ってもらうときは、<b>その先輩のお名前</b></li>' +
@@ -268,7 +318,7 @@ function drawSheet(){
     '<p>ぜひ<b>感謝を循環させて</b>、みんなのやりたいことが叶っていく場にしていきましょう😊</p>' +
     '<div class="acts">' + (sheets.length ? sheets.map(s => '<a class="b3" href="' + esc(s.url) + '" target="_blank" rel="noopener">📝 ' + esc(s.adv) + 'さんのスプレッドシートを開く</a>').join("")
       : '<p class="sub">スプレッドシートの場所は、日程を読み込むと出ます（「もどる」で日程の画面へ）。</p>') + '</div>' +
-    nav(null) + '</div>';
+    nav("次へ ›") + '</div>';
 }
 
 function say(sel, t, bad){ const m = $(sel); if(!m) return; m.style.color = bad ? "#C62828" : "#2E7D32"; m.textContent = t; }
