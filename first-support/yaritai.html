@@ -71,7 +71,7 @@
   .done b{color:var(--deep);}
   .hist{font-size:12px;color:#7A72A0;margin-top:10px;}
   @media (max-width:700px){ .wip{margin-right:62px !important;} }
-  .wip{background:#FFF3E0;border:2px dashed #FFB74D;color:#E65100;border-radius:12px;padding:8px 8px;font-size:12.5px;font-weight:700;text-align:center;margin:4px 0 10px;}
+  .wip{background:#FFF3E0;border:2px dashed #FFB74D;color:#E65100;border-radius:12px;padding:8px 6px;font-size:min(12.5px,3.1vw);font-weight:700;text-align:center;margin:4px 0 10px;white-space:nowrap;}
   .verTag{display:block;text-align:center;font-size:9.5px;color:#C4B8D8;font-family:monospace;padding:16px 0 20px;}
 </style>
 </head>
@@ -90,10 +90,10 @@
 
 <script>
 /* ================================================================
-   やりたいことを見つける（仮の名前）  v1.2.069
+   やりたいことを見つける（仮の名前）  v1.2.070
    ----------------------------------------------------------------
    ・1問ずつ答えていくと「ビッグWHY → 夢 → ビジョン」になり、最後の問いのあとは自動でまとめへ。まとめには「保存する」「編集する」だけ（v1.2.067）
-   ・どの問いも「スキップ」できます
+   ・書かずに「次へ」で進んでも大丈夫です
    ・答えは書いているあいだ、この端末に下書きとして残ります（とちゅうでやめても続きから）
    ・最後に「保存する」で、日付つきでGAS（タブ「やりたいことアーカイブ」）に残ります。何度でも書き直せます
    ・見られるのは：その方のアップクリエ・サポート担当・系列リーダーと、クリエーターズ以上（見る画面はこれから）
@@ -148,9 +148,8 @@ function draw(){
   let h = '<div class="card"><span class="tag ' + it.tag + '">' + it.t + '</span><p class="q">' + esc(it.q) + '</p>' + (it.sub ? '<p class="sub">' + esc(it.sub) + '</p>' : "");
   if(it.two) h += it.two.map((l, i) => '<p class="lab">' + esc(l) + '</p><textarea id="ta' + i + '" style="min-height:90px">' + esc(v[i] || "") + '</textarea>').join("");
   else h += '<textarea id="ta0">' + esc(v) + '</textarea>';
-  h += '<p class="mic">' + MIC + '</p>' + navHtml() + '<button type="button" class="skip" id="bSkip">この質問はスキップ ›</button></div>';
+  h += '<p class="mic">' + MIC + '</p>' + navHtml() + '</div>';
   $("#stage").innerHTML = h; bindNav();
-  $("#bSkip").onclick = () => { D.step++; saveDraft(); draw(); scrollTo(0, 0); };   /* 書いた中身は変えずに、次へ */
 }
 function navHtml(nextLabel){ return '<div class="nav"><button type="button" class="back" id="bBack">‹ もどる</button><button type="button" class="next" id="bNext">' + (nextLabel || "次へ ›") + '</button></div>'; }
 function readAns(){
