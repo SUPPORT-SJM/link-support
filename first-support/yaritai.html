@@ -46,6 +46,10 @@
   .nav{display:flex;gap:8px;margin-top:14px;}
   .nav .back{flex:0 0 auto;background:#fff;border:2px solid var(--line);color:#6C6588;border-radius:13px;padding:12px 16px;font-weight:700;font-size:14px;}
   .nav .next{flex:1;background:var(--main);color:#fff;border-radius:13px;padding:13px;font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:16px;}
+  .big2{display:flex;flex-direction:column;gap:9px;margin-top:14px;}
+  .big2 button{width:100%;border-radius:13px;padding:13px;font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:16px;color:#fff;}
+  .big2 .b1{background:var(--main);} .big2 .b2{background:var(--focus);}
+  .pick .gh{font-size:12.5px;font-weight:900;color:#2E8A6E;margin:8px 0 0;}
   .skip{display:block;margin:10px auto 0;background:none;color:#8A83AA;font-size:12.5px;text-decoration:underline;}
   .pre p{font-size:15px;line-height:1.9;margin-bottom:8px;}
   .pre .big{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:17px;color:var(--deep);background:var(--soft);border-radius:14px;padding:12px 14px;margin:6px 0 10px;line-height:1.75;}
@@ -83,7 +87,7 @@
 
 <script>
 /* ================================================================
-   やりたいことを見つける（仮の名前）  v1.2.063
+   やりたいことを見つける（仮の名前）  v1.2.064
    ----------------------------------------------------------------
    ・1問ずつ答えていくと「ビッグWHY → 夢 → ビジョン」が形になり、5つの質問でビジョンを1つずつ形にします
    ・答えは書いているあいだ、この端末に下書きとして残ります（とちゅうでやめても続きから）
@@ -176,29 +180,38 @@ function drawPre(){
 }
 
 /* ---------- 形にする（5つの質問） ---------- */
+/* 書いたビジョンを、どこから出てきたものかで分けて並べます */
+const VG = [["vision.fun","楽しい由来のビジョン"],["vision.happy","幸せ由来のビジョン"],["vision.money","お金に関するビジョン"],["vision.time","時間の自由からのビジョン"],["vision.friends","仲間がいたらのビジョン"],["vision.other","その他のビジョン"]];
 function candidates(){
-  const out = [];
-  ["vision.fun","vision.happy","vision.time","vision.friends","vision.other"].forEach(k => String(D.a[k] || "").split(/\n+/).forEach(l => { l = l.replace(/^[\s・\-●○◎◉✅]+/, "").trim(); if(l && out.indexOf(l) < 0) out.push(l); }));
-  const m = D.a["vision.money"]; if(m && String(m[1] || "").trim()) String(m[1]).split(/\n+/).forEach(l => { l = l.trim(); if(l && out.indexOf(l) < 0) out.push(l); });
-  return out;
+  const seen = [], groups = [];
+  VG.forEach(g => {
+    let v = D.a[g[0]];
+    if(g[0] === "vision.money") v = v ? (String(v[1] || "").trim() ? v[1] : (String(v[0] || "").trim() ? v[0] : "")) : "";
+    const items = [];
+    String(v || "").split(/\n+/).forEach(l => { l = l.replace(/^[\s・\-●○◎◉✅]+/, "").trim(); if(l && seen.indexOf(l) < 0){ seen.push(l); items.push(l); } });
+    if(items.length) groups.push({ nm:g[1], items });
+  });
+  return { groups, flat: seen };
 }
+function sumIdx(){ return Q.findIndex(x => x.k === "sum"); }
+function focusIdx(){ return Q.findIndex(x => x.k === "focus"); }
 function drawFocus(){
   /* fi < 0：どのビジョンを形にするか選ぶ画面 */
   if(D.fi < 0){
-    const c = candidates(), shaped = D.focus.map(f => f.title);
+    const cg = candidates(), c = cg.flat, shaped = D.focus.map(f => f.title);
     let h = '<div class="card"><span class="tag focus">形にする</span><p class="q">書いたビジョンの中から1つ選んで、形にしてみましょう</p>' +
       '<p class="sub">選んだビジョンに、4つの質問をします。いくつでも、くり返し形にできます。</p>' +
       (shaped.length ? '<p class="lab">✅ 形にしたビジョン：' + shaped.map(esc).join("／") + '</p>' : "") +
-      '<div class="pick" id="pick">' + c.map((t, i) => '<button type="button" data-i="' + i + '">' + (shaped.indexOf(t) >= 0 ? "✅ " : "🌱 ") + esc(t) + '</button>').join("") + '</div>' +
-      '<p class="lab">リストにないものを書く</p><input type="text" id="ownV" placeholder="形にしたいビジョン">' +
-      '<div class="nav"><button type="button" class="back" id="bBack">‹ もどる</button><button type="button" class="next" id="bGo">このビジョンを形にする ›</button></div>' +
-      '<button type="button" class="skip" id="bSum">' + (shaped.length ? "まとめへ進む ›" : "今回は形にしないで、まとめへ ›") + '</button></div>';
+      '<div class="pick" id="pick">' + cg.groups.map(g => '<p class="gh">' + esc(g.nm) + '</p>' + g.items.map(t => '<button type="button" data-i="' + c.indexOf(t) + '">' + (shaped.indexOf(t) >= 0 ? "✅ " : "🌱 ") + esc(t) + '</button>').join("")).join("") + '</div>' +
+      '<p class="lab">リストにないビジョンを書く</p><input type="text" id="ownV" placeholder="形にしたいビジョン">' +
+      '<div class="big2"><button type="button" class="b1" id="bGo">このビジョンを形にする ›</button><button type="button" class="b2" id="bSum">まとめに進む ›</button></div>' +
+      '<button type="button" class="skip" id="bBack">‹ もどる</button></div>';
     $("#stage").innerHTML = h;
     let sel = "";
     document.querySelectorAll("#pick button").forEach(b => b.onclick = () => { document.querySelectorAll("#pick button").forEach(x => x.classList.remove("on")); b.classList.add("on"); sel = c[+b.dataset.i]; $("#ownV").value = ""; });
     $("#ownV").oninput = () => { document.querySelectorAll("#pick button").forEach(x => x.classList.remove("on")); sel = ""; };
     $("#bBack").onclick = () => { D.step--; saveDraft(); draw(); scrollTo(0, 0); };
-    $("#bSum").onclick = () => { D.step++; saveDraft(); draw(); scrollTo(0, 0); };
+    $("#bSum").onclick = () => { D.step = sumIdx(); saveDraft(); draw(); scrollTo(0, 0); };
     $("#bGo").onclick = () => {
       const t = ($("#ownV").value.trim() || sel);
       if(!t){ alertBox("形にしたいビジョンを、1つ選ぶか書いてください"); return; }
@@ -216,7 +229,7 @@ function drawFocus(){
   $("#stage").innerHTML = h;
   const keep = () => { f[q.k] = $("#fta").value; saveDraft(); };
   $("#bBack").onclick = () => { keep(); if(D.fs > 0) D.fs--; else D.fi = -1; saveDraft(); draw(); scrollTo(0, 0); };
-  $("#bNext").onclick = () => { keep(); if(D.fs < FQ.length - 1) D.fs++; else { D.fi = -1; D.fs = 0; } saveDraft(); draw(); scrollTo(0, 0); };
+  $("#bNext").onclick = () => { keep(); if(D.fs < FQ.length - 1) D.fs++; else { D.fi = -1; D.fs = 0; D.step = sumIdx(); } saveDraft(); draw(); scrollTo(0, 0); };   /* 4つ答えたら、まとめへ */
 }
 function alertBox(t){ let m = $("#amsg"); if(!m){ m = document.createElement("p"); m.id = "amsg"; m.className = "msg"; m.style.color = "#C62828"; $(".card").appendChild(m); } m.textContent = t; }
 
@@ -237,12 +250,13 @@ function sumHtml(a, focus){
 }
 function drawSum(){
   $("#stage").innerHTML = '<div class="card sum"><span class="tag pre">まとめ</span><p class="q">あなたの「やりたいこと」</p>' + sumHtml(D.a, D.focus) +
-    '<div class="nav"><button type="button" class="back" id="bBack">‹ もどる</button><button type="button" class="next" id="bSave">💾 保存する</button></div>' +
-    '<p class="msg" id="sMsg"></p><p class="hist" id="hist"></p>' +
+    '<div class="big2"><button type="button" class="b1" id="bSave">💾 保存する</button><button type="button" class="b2" id="bAdd">＋ ビジョンを追加する</button></div>' +
+    '<p class="msg" id="sMsg"></p><button type="button" class="skip" id="bBack">‹ もどる</button><p class="hist" id="hist"></p>' +
     '<div class="done">🎉 おつかれさまでした。<br>これをもとに、<b>アップラインの方と相談しながら、あなたのやりたいことを叶えていきましょう。</b><br><br>' +
     'やりたいことがまだはっきりしない方こそ、<b>練習のような感覚で、日々思い出したときに</b>やってみてください。答えは変わっていって大丈夫です。書き直すたびに、日付つきで残っていきます。</div></div>';
   $("#bBack").onclick = () => { D.step--; saveDraft(); draw(); scrollTo(0, 0); };
   $("#bSave").onclick = saveIt;
+  $("#bAdd").onclick = () => { D.step = focusIdx(); D.fi = -1; D.fs = 0; saveDraft(); draw(); scrollTo(0, 0); };
   showHist();
 }
 async function post(params){
