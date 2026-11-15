@@ -8,6 +8,6 @@ window.BAM_MANIFEST = [
   { day: 5, title: "2026年 11月 5日目", ready: true },
   { day: 6, title: "2026年 11月 6日目", ready: true },
   { day: 7, title: "2026年 11月 7日目", ready: true },
-  { day: 8, title: "2026年 11月 8日目（途中まで）", ready: true },
-  { day: 9, title: "2026年 11月 9日目：総括", ready: false }
+  { day: 8, title: "2026年 11月 8日目", ready: true },
+  { day: 9, title: "2026年 11月 9日目：総括", ready: true }
 ];
