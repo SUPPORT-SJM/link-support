@@ -343,7 +343,9 @@ async function send(){
       $("#formArea").style.display = "none";
       $("#doneArea").style.display = "block";
       $("#doneTo").innerHTML = "<b>" + (j.to || "担当の方") + "</b> に"
-        + (j.edit ? "修正のお願いを" : "") + "お届けしました。";
+        + (j.edit ? "修正のお願いを" : "") + "お届けしました。"
+        /* v1.2.088：届け先の方が名簿にいないときは、いったん交通整備課統括（さかいあたる）へ届きます */
+        + (j.fallback ? "<br>ただいま届け先の方が見当たらないため、いったん交通整備課統括のさかいあたるさんに連絡が行くことになりますが、順次、返事や反応が来るのをお待ちください。" : "");
       show("", "");
       window.scrollTo({top:0, behavior:"smooth"});
       return;

@@ -2,6 +2,7 @@
    集客の環境（v1.2.086）
    ・SASAEAI のプロフィールURL：入れる →「できた（保存する）」→ URLをコピー・QRコード
    ・LINK-BASE の事業URL：カテゴリ・タイトル・URLを入れて「できた（保存する）」で足していきます（いくつでも）
+       v1.2.088：えらんでいる事業を「この事業を消す」で消せます（linkbaseDel）
        新しい3つを出し、「もっと見る」で全部。えらんだ事業のQRコードとURLのコピー
    ・ホームの「LINKを知ろう › 集客の環境を整えよう」と、便利な情報一覧の SASAEAI・LINK-BASE の丸で、同じものを出します
    ・保存先：スプレッドシートのタブ「SASAEAIプロフィール」「LINK-BASE掲載」（GAS：myLinks・sasaeaiSave・linkbaseAdd）
@@ -30,6 +31,12 @@
 .skl .skl-it .d{font-size:11.5px;color:#78909C}
 .skl .skl-more{display:block;width:100%;margin-top:4px;padding:8px;border:none;background:none;color:#1565C0;font-family:inherit;font-weight:700;font-size:14px;cursor:pointer;text-decoration:underline}
 .skl .skl-empty{font-size:13.5px;color:#607D8B}
+.skl .skl-del{display:block;margin:10px auto 0;padding:6px 14px;border:1.5px solid #E57373;border-radius:999px;background:#fff;color:#C62828;font-family:inherit;font-weight:700;font-size:13px;cursor:pointer}
+.skl .skl-del:disabled{opacity:.5}
+#sklConf{position:fixed;inset:0;z-index:99999;background:rgba(20,25,60,.45);display:flex;align-items:center;justify-content:center;padding:16px}
+#sklConf .p{background:#fff;border-radius:16px;max-width:360px;width:100%;padding:16px;font-size:15px;line-height:1.7}
+#sklConf .r{display:flex;gap:8px;margin-top:12px}
+#sklConf button{flex:1;border-radius:12px;padding:11px;font-family:inherit;font-weight:700;font-size:15px;cursor:pointer}
 `;
   function addCss(){ if(document.getElementById("sklCss")) return; const s = document.createElement("style"); s.id = "sklCss"; s.textContent = CSS; document.head.appendChild(s); }
   const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -43,6 +50,15 @@
   }
   function qrSrc(url){
     try{ const q = qrcode(0, "M"); q.addData(url); q.make(); return q.createDataURL(6, 8); }catch(e){ return ""; }
+  }
+  /* 確かめの小さなまど（ブラウザの確認ダイアログは使いません） */
+  function sklConfirm(text, yes){
+    const d = document.createElement("div"); d.id = "sklConf";
+    d.innerHTML = '<div class="p"><p>' + esc(text) + '</p><div class="r"><button type="button" style="background:#fff;border:2px solid #CFD8DC;color:#455A64">やめる</button><button type="button" style="background:#E53935;border:2px solid #E53935;color:#fff">消す</button></div></div>';
+    document.body.appendChild(d);
+    const b = d.querySelectorAll("button");
+    b[0].onclick = () => d.remove();
+    b[1].onclick = () => { d.remove(); yes(); };
   }
   let cache = null;
   async function api(params, post){
@@ -128,7 +144,8 @@
           : '<p class="skl-empty">まだありません。上で入れて「できた（保存する）」を押すと、ここに出ます。</p>') +
         (cur ? '<p class="skl-qrt" style="margin-top:10px;">' + esc(cur.title) + '</p><div class="skl-url">' + esc(cur.url) + '</div>' +
           '<button type="button" class="skl-btn sub" data-k="copy">📋 URLをコピーする</button><p class="skl-msg" data-k="cmsg"></p>' +
-          '<img class="skl-qr" alt="' + esc(cur.title) + 'のQRコード" src="' + qrSrc(cur.url) + '"><p class="skl-qrt">スマホのカメラで読みとれます</p>' : '') +
+          '<img class="skl-qr" alt="' + esc(cur.title) + 'のQRコード" src="' + qrSrc(cur.url) + '"><p class="skl-qrt">スマホのカメラで読みとれます</p>' +
+          '<button type="button" class="skl-del" data-k="del">🗑 この事業を消す</button><p class="skl-msg" data-k="dmsg"></p>' : '') +
         (opt.view ? '<a class="skl-go" href="https://link-base.jp/" target="_blank" rel="noopener">LINK-BASEサイトにアクセスする ›</a>' : '') +
         '</div>';
       const q = k => box.querySelector('[data-k="' + k + '"]');
@@ -136,6 +153,16 @@
       box.querySelectorAll('input[name=sklLb]').forEach(r => r.onchange = () => { sel = +r.value; draw(); });
       if(q("more")) q("more").onclick = () => { all = !all; draw(); };
       if(cur) copyBtn(q("copy"), q("cmsg"), cur.url, "📋 URLをコピーする");
+      /* v1.2.088：えらんでいる事業を消します（確かめてから） */
+      if(cur) q("del").onclick = () => sklConfirm("「" + cur.title + "」を消しますか？（もとにはもどせません）", async () => {
+        const m = q("dmsg"); m.textContent = "消しています…"; m.style.color = "#607D8B"; q("del").disabled = true;
+        try{
+          const j = await api({ action:"linkbaseDel", at:cur.at, url:cur.url }, true);
+          if(j && j.ok){ cache = j; sel = 0; draw(); const m2 = q("smsg"); m2.textContent = "🗑 消しました"; m2.style.color = "#2E7D32"; return; }
+          m.textContent = j && j.error === "notfound" ? "見つかりませんでした。ページを開きなおしてください" : errText(j).replace("読み込めませんでした", "消せませんでした"); m.style.color = "#C62828";
+        }catch(e){ m.textContent = "通信できませんでした。電波のよいところでお試しください"; m.style.color = "#C62828"; }
+        q("del").disabled = false;
+      });
       q("save").onclick = async () => {
         const cat = q("cat").value.trim(), title = q("title").value.trim(), url = q("url").value.trim(), m = q("smsg");
         if(!title){ m.textContent = "⚠️ 事業のタイトルを入れてください"; m.style.color = "#C62828"; return; }

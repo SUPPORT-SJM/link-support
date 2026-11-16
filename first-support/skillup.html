@@ -65,6 +65,8 @@ const GAS_URL = window.SKY_GAS_URL;
 let member = null;
 try{ const raw = localStorage.getItem("skyarc_member"); if(raw && raw !== "null") member = JSON.parse(raw); }catch(e){}
 if(member && !member.id) member = null;
+/* v1.2.088：アップクリエの方が名簿にいないときは、いったん交通整備課統括（さかいあたる）へ届きます */
+const FALLBACK_MSG = "✅ 送りました。ただいまアップクリエの方が見当たらないため、いったん交通整備課統括のさかいあたるさんに連絡が行くことになりますが、順次、返事や反応が来るのをお待ちください。";
 const q = o => Object.keys(o).map(k => k + "=" + encodeURIComponent(o[k])).join("&");
 
 async function load(){
@@ -103,7 +105,7 @@ async function send(){
   const m = $("#msg"); m.style.color = "#5B6386"; m.textContent = "送っています…"; $("#go").disabled = true;
   try{
     const j = await (await fetch(GAS_URL, { method:"POST", body:new URLSearchParams({ action:"skillReq", id:member.id, pin:member.pin }) })).json();
-    if(j && j.ok){ m.style.color = "#2E7D32"; m.textContent = "✅ " + j.to + "さんに通知を送りました。開放されるまで、しばらくお待ちください。"; return; }
+    if(j && j.ok){ m.style.color = "#2E7D32"; m.textContent = j.fallback ? FALLBACK_MSG : "✅ " + j.to + "さんに通知を送りました。開放されるまで、しばらくお待ちください。"; return; }
     m.style.color = "#C62828";
     m.textContent = j && j.error === "noreceiver" ? "アップクリエの方が名簿に入っていません。アップラインの方に直接ご相談ください。" : "送れませんでした。少しおいてお試しください。";
   }catch(e){ m.style.color = "#C62828"; m.textContent = "通信できませんでした。"; }
