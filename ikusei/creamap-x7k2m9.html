@@ -76,10 +76,14 @@
   .org{display:flex;flex-direction:column;align-items:center;min-width:max-content;padding:10px 20px;}
 
   /* ===== 拡大縮小 ===== */
-  #chartArea{overflow:auto;padding-bottom:20px;position:relative;cursor:grab;}
+  /* v1.2.093：地図のように、わくの中を自由に動かします（ドラッグで上下左右・ホイールやつまむ指で拡大縮小） */
+  #chartArea{overflow:hidden;position:relative;cursor:grab;height:max(420px, calc(100vh - 150px));
+    background:#FBFAFF;border:1px solid var(--line);border-radius:16px;touch-action:none;user-select:none;-webkit-user-select:none;}
   #chartArea.grabbing{cursor:grabbing;}
   #chartArea.grabbing .card{cursor:grabbing;}
-  #zoomWrap{transform-origin:0 0;transition:transform .12s ease-out;display:inline-block;min-width:100%;}
+  #zoomWrap{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform;}
+  #zoomWrap.anim{transition:transform .15s ease-out;}
+  #zoomWrap .empty{width:min(560px, 90vw);}
   .zoom-bar{
     position:sticky;top:0;z-index:15;display:flex;align-items:center;gap:8px;
     background:rgba(255,255,255,.94);backdrop-filter:blur(6px);
@@ -273,7 +277,7 @@
         <button class="wide" onclick="zoomFit()" title="全体が入る大きさにします">全体表示</button>
         <button class="wide" onclick="zoomReset()">100%</button>
       </div>
-      <p class="zoom-hint">マウスホイールで拡大縮小／ドラッグで上下左右に動かせます</p>
+      <p class="zoom-hint">ドラッグで上下左右に動かせます／マウスホイール・指2本でつまむと拡大縮小</p>
 
       <div id="editBox"></div>
       <div id="chartArea"><div id="zoomWrap"></div></div>
@@ -573,7 +577,7 @@ function renderChart(){
   const html = mode === "person" ? lineageHtml(list[0], 1) : list.map(m=>nodeHtml(m,1)).join("");
   area.innerHTML = '<div class="org">' + html + '</div>';
   // 描画が終わってから線を引きます
-  requestAnimationFrame(()=>{ drawLines(); applyZoom(); });
+  requestAnimationFrame(()=>{ drawLines(); resetView(); });
 }
 
 /* 親カードの下端から、各子カードの上端へ線を引きます */
@@ -776,141 +780,140 @@ function backToPortal(){
 }
 
 
-/* ================= 拡大縮小 ================= */
-let zoomLevel = 1;
-const ZOOM_MIN = 0.25, ZOOM_MAX = 2.5;
+/* ================= 拡大縮小・動かす（v1.2.093：地図のように） =================
+   ・わく（#chartArea）の中で、図（#zoomWrap）を translate と scale で動かします
+   ・ドラッグ（マウス・指1本）で上下左右に、どこへでも動かせます（図が少しでも見えている範囲で）
+   ・マウスホイール・指2本でつまむと、その場所を中心に拡大縮小します
+   ・「全体表示」は全体が入る大きさにして、まんなかに置きます */
+let zoomLevel = 1, panX = 0, panY = 0;
+const ZOOM_MIN = 0.15, ZOOM_MAX = 3;
+const KEEP = 80;   /* 図が、わくの中に少なくともこれだけ見えているようにします */
 
-function applyZoom(){
+function orgSize(){
+  const org = document.querySelector("#zoomWrap .org") || document.querySelector("#zoomWrap > *");
+  return org ? { w: org.offsetWidth, h: org.offsetHeight } : { w: 0, h: 0 };
+}
+function clampPan(){
+  const area = document.getElementById("chartArea");
+  if(!area) return;
+  const { w, h } = orgSize(), aw = area.clientWidth, ah = area.clientHeight;
+  const cw = w * zoomLevel, ch = h * zoomLevel;
+  panX = Math.min(aw - KEEP, Math.max(KEEP - cw, panX));
+  panY = Math.min(ah - KEEP, Math.max(KEEP - ch, panY));
+}
+function applyZoom(anim){
   const wrap = document.getElementById("zoomWrap");
   if(!wrap) return;
-  wrap.style.transform = `scale(${zoomLevel})`;
-  // 縮小しても余白が正しく出るように、見かけの大きさを調整します
-  const org = wrap.querySelector(".org");
-  if(org){
-    wrap.style.width  = (org.offsetWidth  * zoomLevel) + "px";
-    wrap.style.height = (org.offsetHeight * zoomLevel) + "px";
-  }
+  clampPan();
+  wrap.classList.toggle("anim", !!anim);
+  wrap.style.transform = `translate(${panX}px, ${panY}px) scale(${zoomLevel})`;
   const pct = document.getElementById("zoomPct");
   if(pct) pct.textContent = Math.round(zoomLevel*100) + "%";
 }
-
-function setZoom(v){
-  zoomLevel = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, v));
-  applyZoom();
+/* (cx, cy)：わくの中のこの点が、拡大縮小しても同じところに見えるようにします（ないときは、わくのまんなか） */
+function setZoom(v, cx, cy, anim){
+  const area = document.getElementById("chartArea");
+  const nz = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, v));
+  if(area){
+    if(cx == null){ cx = area.clientWidth / 2; cy = area.clientHeight / 2; }
+    panX = cx - (cx - panX) * (nz / zoomLevel);
+    panY = cy - (cy - panY) * (nz / zoomLevel);
+  }
+  zoomLevel = nz;
+  applyZoom(anim);
 }
-function zoomBy(d){ setZoom(zoomLevel + d); }
-function zoomReset(){ setZoom(1); }
+function zoomBy(d){ setZoom(zoomLevel * (d > 0 ? 1.2 : 1/1.2), null, null, true); }
+function zoomReset(){ setZoom(1, null, null, true); }
 
-/* 全体が画面に収まる大きさにします */
+/* 全体が、わくに入る大きさにして、まんなかに置きます */
 function zoomFit(){
   const area = document.getElementById("chartArea");
-  const org = document.querySelector("#zoomWrap .org");
-  if(!area || !org) return;
-  const w = org.offsetWidth, h = org.offsetHeight;
-  if(!w || !h) return;
-  const fit = Math.min((area.clientWidth - 20) / w, 1);
-  setZoom(fit);
-  area.scrollLeft = 0;
+  const { w, h } = orgSize();
+  if(!area || !w || !h) return;
+  const z = Math.min((area.clientWidth - 24) / w, (area.clientHeight - 24) / h, 1);
+  zoomLevel = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, z));
+  panX = (area.clientWidth - w * zoomLevel) / 2;
+  panY = (area.clientHeight - h * zoomLevel) / 2;
+  applyZoom(true);
+}
+/* 図を描きなおしたとき：いまの大きさのまま、いちばん上の方が、わくの上のまんなかに来るようにします */
+function resetView(){
+  const area = document.getElementById("chartArea");
+  const { w } = orgSize();
+  if(!area) return;
+  panX = (area.clientWidth - w * zoomLevel) / 2;
+  panY = 12;
+  applyZoom(false);
 }
 
-/* つかんで動かす(ドラッグでスクロール) */
+/* つかんで動かす・つまんで拡大（マウスも指も、pointer でまとめて受けます） */
 (function(){
   const area = document.getElementById("chartArea");
   if(!area) return;
-
-  let dragging = false, moved = false;
-  let startX = 0, startY = 0, startL = 0, startT = 0;
-
-  area.addEventListener("mousedown", function(e){
-    if(e.button !== 0) return;            // 左ボタンのみ
-    dragging = true; moved = false;
-    startX = e.clientX; startY = e.clientY;
-    startL = area.scrollLeft; startT = area.scrollTop;
-  });
-
-  window.addEventListener("mousemove", function(e){
-    if(!dragging) return;
-    const dx = e.clientX - startX;
-    const dy = e.clientY - startY;
-    // 5px以上動いたら「動かしている」と判断します
-    if(!moved && Math.hypot(dx, dy) > 5){
+  const pts = new Map();
+  let moved = false, sx = 0, sy = 0, spx = 0, spy = 0;
+  let pinch = null;   /* { d, z, mx, my, px, py } */
+  const local = e => { const r = area.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+  const startPan = () => {
+    const p = [...pts.values()][0];
+    sx = p.x; sy = p.y; spx = panX; spy = panY;
+  };
+  area.addEventListener("pointerdown", e => {
+    if(view !== "chart") return;
+    if(e.pointerType === "mouse" && e.button !== 0) return;
+    pts.set(e.pointerId, local(e));
+    /* つかむ（pointer capture）のは、動かしはじめてから。すぐにつかむと、カードを押しても開かなくなるため */
+    if(pts.size === 1){ moved = false; startPan(); }
+    if(pts.size === 2){
+      const [a, b] = [...pts.values()];
+      [...pts.keys()].forEach(id => { try{ area.setPointerCapture(id); }catch(_){} });
+      pinch = { d: Math.hypot(a.x - b.x, a.y - b.y) || 1, z: zoomLevel, mx: (a.x + b.x) / 2, my: (a.y + b.y) / 2, px: panX, py: panY };
       moved = true;
-      area.classList.add("grabbing");
-    }
-    if(moved){
-      e.preventDefault();
-      area.scrollLeft = startL - dx;
-      area.scrollTop  = startT - dy;
     }
   });
-
-  window.addEventListener("mouseup", function(){
-    if(moved){
-      // ドラッグ直後のクリックは無効にします(カードが開かないように)
-      area.addEventListener("click", function stop(ev){
-        ev.stopPropagation(); ev.preventDefault();
-        area.removeEventListener("click", stop, true);
-      }, true);
+  area.addEventListener("pointermove", e => {
+    if(!pts.has(e.pointerId)) return;
+    pts.set(e.pointerId, local(e));
+    if(pts.size >= 2 && pinch){
+      const [a, b] = [...pts.values()];
+      const d = Math.hypot(a.x - b.x, a.y - b.y) || 1, mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+      const nz = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, pinch.z * d / pinch.d));
+      /* つまんだ点の下の図が、指といっしょに動くように */
+      panX = mx - (pinch.mx - pinch.px) * (nz / pinch.z);
+      panY = my - (pinch.my - pinch.py) * (nz / pinch.z);
+      zoomLevel = nz; applyZoom(false);
+      return;
     }
-    dragging = false; moved = false;
-    area.classList.remove("grabbing");
+    const p = pts.get(e.pointerId);
+    const dx = p.x - sx, dy = p.y - sy;
+    if(!moved && Math.hypot(dx, dy) > 5){ moved = true; area.classList.add("grabbing"); try{ area.setPointerCapture(e.pointerId); }catch(_){} }
+    if(moved){ panX = spx + dx; panY = spy + dy; applyZoom(false); }
   });
+  const end = e => {
+    if(!pts.has(e.pointerId)) return;
+    pts.delete(e.pointerId);
+    if(pts.size < 2) pinch = null;
+    if(pts.size === 1) startPan();   /* 指を1本はなしたら、のこりの指で続けて動かせます */
+    if(pts.size === 0){
+      area.classList.remove("grabbing");
+      if(moved){
+        /* 動かした直後のクリックは無効にします（カードが開かないように） */
+        const stop = ev => { ev.stopPropagation(); ev.preventDefault(); area.removeEventListener("click", stop, true); };
+        area.addEventListener("click", stop, true);
+        setTimeout(() => { area.removeEventListener("click", stop, true); moved = false; }, 80);   /* そのあとのクリックは、ふつうに開けます */
+      }
+    }
+  };
+  area.addEventListener("pointerup", end);
+  area.addEventListener("pointercancel", end);
 
-  /* 指1本でも動かせるようにします(スマホ) */
-  let tDrag = false, tx = 0, ty = 0, tl = 0, tt = 0;
-  area.addEventListener("touchstart", function(e){
-    if(e.touches.length !== 1) { tDrag = false; return; }
-    tDrag = true;
-    tx = e.touches[0].clientX; ty = e.touches[0].clientY;
-    tl = area.scrollLeft; tt = area.scrollTop;
-  }, { passive:true });
-  area.addEventListener("touchmove", function(e){
-    if(!tDrag || e.touches.length !== 1) return;
-    area.scrollLeft = tl - (e.touches[0].clientX - tx);
-    area.scrollTop  = tt - (e.touches[0].clientY - ty);
-  }, { passive:true });
-  area.addEventListener("touchend", function(){ tDrag = false; }, { passive:true });
-})();
-
-/* マウスホイールで拡大縮小(カーソルの位置を中心に) */
-(function(){
-  const area = document.getElementById("chartArea");
-  if(!area) return;
-
-  area.addEventListener("wheel", function(e){
+  /* マウスホイールで拡大縮小（カーソルの位置を中心に） */
+  area.addEventListener("wheel", e => {
     if(view !== "chart") return;
     e.preventDefault();
-    const rect = area.getBoundingClientRect();
-    // カーソルが指している位置(拡大前)
-    const px = (area.scrollLeft + e.clientX - rect.left) / zoomLevel;
-    const py = (area.scrollTop  + e.clientY - rect.top ) / zoomLevel;
-
-    const before = zoomLevel;
-    setZoom(zoomLevel * (e.deltaY < 0 ? 1.12 : 1/1.12));
-    if(zoomLevel === before) return;
-
-    // 同じ位置が指されたままになるようスクロールを合わせます
-    area.scrollLeft = px * zoomLevel - (e.clientX - rect.left);
-    area.scrollTop  = py * zoomLevel - (e.clientY - rect.top);
+    const p = local(e);
+    setZoom(zoomLevel * Math.pow(1.0015, -e.deltaY * (e.deltaMode === 1 ? 16 : 1)), p.x, p.y, false);
   }, { passive:false });
-
-  /* 指でつまんで拡大縮小(スマホ・トラックパッド) */
-  let pinchStart = 0, zoomStart = 1;
-  function dist(t){
-    const dx = t[0].clientX - t[1].clientX;
-    const dy = t[0].clientY - t[1].clientY;
-    return Math.hypot(dx, dy);
-  }
-  area.addEventListener("touchstart", function(e){
-    if(e.touches.length === 2){ pinchStart = dist(e.touches); zoomStart = zoomLevel; }
-  }, { passive:true });
-  area.addEventListener("touchmove", function(e){
-    if(e.touches.length === 2 && pinchStart){
-      e.preventDefault();
-      setZoom(zoomStart * (dist(e.touches) / pinchStart));
-    }
-  }, { passive:false });
-  area.addEventListener("touchend", function(){ pinchStart = 0; }, { passive:true });
 })();
 
 
@@ -925,7 +928,7 @@ function toast(msg){
 let resizeTimer = null;
 window.addEventListener("resize", ()=>{
   clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(()=>{ if(view === "chart") drawLines(); }, 200);
+  resizeTimer = setTimeout(()=>{ if(view === "chart"){ drawLines(); applyZoom(false); } }, 200);
 });
 window.addEventListener("pageshow", function(e){ if(e.persisted) location.reload(); });
 </script>
