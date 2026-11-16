@@ -153,6 +153,8 @@
     padding:9px 16px;text-decoration:none;
   }
   .btn-video.alt{background:var(--green-leaf);}
+  /* v1.2.091：動画を開いたら、緑に（見たしるし） */
+  .btn-video.seen{background:var(--green-leaf);}
   .btn-video .end{font-weight:400;font-size:11px;opacity:.85;}
   .chk{
     margin-left:auto;display:inline-flex;align-items:center;gap:7px;
@@ -604,6 +606,7 @@ async function login(){
 function logout(){ skyLogout(); }
 
 function enterApp(){
+  loadViewed();
   $("#loginView").style.display = "none";
   $("#appView").style.display = "block";
   $("#helloName").textContent = (member.name ? (window.skyGrowth ? skyGrowth.selfTag(member.id) : "") + member.name + "さん、" : "") + "こんにちは!";
@@ -651,7 +654,7 @@ function render(){
       ${t.rec && !t.making ? `<div class="rec"><b>🗣️ 話せるようにしよう:</b>${t.rec}</div>` : ""}
       <div class="task-actions">
         ${t.link && !t.making ? (CLIPS[t.id]
-            ? `<button type="button" class="btn-video ${t.link.alt?'alt':''}" onclick="openClip('${t.id}')">▶ 動画を見る</button>`
+            ? `<button type="button" class="btn-video ${viewed[t.id] ? 'seen' : ''}" onclick="openClip('${t.id}')">▶ 動画を見る</button>`
             : `<a class="btn-video ${t.link.alt?'alt':''}" href="${t.link.url}" target="_blank" rel="noopener">${t.link.label}${t.link.end?` <span class="end">${t.link.end}</span>`:""}</a>`) : ""}
         ${t.making
           ? `<span class="making-note">公開されたらお知らせします。おたのしみに!</span>`
@@ -674,8 +677,12 @@ function render(){
 /* 切り抜き動画のポップアップ
    v1.2.084：サムネはやめて、開いたらすぐドライブの動画を出します（動画の中の ▶ を押すと再生）。
    ドライブの動画は、サムネを押して自動で再生させることができないため、ひと手間を減らしました */
+/* v1.2.091：開いた動画を覚えておきます（この端末だけ）。「動画を見る」が緑になります */
+let viewed = {};
+function loadViewed(){ try{ viewed = JSON.parse(localStorage.getItem("gcon_viewed_" + (member && member.id)) || "{}") || {}; }catch(e){ viewed = {}; } }
 function openClip(id){
   const c = CLIPS[id]; if(!c) return;
+  if(!viewed[id]){ viewed[id] = true; try{ localStorage.setItem("gcon_viewed_" + member.id, JSON.stringify(viewed)); }catch(e){} render(); }
   const t = WEEKS.flatMap(w=>w.tasks).find(x=>x.id === id) || {};
   const d = document.createElement("div"); d.id = "clipPop";
   d.innerHTML = `<div class="cp"><p class="cp-t">${t.no} ${t.title}</p>
