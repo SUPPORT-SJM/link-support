@@ -611,7 +611,8 @@ function enterApp(){
   render();
 }
 
-/* ---------- render（v1.2.077：1週ずつ1ページ。「できたら押す」→「できた」と「合格」→ 次のステップへ） ---------- */
+/* ---------- render（v1.2.077：1週ずつ1ページ。「できたら押す」→「できた」と「合格」→ 次のステップへ）
+   v1.2.090：動画のあるものは、本人のボタンを「見た」に。アップクリエの方が確認したら（先生の丸）「できた」と出ます ---------- */
 function weekDone(wi){ const a = WEEKS[wi].tasks.filter(t=>!t.making); return a.length > 0 && a.every(t=>progress[t.id]); }
 function render(){
   const root = $("#weeksRoot");
@@ -654,9 +655,9 @@ function render(){
             : `<a class="btn-video ${t.link.alt?'alt':''}" href="${t.link.url}" target="_blank" rel="noopener">${t.link.label}${t.link.end?` <span class="end">${t.link.end}</span>`:""}</a>`) : ""}
         ${t.making
           ? `<span class="making-note">公開されたらお知らせします。おたのしみに!</span>`
-          : `<button class="chk" onclick="toggle('${t.id}')">${progress[t.id] ? "✓ できた!" : "できたら押す"}</button>`}
+          : `<button class="chk" onclick="toggle('${t.id}')">${t.link ? (progress[t.id] ? "✓ 見た!" : "見た") : (progress[t.id] ? "✓ できた!" : "できたら押す")}</button>`}
       </div>
-      ${!t.making && progress[t.id] ? `<div class="pass ${ok ? "on" : ""}">${ok ? "🎉 合格" : "⏳ 合格まち（アップクリエの方の確認待ち）"}</div>` : ""}`;
+      ${!t.making && progress[t.id] ? `<div class="pass ${ok ? "on" : ""}">${ok ? "🎉 できた（アップクリエの方が確認しました）" : "⏳ アップクリエの方の確認待ち（確認できたら「できた」になります）"}</div>` : ""}`;
     body.appendChild(el);
   });
   root.appendChild(sec);
@@ -664,10 +665,10 @@ function render(){
   const nav = document.createElement("div");
   nav.className = "wk-nav";
   nav.innerHTML = (wi > 0 ? `<button class="wk-prev" onclick="goWeek(${wi-1})">‹ 前の週</button>` : `<a class="wk-prev" href="./gcon-roadmap.html">‹ 育成の流れ</a>`) +
-    (last ? `<div class="wk-last">${weekDone(wi) ? "🎉 4週間おつかれさまでした！月1回の判定日に、先輩2人の前で通し練習をしましょう。" : "ぜんぶ「できた」になったら、判定日に進めます。"}</div>`
+    (last ? `<div class="wk-last">${weekDone(wi) ? "🎉 4週間おつかれさまでした！月1回の判定日に、先輩2人の前で通し練習をしましょう。" : "ぜんぶ押したら、判定日に進めます。"}</div>`
           : `<button class="wk-next" onclick="goWeek(${wi+1})" ${weekDone(wi) ? "" : "disabled"}>次のステップへ ›</button>`);
   root.appendChild(nav);
-  if(!last && !weekDone(wi)){ const p = document.createElement("p"); p.className = "wk-hint"; p.textContent = "この週を、ぜんぶ「できたら押す」にすると、次のステップへ進めます。"; root.appendChild(p); }
+  if(!last && !weekDone(wi)){ const p = document.createElement("p"); p.className = "wk-hint"; p.textContent = "この週を、ぜんぶ「見た」（動画がないものは「できたら押す」）にすると、次のステップへ進めます。"; root.appendChild(p); }
   updateOverall();
 }
 /* 切り抜き動画のポップアップ
