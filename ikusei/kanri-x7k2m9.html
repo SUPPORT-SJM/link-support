@@ -134,6 +134,20 @@
   #yariPop .ysum dt{color:#7A72A0;font-weight:700;font-size:12px;margin-top:6px;}
   #yariPop .ysum dd{margin:0;white-space:pre-wrap;word-break:break-word;}
   /* v1.2.092：スキルアッププロの開放（オン・オフ） */
+  .pen-btn{display:inline-grid;place-items:center;width:26px;height:26px;margin:0 4px 0 6px;vertical-align:-6px;border:1.5px solid #CFC9E3;border-radius:7px;background:#fff;font-size:13px;line-height:1;cursor:pointer;padding:0;}
+  .pen-btn:hover{background:#F3F1F8;}
+  .mtabs{display:flex;gap:6px;margin:0 0 10px;}
+  .mtabs button{flex:1;padding:9px 6px;border-radius:12px;border:2px solid #DCD6F2;background:#fff;color:#6C6588;font-family:inherit;font-weight:700;font-size:13.5px;cursor:pointer;}
+  @media (max-width:700px){ .mtabs{margin-right:54px;} }   /* 右上のメニューのボタンと重ならないように */
+  .mtabs button.on{background:#6E5FB5;border-color:#6E5FB5;color:#fff;cursor:default;}
+  .mtabs button:disabled:not(.on){opacity:.4;cursor:default;}
+  .dm-sub{font-weight:900;font-size:13.5px;color:#4A3D8F;margin:10px 0 4px;display:flex;justify-content:space-between;}
+  .sk-box{border:2px solid #FFE0B2;border-radius:14px;padding:10px 12px;font-size:13.5px;}
+  .sk-box .st{font-weight:700;margin-bottom:6px;}
+  .sk-box button{border-radius:999px;padding:8px 16px;font-family:inherit;font-weight:900;font-size:13.5px;cursor:pointer;border:2px solid #FF9800;background:#FF9800;color:#fff;}
+  .sk-box button.off{background:#fff;color:#C66A00;}
+  .sk-box button:disabled{opacity:.5;cursor:default;}
+  .pro-btn{margin-top:5px;background:#FFF3E0;color:#C66A00;border:1.5px solid #FFCC80;border-radius:999px;padding:3px 11px;font-size:11px;font-weight:700;font-family:inherit;cursor:pointer;line-height:1.5;white-space:nowrap;}
   .skill-btn{margin-top:5px;background:#FFF3E0;color:#C66A00;border:1.5px solid #FFCC80;border-radius:999px;padding:3px 11px;font-size:11px;font-weight:700;font-family:inherit;cursor:pointer;line-height:1.5;white-space:nowrap;}
   #yariPop .sk-row{display:flex;align-items:center;justify-content:space-between;gap:10px;border:2px solid #FFE0B2;border-radius:14px;padding:12px 14px;margin:10px 0 4px;font-weight:700;}
   #yariPop .sk-sw{flex:none;min-width:84px;border-radius:999px;padding:8px 14px;font-family:inherit;font-weight:900;font-size:14px;cursor:pointer;border:2px solid #CFD8DC;background:#fff;color:#607D8B;}
@@ -550,7 +564,7 @@
   .mc-people{display:flex;flex-wrap:wrap;gap:2px 14px;font-size:11.5px;color:#7A7390;line-height:1.6;}
   .mc-people .me{color:#2F7A5C;}
   .mc-foot{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:12px;color:#6A6480;border-top:1px dashed #ECE9F5;padding-top:8px;}
-  .mc-foot .dept-chip,.mc-foot .hidchk{margin-top:0;}
+  .mc-foot .dept-chip,.mc-foot .hidchk,.mc-foot .yari-btn,.mc-foot .pro-btn{margin-top:0;}   /* v1.2.094：たての位置をそろえます */
   .mc-foot .edit-row{margin-left:auto;}
   .mc-foot .flags{max-width:none;}
   .sum{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
@@ -962,6 +976,7 @@
 <div id="memModal" onclick="if(event.target===this)closeMember()">
   <div class="mm-card">
     <div class="mm-head">
+      <div class="mtabs" id="mmTabs"></div>
       <h3 id="mmTitle">会員を追加</h3>
       <p class="sub" id="mmSub">管理者・チーム代表のみ操作できます</p>
     </div>
@@ -1140,6 +1155,7 @@
 <div id="detailModal" onclick="if(event.target===this)closeDetail()">
   <div class="dm-card">
     <div class="dm-head">
+      <div class="mtabs" id="dmTabs"></div>
       <h3 id="dmName"></h3>
       <p class="sub" id="dmSub"></p>
     </div>
@@ -1225,54 +1241,29 @@ const ITEM_MASTER = {
   /* 仮組み v1.2.006：新しいファーストサポート（トップの丸：はじめの一歩 → LINKを知ろう → LINKを使おう）。タブ「flow進捗」 */
   flow: {
     label: "🌈 ファーストサポート（新）",
+    /* v1.2.094：進捗の編集では、3つに分けて出します（保存は今まで通り flow ひとつ） */
+    groups: [
+      { label:"👋 はじめの一歩", codes:["h0","h1","h2","h3"] },
+      { label:"🔎 LINKを知ろう", codes:["k1","k2a","k2b","k2c","k2d","k3a","k3b"] },
+      { label:"🚀 LINKを使おう", codes:["u1","u3"] }
+    ],
     items: [
-      ["h0","はじめの一歩：便利な2つをホームに置く"],
-      ["h1","はじめの一歩：LINK information を追加"],
-      ["h2","はじめの一歩：必要最低限のオープンチャット"],
-      ["h3","はじめの一歩：紹介URLを発行・保存"],
-      ["k1","LINKを知ろう：LINK information について"],
-      ["k2a","LINKを知ろう：ユーザーサポート会"],
-      ["k2b","LINKを知ろう：LINKセミナー"],
-      ["k2c","LINKを知ろう：グルコン"],
-      ["k2d","LINKを知ろう：チーム交流会"],
-      ["k3a","LINKを知ろう：SASAEAIにプロフィール掲載"],
-      ["k3b","LINKを知ろう：LINK-BASEに事業を掲載"],
-      ["u1","LINKを使おう：チームのチャット"],
-      ["u3","LINKを使おう：地域コミュニティ・LINKサークル"],
+      ["h0","便利な2つをホームに置く"],
+      ["h1","LINK information を追加"],
+      ["h2","必要最低限のオープンチャット"],
+      ["h3","紹介URLを発行・保存"],
+      ["k1","LINK information について"],
+      ["k2a","ユーザーサポート会"],
+      ["k2b","LINKセミナー"],
+      ["k2c","グルコン"],
+      ["k2d","チーム交流会"],
+      ["k3a","SASAEAIにプロフィール掲載"],
+      ["k3b","LINK-BASEに事業を掲載"],
+      ["u1","チームのチャット"],
+      ["u3","地域コミュニティ・LINKサークル"],
     ]
   },
-  hajime: {
-    label: "👋 はじめの一歩",
-    items: [
-      ["H1","Skyarcユーザーサポートに入る"],
-      ["H2","系列のオープンチャットを確認"],
-      ["H3","紹介URLを発行して保存"],
-    ]
-  },
-  guide: {
-    label: "📘 初期サポートガイド",
-    items: [
-      ["G1","ホーム画面にLINKポータルを置く"],
-      ["G2","LINK information(公式LINE)に入る"],
-      ["Gs","LINK informationのリッチメニューを解放"],
-      ["G3","LINKセミナー・LINKセレモニー"],
-      ["G4","LINKスケジュールサイトの使い方"],
-      ["G5","オープンチャットに入る"],
-    ]
-  },
-  step1: {
-    label: "🚀 活用の1stステップ",
-    items: [
-      ["S1","ユーザーサポート会に参加"],
-      ["S2","グルコンに参加"],
-      ["S3","LINKセミナーに参加"],
-      ["S4","チーム交流会に参加"],
-      ["S5","LINK全体のオープンチャット"],
-      ["S6","系列のオープンチャット"],
-      ["S7","LINK-BASEに掲載"],
-      ["S8","SASAEAIのマッチング設定"],
-    ]
-  },
+  /* v1.2.094：古い「はじめの一歩」「初期サポートガイド」「活用の1stステップ」は、進捗の編集から外しました */
   piyo: {
     label: "① ぴよぴよ脱出クイズ",
     items: [
@@ -2128,7 +2119,7 @@ function rowsHtml(list){
             ? `<span class="auto-fill" ${canEd ? open : ""} title="一部のデータがまとめて更新されています：${m.autoFill}">📝 要確認</span>`
             : `<span class="auto-fill" ${canEd ? open : ""} title="お名前から自動でうめました：${m.autoFill}">🔎 確認待ち</span>`) : "")
         + (m.temp ? `<span class="temp-id" ${canEd ? open : ""} title="会員番号が分からないまま登録された方です">🔗 番号まち</span>` : "");
-      const btn = canEd ? `<button class="scope-btn" ${open}>編集</button>` : "";
+      const btn = canEd ? `<button class="scope-btn" ${open}>会員情報編集</button>` : "";
       return (marks || btn) ? `<div class="edit-row">${marks}${btn}</div>` : "";
     })();
     const ssPeople = window.SS ? SS.peopleHtml(m.id) : "";
@@ -2136,7 +2127,7 @@ function rowsHtml(list){
     const rank = roleLabel(m);
     return `<div class="mc ${rel.intro ? "is-intro" : (rel.helper ? "is-helper" : "")} ${m.needCheck ? "row-check" : (m.autoFill ? "row-auto" : "")} ${hidOn ? "row-hid" : ""}">
       <div class="mc-top">
-        <a href="#" class="nm nm-link" onclick="openDetail('${m.id}');return false;">${growMark}${m.name || "(名前未登録)"}</a>${m.realName && m.realName !== m.name ? `<span class="rn">(${m.realName})</span>` : ""}
+        <a href="#" class="nm nm-link" onclick="openDetail('${m.id}');return false;">${growMark}${m.name || "(名前未登録)"}</a><button type="button" class="pen-btn" onclick="openDetail('${m.id}')" title="進捗の編集" aria-label="進捗の編集">✏️</button>${m.realName && m.realName !== m.name ? `<span class="rn">(${m.realName})</span>` : ""}
         <span class="id">${m.id}</span>
         <span class="tags">
           <span class="tag rank">${rank}</span>
@@ -2151,7 +2142,7 @@ function rowsHtml(list){
       <div class="mc-foot">
         <div class="flags">${fb("サポーター","sup")}${fb("クリエ","")}${fb("アドバンス","adv")}${fb("系列代表","kei")}${fb("チーム代表","rep")}${fb("管理者","adm")}</div>${scopeBtn}
         ${canYari(m) ? `<button type="button" class="yari-btn" onclick="openYaritai('${m.id}')">🌱 やりたいこと</button>` : ""}
-        ${canYari(m) ? `<button type="button" class="skill-btn" onclick="openSkill('${m.id}')">🚀 スキルアッププロ</button>` : ""}
+        ${canYari(m) ? `<button type="button" class="pro-btn" onclick="openPro('${m.id}')" title="スキルアッププロの許可">🚀 プロ</button>` : ""}
         <button type="button" class="dept-chip ${m.dept ? "has" : ""}" onclick="openDeptPick('${m.id}')" title="部門">🏷 ${m.dept ? String(m.dept).split(",").join("・") : "部門：未所属"}</button>
         <label class="hidchk ${hidPend ? "pend" : ""}" title="あなたの画面だけで非表示にします"><input type="checkbox" ${hidOn ? "checked" : ""} onchange="toggleHide('${m.id}', this.checked)">非表示</label>
         ${editRow}
@@ -2201,45 +2192,6 @@ async function openYaritai(id){
       '<div class="ysum"></div>';
     body.querySelector("#ypWhen").onchange = ev => show(+ev.target.value);
     show(0);
-  }catch(err){ body.innerHTML = '<p class="yp-msg">通信できませんでした。電波のよい場所でお試しください。</p>'; }
-}
-/* ================================================================
-   スキルアッププロの開放（v1.2.092）
-   ・クリエーターズ・アドバンス・系列代表・チーム代表の方は、自動でオン
-   ・それ以外の方は、オン・オフを切りかえられます（変えられるかどうかは GAS で確かめます：
-     管理者・チーム代表、その方のアップクリエ、担当系列の系列代表・アドバンス）
-================================================================ */
-async function openSkill(id){
-  const old = document.getElementById("yariPop"); if(old) old.remove();
-  const box = document.createElement("div"); box.id = "yariPop";
-  const m = (data && data.members || []).find(x => hk(x.id) === hk(id)) || {};
-  const e = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-  box.innerHTML = '<div class="yp"><div class="yp-h">🚀 ' + e(m.name || id) + ' さんのスキルアッププロ</div><div id="skBody"><p class="yp-msg">読み込んでいます…</p></div><button type="button" class="yp-close">とじる</button></div>';
-  document.body.appendChild(box);
-  const close = () => box.remove();
-  box.querySelector(".yp-close").onclick = close;
-  box.addEventListener("click", ev => { if(ev.target === box) close(); });
-  const body = box.querySelector("#skBody");
-  const base = { id:admin.id, pin:admin.pin, email:admin.email || "", target:id };
-  const draw = j => {
-    if(j.auto){ body.innerHTML = '<div class="sk-row"><span>開放</span><button type="button" class="sk-sw on" disabled>オン</button></div><p class="yp-msg">クリエーターズ以上の方なので、自動でオンになっています。</p>'; return; }
-    body.innerHTML = '<div class="sk-row"><span>開放</span><button type="button" class="sk-sw ' + (j.open ? "on" : "") + '" id="skSw"' + (j.canSet ? "" : " disabled") + '>' + (j.open ? "オン" : "オフ") + '</button></div>' +
-      '<p class="yp-msg" id="skMsg">' + (j.canSet ? "押すと、オン・オフが切りかわります。オンにすると、ご本人に通知が届きます。" : "変えられるのは、管理者・チーム代表と、この方のアップクリエの方、担当系列の系列代表・アドバンスの方です。") + '</p>';
-    const sw = body.querySelector("#skSw");
-    if(j.canSet) sw.onclick = async () => {
-      sw.disabled = true; body.querySelector("#skMsg").textContent = "切りかえています…";
-      try{
-        const r = await (await fetch(GAS_URL, { method:"POST", body:new URLSearchParams(Object.assign({ action:"skillSet", on: j.open ? "0" : "1" }, base)) })).json();
-        if(r && r.ok){ j.open = r.open; draw(j); body.querySelector("#skMsg").textContent = r.open ? "✅ オンにしました（ご本人に通知しました）" : "オフにしました"; return; }
-        body.querySelector("#skMsg").textContent = r && r.error === "noperm" ? "この方のオン・オフは、変えられません。" : "切りかえられませんでした。少しおいてお試しください。";
-      }catch(err){ body.querySelector("#skMsg").textContent = "通信できませんでした。電波のよい場所でお試しください。"; }
-      sw.disabled = false;
-    };
-  };
-  try{
-    const j = await (await fetch(GAS_URL + "?" + new URLSearchParams(Object.assign({ action:"skillOf" }, base)).toString())).json();
-    if(!j || !j.ok){ body.innerHTML = '<p class="yp-msg">' + (j && j.error === "unknown_action" ? "GASがまだ新しい版になっていません（v1.2.092 以上が必要です）。" : "読み込めませんでした。少しおいてお試しください。") + '</p>'; return; }
-    draw(j);
   }catch(err){ body.innerHTML = '<p class="yp-msg">通信できませんでした。電波のよい場所でお試しください。</p>'; }
 }
 /* あなたとの関係（紹介した方・サポート担当の方） */
@@ -2634,6 +2586,8 @@ function openMember(m){
 
   document.getElementById("memModal").classList.toggle("lite", !(data && data.isFull));
   document.getElementById("mmTitle").textContent = m ? "会員情報の編集" : "会員を追加";
+  /* v1.2.094：編集のときは、上に「進捗の編集／会員情報の編集」のタブ */
+  if(m) drawModalTabs("mm", m.id); else { const t = document.getElementById("mmTabs"); if(t) t.innerHTML = ""; }
   document.getElementById("mmSub").textContent = m
     ? "変更したい項目だけ入力してください"
     : "まず会員番号を入れて「つぎへ」を押してください";
@@ -4050,66 +4004,158 @@ function renderDetail(){
   });
 
   const body = document.getElementById("dmBody");
-  body.innerHTML = showApps.map(app=>{
+  /* v1.2.094：上のタブ（進捗の編集／会員情報の編集） */
+  drawModalTabs("dm", m.id);
+  const rowHtml = (app, code, label, gi, marks, self) => {
+    const on = marks.indexOf(code) >= 0;
+    const didSelf = !!self[code];
+    const g = gi == null ? "" : ` data-g="${gi}"`;
+    if(selfEditMode[app]){
+      return `<label class="dm-item ${didSelf?'checked':''}" data-selfapp="${app}"${g} style="border-color:${didSelf?'#F5C452':'var(--line)'};background:${didSelf?'#FDF6E4':'#fff'};">
+        <input type="checkbox" value="${code}" ${didSelf?'checked':''}
+          onchange="this.closest('.dm-item').classList.toggle('checked', this.checked)">
+        <span class="code">${code}</span>
+        <span class="nm2">${label}</span>
+        <span class="selfmark">🐣本人チェック</span>
+      </label>`;
+    }
+    return `<label class="dm-item ${on?'checked':''}" data-app="${app}"${g}>
+      <input type="checkbox" value="${code}" ${on?'checked':''}
+        onchange="this.closest('.dm-item').classList.toggle('checked', this.checked); updateCount('${app}')">
+      <span class="code">${code}</span>
+      <span class="nm2">${label}</span>
+      ${didSelf ? '<span class="selfmark">🐣本人✓</span>' : ''}
+    </label>`;
+  };
+  const tools = (app, gi) => {
+    const g = gi == null ? "" : "," + gi;
+    return `<div class="dm-tools">
+        <button onclick="checkAll('${app}',true${g})">すべて選択</button>
+        <button onclick="checkAll('${app}',false${g})">すべて解除</button>
+        <button onclick="copySelf('${app}'${g})">🐣本人チェックに合わせる</button>
+        ${canEditSelf ? `<button onclick="toggleSelfEdit('${app}')" class="selfBtn_${app}">${selfEditMode[app] ? "⭕先生の丸にもどす" : "🐣本人チェックを直す"}</button>` : ""}
+      </div>`;
+  };
+  const secs = [];
+  showApps.forEach(app=>{
     const master = ITEM_MASTER[app];
     const pg = detailData.progress[app] || {marks:[], self:{}, grad:""};
     const marks = pg.marks || [];
     const self = pg.self || {};
-    const rows = master.items.map(([code,label])=>{
-      const on = marks.indexOf(code) >= 0;
-      const didSelf = !!self[code];
-      const editing = !!selfEditMode[app];
-      if(editing){
-        return `<label class="dm-item ${didSelf?'checked':''}" data-selfapp="${app}" style="border-color:${didSelf?'#F5C452':'var(--line)'};background:${didSelf?'#FDF6E4':'#fff'};">
-          <input type="checkbox" value="${code}" ${didSelf?'checked':''}
-            onchange="this.closest('.dm-item').classList.toggle('checked', this.checked)">
-          <span class="code">${code}</span>
-          <span class="nm2">${label}</span>
-          <span class="selfmark">🐣本人チェック</span>
-        </label>`;
-      }
-      return `<label class="dm-item ${on?'checked':''}" data-app="${app}">
-        <input type="checkbox" value="${code}" ${on?'checked':''}
-          onchange="this.closest('.dm-item').classList.toggle('checked', this.checked); updateCount('${app}')">
-        <span class="code">${code}</span>
-        <span class="nm2">${label}</span>
-        ${didSelf ? '<span class="selfmark">🐣本人✓</span>' : ''}
-      </label>`;
-    }).join("");
-    return `<div class="dm-sec">
-      <h4>
-        <span>${master.label}${pg.grad ? `<span class="grad">${gradText(pg.grad)}</span>` : ""}</span>
-        <span class="cnt" id="cnt_${app}">⭕ ${marks.length} / ${master.items.length}</span>
-      </h4>
-      <div class="dm-tools">
-        <button onclick="checkAll('${app}',true)">すべて選択</button>
-        <button onclick="checkAll('${app}',false)">すべて解除</button>
-        <button onclick="copySelf('${app}')">🐣本人チェックに合わせる</button>
-        ${canEditSelf ? `<button onclick="toggleSelfEdit('${app}')" id="selfBtn_${app}">🐣本人チェックを直す</button>` : ""}
-      </div>
-      ${rows}
-      ${pg.updated ? `<p class="dm-note">最終更新:${pg.updated}</p>` : ""}
-    </div>`;
-  }).join("");
+    const label = code => (master.items.find(x=>x[0] === code) || [code, code])[1];
+    if(master.groups){
+      /* ファーストサポート（新）は、はじめの一歩・LINKを知ろう・LINKを使おう の3つに分けて出します */
+      master.groups.forEach((gr, gi)=>{
+        const n = gr.codes.filter(c=>marks.indexOf(c) >= 0).length;
+        secs.push(`<div class="dm-sec">
+          <h4><span>${gr.label}</span><span class="cnt" id="cnt_${app}_${gi}">⭕ ${n} / ${gr.codes.length}</span></h4>
+          ${tools(app, gi)}
+          ${gr.codes.map(c=>rowHtml(app, c, label(c), gi, marks, self)).join("")}
+          ${gi === master.groups.length - 1 && pg.updated ? `<p class="dm-note">最終更新:${pg.updated}</p>` : ""}
+        </div>`);
+      });
+    }else{
+      secs.push(`<div class="dm-sec">
+        <h4>
+          <span>${master.label}${pg.grad ? `<span class="grad">${gradText(pg.grad)}</span>` : ""}</span>
+          <span class="cnt" id="cnt_${app}">⭕ ${marks.length} / ${master.items.length}</span>
+        </h4>
+        ${tools(app)}
+        ${master.items.map(([code,lb])=>rowHtml(app, code, lb, null, marks, self)).join("")}
+        ${pg.updated ? `<p class="dm-note">最終更新:${pg.updated}</p>` : ""}
+      </div>`);
+    }
+    /* v1.2.094：ぴよぴよ脱出のすぐ下に、スキルアッププロ */
+    if(app === "piyo") secs.push(SKILL_SEC);
+  });
+  if(showApps.indexOf("piyo") < 0) secs.push(SKILL_SEC);
+  body.innerHTML = secs.join("");
+  loadSkillSec(m.id);
+}
+
+/* ================================================================
+   スキルアッププロ（v1.2.094：進捗の編集の中）
+   ・申請が上がっているか／許可しているか
+   ・「許可する」で、申請が来ていない方も許可できます（取り消しもできます）
+   ・クリエーターズ以上の方は、自動で許可（変えられません）
+   ・変えられるかどうかは GAS が決めます（管理者・チーム代表、その方のアップクリエ、担当系列の系列代表・アドバンス）
+================================================================ */
+const SKILL_SEC = `<div class="dm-sec" id="dmSkill"><h4><span>🚀 スキルアッププロ</span></h4><div class="sk-box" id="skBox">読み込んでいます…</div></div>`;
+async function loadSkillSec(id){
+  const box = document.getElementById("skBox"); if(!box) return;
+  const base = { id:admin.id, pin:admin.pin, email:admin.email || "", target:id };
+  const draw = j => {
+    if(j.auto){ box.innerHTML = '<p class="st">✅ 許可されています</p><p>クリエーターズ以上の方なので、自動で許可になっています。</p>'; return; }
+    box.innerHTML = '<p class="st">' + (j.open ? "✅ 許可されています" : (j.pending ? "✉️ 申請が上がっています" : "申請はまだありません")) + '</p>' +
+      (j.canSet ? '<button type="button" id="skBtn" class="' + (j.open ? "off" : "") + '">' + (j.open ? "許可を取り消す" : "許可する") + '</button>'
+               : '<p>許可できるのは、管理者・チーム代表と、この方のアップクリエの方、担当系列の系列代表・アドバンスの方です。</p>') +
+      '<p id="skMsg" style="margin-top:6px;"></p>';
+    const b = document.getElementById("skBtn");
+    if(b) b.onclick = async () => {
+      b.disabled = true; document.getElementById("skMsg").textContent = "保存しています…";
+      try{
+        const r = await (await fetch(GAS_URL, { method:"POST", body:new URLSearchParams(Object.assign({ action:"skillSet", on: j.open ? "0" : "1" }, base)) })).json();
+        if(r && r.ok){ j.open = r.open; draw(j); document.getElementById("skMsg").textContent = r.open ? "許可しました（ご本人に通知しました）" : "許可を取り消しました"; return; }
+        document.getElementById("skMsg").textContent = r && r.error === "noperm" ? "この方の許可は、変えられません。" : "保存できませんでした。少しおいてお試しください。";
+      }catch(err){ document.getElementById("skMsg").textContent = "通信できませんでした。電波のよい場所でお試しください。"; }
+      b.disabled = false;
+    };
+  };
+  try{
+    const j = await (await fetch(GAS_URL + "?" + new URLSearchParams(Object.assign({ action:"skillOf" }, base)).toString())).json();
+    if(!j || !j.ok){ box.textContent = j && j.error === "unknown_action" ? "GASがまだ新しい版になっていません（v1.2.094 以上が必要です）。" : "読み込めませんでした。"; return; }
+    draw(j);
+  }catch(e){ box.textContent = "通信できませんでした。"; }
+}
+
+/* v1.2.094：一覧の「🚀 プロ」ボタン：進捗の編集と同じ、スキルアッププロの許可の欄だけをポップアップで出します */
+function openPro(id){
+  const old = document.getElementById("yariPop"); if(old) old.remove();
+  const m = (data && data.members || []).find(x => hk(x.id) === hk(id)) || {};
+  const e = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const box = document.createElement("div"); box.id = "yariPop";
+  box.innerHTML = '<div class="yp"><div class="yp-h">🚀 ' + e(m.name || id) + ' さんのスキルアッププロ</div><div class="sk-box" id="skBox">読み込んでいます…</div><button type="button" class="yp-close">とじる</button></div>';
+  document.body.appendChild(box);
+  box.querySelector(".yp-close").onclick = () => box.remove();
+  box.addEventListener("click", ev => { if(ev.target === box) box.remove(); });
+  loadSkillSec(id);
+}
+/* v1.2.094：進捗の編集／会員情報の編集 のタブ（同じ方のまま切りかえます） */
+function drawModalTabs(which, id){
+  const el = document.getElementById(which === "dm" ? "dmTabs" : "mmTabs"); if(!el) return;
+  const m = ((data && data.members) || []).find(x => String(x.id) === String(id));
+  const canEd = !!m && ((data && data.isFull) || m.edit === true);
+  el.innerHTML = '<button type="button" class="' + (which === "dm" ? "on" : "") + '" id="' + which + 'TabP">📊 進捗の編集</button>' +
+                 '<button type="button" class="' + (which === "mm" ? "on" : "") + '" id="' + which + 'TabM"' + (canEd || which === "mm" ? "" : " disabled title=\"この方の会員情報は編集できません\"") + '>👤 会員情報の編集</button>';
+  if(which === "dm" && canEd) document.getElementById("dmTabM").onclick = () => { closeDetail(); openMember(m); };
+  if(which === "mm") document.getElementById("mmTabP").onclick = () => { closeMember(); openDetail(id); };
 }
 
 function toggleSelfEdit(app){
   selfEditMode[app] = !selfEditMode[app];
   renderDetail();
-  const btn = document.getElementById("selfBtn_"+app);
-  if(btn) btn.textContent = selfEditMode[app] ? "⭕先生の丸にもどす" : "🐣本人チェックを直す";
   toast(selfEditMode[app] ? "本人チェックの編集モードです(保存で反映)" : "先生の丸の編集にもどりました");
 }
 
 function updateCount(app){
+  const gs = ITEM_MASTER[app].groups;
+  if(gs){
+    gs.forEach((g, gi)=>{
+      const n = document.querySelectorAll(`.dm-item[data-app="${app}"][data-g="${gi}"] input:checked`).length;
+      const el = document.getElementById(`cnt_${app}_${gi}`);
+      if(el) el.textContent = `⭕ ${n} / ${g.codes.length}`;
+    });
+    return;
+  }
   const boxes = document.querySelectorAll(`.dm-item[data-app="${app}"] input:checked`);
   const total = ITEM_MASTER[app].items.length;
   const el = document.getElementById("cnt_"+app);
   if(el) el.textContent = `⭕ ${boxes.length} / ${total}`;
 }
 
-function checkAll(app, on){
-  document.querySelectorAll(`.dm-item[data-app="${app}"]`).forEach(el=>{
+function checkAll(app, on, gi){
+  const sel = `.dm-item[data-app="${app}"]` + (gi == null ? "" : `[data-g="${gi}"]`);
+  document.querySelectorAll(sel).forEach(el=>{
     const box = el.querySelector("input");
     box.checked = on;
     el.classList.toggle("checked", on);
@@ -4118,9 +4164,9 @@ function checkAll(app, on){
 }
 
 /* 本人がチェックした項目に合わせる(答え合わせの下地に) */
-function copySelf(app){
+function copySelf(app, gi){
   const self = (detailData.progress[app] || {}).self || {};
-  document.querySelectorAll(`.dm-item[data-app="${app}"]`).forEach(el=>{
+  document.querySelectorAll(`.dm-item[data-app="${app}"]` + (gi == null ? "" : `[data-g="${gi}"]`)).forEach(el=>{
     const box = el.querySelector("input");
     const on = !!self[box.value];
     box.checked = on;
@@ -4140,6 +4186,7 @@ async function saveMarks(){
     const apps = detailData.canMarkApps && detailData.canMarkApps.length
       ? detailData.canMarkApps : Object.keys(ITEM_MASTER);
     for(const app of apps){
+      if(!ITEM_MASTER[app]) continue;   /* v1.2.094：外した古いプログラムは、さわりません */
       // 本人チェックの編集モード
       if(selfEditMode[app]){
         const selfChecked = Array.from(document.querySelectorAll(`.dm-item[data-selfapp="${app}"] input:checked`)).map(b=>b.value);
