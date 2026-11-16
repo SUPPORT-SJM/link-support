@@ -123,17 +123,23 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body)
 #taskSheet .fbtn{display:block;padding:12px;border-radius:12px;background:#FF7043;color:#fff;font-weight:700;font-size:14.5px;text-align:center;text-decoration:none;margin-top:8px;}
 #taskSheet .fbtn.green{background:#06C755;}
 #taskSheet .fqr{display:block;width:170px;height:170px;margin:10px auto 2px;border-radius:12px;border:1px solid #E0E0E0;}
-#taskSheet .fsmall{font-size:12px;color:#8D6E63;text-align:center;}
+#taskSheet .fsmall{font-size:13.5px;color:#8D6E63;text-align:center;}
+/* v1.2.096：細かい項目の「できた」ボタン／文字を少し大きく */
+#taskSheet .nbody p{font-size:15.5px;}
+#taskSheet .fsub{display:flex;align-items:center;justify-content:space-between;gap:10px;border:2px solid #E3E8F0;border-radius:12px;padding:9px 10px 9px 12px;margin:6px 0;font-size:15px;font-weight:700;line-height:1.5;}
+#taskSheet .fsub button{flex:none;min-width:84px;padding:8px 12px;border-radius:999px;border:2px solid #29B6F6;background:#fff;color:#0288D1;font-family:inherit;font-weight:900;font-size:14px;cursor:pointer;}
+#taskSheet .fsub.on{border-color:#81D4FA;background:#F1FAFF;}
+#taskSheet .fsub.on button{background:#29B6F6;color:#fff;}
 #taskSheet .fol{margin:8px 0 10px 1.3em;padding:0;font-size:14px;line-height:1.85;color:#5D4037;}
 #taskSheet .fol li{margin-bottom:6px;}
 #taskSheet ol.fhow{padding-left:22px;margin:6px 0;}
-#taskSheet ol.fhow li{font-size:14px;line-height:1.9;margin-bottom:2px;}
+#taskSheet ol.fhow li{font-size:15px;line-height:1.9;margin-bottom:2px;}
 #taskSheet .fgen{background:#FFF8F5;border:1px solid #FFD0B0;border-radius:12px;padding:10px 12px;margin:8px 0;}
 #taskSheet .fgen label{font-size:12px;font-weight:700;color:#FF7043;display:block;margin:2px 0 4px;}
 #taskSheet .fgen input,#taskSheet .fgen select{width:100%;border:1.5px solid #FFCCBC;border-radius:8px;padding:9px 10px;font-size:16px;font-family:inherit;margin-bottom:8px;background:#fff;}
 #taskSheet .fgen .res{background:#fff;border:2px solid #FF8A65;border-radius:10px;padding:9px;text-align:center;font-weight:700;word-break:break-all;margin-bottom:8px;}
 #taskSheet .fgen button{width:100%;padding:10px;border-radius:10px;border:none;background:#FF7043;color:#fff;font-family:inherit;font-weight:700;font-size:14px;cursor:pointer;}
-#taskSheet h4{font-size:14px;color:#E65100;margin:12px 0 4px;}
+#taskSheet h4{font-size:15px;color:#E65100;margin:12px 0 4px;}
 #taskSheet .frule{background:#FFF3E0;border:2px solid #FFB74D;border-radius:12px;padding:10px 12px;margin:8px 0;font-size:14px;line-height:1.8;}
 #taskSheet .frule-ok{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:8px;padding:10px;border-radius:10px;background:#fff;border:2px dashed #FF8A65;font-size:15px;color:#BF360C;cursor:pointer;}
 #taskSheet .frule-ok input{width:26px;height:26px;flex:none;margin:0;accent-color:#FF7043;cursor:pointer;}
@@ -547,9 +553,10 @@ const TREE = [
     /* v1.2.006：0番は、いったんなくしました（思い出したら入れます） */
     {ic:"💬", nm:"LINK information\nについて", g:"member", num:1, task:"k1",
      note2:"LINK information は、LINK内の全ての情報検索ができる、LINK公式ラインです。Q&Aやニーズ別診断、スタンプラリーなどもあります😲<br>大切な<b>リッチメニュー</b>は、5つのステップのチュートリアルを終わらせると解放されます。",
+     subs:[["k1_1","ステップ1　ルール動画"],["k1_2","ステップ2　動き方動画"],["k1_3","ステップ3　SASAEAIマッチング動画 → 制作"],["k1_4","ステップ4　LINKベース → 制作"],["k1_5","ステップ5　LINK information 使い方動画"]],
      html:'<img src="img/richmenu-01.jpg" alt="リッチメニュー解放イメージ" style="display:block;width:100%;border-radius:12px;margin:6px 0">'
-        + '<h4>📋 チュートリアル：ステップ5つ</h4><ol class="fhow"><li>ルール動画</li><li>動き方動画</li><li>SASAEAIマッチング動画 → 制作</li><li>LINKベース → 制作</li><li>LINK information 使い方動画</li></ol>'
-        + '<p>📝 ステップ3・4で作ったものは、<b>初期サポートグループライン</b>にURLを必ず貼ってください。</p>'
+        + '<h4>📋 チュートリアル：ステップ5つ（できたら、それぞれ「できた」を押してください）</h4><div class="fsubs-here"></div>'
+        + '<p>📝 ステップ3・4で作ったものは、こちらのサポートサイト内に保存できるので、保存してください。</p>'
         + '<p>動画はすべて、しっかり全部見てください🎞️ 途中のクイズも正解してくださいね😀</p>'
         + '<a class="fbtn" href="first-support/step3-4.html">📄 つまずきやすいステップ3・4の補足を見る</a>'
         + '<p class="fsmall" style="text-align:left;margin-top:8px">リッチメニューが開放されない・わからない問題があるときは、初期サポートグループラインでご質問ください❤️</p>'},
@@ -578,7 +585,7 @@ const TREE = [
   ]},
   {ic:"🚀", nm:"LINKを\n使おう", g:"member", flowPage:"use", lockAfter:"know", kids:[
     /* v1.2.007：「1stステップ参加確認」はなくしました */
-    {ic:"🌈", nm:"Skyarcの\n交流＆PRチャット", g:"member", num:1, task:"u1", pass:true, wide:true, nameRule:true,
+    {ic:"🌈", nm:"Skyarcの\n交流＆PRチャット", g:"member", num:1, task:"u1", subs:[["u1_k","交流チャットに入った"],["u1_p","PR・体験受講チャットに入った"]], pass:true, wide:true, nameRule:true,
      note2:"Skyarcの仲間たちが、いろいろなお知らせをしてくれたり、良かったことの交流や自己紹介をし合ったりしているチャットです。<br>名前に<b>グループ名を必ず入れて</b>、マナーを守って楽しくご参加ください😊<br><b>ユーザーサポート会</b>で教えてもらったことについての質問に答えると、2つのチャットにご招待できます。"},
     {ic:"🏘", nm:"地域コミュニティ\nLINKサークル", g:"member", num:2, task:"u3", wide:true, nameRule:true,
      note2:"<b>地域コミュニティ</b>は、あなたの地域の仲間とつながれるチャットです。ぜひ入っておきましょう。<br>趣味・事業・興味に合うサークルは<b>「LINKサークル」</b>と呼ばれています。<br>📛 <b>LINK全体のチャット（情報伝達チャット）は、書きこみ禁止</b>です。<br>💡 LINKサークルは情報量が多くなるので、<b>最初は2つまで</b>にしておきましょう。慣れてきたら増やしてください。<br>LINK information でも、詳しく分かります。",
@@ -663,14 +670,14 @@ const TREE = [
     {ic:"🏠", nm:"LINKポータル", g:"sup", url:"https://app.link-event-x.com"}
   ]},
   {ic:"👋", nm:"はじめの一歩", g:"member", flowPage:"hajime", kids:[
-    {ic:"📲", nm:"便利な2つを\nホームに置く", g:"member", num:0, task:"h0",
+    {ic:"📲", nm:"便利な2つを\nホームに置く", g:"member", num:0, task:"h0", subs:[["h0_p","LINKポータルを置いた"],["h0_s","このサイト（Skyarc LINKサポート）を置いた"]],
      note2:"「LINKポータル」と「このサイト（LINKサポート）」の2つを、スマホのホーム画面に置きます。アプリみたいにワンタップで開けて、ずっと楽になります✨<br>下のボタンから、iPhone・Android・パソコンそれぞれの置き方が見られます。置けたら「もどる」でここに戻って、「できたら押してね」を押してください。",
      link:{t:"📲 ホーム画面に置く案内をひらく", u:B+"app.html"}},
     {ic:"💬", nm:"LINK information\nを追加", g:"member", num:1, task:"h1",
      note2:"LINKの公式LINE「LINK information」を友だち追加します。詳しい使い方（リッチメニューなど）は、あとでお伝えします。いまは<b>「友だち追加」だけ</b>でOKです😊",
      html:'<a class="fbtn green" href="https://s.lmes.jp/landing-qr/2008524921-7QZ2vX3X?uLand=iRyJ9G" target="_blank" rel="noopener">📲 LINK information を友だち追加する</a>'
         + '<img class="fqr" src="img/qr-link-information.png" alt="LINK information の友だち追加のQRコード"><p class="fsmall">パソコンで見ているときは、スマホのカメラでこのQRコードを読みとってください</p>'},
-    {ic:"🫧", nm:"必要最低限の\nオープンチャット", g:"member", num:2, task:"h2", gen:true, wide:true, nameRule:true,
+    {ic:"🫧", nm:"必要最低限の\nオープンチャット", g:"member", num:2, task:"h2", subs:[["h2_a","① LINK情報伝達チャットに入った"],["h2_b","② Skyarcユーザーサポートに入った"]], gen:true, wide:true, nameRule:true,
      note2:"オープンチャットでは、名前の後ろに<b>「チーム名／系列名」</b>を入れるのがルールです。学校で「山田くん」と言われても、何年何組か分からないと、担任の先生に連絡できないのと同じです。まず下で名前を作って<b>コピーしてから</b>、2つに入りましょう。",
      html:'<h4>① LINK情報伝達チャット（情報の宝箱）</h4><p class="fsmall" style="text-align:left">LINK全体の、<b>あなたにとって大事な情報</b>が常に来るチャットです（書きこみはできません）。しっかり毎日ご確認ください。</p><a class="fbtn fjoin" href="https://line.me/ti/g2/gMA3NZL3Ypihck48K0xB9mHwJe8AV3ezmjXX6A?utm_source=invitation&utm_medium=link_copy&utm_campaign=default" target="_blank" rel="noopener">📲 LINK情報伝達チャットに入る</a>'
         + '<h4>② 🌈Skyarcユーザーサポート（質問できる）</h4><a class="fbtn fjoin" href="https://line.me/ti/g2/yBQmWy1jkxlyWsEQ6hpzwTEyKK6VVSdt4B5mhw?utm_source=invitation&utm_medium=link_copy&utm_campaign=default" target="_blank" rel="noopener">📲 🌈Skyarcユーザーサポートに参加する</a>'
@@ -1230,6 +1237,8 @@ function openTask(it){
     + '<div id="fPassBox"></div></div>';
   if(it.nameRule && !it.pass) h += '</div>';
   if(it.link) h += `<a class="flink" id="taskLink" href="${it.link.u}"${/^https?:/.test(it.link.u) ? ' target="_blank" rel="noopener"' : ""}>${it.link.t}</a>`;
+  /* v1.2.096：細かい項目（できたボタン）。ぜんぶ「できた」にすると、この項目も「できた」になります */
+  if(it.subs && h.indexOf('fsubs-here') < 0) h += '<h4>✅ ひとつずつ、できたら押してください</h4><div class="fsubs-here"></div>';
   h += '<button type="button" class="fdone" id="taskDone"></button><button type="button" class="fclose" id="taskClose2">とじる</button>';
   $("#taskBody").innerHTML = h;
   $("#taskSheet").hidden = false;
@@ -1265,6 +1274,20 @@ function openTask(it){
     b.setAttribute("aria-pressed", on ? "true" : "false");
   };
   paintDone();
+  if(it.subs){
+    const box = document.querySelector("#taskBody .fsubs-here");
+    const drawSubs = ()=>{
+      box.innerHTML = it.subs.map(([k, lb])=>`<div class="fsub${FLOW[k] ? " on" : ""}"><span>${lb}</span><button type="button" data-k="${k}">${FLOW[k] ? "✓ できた" : "できた"}</button></div>`).join("");
+      box.querySelectorAll("button").forEach(b=>b.onclick = ()=>{
+        const k = b.dataset.k, ch = {};
+        if(FLOW[k]){ delete FLOW[k]; ch[k] = false; } else { FLOW[k] = true; ch[k] = true; }
+        saveFlow(ch); drawSubs();
+        /* ぜんぶ「できた」になったら、この項目も「できた」に */
+        if(it.subs.every(x=>FLOW[x[0]]) && !FLOW[it.task]) $("#taskDone").click();
+      });
+    };
+    drawSubs();
+  }
   $("#taskClose2").onclick = closeTask;
   $("#taskDone").onclick = ()=>{
     const pageK = path.length ? path[0].flowPage : "";

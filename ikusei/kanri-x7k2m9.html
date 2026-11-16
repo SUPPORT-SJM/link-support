@@ -134,6 +134,16 @@
   #yariPop .ysum dt{color:#7A72A0;font-weight:700;font-size:12px;margin-top:6px;}
   #yariPop .ysum dd{margin:0;white-space:pre-wrap;word-break:break-word;}
   /* v1.2.092：スキルアッププロの開放（オン・オフ） */
+  .h1ver{font-family:monospace;font-size:11px;font-weight:400;opacity:.75;margin-left:8px;vertical-align:middle;}
+  /* v1.2.096：細かい項目（入れ子） */
+  .dm-item.has-sub{cursor:default;}
+  .dm-item.has-sub .nm2{cursor:pointer;}
+  .dm-item .tog{flex-shrink:0;font-size:12px;color:var(--deep);background:var(--mist);border-radius:999px;padding:2px 9px;cursor:pointer;font-weight:700;}
+  .dm-subs{margin:-2px 0 8px 26px;border-left:3px solid var(--mist);padding-left:8px;}
+  .dm-subs[hidden]{display:none;}
+  .dm-subs .dm-item{font-size:12.5px;padding:7px 10px;}
+  .dm-info{margin:-2px 0 8px 26px;font-size:12.5px;color:#5E5A78;background:#F7F6FC;border-radius:10px;padding:7px 10px;line-height:1.6;}
+  .dm-info a{color:var(--blue);word-break:break-all;}
   .pen-btn{display:inline-grid;place-items:center;width:26px;height:26px;margin:0 4px 0 6px;vertical-align:-6px;border:1.5px solid #CFC9E3;border-radius:7px;background:#fff;font-size:13px;line-height:1;cursor:pointer;padding:0;}
   .pen-btn:hover{background:#F3F1F8;}
   .mtabs{display:flex;gap:6px;margin:0 0 10px;}
@@ -677,7 +687,7 @@
   <div class="head">
     <div class="wrap row">
       <div>
-        <h1>🔐 メンバーマネジメントルーム</h1>
+        <h1>🔐 メンバーマネジメントルーム<span class="h1ver" id="h1Ver"></span></h1>
         <div class="me" id="meLine"></div>
         <button type="button" id="btnSelfEdit" onclick="openSelfEdit()" style="display:none;margin-top:6px;background:rgba(255,255,255,.22);color:#fff;border:1.5px solid rgba(255,255,255,.55);border-radius:999px;padding:5px 13px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;">✏️ 自分の会員情報を編集する</button>
       </div>
@@ -1295,6 +1305,16 @@ const ITEM_MASTER = {
   }
 };
 const APPS = Object.keys(ITEM_MASTER).join(",");
+/* v1.2.096：進捗の編集で、項目を押すと開く細かい項目（先生の丸は flow のコードとして保存します）
+   [コード, 名前, 本人の記録のキー（あれば。セミナー・グルコンは「本人の記録」タブ）] */
+const FLOW_SUBS = {
+  h0:  [["h0_p","LINKポータルを置いた"],["h0_s","Skyarc LINKサポートサイトを置いた"]],
+  h2:  [["h2_a","① LINK情報伝達チャットに入った"],["h2_b","② Skyarcユーザーサポートに入った"]],
+  k1:  [["k1_1","ステップ1　ルール動画"],["k1_2","ステップ2　動き方動画"],["k1_3","ステップ3　SASAEAIマッチング動画 → 制作"],["k1_4","ステップ4　LINKベース → 制作"],["k1_5","ステップ5　LINK information 使い方動画"]],
+  k2b: [["k2b_s1","LINKセミナー 通常編","s1"],["k2b_s2","LINKセミナー 社長編","s2"],["k2b_s3","LINKセミナー 自己ブランディング特化版","s3"],["k2b_s4","LINKセミナー グループ構築特化版","s4"],["k2b_s5","LINKセミナー 新サービス特化版","s5"]],
+  k2c: [["k2c_g1","高山翔子さんのグルコン","g1"],["k2c_g2","いと・すけさんのグルコン","g2"],["k2c_g3","冨田由起子さんのグルコン","g3"]],
+  u1:  [["u1_k","交流チャットに入った"],["u1_p","PR・体験受講チャットに入った"]]
+};
 
 const AREAS = [
   "北海道","青森県","岩手県","宮城県","秋田県","山形県","福島県",
@@ -3843,7 +3863,9 @@ function mmFind(fid){
   }, { auth: { id:admin.id, pin:admin.pin, email:admin.email } });
 }
 
+let detailHiddenFor = "";   /* v1.2.096：タブで会員情報に切りかえたとき、かくしてある進捗の画面の方 */
 function closeMember(){
+  detailHiddenFor = "";
   const sv = document.getElementById("mmSave");
   if(sv){ sv.dataset.req = ""; sv.textContent = "保存する"; }
   const idf = document.getElementById("mmId");
@@ -4052,7 +4074,7 @@ function renderDetail(){
         secs.push(`<div class="dm-sec">
           <h4><span>${gr.label}</span><span class="cnt" id="cnt_${app}_${gi}">⭕ ${n} / ${gr.codes.length}</span></h4>
           ${tools(app, gi)}
-          ${gr.codes.map(c=>rowHtml(app, c, label(c), gi, marks, self)).join("")}
+          ${gr.codes.map(c=>flowRowHtml(app, c, label(c), gi, marks, self, rowHtml)).join("")}
           ${gi === master.groups.length - 1 && pg.updated ? `<p class="dm-note">最終更新:${pg.updated}</p>` : ""}
         </div>`);
       });
@@ -4082,6 +4104,56 @@ function renderDetail(){
    ・クリエーターズ以上の方は、自動で許可（変えられません）
    ・変えられるかどうかは GAS が決めます（管理者・チーム代表、その方のアップクリエ、担当系列の系列代表・アドバンス）
 ================================================================ */
+/* v1.2.096：ファーストサポートの1行（細かい項目があれば、押すと開く入れ子に） */
+function flowRowHtml(app, code, lb, gi, marks, self, rowHtml){
+  const ex = (detailData && detailData.extra) || {};
+  const esc2 = t => String(t == null ? "" : t).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  let info = "";
+  if(code === "k3a") info = ex.sasaeai ? `🔗 SASAEAIのURL：保存あり <a href="${esc2(ex.sasaeai)}" target="_blank" rel="noopener">${esc2(ex.sasaeai)}</a>` : "SASAEAIのURL：まだ保存されていません";
+  if(code === "k3b") info = (ex.linkbase && ex.linkbase.length) ? `🔗 LINK-BASEの事業URL：${ex.linkbase.length}件 保存あり<br>` + ex.linkbase.map(x=>`・<a href="${esc2(x.url)}" target="_blank" rel="noopener">${esc2(x.title || x.url)}</a>`).join("<br>") : "LINK-BASEの事業URL：まだ保存されていません";
+  const subs = FLOW_SUBS[code];
+  if(!subs || selfEditMode[app]) return rowHtml(app, code, lb, gi, marks, self) + (info ? `<div class="dm-info">${info}</div>` : "");
+  const on = marks.indexOf(code) >= 0;
+  const selfRec = ex.self || {};
+  const subRows = subs.map(([sc, sl, rk])=>{
+    const son = marks.indexOf(sc) >= 0;
+    const sd = rk ? selfRec[rk] : (self[sc] ? "✓" : "");
+    const smark = sd ? `<span class="selfmark">🐣本人${rk ? " " + esc2(String(sd).replace(/^\d{4}\//, "")) : "✓"}</span>` : "";
+    return `<label class="dm-item ${son?'checked':''}" data-app="${app}" data-sub="${code}">
+      <input type="checkbox" value="${sc}" ${son?'checked':''} onchange="subChanged(this,'${app}','${code}')">
+      <span class="nm2">${sl}</span>${smark}
+    </label>`;
+  }).join("");
+  const done = subs.filter(x=>marks.indexOf(x[0]) >= 0).length;
+  return `<div class="dm-item has-sub ${on?'checked':''}" data-app="${app}" data-g="${gi}" data-par="${code}">
+      <input type="checkbox" value="${code}" ${on?'checked':''} onchange="parentChanged(this,'${app}','${code}')">
+      <span class="code">${code}</span>
+      <span class="nm2" onclick="toggleSubs('${code}')">${lb}</span>
+      ${self[code] ? '<span class="selfmark">🐣本人✓</span>' : ''}
+      <span class="tog" onclick="toggleSubs('${code}')" id="tog_${code}">${done}/${subs.length} ▾</span>
+    </div>
+    <div class="dm-subs" id="subs_${code}" hidden>${subRows}</div>` + (info ? `<div class="dm-info">${info}</div>` : "");
+}
+function toggleSubs(code){ const el = document.getElementById("subs_" + code); if(el) el.hidden = !el.hidden; }
+/* 親のチェック：細かい項目をぜんぶ同じにします */
+function parentChanged(box, app, code){
+  box.closest(".dm-item").classList.toggle("checked", box.checked);
+  document.querySelectorAll(`#subs_${code} input`).forEach(i=>{ i.checked = box.checked; i.closest(".dm-item").classList.toggle("checked", box.checked); });
+  paintSubCount(code); updateCount(app);
+}
+/* 細かい項目のチェック：ぜんぶついたら、親もつきます（ひとつでも外すと、親も外れます） */
+function subChanged(box, app, code){
+  box.closest(".dm-item").classList.toggle("checked", box.checked);
+  const all = [...document.querySelectorAll(`#subs_${code} input`)];
+  const par = document.querySelector(`.dm-item[data-par="${code}"] input`);
+  if(par){ par.checked = all.every(i=>i.checked); par.closest(".dm-item").classList.toggle("checked", par.checked); }
+  paintSubCount(code); updateCount(app);
+}
+function paintSubCount(code){
+  const all = [...document.querySelectorAll(`#subs_${code} input`)];
+  const t = document.getElementById("tog_" + code);
+  if(t) t.textContent = all.filter(i=>i.checked).length + "/" + all.length + " ▾";
+}
 const SKILL_SEC = `<div class="dm-sec" id="dmSkill"><h4><span>🚀 スキルアッププロ</span></h4><div class="sk-box" id="skBox">読み込んでいます…</div></div>`;
 async function loadSkillSec(id){
   const box = document.getElementById("skBox"); if(!box) return;
@@ -4129,8 +4201,14 @@ function drawModalTabs(which, id){
   const canEd = !!m && ((data && data.isFull) || m.edit === true);
   el.innerHTML = '<button type="button" class="' + (which === "dm" ? "on" : "") + '" id="' + which + 'TabP">📊 進捗の編集</button>' +
                  '<button type="button" class="' + (which === "mm" ? "on" : "") + '" id="' + which + 'TabM"' + (canEd || which === "mm" ? "" : " disabled title=\"この方の会員情報は編集できません\"") + '>👤 会員情報の編集</button>';
-  if(which === "dm" && canEd) document.getElementById("dmTabM").onclick = () => { closeDetail(); openMember(m); };
-  if(which === "mm") document.getElementById("mmTabP").onclick = () => { closeMember(); openDetail(id); };
+  /* v1.2.096：タブの切りかえでは読みなおしません（進捗の画面は、かくしておくだけ。入れかけたチェックもそのまま） */
+  if(which === "dm" && canEd) document.getElementById("dmTabM").onclick = () => { document.getElementById("detailModal").classList.remove("show"); openMember(m); detailHiddenFor = String(id); };
+  if(which === "mm") document.getElementById("mmTabP").onclick = () => {
+    const keep = detailHiddenFor === String(id) && detailData && String(detailData.member.id) === String(id);
+    closeMember();
+    if(keep) document.getElementById("detailModal").classList.add("show");
+    else openDetail(id);
+  };
 }
 
 function toggleSelfEdit(app){
@@ -4157,6 +4235,11 @@ function updateCount(app){
 
 function checkAll(app, on, gi){
   const sel = `.dm-item[data-app="${app}"]` + (gi == null ? "" : `[data-g="${gi}"]`);
+  /* 細かい項目もいっしょに */
+  if(gi != null) document.querySelectorAll(`.dm-item[data-app="${app}"][data-g="${gi}"][data-par]`).forEach(p=>{
+    document.querySelectorAll(`#subs_${p.dataset.par} input`).forEach(i=>{ i.checked = on; i.closest(".dm-item").classList.toggle("checked", on); });
+    paintSubCount(p.dataset.par);
+  });
   document.querySelectorAll(sel).forEach(el=>{
     const box = el.querySelector("input");
     box.checked = on;
@@ -4232,6 +4315,8 @@ async function saveMarks(){
   }
 }
 
+/* v1.2.096：タイトルの右に、いつも版を出します */
+document.addEventListener("DOMContentLoaded", ()=>{ const v = document.getElementById("h1Ver"); if(v) v.textContent = window.SKY_VERSION || ""; });
 function closeDetail(){
   document.getElementById("detailModal").classList.remove("show");
   detailData = null;
