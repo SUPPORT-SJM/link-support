@@ -39,6 +39,8 @@
   #conf .p{background:#fff;border-radius:18px;max-width:400px;width:100%;padding:18px 16px;}
   #conf .row{display:flex;gap:8px;margin-top:12px;}
   #conf .row button{flex:1;border-radius:12px;padding:12px;font-weight:700;font-size:15px;}
+  .ask{text-align:center;font-weight:700;font-size:16px;margin:14px 0 4px;}
+  .okbadge{background:#FF9800;color:#fff;border-radius:13px;padding:12px;text-align:center;font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:14.5px;margin:12px 0 4px;box-shadow:0 4px 12px rgba(255,152,0,.3);}
   .verTag{display:block;text-align:center;font-size:9.5px;color:#C2C8DE;font-family:monospace;padding:16px 0 20px;}
 </style>
 </head>
@@ -57,6 +59,7 @@
 /* ================================================================
    スキルアッププロシリーズを学ぶ（v1.2.076）
    ・直紹介が2人以上いて、本気でLINKを拡大する活動ができる方だけ、ここから先に進めます
+   ・v1.2.092：直紹介の人数は数えません。クリエーターズ以上は自動で開放。開放されたら「了承が降りています」と「次へ進む」（中身は準備中）
    ・「大丈夫です」にチェック → アップクリエの方に通知で開放をお願いします
    ・アップクリエの方が通知から「開放する」を押すと、開放されます（中身は準備中）
 ================================================================ */
@@ -81,21 +84,21 @@ async function load(){
     box.innerHTML = '<p class="sub">' + (j && j.error === "unknown_action" ? "まだしくみが用意できていません（GASの更新待ち）。" : "読み込めませんでした。少しおいてお試しください。") + '</p>';
     return;
   }
-  const head = '<div class="box">直紹介が<b>2人以上</b>いて、<b>本気でLINKを拡大する活動</b>ができる方のみ、ここから先に参加できます。</div>' +
-    '<p class="cnt">あなたの直紹介：' + j.n + '人' + (j.n >= 2 ? '<span class="flag">🎉 直2人達成</span>' : '') + '</p>';
+  /* v1.2.092：直紹介の人数は出しません（名簿の直紹介は、LINKをやめた方もふくむため）。
+     クリエーターズ・アドバンス・系列代表・チーム代表の方は、自動で開放されています */
+  const head = '<div class="box">直紹介が<b>2人以上</b>いて、<b>本気でLINKを拡大する活動をすると決めている方</b>のみ、ここから先に参加できます。</div>';
   if(j.open){
-    box.innerHTML = head + '<p style="text-align:center;font-weight:700;">✅ スキルアッププロが開放されています</p><p class="sub" style="text-align:center;">学びの中身は、ただいま準備中です。もうしばらくお待ちください。</p>';
-    return;
-  }
-  if(j.n < 2){
-    box.innerHTML = head + '<p>直紹介が2人になったら、アップクリエの方に開放をお願いできます。</p>';
+    box.innerHTML = head +
+      '<div class="okbadge">✅ ' + (j.auto ? 'クリエーターズ以上の方は、開放されています' : 'アップクリエの方の了承が降りています') + '</div>' +
+      '<button class="btn" id="next">次へ進む ›</button><p class="sub" id="wipMsg" style="text-align:center;margin-top:10px;" hidden>🚧 学びの中身は、ただいま準備中です。もうしばらくお待ちください。</p>';
+    $("#next").onclick = () => { $("#wipMsg").hidden = false; };
     return;
   }
   if(j.pending){
     box.innerHTML = head + '<p>✉️ アップクリエの方に、開放のお願いを出しています。開放されるまで、しばらくお待ちください。</p>';
     return;
   }
-  box.innerHTML = head + '<p>大丈夫ですか？</p>' +
+  box.innerHTML = head + '<p class="ask">よろしいですか？</p>' +
     '<label class="agree"><input type="checkbox" id="ok"> 大丈夫です。本気でLINKを拡大する活動をしていきます</label>' +
     '<button class="btn" id="go" disabled>アップクリエの方に開放をお願いする</button><p class="msg" id="msg"></p>';
   $("#ok").onchange = e => { $("#go").disabled = !e.target.checked; };

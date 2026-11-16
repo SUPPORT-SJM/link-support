@@ -133,6 +133,12 @@
   #yariPop .ysum dl{font-size:13.5px;margin:0;}
   #yariPop .ysum dt{color:#7A72A0;font-weight:700;font-size:12px;margin-top:6px;}
   #yariPop .ysum dd{margin:0;white-space:pre-wrap;word-break:break-word;}
+  /* v1.2.092：スキルアッププロの開放（オン・オフ） */
+  .skill-btn{margin-top:5px;background:#FFF3E0;color:#C66A00;border:1.5px solid #FFCC80;border-radius:999px;padding:3px 11px;font-size:11px;font-weight:700;font-family:inherit;cursor:pointer;line-height:1.5;white-space:nowrap;}
+  #yariPop .sk-row{display:flex;align-items:center;justify-content:space-between;gap:10px;border:2px solid #FFE0B2;border-radius:14px;padding:12px 14px;margin:10px 0 4px;font-weight:700;}
+  #yariPop .sk-sw{flex:none;min-width:84px;border-radius:999px;padding:8px 14px;font-family:inherit;font-weight:900;font-size:14px;cursor:pointer;border:2px solid #CFD8DC;background:#fff;color:#607D8B;}
+  #yariPop .sk-sw.on{background:#FF9800;border-color:#FF9800;color:#fff;}
+  #yariPop .sk-sw:disabled{opacity:.5;cursor:default;}
   #yariPop .yp-msg{font-size:13.5px;color:#6C6588;padding:10px 0;}
   #yariPop .yp-close{display:block;width:100%;margin-top:12px;padding:11px;border-radius:12px;border:2px solid #CFD8DC;background:#fff;color:#455A64;font-family:inherit;font-weight:700;font-size:15px;cursor:pointer;}
   .dept-chip{margin-top:5px;background:#F3F1F8;color:#8A84A0;border:1.5px dashed #CFC9E3;border-radius:999px;padding:3px 10px;font-size:11px;font-weight:700;font-family:inherit;cursor:pointer;text-align:left;line-height:1.5;max-width:180px;white-space:nowrap;}
@@ -2145,6 +2151,7 @@ function rowsHtml(list){
       <div class="mc-foot">
         <div class="flags">${fb("サポーター","sup")}${fb("クリエ","")}${fb("アドバンス","adv")}${fb("系列代表","kei")}${fb("チーム代表","rep")}${fb("管理者","adm")}</div>${scopeBtn}
         ${canYari(m) ? `<button type="button" class="yari-btn" onclick="openYaritai('${m.id}')">🌱 やりたいこと</button>` : ""}
+        ${canYari(m) ? `<button type="button" class="skill-btn" onclick="openSkill('${m.id}')">🚀 スキルアッププロ</button>` : ""}
         <button type="button" class="dept-chip ${m.dept ? "has" : ""}" onclick="openDeptPick('${m.id}')" title="部門">🏷 ${m.dept ? String(m.dept).split(",").join("・") : "部門：未所属"}</button>
         <label class="hidchk ${hidPend ? "pend" : ""}" title="あなたの画面だけで非表示にします"><input type="checkbox" ${hidOn ? "checked" : ""} onchange="toggleHide('${m.id}', this.checked)">非表示</label>
         ${editRow}
@@ -2194,6 +2201,45 @@ async function openYaritai(id){
       '<div class="ysum"></div>';
     body.querySelector("#ypWhen").onchange = ev => show(+ev.target.value);
     show(0);
+  }catch(err){ body.innerHTML = '<p class="yp-msg">通信できませんでした。電波のよい場所でお試しください。</p>'; }
+}
+/* ================================================================
+   スキルアッププロの開放（v1.2.092）
+   ・クリエーターズ・アドバンス・系列代表・チーム代表の方は、自動でオン
+   ・それ以外の方は、オン・オフを切りかえられます（変えられるかどうかは GAS で確かめます：
+     管理者・チーム代表、その方のアップクリエ、担当系列の系列代表・アドバンス）
+================================================================ */
+async function openSkill(id){
+  const old = document.getElementById("yariPop"); if(old) old.remove();
+  const box = document.createElement("div"); box.id = "yariPop";
+  const m = (data && data.members || []).find(x => hk(x.id) === hk(id)) || {};
+  const e = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  box.innerHTML = '<div class="yp"><div class="yp-h">🚀 ' + e(m.name || id) + ' さんのスキルアッププロ</div><div id="skBody"><p class="yp-msg">読み込んでいます…</p></div><button type="button" class="yp-close">とじる</button></div>';
+  document.body.appendChild(box);
+  const close = () => box.remove();
+  box.querySelector(".yp-close").onclick = close;
+  box.addEventListener("click", ev => { if(ev.target === box) close(); });
+  const body = box.querySelector("#skBody");
+  const base = { id:admin.id, pin:admin.pin, email:admin.email || "", target:id };
+  const draw = j => {
+    if(j.auto){ body.innerHTML = '<div class="sk-row"><span>開放</span><button type="button" class="sk-sw on" disabled>オン</button></div><p class="yp-msg">クリエーターズ以上の方なので、自動でオンになっています。</p>'; return; }
+    body.innerHTML = '<div class="sk-row"><span>開放</span><button type="button" class="sk-sw ' + (j.open ? "on" : "") + '" id="skSw"' + (j.canSet ? "" : " disabled") + '>' + (j.open ? "オン" : "オフ") + '</button></div>' +
+      '<p class="yp-msg" id="skMsg">' + (j.canSet ? "押すと、オン・オフが切りかわります。オンにすると、ご本人に通知が届きます。" : "変えられるのは、管理者・チーム代表と、この方のアップクリエの方、担当系列の系列代表・アドバンスの方です。") + '</p>';
+    const sw = body.querySelector("#skSw");
+    if(j.canSet) sw.onclick = async () => {
+      sw.disabled = true; body.querySelector("#skMsg").textContent = "切りかえています…";
+      try{
+        const r = await (await fetch(GAS_URL, { method:"POST", body:new URLSearchParams(Object.assign({ action:"skillSet", on: j.open ? "0" : "1" }, base)) })).json();
+        if(r && r.ok){ j.open = r.open; draw(j); body.querySelector("#skMsg").textContent = r.open ? "✅ オンにしました（ご本人に通知しました）" : "オフにしました"; return; }
+        body.querySelector("#skMsg").textContent = r && r.error === "noperm" ? "この方のオン・オフは、変えられません。" : "切りかえられませんでした。少しおいてお試しください。";
+      }catch(err){ body.querySelector("#skMsg").textContent = "通信できませんでした。電波のよい場所でお試しください。"; }
+      sw.disabled = false;
+    };
+  };
+  try{
+    const j = await (await fetch(GAS_URL + "?" + new URLSearchParams(Object.assign({ action:"skillOf" }, base)).toString())).json();
+    if(!j || !j.ok){ body.innerHTML = '<p class="yp-msg">' + (j && j.error === "unknown_action" ? "GASがまだ新しい版になっていません（v1.2.092 以上が必要です）。" : "読み込めませんでした。少しおいてお試しください。") + '</p>'; return; }
+    draw(j);
   }catch(err){ body.innerHTML = '<p class="yp-msg">通信できませんでした。電波のよい場所でお試しください。</p>'; }
 }
 /* あなたとの関係（紹介した方・サポート担当の方） */
