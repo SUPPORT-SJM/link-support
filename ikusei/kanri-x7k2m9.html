@@ -565,6 +565,8 @@
   .mc-people .me{color:#2F7A5C;}
   .mc-foot{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:12px;color:#6A6480;border-top:1px dashed #ECE9F5;padding-top:8px;}
   .mc-foot .dept-chip,.mc-foot .hidchk,.mc-foot .yari-btn,.mc-foot .pro-btn{margin-top:0;}   /* v1.2.094：たての位置をそろえます */
+  /* v1.2.095：やりたいこと・プロ・部門の楕円を、サポーターなどのボタンと同じ高さ（26px）にして、文字をまんなかに */
+  .mc-foot .yari-btn,.mc-foot .pro-btn,.mc-foot .dept-chip{display:inline-flex;align-items:center;height:26px;line-height:1;padding-top:0;padding-bottom:0;box-sizing:border-box;}
   .mc-foot .edit-row{margin-left:auto;}
   .mc-foot .flags{max-width:none;}
   .sum{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
@@ -4085,8 +4087,8 @@ async function loadSkillSec(id){
   const box = document.getElementById("skBox"); if(!box) return;
   const base = { id:admin.id, pin:admin.pin, email:admin.email || "", target:id };
   const draw = j => {
-    if(j.auto){ box.innerHTML = '<p class="st">✅ 許可されています</p><p>クリエーターズ以上の方なので、自動で許可になっています。</p>'; return; }
-    box.innerHTML = '<p class="st">' + (j.open ? "✅ 許可されています" : (j.pending ? "✉️ 申請が上がっています" : "申請はまだありません")) + '</p>' +
+    if(j.auto){ box.innerHTML = '<p class="st">✅ 開放されています</p>'; return; }   /* v1.2.095：クリエーターズ以上の説明の文は出しません */
+    box.innerHTML = '<p class="st">' + (j.open ? "✅ 開放されています" : (j.pending ? "✉️ 申請が上がっています" : "申請はまだありません")) + '</p>' +
       (j.canSet ? '<button type="button" id="skBtn" class="' + (j.open ? "off" : "") + '">' + (j.open ? "許可を取り消す" : "許可する") + '</button>'
                : '<p>許可できるのは、管理者・チーム代表と、この方のアップクリエの方、担当系列の系列代表・アドバンスの方です。</p>') +
       '<p id="skMsg" style="margin-top:6px;"></p>';
