@@ -89,6 +89,8 @@ const qs = new URLSearchParams(location.search);
 let tab = qs.get("tab") || (qs.get("ask") ? "ask" : "inbox"), data = null;
 const TO = [["helper","サポート担当の方"],["upline","アップクリエの方"],["advance","アップアドバンスの方"],["keirep","自身の系列代表の方"],["site","サイトのこと（交通整備課）"]];
 const TYPES = ["質問・相談", "LINKの話を聞きたい・入りたいと言われた", "サイトのこと（不具合・使い方）"];   /* v1.2.083：「サポーターになりたい」は専用の申し込み（?ask=sup）に分けました */
+/* v1.2.086：宛先の方が名簿で見つからないときは、いったん交通整備課統括（さかいあたる）へ届きます */
+const FALLBACK_MSG = "✅ 送りました。ただいま宛先の方が見当たらないため、いったん交通整備課統括のさかいあたるさんに連絡が行くことになりますが、順次、返事や反応が来るのをお待ちください。";
 const NOTE_WAIT = 'こちらは、すぐにお返事が来るものではありません。通知を見たアップラインの方などが、<b>LINEなどでお返事をくださる</b>と思いますので、お待ちください。<br><b>緊急のご連絡は、いつもどおり初期サポートラインや、個別にご連絡ください。</b>';
 
 async function api(params, post){
@@ -169,7 +171,7 @@ function drawAsk(){
       say("送っています…"); $("#send").disabled = true;
       try{
         const j = await api({ action:"inquiry", toKind:to, type:type, text:text }, true);
-        if(j && j.ok){ say("✅ " + j.to.join("・") + "さんに送りました。LINEなどでお返事があるまで、しばらくお待ちください。"); $("#text").value = ""; data = null; }
+        if(j && j.ok){ say(j.fallback ? FALLBACK_MSG : "✅ " + j.to.join("・") + "さんに送りました。LINEなどでお返事があるまで、しばらくお待ちください。"); $("#text").value = ""; data = null; }
         else say(j && j.error === "noreceiver" ? "その宛先の方が、名簿で見つかりませんでした。ほかの宛先を選ぶか、アップラインの方に直接ご相談ください。" : j && j.error === "unknown_action" ? "まだしくみが用意できていません（GASの更新待ち）。" : "送れませんでした。少しおいてお試しください。", true);
       }catch(e){ say("通信できませんでした。", true); }
       $("#send").disabled = false;
@@ -192,7 +194,7 @@ function drawSupApply(){
       say("送っています…"); $("#send").disabled = true;
       try{
         const j = await api({ action:"inquiry", toKind:to, type:"サポーターになりたい", text:text }, true);
-        if(j && j.ok){ say("✅ " + j.to.join("・") + "さんに申し込みました。LINEなどでお返事があるまで、しばらくお待ちください。"); data = null; }
+        if(j && j.ok){ say(j.fallback ? FALLBACK_MSG : "✅ " + j.to.join("・") + "さんに申し込みました。LINEなどでお返事があるまで、しばらくお待ちください。"); data = null; }
         else say(j && j.error === "noreceiver" ? "その方が、名簿で見つかりませんでした。もう一方を選ぶか、初期サポートラインでお伝えください。" : j && j.error === "unknown_action" ? "まだしくみが用意できていません（GASの更新待ち）。" : "送れませんでした。少しおいてお試しください。", true);
       }catch(e){ say("通信できませんでした。", true); }
       $("#send").disabled = false;

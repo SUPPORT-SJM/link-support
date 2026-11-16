@@ -3,6 +3,8 @@
 <head>
 <script src="config.js"></script>
 <script src="nickname.js"></script>
+<script src="qrcode.js"></script>
+<script src="sky-links.js"></script>
 <meta charset="UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
@@ -565,10 +567,10 @@ const TREE = [
        html:'<p class="nm1">📝 申し込みのお名前には、必ず<b>自分の系列</b>が分かるように入れましょう。<br>🍽 <b>リアル交流会</b>は、<b>SASAEAIのプロフィールの記入が必須</b>です。すぐ出せるようにしておいてください。</p>'}
     ]},
     {ic:"🪞", nm:"集客の環境を\n整えよう", g:"member", num:3, group:true, kids:[
-      {ic:"🤝", nm:"SASAEAIに\nプロフィール掲載", g:"member", task:"k3a",
+      {ic:"🤝", nm:"SASAEAIに\nプロフィール掲載", g:"member", task:"k3a", sasaeai:true,
        note2:"支え合いのマッチング設定です。できること・してほしいことを登録して、プロフィールを掲載します。",
        pages:[{t:"🤝 SASAEAI設定ガイドを見る", u:"first-support/sasaeai.html"}]},
-      {ic:"🏰", nm:"LINK-BASEに\n事業を掲載", g:"member", task:"k3b",
+      {ic:"🏰", nm:"LINK-BASEに\n事業を掲載", g:"member", task:"k3b", linkbase:true,
        note2:"自分のこと・事業のことを知ってもらうページです。ご縁が広がるきっかけになります。",
        pages:[{t:"🏰 LINK-BASE掲載ガイドを見る", u:"first-support/linkbase.html"}]}
     ]},
@@ -1219,6 +1221,8 @@ function openTask(it){
   if(it.quiz) h += '<h4>📝 クイズ（ぜんぶ正解すると、説明が見られます）</h4>' + it.quiz.map((q, i)=>`<div class="fq" data-i="${i}"><p>Q${i + 1}. ${q.q}</p><div class="fqb"><button type="button" data-a="o">⭕</button><button type="button" data-a="x">❌</button></div></div>`).join("") + '<p class="fsmall" id="fQuizMsg" style="text-align:left"></p><div id="fQuizOk" hidden>';
   if(it.pages) it.pages.forEach((pg, i)=>{ h += `<button type="button" class="fbtn fpage" data-i="${i}" style="width:100%;border:none;cursor:pointer;font-family:inherit;background:#6E5FB5">${pg.t}</button>`; });
   if(it.quiz) h += '</div>';
+  /* v1.2.086：SASAEAIのプロフィールURL・LINK-BASEの事業URLを保存して、コピー・QRコードを出します（sky-links.js） */
+  if(it.sasaeai || it.linkbase) h += '<div id="fLinks"></div>';
   if(it.refSave) h += '<div class="fgen"><input id="fRef" type="url" inputmode="url" autocapitalize="off" spellcheck="false" placeholder="https://…" value="' + String((me && me.refUrl) || "").replace(/"/g, "&quot;") + '"><button type="button" id="fRefOk">OK（会員情報に保存する）</button><p class="fsmall" id="fRefMsg" style="margin-top:6px"></p></div>';
   /* v1.2.061：合言葉をやめて、質問に答える形に（質問 → 名前のルール・マナーに「分かりました」 → 2つのチャットのURL） */
   if(it.pass) h += '<div class="fgen"><label for="fPass">❓ ユーザーサポート会で、最初にホーム画面に置くように言われたサイトの名前は何ですか？（カタカナで）</label><input id="fPass" type="text" autocomplete="off" placeholder="カタカナで入れてください"><button type="button" id="fPassOk">答える</button><p class="fsmall" id="fPassMsg" style="margin-top:6px"></p>'
@@ -1233,6 +1237,11 @@ function openTask(it){
   if(it.gen) flowGen();
   document.querySelectorAll("#taskBody .fpage").forEach(b=>b.addEventListener("click", ()=>openPage(it.pages[+b.dataset.i])));
   if(it.refSave) $("#fRefOk").onclick = flowSaveRef;
+  if((it.sasaeai || it.linkbase) && window.skyLinks){
+    /* 「できた（保存する）」で保存したら、「できたら押してね」も「できた」にします */
+    const saved = ()=>{ if(!FLOW[it.task] && $("#taskDone")) $("#taskDone").click(); };
+    skyLinks[it.sasaeai ? "sasaeai" : "linkbase"]($("#fLinks"), { onSaved: saved });
+  }
   if(it.pass) $("#fPassOk").onclick = flowPass;
   if(it.nameRule && !it.pass){ const r = $("#fRule"), g = $("#fGate"); r.checked = false; g.classList.add("off");
     r.onchange = ()=>{ g.classList.toggle("off", !r.checked); }; }   /* 開くたびに、チェックしてから進みます */
@@ -1425,7 +1434,7 @@ function saveReturn(){
   }
   try{ if(idx.length) sessionStorage.setItem(RET_KEY, JSON.stringify({ idx, t: Date.now() })); else sessionStorage.removeItem(RET_KEY); }catch(e){}
 }
-let hashBack = false;
+let hashBack = false, hashDepth = 1;   /* v1.2.086：何段目で「もどる」を押したら、もとのページへもどるか */
 /* 仮組み：メニューなどから「はじめの一歩」「LINKを知ろう」「LINKを使おう」の段を開きます（#hajime・#know・#use）
    順番がまだのときは、トップのまま「先に〇〇を」とお知らせします */
 function flowHashPage(){ const h = location.hash.replace("#",""); return FLOW_ORDER.indexOf(h) >= 0 ? h : ""; }
@@ -1445,12 +1454,15 @@ addEventListener("hashchange", ()=>{ if(flowHashPage()) openFlowHash(true); });
 function restoreReturn(){
   if(openFlowHash(false)) return;
   /* 「交流会・サポート会情報」から（チーム情報のページ・活用の1stステップ）：各種スケジュール情報（公式公認／チーム独自）の段を開きます */
-  if(location.hash === "#sched"){
+  /* v1.2.086：#schedTeam は、便利な情報一覧の「チーム独自の交流会などの情報」から：各種スケジュール情報 › チーム独自 の段を開きます */
+  if(location.hash === "#sched" || location.hash === "#schedTeam"){
+    const team = location.hash === "#schedTeam";
     try{ sessionStorage.removeItem(RET_KEY); }catch(e){}
     /* この段の「もどる」は、開く前のページ（チーム情報など）へもどります */
     try{ hashBack = !!document.referrer && new URL(document.referrer).origin === location.origin && history.length > 1; }catch(e){ hashBack = false; }
     try{ history.replaceState(null, "", location.pathname + location.search); }catch(e){}
-    const want = [/^各種スケジュール情報$/];
+    const want = team ? [/^各種スケジュール情報$/, /^チーム独自$/] : [/^各種スケジュール情報$/];
+    hashDepth = want.length;
     let list = TREE;
     for(const re of want){
       const it = list.find(x=>x.kids && re.test(x.nm));
@@ -1476,7 +1488,7 @@ function restoreReturn(){
 /* 「もどる」のアイコンを押したら、1つ前の段へ */
 function goBack(n){
   /* チーム情報のページなどから「各種スケジュール情報」の段へ来たときは、その段の「もどる」で、もとのページへ */
-  if(hashBack && path.length === 1){ hashBack = false; history.back(); return; }
+  if(hashBack && path.length === hashDepth){ hashBack = false; history.back(); return; }
   document.getElementById("info").hidden = true;
   goTo(()=> path.pop(), n ? n.x : undefined, n ? n.y : undefined, n);
 }

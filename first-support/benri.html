@@ -69,6 +69,8 @@ body{font-family:"Zen Kaku Gothic New",sans-serif;background:radial-gradient(ell
 <link rel="stylesheet" href="../beta.css">
 <script src="../loading.js"></script>
 <script src="../login.js"></script>
+<script src="../qrcode.js"></script>
+<script src="../sky-links.js"></script>
 </head>
 <body>
 <a href="../index.html" class="back-btn">← ホームに戻る</a>
@@ -83,10 +85,12 @@ body{font-family:"Zen Kaku Gothic New",sans-serif;background:radial-gradient(ell
 マイページ</span></a>
   <a class="bub in" href="https://link-event-x.com/" target="_blank" rel="noopener"><span class="ball">🗓</span><span class="nm">LINK公認公式
 スケジュール</span></a>
-  <a class="bub in" href="https://sasaeai.link-platform.jp/" target="_blank" rel="noopener"><span class="ball">🤝</span><span class="nm">SASAEAI
-マッチング</span></a>
-  <a class="bub in" href="https://link-base.jp/" target="_blank" rel="noopener"><span class="ball">🏢</span><span class="nm">LINK-BASE
-サイト</span></a>
+  <button type="button" class="bub in" data-pop="popSasa"><span class="ball">🤝</span><span class="nm">SASAEAI
+マッチング</span></button>
+  <button type="button" class="bub in" data-pop="popLb"><span class="ball">🏢</span><span class="nm">LINK-BASE
+サイト</span></button>
+  <a class="bub in" href="../index.html#schedTeam"><span class="ball">☁️</span><span class="nm">チーム独自の
+交流会などの情報</span></a>
   <button type="button" class="bub out" data-pop="popMem"><span class="ball">👤</span><span class="nm">会員情報
 紹介コード</span></button>
   <button type="button" class="bub out" data-pop="popNick"><span class="ball">🏷️</span><span class="nm">オープン
@@ -123,6 +127,20 @@ body{font-family:"Zen Kaku Gothic New",sans-serif;background:radial-gradient(ell
   <button type="button" class="closeb">とじる</button>
 </div></div>
 
+<!-- v1.2.086：SASAEAI（あなたのプロフィールURL・コピー・QRコード → サイトへ） -->
+<div class="sheet" id="popSasa" hidden><div class="pop" role="dialog" aria-modal="true">
+  <h2>🤝 SASAEAIマッチング</h2>
+  <div id="sasaBox"></div>
+  <button type="button" class="closeb">とじる</button>
+</div></div>
+
+<!-- v1.2.086：LINK-BASE（あなたの事業のURL・えらんだ事業のQRコード → サイトへ） -->
+<div class="sheet" id="popLb" hidden><div class="pop" role="dialog" aria-modal="true">
+  <h2>🏢 LINK-BASEサイト</h2>
+  <div id="lbBox"></div>
+  <button type="button" class="closeb">とじる</button>
+</div></div>
+
 <!-- Zoom -->
 <div class="sheet" id="popZoom" hidden><div class="pop" role="dialog" aria-modal="true">
   <h2>🎥 LINKセミナー・LINK主催イベントのZoom</h2>
@@ -141,6 +159,8 @@ body{font-family:"Zen Kaku Gothic New",sans-serif;background:radial-gradient(ell
 /* ================================================================
    便利な情報一覧（トップページの「便利な情報一覧」の丸から開きます）
    ・LINKのサイト：LINKポータル・ビジネスマイページ・公認公式スケジュールサイト・SASAEAI・LINK-BASE
+   ・v1.2.086：SASAEAI・LINK-BASE は、押すとまずポップアップ（ご自身のURL・コピー・QRコード、下にサイトへのリンク）。
+     「チーム独自の交流会などの情報」の丸を足しました（ホームの 各種スケジュール情報 › チーム独自 を開きます。もどるで、ここへ）
    ・会員情報／紹介コード：ログインしている方の会員番号と、紹介URL（会員名簿の「紹介URL」）をコピーできます
    ・オープンチャットの名前づくり：nickname.js の決まり（20文字）で作ります
    ・Zoom：LINKセミナー・LINK主催イベントのZoom（URL・ミーティングID・パスコード、それぞれコピー）
@@ -235,7 +255,12 @@ document.querySelectorAll("#popZoom [data-copy]").forEach(b=>{
 
 /* ---------- ポップアップ ---------- */
 let popOpen = false;
-function openPop(id){ const s = document.getElementById(id); if(!s) return; s.hidden = false; popOpen = true; }
+function openPop(id){
+  const s = document.getElementById(id); if(!s) return; s.hidden = false; popOpen = true;
+  /* v1.2.086：SASAEAI・LINK-BASE は、ホームの「集客の環境を整えよう」と同じものを出します（sky-links.js） */
+  if(id === "popSasa" && window.skyLinks) skyLinks.sasaeai($("#sasaBox"), { view:true });
+  if(id === "popLb" && window.skyLinks) skyLinks.linkbase($("#lbBox"), { view:true });
+}
 function closePops(){ document.querySelectorAll(".sheet").forEach(s=>s.hidden = true); popOpen = false; }
 document.querySelectorAll(".bub[data-pop]").forEach(b=>b.addEventListener("click", ()=>openPop(b.dataset.pop)));
 document.querySelectorAll(".sheet").forEach(s=>{
@@ -257,6 +282,7 @@ document.addEventListener("keydown", e=>{ if(e.key === "Escape") closePops(); })
   N.push({ el: sun, kind: "sun", ph: 0 });
   document.querySelectorAll(".bub.in").forEach((el, i)=>N.push({ el, kind: "in", k: i, ph: i * 1.3 }));
   document.querySelectorAll(".bub.out").forEach((el, i)=>N.push({ el, kind: "out", k: i, ph: i * 2.1 }));
+  const inN = document.querySelectorAll(".bub.in").length;
   N.forEach(n=>{ n.x = null; n.y = null; n.vx = 0; n.vy = 0; n.s = 1; n.ts = 1; n.el.draggable = false; });
   let W, H, cx, cy, RI, RO;
   function size(){
@@ -318,7 +344,7 @@ document.addEventListener("keydown", e=>{ if(e.key === "Escape") closePops(); })
       let hx, hy, depth = 0;
       if(n.kind === "sun"){ hx = cx; hy = cy; }
       else if(n.kind === "in"){
-        const a = sec * 2 * Math.PI / 30 + n.k * 2 * Math.PI / 5 - Math.PI / 2;   /* 30秒でひとまわり */
+        const a = sec * 2 * Math.PI / 30 + n.k * 2 * Math.PI / inN - Math.PI / 2;   /* 30秒でひとまわり（v1.2.086：丸の数で等分） */
         hx = cx + RI.x * Math.cos(a); hy = cy + RI.y * Math.sin(a);
       }else{
         const a = -sec * 2 * Math.PI / 22 + n.k * 2 * Math.PI / 3;              /* 反対まわりに22秒でひとまわり */
