@@ -32,7 +32,7 @@ body{font-family:"Zen Kaku Gothic New",sans-serif;background:radial-gradient(ell
 .bub.out{width:80px;transform-origin:50% 15px}
 .bub.out .ball{width:29px;height:29px;font-size:14px;border-width:2px}   /* 外がわの3つは、半分の大きさ */
 .bub.out .nm{font-size:9.5px;padding:1px 4px;border-radius:6px}
-.sun{position:absolute;left:0;top:0;width:120px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:grab;
+.sun{position:absolute;left:0;top:0;width:120px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;
   touch-action:none;user-select:none;-webkit-user-select:none;transform-origin:50% 36px}
 .sun .ball{width:72px;height:72px;border-radius:50%;display:grid;place-items:center;font-size:32px;
   background:radial-gradient(circle at 35% 30%,#FFF9C4,#FFD54F 60%,#FFB300);box-shadow:0 0 0 8px rgba(255,213,79,.25),0 0 34px rgba(255,193,7,.45)}
@@ -79,7 +79,7 @@ body{font-family:"Zen Kaku Gothic New",sans-serif;background:radial-gradient(ell
 <div id="stage">
   <div class="orb" id="orbIn"></div>
   <div class="orb o" id="orbOut"></div>
-  <div class="sun" id="sun"><div class="ball">🧰</div><div class="nm">便利な<br>情報一覧</div></div>
+  <div class="sun" id="sun" role="button" tabindex="0" aria-label="もどる"><div class="ball">↩️</div><div class="nm">もどる</div></div>
   <a class="bub in" href="https://app.link-event-x.com" target="_blank" rel="noopener"><span class="ball">🏠</span><span class="nm">LINKポータル</span></a>
   <a class="bub in" href="https://member.link-platform.jp" target="_blank" rel="noopener"><span class="ball">💼</span><span class="nm">ビジネス
 マイページ</span></a>
@@ -252,6 +252,16 @@ document.querySelectorAll("#popZoom [data-copy]").forEach(b=>{
     b.closest(".row").querySelector(".cpmsg").textContent = ok ? "コピーしました" : "コピーできませんでした。長押ししてコピーしてください";
   });
 });
+
+/* ---------- まんなかの丸：もどる（v1.2.087） ----------
+   このサイトのページから来たときは、そのページへ。そうでないときは、ホームへ */
+function goBackBenri(){
+  let same = false;
+  try{ same = !!document.referrer && new URL(document.referrer).origin === location.origin && history.length > 1; }catch(e){}
+  if(same) history.back(); else location.href = "../index.html";
+}
+$("#sun").addEventListener("click", goBackBenri);
+$("#sun").addEventListener("keydown", e=>{ if(e.key === "Enter" || e.key === " "){ e.preventDefault(); goBackBenri(); } });
 
 /* ---------- ポップアップ ---------- */
 let popOpen = false;
