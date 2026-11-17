@@ -658,16 +658,23 @@ const TREE = [
   {ic:"🐣", nm:"サポーター\nとは", g:"sup", need:"supIntro", url:B+"first-support/to-supporter.html"},
   {ic:"🐣", nm:"サポーターの\n部屋", g:"sup", need:"sup",
    flip:{ic:"🐣", nm:"サポーター\nとは", g:"sup", url:B+"first-support/to-supporter.html"}, kids:[
+    /* v1.2.104：サポーターの部屋を、まとまりに分けました（LINKポータルの丸は外しました） */
     {ic:"🐣", nm:"サポーター\nとは", g:"sup", url:B+"first-support/to-supporter.html"},
-    {ic:"🤝", nm:"入会直後の\nフォローの仕方", g:"sup", url:B+"first-support/sup-follow.html"},
-    {ic:"💌", nm:"新規の方への\n最初のメッセージ", g:"sup", url:B+"ikusei/first-message.html"},
-    {ic:"🐣", nm:"ぴよぴよ\n脱出クイズ", g:"sup", url:B+"ikusei/piyo-quiz.html"},
+    {ic:"🧾", nm:"登録サポート", g:"sup", kids:[
+      {ic:"📋", nm:"登録方法の\nおさらい", g:"sup", wip:true},
+      {ic:"🤝", nm:"入会直後の\nフォローの仕方", g:"sup", url:B+"first-support/sup-follow.html"}
+    ]},
+    {ic:"📘", nm:"サポートマニュアル\nとトーク集", g:"sup", wide:true, kids:[
+      {ic:"💌", nm:"新規の方への\n最初のメッセージ", g:"sup", url:B+"ikusei/first-message.html"}
+    ]},
+    {ic:"🌱", nm:"成長ノウハウ", g:"sup", kids:[
+      {ic:"🚀", nm:"スキルアッププロ\nシリーズを学ぶ", g:"sup", url:B+"first-support/skillup.html"},
+      {ic:"🌱", nm:"やりたいことを\n磨く", g:"sup", url:B+"first-support/yaritai.html"},
+      {ic:"🐣", nm:"ぴよぴよ\n脱出クイズ", g:"sup", url:B+"ikusei/piyo-quiz.html"}
+    ]},
     {ic:"📝", nm:"新規登録の\n依頼", g:"sup", url:B+"ikusei/shinki-irai.html"},
     {ic:"💬", nm:"アップに\n相談する", g:"sup", url:B+"notices.html?ask=link"},
-    {ic:"🌱", nm:"やりたいことを\n磨く", g:"sup", url:B+"first-support/yaritai.html"},
-    {ic:"🚀", nm:"スキルアッププロ\nシリーズを学ぶ", g:"sup", url:B+"first-support/skillup.html"},
-    {ic:"🔐", nm:"メンバー\nマネジメントルーム", g:"sup", wide:true, url:B+"ikusei/kanri-x7k2m9.html"},
-    {ic:"🏠", nm:"LINKポータル", g:"sup", url:"https://app.link-event-x.com"}
+    {ic:"🔐", nm:"メンバー\nマネジメントルーム", g:"sup", wide:true, url:B+"ikusei/kanri-x7k2m9.html"}
   ]},
   {ic:"👋", nm:"はじめの一歩", g:"member", flowPage:"hajime", kids:[
     {ic:"📲", nm:"便利な2つを\nホームに置く", g:"member", num:0, task:"h0", subs:[["h0_p","LINKポータルを置いた"],["h0_s","このサイト（Skyarc LINKサポート）を置いた"]],
