@@ -147,7 +147,7 @@
   .pen-btn{display:inline-grid;place-items:center;width:26px;height:26px;margin:0 4px 0 6px;vertical-align:-6px;border:1.5px solid #CFC9E3;border-radius:7px;background:#fff;font-size:13px;line-height:1;cursor:pointer;padding:0;}
   .pen-btn:hover{background:#F3F1F8;}
   .mtabs{display:flex;gap:6px;margin:0 0 10px;}
-  .mtabs button{flex:1;padding:9px 6px;border-radius:12px;border:2px solid #DCD6F2;background:#fff;color:#6C6588;font-family:inherit;font-weight:700;font-size:13.5px;cursor:pointer;}
+    .mtabs button{flex:1;padding:9px 6px;border-radius:12px;border:2px solid #DCD6F2;background:#fff;color:#6C6588;font-family:inherit;font-weight:700;font-size:12.5px;line-height:1.35;cursor:pointer;}
   @media (max-width:700px){ .mtabs{margin-right:54px;} }   /* 右上のメニューのボタンと重ならないように */
   .mtabs button.on{background:#6E5FB5;border-color:#6E5FB5;color:#fff;cursor:default;}
   .mtabs button:disabled:not(.on){opacity:.4;cursor:default;}
@@ -594,6 +594,30 @@
   .ss-chip.pend,.plink.pend{outline:2.5px dashed #E5A823;outline-offset:1px;}
   .ss-dot{flex:0 0 auto;width:12px;height:12px;border-radius:50%;margin-top:4px;}
   .ss-dot.g{background:#3DAA6E;} .ss-dot.y{background:#E5A823;} .ss-dot.r{background:#E0566A;}
+  /* v1.2.099：当月案内予定（来月導員予定のまま月が変わった）は、青く光らせます */
+  .ss-dot.b{background:#2F80ED;animation:ssBlue 1.6s ease-in-out infinite;}
+  @keyframes ssBlue{0%,100%{box-shadow:0 0 0 2px rgba(47,128,237,.25)}50%{box-shadow:0 0 0 6px rgba(47,128,237,.12),0 0 10px rgba(47,128,237,.7)}}
+  .ss-modal .sem.blue,.sstab .sem.blue{background:#EAF2FF;border-radius:10px;padding:10px;}
+  .bluenote{font-size:12px;font-weight:700;color:#1F5FC4;margin-top:6px;}
+  .oldnote{font-size:11.5px;color:#8A84A0;background:#F6F5FA;border-radius:8px;padding:5px 9px;margin:4px 0 6px;}
+  .ss-modal .states.mth,.sstab .states.mth{margin-top:8px;font-size:12px;color:#6A6480;align-items:center;}
+  .sstab .sem{border-top:1px solid #F0EDF9;padding:10px 0;}
+  .sstab .sem .lb{font-size:13px;font-weight:700;color:#3B3550;margin-bottom:6px;}
+  .sstab .states{display:flex;flex-wrap:wrap;gap:6px;}
+  .sstab .states button{padding:7px 11px;border-radius:999px;border:1.5px solid #E1DCF2;background:#fff;color:#5A5470;font-size:12.5px;font-weight:700;font-family:inherit;cursor:pointer;}
+  .sstab .states button.on{background:#6E5FB5;border-color:#6E5FB5;color:#fff;}
+  .sstab .dt{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:12px;color:#6A6480;}
+  .sstab .dt input{padding:7px 9px;font-size:14px;border-radius:9px;border:1.5px solid #E1DCF2;font-family:inherit;}
+  .sstab .dt .x{background:none;border:none;color:#9A96AE;font-size:12px;text-decoration:underline;cursor:pointer;}
+  .sstab .ssupd{font-size:11.5px;color:#8A84A0;margin-top:6px;}
+  .ssmsg{font-size:13px;font-weight:700;margin-top:6px;min-height:1em;}
+  .ssmsg.ok{color:#2F7A5C;} .ssmsg.err{color:#B3352F;}
+  .ss-modal .sheet.wide{max-width:980px;}
+  .reptbl{overflow:auto;max-height:55vh;border:1px solid #E1DCF2;border-radius:10px;margin-top:8px;}
+  .reptbl table{border-collapse:collapse;font-size:12px;white-space:nowrap;}
+  .reptbl th{position:sticky;top:0;background:#EDEAF9;color:#4A3F7A;padding:6px 8px;text-align:left;border-bottom:1px solid #DCD6F2;}
+  .reptbl td{padding:5px 8px;border-bottom:1px solid #F0EDF9;}
+  .reptbl td.r{color:#B3352F;} .reptbl td.g{color:#2F7A5C;} .reptbl td.b{color:#1F5FC4;font-weight:700;}
   .ss-chip .t{font-size:10.5px;color:#8A84A0;font-weight:700;line-height:1.4;}
   .ss-chip .v{font-size:12px;color:#22222A;line-height:1.45;}
   .ss-chip .me{display:block;font-size:10.5px;color:#2F7A5C;line-height:1.45;margin-top:2px;}
@@ -713,7 +737,7 @@
         <button class="btn-add" id="btnEvb" onclick="openEvb()" style="display:none;background:#5E8FD8;">📅 申込みシート</button>
         <button class="btn-add" id="btnLnk" onclick="openLnk()" style="display:none;background:#26A69A;">🔗 リンク先の変更</button>
         <label class="idlechk" title="最後のログインから30日以上たっている方だけを出します"><input type="checkbox" id="fIdle" onchange="render()">30日以上ログインなし</label>
-        <button class="btn-add" id="btnReport" onclick="saveReport()" style="background:#3DAA6E;">📄 初期サポートを報告用に保存</button>
+        <button class="btn-add" id="btnReport" onclick="saveReport()" style="background:#3DAA6E;">📄 ファーストサポート管理表をつくる</button>
         <button id="btnStats" onclick="openStats()" style="display:none;">📊 アクセス</button>
         <button id="btnHome" class="sky-home" onclick="goLeave(()=>location.href='../index.html')">🏠 ホーム</button>
         <button onclick="goLeave(()=>location.href='./creamap-x7k2m9.html')">🗺 クリエマップ</button>
@@ -1184,9 +1208,10 @@
       <p class="sub" id="dmSub"></p>
     </div>
     <div class="dm-body" id="dmBody"></div>
+    <div class="dm-body" id="ssBody" hidden></div>
     <div class="dm-foot">
       <button class="dm-cancel" onclick="closeDetail()">とじる</button>
-      <button class="dm-save" onclick="saveMarks()">先生の丸を保存</button>
+      <button class="dm-save" id="dmSave" onclick="dmSaveClick()">先生の丸を保存</button>
     </div>
   </div>
 </div>
@@ -2103,7 +2128,21 @@ function saveReport(){
   const kf = $("#keiFilter"); if(kf && kf.value && kf.selectedOptions[0]) parts.push(kf.selectedOptions[0].textContent);
   if($("#fIdle") && $("#fIdle").checked) parts.push("30日以上ログインなし");
   if($("#search").value.trim()) parts.push("検索：" + $("#search").value.trim());
-  SS.saveReport(lastShown, parts.join("／") || "すべて");
+  /* v1.2.099：育成データのスプレッドシートには入れず、自分から先のメンバー全員の表を、この端末に Excel で保存します */
+  const ids = downlineIds();
+  const meM = ((data && data.members) || []).find(x=>hk(x.id) === hk(admin && admin.id));
+  SS.openReport(ids, "あなたから先のメンバー全員", (meM && meM.name) || "");
+}
+/* 自分から先のメンバー（アップクリエ・紹介者・サポート担当で、自分につながっている方。自分はのぞく） */
+function downlineIds(){
+  const all = (data && data.members) || [];
+  const me = hk(admin && admin.id);
+  const kids = {};
+  all.forEach(m=>[m.upline, m.intro, m.helper].forEach(u=>{ const k = hk(u); if(k && k !== hk(m.id)){ (kids[k] = kids[k] || []).push(m); } }));
+  const seen = {}, out = [];
+  const walk = id=>{ (kids[id] || []).forEach(m=>{ const k = hk(m.id); if(seen[k] || k === me) return; seen[k] = 1; out.push(m.id); walk(k); }); };
+  walk(me);
+  return out;
 }
 
 function rowsHtml(list){
@@ -4088,7 +4127,8 @@ function renderDetail(){
 
   const body = document.getElementById("dmBody");
   /* v1.2.094：上のタブ（進捗の編集／会員情報の編集） */
-  drawModalTabs("dm", m.id);
+  const ssb = document.getElementById("ssBody"); if(ssb && ssb.dataset.for !== String(m.id)){ ssb.dataset.for = ""; ssb.innerHTML = ""; }
+  setDmMode(dmMode, m.id);
   const rowHtml = (app, code, label, gi, marks, self) => {
     const on = marks.indexOf(code) >= 0;
     const didSelf = !!self[code];
@@ -4254,21 +4294,42 @@ function openPro(id){
   loadSkillSec(id);
 }
 /* v1.2.094：進捗の編集／会員情報の編集 のタブ（同じ方のまま切りかえます） */
+/* v1.2.099：タブは3つ（📊 進捗の編集／🌱 初期サポート状況の編集／👤 会員情報の編集）
+   ・進捗と初期サポートは、同じ画面の中で切りかえます（読みなおしません）
+   ・会員情報は別の画面。行き来しても、進捗の画面はかくしておくだけです */
+let dmMode = "p";   /* "p" 進捗 ／ "s" 初期サポート */
 function drawModalTabs(which, id){
   const el = document.getElementById(which === "dm" ? "dmTabs" : "mmTabs"); if(!el) return;
   const m = ((data && data.members) || []).find(x => String(x.id) === String(id));
   const canEd = !!m && ((data && data.isFull) || m.edit === true);
-  el.innerHTML = '<button type="button" class="' + (which === "dm" ? "on" : "") + '" id="' + which + 'TabP">📊 進捗の編集</button>' +
-                 '<button type="button" class="' + (which === "mm" ? "on" : "") + '" id="' + which + 'TabM"' + (canEd || which === "mm" ? "" : " disabled title=\"この方の会員情報は編集できません\"") + '>👤 会員情報の編集</button>';
-  /* v1.2.096：タブの切りかえでは読みなおしません（進捗の画面は、かくしておくだけ。入れかけたチェックもそのまま） */
-  if(which === "dm" && canEd) document.getElementById("dmTabM").onclick = () => { document.getElementById("detailModal").classList.remove("show"); openMember(m); detailHiddenFor = String(id); };
-  if(which === "mm") document.getElementById("mmTabP").onclick = () => {
-    const keep = detailHiddenFor === String(id) && detailData && String(detailData.member.id) === String(id);
-    closeMember();
-    if(keep) document.getElementById("detailModal").classList.add("show");
-    else openDetail(id);
-  };
+  const on = k => (which === "mm" ? k === "m" : k === dmMode) ? "on" : "";
+  el.innerHTML = '<button type="button" class="' + on("p") + '" id="' + which + 'TabP">📊 進捗の編集</button>' +
+                 '<button type="button" class="' + on("s") + '" id="' + which + 'TabS">🌱 初期サポート状況の編集</button>' +
+                 '<button type="button" class="' + on("m") + '" id="' + which + 'TabM"' + (canEd || which === "mm" ? "" : " disabled title=\"この方の会員情報は編集できません\"") + '>👤 会員情報の編集</button>';
+  if(which === "dm"){
+    document.getElementById("dmTabP").onclick = () => setDmMode("p", id);
+    document.getElementById("dmTabS").onclick = () => setDmMode("s", id);
+    if(canEd) document.getElementById("dmTabM").onclick = () => { document.getElementById("detailModal").classList.remove("show"); openMember(m); detailHiddenFor = String(id); };
+  }else{
+    const back = mode => {
+      const keep = detailHiddenFor === String(id) && detailData && String(detailData.member.id) === String(id);
+      closeMember();
+      if(keep){ document.getElementById("detailModal").classList.add("show"); setDmMode(mode, id); }
+      else { dmMode = mode; openDetail(id); }
+    };
+    document.getElementById("mmTabP").onclick = () => back("p");
+    document.getElementById("mmTabS").onclick = () => back("s");
+  }
 }
+function setDmMode(mode, id){
+  dmMode = mode;
+  const ps = document.getElementById("dmBody"), ss = document.getElementById("ssBody"), sv = document.getElementById("dmSave");
+  ps.hidden = mode !== "p"; ss.hidden = mode !== "s";
+  sv.textContent = mode === "s" ? "初期サポート状況を保存" : "先生の丸を保存";
+  if(mode === "s" && window.SS && ss.dataset.for !== String(id)){ SS.renderTab(ss, id); ss.dataset.for = String(id); }
+  drawModalTabs("dm", id);
+}
+function dmSaveClick(){ if(dmMode === "s"){ if(window.SS) SS.tabSave(); } else saveMarks(); }
 
 function toggleSelfEdit(app){
   selfEditMode[app] = !selfEditMode[app];
@@ -4377,6 +4438,8 @@ async function saveMarks(){
 /* v1.2.096：タイトルの右に、いつも版を出します */
 document.addEventListener("DOMContentLoaded", ()=>{ const v = document.getElementById("h1Ver"); if(v) v.textContent = window.SKY_VERSION || ""; });
 function closeDetail(){
+  dmMode = "p";
+  const ssb = document.getElementById("ssBody"); if(ssb){ ssb.dataset.for = ""; ssb.innerHTML = ""; }
   document.getElementById("detailModal").classList.remove("show");
   detailData = null;
   selfEditMode = {};

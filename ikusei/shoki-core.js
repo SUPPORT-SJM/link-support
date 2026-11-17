@@ -13,21 +13,35 @@ let me = null, data = null, byId = {}, onChange = function(){}, toast = function
 /* ================================================================
    項目と状態
 ================================================================ */
+/* v1.2.099：グルコンは3人（g1・g2・g3）、チーム交流会はオンライン（kon）・リアル（kre）に分けました。
+   前の「グルコン（g）」「チーム交流会（k）」の記録は、新しい方が空のときに「前の記録」として出します */
 const GROUPS = [
   { key:"u",   title:"① ユーザーサポート会", items:["u"] },
   { key:"sem", title:"② LINKセミナー（5種類）", items:["s1","s2","s3","s4","s5"] },
-  { key:"g",   title:"③ グルコン", items:["g"] },
-  { key:"k",   title:"④ チーム交流会", items:["k"] }
+  { key:"g",   title:"③ グルコン", items:["g1","g2","g3"], old:"g" },
+  { key:"k",   title:"④ チーム交流会", items:["kon","kre"], old:"k" }
 ];
 const ITEM_LABEL = { u:"ユーザーサポート会", s1:"通常編", s2:"社長編", s3:"自己ブランディング特化版",
-                     s4:"グループ構築特化版", s5:"新サービス特化版", g:"グルコン", k:"チーム交流会" };
+                     s4:"グループ構築特化版", s5:"新サービス特化版", g:"グルコン", k:"チーム交流会",
+                     g1:"高山翔子さんのグルコン", g2:"いと・すけさんのグルコン", g3:"冨田由起子さんのグルコン",
+                     kon:"オンライン交流会", kre:"リアル交流会" };
+const SEM_KEYS = ["s1","s2","s3","s4","s5"];
+const METHODS = ["リアル","動画視聴会"];   /* v1.2.099：セミナーの参加方法 */
 const STATES = [
   { v:"",         t:"未案内" },
-  { v:"案内した", t:"案内した（返事待ち）" },
+  { v:"案内した", t:"案内済み（返事待ち）" },
   { v:"参加予定", t:"参加予定" },
   { v:"参加済み", t:"参加済み" },
-  { v:"見送り",   t:"今回は見送り" }
+  { v:"見送り",   t:"見送り" },
+  { v:"来月導員予定", t:"来月導員予定" }   /* v1.2.099 */
 ];
+/* v1.2.099：「来月導員予定」のまま月が変わったか（選んだ日の月より、今月があと） */
+function overdueNext(it){
+  if(!it || it.s !== "来月導員予定") return false;
+  const d = parseD(it.d); if(!d) return false;
+  const t = today0();
+  return t.getFullYear() * 12 + t.getMonth() > d.getFullYear() * 12 + d.getMonth();
+}
 
 /* ================================================================
    日付の計算（経過月数・直近3ヶ月）
@@ -50,6 +64,7 @@ function within3(d){ return d && monthsSince(d) < 3; }
 function sigOne(key, it){
   const s = it.s, d = parseD(it.d);
   if(!s) return { c:"r", v:"未案内" };
+  if(s === "来月導員予定") return overdueNext(it) ? { c:"b", v:"当月案内予定（" + md(it.d) + " に来月導員予定）" } : { c:"y", v:"来月導員予定" + (d ? "（" + md(it.d) + " 記入）" : "") };
   if(s === "案内した") return { c:"y", v:"返事待ち" + (d ? "（" + md(it.d) + " 案内）" : "") };
   if(s === "見送り") return { c:"y", v:"今回は見送り" };
   if(s === "参加予定"){
@@ -67,12 +82,15 @@ function sigOne(key, it){
 /* セミナー5種のまとめ */
 function sigSem(items){
   const ks = ["s1","s2","s3","s4","s5"];
+  /* v1.2.099：来月導員予定のまま月が変わったものがあれば、青で知らせます */
+  const od = ks.filter(k=>overdueNext(items[k]));
+  if(od.length){ const n0 = ks.filter(k=>(items[k] || {}).s === "参加済み").length; return { c:"b", v:n0 + "/5 種・当月案内予定 " + od.length + "種" }; }
   let done = 0, latest = null, passed = false, moving = false;
   ks.forEach(k=>{
     const it = items[k] || {}; const d = parseD(it.d);
     if(it.s === "参加済み"){ done++; if(d && (!latest || d > latest)) latest = d; }
     else if(it.s === "参加予定"){ moving = true; if(d && d < today0()) passed = true; }
-    else if(it.s === "案内した" || it.s === "見送り") moving = true;
+    else if(it.s === "案内した" || it.s === "見送り" || it.s === "来月導員予定") moving = true;
   });
   const last = latest ? "／直近 " + (latest.getMonth() + 1) + "/" + latest.getDate() : "";
   if(passed) return { c:"r", v:done + "/5 種・予定日が過ぎています" };
@@ -83,12 +101,37 @@ function sigSem(items){
   if(done === 5 && recent !== false) return { c:"g", v:"5/5 種 参加済み" + last };
   return { c:"y", v:done + "/5 種" + (recent === false ? "・3ヶ月以上あいています" : "") + last };
 }
+/* v1.2.099：いくつかに分かれた項目（グルコン3人・交流会2つ）のまとめ */
+function sigMulti(key, items, keys, oldKey){
+  const its = keys.map(k=>Object.assign({ k: k }, items[k] || {}));
+  if(its.every(x=>!x.s)){
+    const o = items[oldKey] || {};
+    if(o.s){ const r = sigOne(key, o); return { c:r.c, v:r.v + "（前の記録）" }; }
+    return { c:"r", v:"未案内" };
+  }
+  const od = its.filter(x=>overdueNext(x));
+  if(od.length) return { c:"b", v:"当月案内予定：" + od.map(x=>ITEM_LABEL[x.k].replace("のグルコン","")).join("・") };
+  const done = its.filter(x=>x.s === "参加済み");
+  if(done.length){
+    const last = done.map(x=>parseD(x.d)).filter(Boolean).sort((a,b)=>b-a)[0];
+    const names = done.map(x=>ITEM_LABEL[x.k].replace("のグルコン","").replace("交流会","")).join("・");
+    if(key === "k" && last && monthsSince(last) >= 3) return { c:"y", v:"前回 " + (last.getMonth()+1) + "/" + last.getDate() + "（" + monthsSince(last) + "ヶ月前）" };
+    return { c:"g", v:"参加済み：" + names + (last ? "（直近 " + (last.getMonth()+1) + "/" + last.getDate() + "）" : "") };
+  }
+  /* 参加済みがないときは、いちばん進んでいるもの */
+  const order = ["参加予定","案内した","来月導員予定","見送り"];
+  for(const st of order){
+    const x = its.find(y=>y.s === st);
+    if(x){ const r = sigOne(key, x); return { c:r.c, v:ITEM_LABEL[x.k].replace("のグルコン","") + "：" + r.v }; }
+  }
+  return { c:"r", v:"未案内" };
+}
 function signals(m){
   return {
     u: sigOne("u", m.items.u || {}),
     sem: sigSem(m.items),
-    g: sigOne("g", m.items.g || {}),
-    k: sigOne("k", m.items.k || {})
+    g: sigMulti("g", m.items, ["g1","g2","g3"], "g"),
+    k: sigMulti("k", m.items, ["kon","kre"], "k")
   };
 }
 /* ================================================================
@@ -149,12 +192,14 @@ async function load(m, opt){
 function get(id){ return byId[hkey(id)] || null; }
 function itemChanged(m, k){
   const a = (m.items && m.items[k]) || {}, b = (m.orig && m.orig[k]) || {};
-  return (a.s || "") !== (b.s || "") || (a.d || "") !== (b.d || "");
+  return (a.s || "") !== (b.s || "") || (a.d || "") !== (b.d || "") || (a.m || "") !== (b.m || "");
 }
 function supChanges(){
   const out = [];
   (data ? data.members : []).forEach(m=>Object.keys(m.items || {}).forEach(k=>{
-    if(itemChanged(m, k)) out.push({ target: m.id, item: k, state: m.items[k].s || "", date: m.items[k].d || "" });
+    if(k === "g" || k === "k") return;   /* v1.2.099：前の記録は、さわりません */
+    if(itemChanged(m, k)) out.push(Object.assign({ target: m.id, item: k, state: m.items[k].s || "", date: m.items[k].d || "" },
+      SEM_KEYS.indexOf(k) >= 0 ? { method: m.items[k].m || "" } : {}));
   }));
   return out;
 }
@@ -248,7 +293,7 @@ function openEd(id, gkey){
   edGroup = GROUPS.find(g=>g.key === gkey);
   if(!edMember || !edGroup) return;
   edDraft = {};
-  edGroup.items.forEach(k=>{ const it = edMember.items[k] || {}; edDraft[k] = { s: it.s || "", d: it.d || "" }; });
+  edGroup.items.forEach(k=>{ const it = edMember.items[k] || {}; edDraft[k] = { s: it.s || "", d: it.d || "", m: it.m || "" }; });
   $("#ssedTitle").textContent = edGroup.title;
   $("#ssedWho").textContent = (window.skyGrowth ? skyGrowth.tag(edMember.grow) : "") + (edMember.name || "") + "さん（" + edMember.id + "）";
   $("#ssedMsg").className = "msg";
@@ -259,35 +304,45 @@ function openEd(id, gkey){
 function closeEd(){ $("#ssed").classList.remove("show"); }
 function toInputDate(t){ const d = parseD(t); if(!d) return ""; const p = n=>String(n).padStart(2,"0"); return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()); }
 function todayText(){ const d = today0(); return d.getFullYear() + "/" + (d.getMonth() + 1) + "/" + d.getDate(); }
-function drawEd(){
-  $("#ssedBody").innerHTML = edGroup.items.map(k=>{
-    const dr = edDraft[k];
-    const dateLabel = dr.s === "参加予定" ? "参加する日" : dr.s === "参加済み" ? "参加した日" : dr.s === "案内した" ? "案内した日" : "日付";
-    return `<div class="sem">
-      ${edGroup.items.length > 1 ? `<div class="lb">${esc(ITEM_LABEL[k])}</div>` : ""}
-      <div class="states">${STATES.map(st=>`<button type="button" class="${dr.s === st.v ? "on" : ""}" onclick="SS.pickState('${k}','${st.v}')">${esc(st.t)}</button>`).join("")}</div>
-      ${dr.s ? `<div class="dt">${dateLabel}<input type="date" value="${toInputDate(dr.d)}" onchange="SS.pickDate('${k}',this.value)">
-        ${dr.d ? `<button type="button" class="x" onclick="SS.pickDate('${k}','')">日付を消す</button>` : ""}</div>` : ""}
-    </div>`;
-  }).join("");
+/* 1つの項目の入力（状態・日付・セミナーは参加方法）。fn … 呼ぶ関数の頭（"SS.pick" または "SS.tab"） */
+function itemEdHtml(k, dr, fn, showLabel){
+  const dateLabel = dr.s === "参加予定" ? "参加する日" : dr.s === "参加済み" ? "参加した日" : dr.s === "案内した" ? "案内した日" : dr.s === "来月導員予定" ? "記入した日" : "日付";
+  return `<div class="sem${overdueNext(dr) ? " blue" : ""}">
+    ${showLabel ? `<div class="lb">${esc(ITEM_LABEL[k])}</div>` : ""}
+    <div class="states">${STATES.map(st=>`<button type="button" class="${dr.s === st.v ? "on" : ""}" onclick="${fn}State('${k}','${st.v}')">${esc(st.t)}</button>`).join("")}</div>
+    ${overdueNext(dr) ? `<div class="bluenote">🔵 当月案内予定です（${esc(md(dr.d))} に「来月導員予定」にしたまま、月が変わりました）</div>` : ""}
+    ${dr.s ? `<div class="dt">${dateLabel}<input type="date" value="${toInputDate(dr.d)}" onchange="${fn}Date('${k}',this.value)">
+      ${dr.d ? `<button type="button" class="x" onclick="${fn}Date('${k}','')">日付を消す</button>` : ""}</div>` : ""}
+    ${SEM_KEYS.indexOf(k) >= 0 && dr.s === "参加済み" ? `<div class="states mth">参加方法：${METHODS.map(x=>`<button type="button" class="${dr.m === x ? "on" : ""}" onclick="${fn}Method('${k}','${x}')">${x === "動画視聴会" ? "動画視聴会で参加" : "リアルで参加"}</button>`).join("")}</div>` : ""}
+  </div>`;
 }
-function pickState(k, v){
-  const dr = edDraft[k];
+function oldNote(m, g){
+  if(!g.old) return "";
+  const o = (m.items || {})[g.old] || {};
+  return o.s ? `<div class="oldnote">前の記録：${esc(o.s)}${o.d ? " " + esc(md(o.d)) : ""}（分ける前の記録です）</div>` : "";
+}
+function drawEd(){
+  $("#ssedBody").innerHTML = oldNote(edMember, edGroup) + edGroup.items.map(k=>itemEdHtml(k, edDraft[k], "SS.pick", edGroup.items.length > 1)).join("");
+}
+/* 状態をえらんだときの日付の決まり（来月導員予定は、選んだ日を入れます） */
+function applyState(dr, v){
   dr.s = v;
   if(!v) dr.d = "";
-  /* 案内した・参加済みは、日付が空なら今日を入れておきます（あとで直せます） */
+  else if(v === "来月導員予定") dr.d = todayText();
   else if(!dr.d && (v === "案内した" || v === "参加済み")) dr.d = todayText();
   else if(v === "参加予定" || v === "見送り"){ const d = parseD(dr.d); if(v === "見送り") dr.d = ""; else if(d && d < today0()) dr.d = ""; }
-  drawEd();
+  if(v !== "参加済み") dr.m = "";
 }
+function pickState(k, v){ applyState(edDraft[k], v); drawEd(); }
 function pickDate(k, v){ edDraft[k].d = v ? v.replace(/-/g, "/") : ""; drawEd(); }
+function pickMethod(k, v){ edDraft[k].m = edDraft[k].m === v ? "" : v; drawEd(); }
 function saveEd(){
-  const changed = edGroup.items.filter(k=>{ const it = edMember.items[k] || {}; return (it.s || "") !== edDraft[k].s || (it.d || "") !== edDraft[k].d; });
+  const changed = edGroup.items.filter(k=>{ const it = edMember.items[k] || {}; return (it.s || "") !== edDraft[k].s || (it.d || "") !== edDraft[k].d || (it.m || "") !== (edDraft[k].m || ""); });
   if(!changed.length){ closeEd(); return; }
   const noDate = changed.filter(k=>edDraft[k].s === "参加予定" && !edDraft[k].d);
   if(noDate.length){ $("#ssedMsg").className = "msg err"; $("#ssedMsg").textContent = "参加予定の日付を入れてください"; return; }
   /* この画面の中だけで変えます。上の「💾 一覧の変更を保存」でまとめて保存します */
-  changed.forEach(k=>{ edMember.items[k] = { s: edDraft[k].s, d: edDraft[k].d }; });
+  changed.forEach(k=>{ edMember.items[k] = { s: edDraft[k].s, d: edDraft[k].d, m: edDraft[k].m || "" }; });
   closeEd();
   draw();
 }
@@ -316,7 +371,7 @@ async function save(){
         j.results.forEach(r=>{
           const m = data.members.find(x=>x.id === r.target);
           if(!m) return;
-          if(r.ok){ m.orig[r.item] = { s: r.s, d: r.d }; m.items[r.item] = { s: r.s, d: r.d }; m.updated = j.updated; m.updatedBy = j.updatedBy; }
+          if(r.ok){ const mm = (m.items[r.item] || {}).m || ""; m.orig[r.item] = { s: r.s, d: r.d, m: mm }; m.items[r.item] = { s: r.s, d: r.d, m: mm }; m.updated = j.updated; m.updatedBy = j.updatedBy; }
           else{
             m.items[r.item] = JSON.parse(JSON.stringify(m.orig[r.item] || { s:"", d:"" }));
             bad.push((m.name || r.target) + "さん：" + ({ outofscope:"担当の範囲外の方です", baddate:"日付の形がちがいます" }[r.error] || "保存できませんでした"));
@@ -380,8 +435,132 @@ async function saveReport(ids, cond){
     toast("通信できませんでした");
   }finally{ if(typeof skyBusyEnd === "function") skyBusyEnd("report"); }
 }
+
+/* ================================================================
+   v1.2.099：進捗の画面の「🌱 初期サポート状況の編集」タブ
+   ・その方の4つ（ユーザーサポート会・LINKセミナー5種・グルコン3人・交流会2つ）をまとめて入れて、すぐ保存します
+================================================================ */
+const TAB_KEYS = GROUPS.reduce((a, g)=>a.concat(g.items), []);
+let tabM = null, tabDraft = {}, tabEl = null;
+function renderTab(el, id){
+  tabEl = el;
+  if(status === "loading"){ el.innerHTML = '<p class="ss-note">初期サポートの記録を読みこんでいます…少しおいて、もう一度タブを押してください。</p>'; return; }
+  if(status !== "ok"){ el.innerHTML = '<p class="ss-note err">初期サポートの記録を読みこめませんでした。</p>'; return; }
+  tabM = get(id);
+  if(!tabM){ el.innerHTML = '<p class="ss-note">この方の初期サポートの記録は、あなたの担当の範囲の外です。</p>'; return; }
+  tabDraft = {};
+  TAB_KEYS.forEach(k=>{ const it = tabM.items[k] || {}; tabDraft[k] = { s: it.s || "", d: it.d || "", m: it.m || "" }; });
+  drawTab();
+}
+function drawTab(){
+  if(!tabEl || !tabM) return;
+  tabEl.innerHTML = '<div class="sstab">' + GROUPS.map(g=>`<div class="dm-sec"><h4><span>${esc(g.title)}</span></h4>${oldNote(tabM, g)}${g.items.map(k=>itemEdHtml(k, tabDraft[k], "SS.tab", g.items.length > 1)).join("")}</div>`).join("")
+    + `<p class="ssupd">${tabM.updated ? "最後の更新：" + esc(tabM.updated) + "　" + esc(tabM.updatedBy || "") : ""}</p><p class="ssmsg" id="ssTabMsg"></p></div>`;
+}
+function tabState(k, v){ applyState(tabDraft[k], v); drawTab(); }
+function tabDate(k, v){ tabDraft[k].d = v ? v.replace(/-/g, "/") : ""; drawTab(); }
+function tabMethod(k, v){ tabDraft[k].m = tabDraft[k].m === v ? "" : v; drawTab(); }
+function tabChanged(){
+  if(!tabM) return [];
+  return TAB_KEYS.filter(k=>{ const it = tabM.orig[k] || {}; const d = tabDraft[k]; return (it.s || "") !== d.s || (it.d || "") !== d.d || (it.m || "") !== (d.m || ""); });
+}
+async function tabSave(){
+  const msg = ()=>document.getElementById("ssTabMsg");
+  const ch = tabChanged();
+  if(!ch.length){ if(msg()){ msg().className = "ssmsg ok"; msg().textContent = "変更はありません"; } return true; }
+  if(ch.some(k=>tabDraft[k].s === "参加予定" && !tabDraft[k].d)){ msg().className = "ssmsg err"; msg().textContent = "参加予定の日付を入れてください"; return false; }
+  const changes = ch.map(k=>Object.assign({ target: tabM.id, item: k, state: tabDraft[k].s, date: tabDraft[k].d }, SEM_KEYS.indexOf(k) >= 0 ? { method: tabDraft[k].m || "" } : {}));
+  msg().className = "ssmsg"; msg().textContent = "保存しています…";
+  try{
+    const j = await api({ action:"supportSetMany", changes: JSON.stringify(changes) });
+    if(!j || j.ok !== true){ msg().className = "ssmsg err"; msg().textContent = ({ suplayout:"「サポート状況」タブの見出しが決まった形とちがうため、保存を止めました", busy:"いま混み合っています。少しおいてお試しください" })[j && j.error] || "保存できませんでした"; return false; }
+    const bad = [];
+    j.results.forEach(r=>{
+      if(r.ok){ const v = { s: r.s, d: r.d, m: (tabDraft[r.item] || {}).m || "" }; tabM.items[r.item] = JSON.parse(JSON.stringify(v)); tabM.orig[r.item] = JSON.parse(JSON.stringify(v)); }
+      else bad.push(ITEM_LABEL[r.item] || r.item);
+    });
+    tabM.updated = j.updated; tabM.updatedBy = j.updatedBy;
+    drawTab(); draw();
+    msg().className = bad.length ? "ssmsg err" : "ssmsg ok";
+    msg().textContent = bad.length ? "保存できなかった項目があります：" + bad.join("・") : "✓ 保存しました";
+    return !bad.length;
+  }catch(e){ msg().className = "ssmsg err"; msg().textContent = "通信できませんでした"; return false; }
+}
+
+/* ================================================================
+   v1.2.099：ファーストサポート管理表（報告用）
+   ・育成データのスプレッドシートには入れません。見る方の端末に Excel（.xlsx）で保存します
+   ・先に「こんな表になります」と中身を見せてから、保存します
+================================================================ */
+const REP_COLS = [
+  ["u","①ユーザーサポート会"],
+  ["s1","②セミナー 通常編"],["s2","②セミナー 社長編"],["s3","②セミナー 自己ブランディング"],["s4","②セミナー グループ構築"],["s5","②セミナー 新サービス"],
+  ["g1","③グルコン 高山翔子さん"],["g2","③グルコン いと・すけさん"],["g3","③グルコン 冨田由起子さん"],
+  ["kon","④交流会 オンライン"],["kre","④交流会 リアル"]
+];
+function cellText(it){
+  it = it || {};
+  if(!it.s) return "未案内";
+  if(overdueNext(it)) return "当月案内予定（" + md(it.d) + " 来月導員予定）";
+  const st = (STATES.find(x=>x.v === it.s) || {}).t || it.s;
+  return st + (it.d ? " " + md(it.d) : "") + (it.m ? "（" + it.m + "）" : "");
+}
+let repRows = null, repName = "";
+function openReport(ids, title, whoName){
+  if(status !== "ok"){ toast("初期サポートの記録が読みこめていません"); return; }
+  const list = ids.map(get).filter(Boolean);
+  if(!list.length){ toast("表に入れる方がいません"); return; }
+  const head = ["会員番号","お名前","系列","アップクリエ","サポート担当"].concat(REP_COLS.map(c=>c[1]));
+  const hasOld = list.some(m=>(m.items.g || {}).s || (m.items.k || {}).s);
+  if(hasOld) head.push("グルコン（前の記録）","交流会（前の記録）");
+  repRows = [head].concat(list.map(m=>{
+    const it = m.orig || m.items;
+    const r = [pad8(m.id), m.name || "", m.keiretsu || "", who(m.uplineName, m.upline), who(m.helperName, m.helper)].concat(REP_COLS.map(c=>cellText(it[c[0]])));
+    if(hasOld) r.push((it.g || {}).s ? cellText(it.g) : "", (it.k || {}).s ? cellText(it.k) : "");
+    return r;
+  }));
+  repName = whoName || "";
+  let box = document.getElementById("ssrep");
+  if(!box){ box = document.createElement("div"); box.id = "ssrep"; box.className = "ss-modal"; document.body.appendChild(box);
+    box.addEventListener("click", e=>{ if(e.target === box) box.classList.remove("show"); }); }
+  box.innerHTML = `<div class="sheet wide"><h3>📄 ファーストサポート管理表</h3>
+    <p class="who2">${esc(title)}（${list.length}名）。この表を、Excelのファイルで、この端末に保存します。<br>育成データのスプレッドシートには入れません。</p>
+    <div class="reptbl"><table><thead><tr>${repRows[0].map(h=>`<th>${esc(h)}</th>`).join("")}</tr></thead><tbody>${repRows.slice(1).map(r=>`<tr>${r.map(c=>`<td class="${/^未案内$/.test(c) ? "r" : /当月案内予定/.test(c) ? "b" : /^参加済み/.test(c) ? "g" : ""}">${esc(c)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
+    <p class="msg" id="ssrepMsg"></p>
+    <div class="btns"><button class="close" onclick="document.getElementById('ssrep').classList.remove('show')">とじる</button><button class="save" id="ssrepGo" onclick="SS.saveReportXlsx()">この表をExcelで保存する</button></div></div>`;
+  box.classList.add("show");
+}
+function loadXlsx(){
+  return new Promise((ok, ng)=>{
+    if(window.XLSX) return ok();
+    const sc = document.createElement("script");
+    sc.src = "../xlsx.full.min.js";   /* SheetJS 0.18.5（Apache-2.0）をサイトの中に置いています */
+    sc.onload = ()=>ok(); sc.onerror = ()=>ng(); document.head.appendChild(sc);
+  });
+}
+async function saveReportXlsx(){
+  const msg = document.getElementById("ssrepMsg");
+  try{
+    msg.className = "msg ok"; msg.textContent = "ファイルを作っています…";
+    await loadXlsx();
+    const ws = XLSX.utils.aoa_to_sheet(repRows);
+    ws["!cols"] = repRows[0].map((h, i)=>({ wch: i < 5 ? 14 : 22 }));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "ファーストサポート");
+    const d = today0(), p2 = n=>String(n).padStart(2, "0");
+    /* ファイル名は英数字だけにします（日本語の名前だと、端末によって「download」という名前になってしまうため） */
+    const fname = "first-support-report_" + d.getFullYear() + p2(d.getMonth() + 1) + p2(d.getDate()) + ".xlsx";
+    const buf = XLSX.write(wb, { bookType:"xlsx", type:"array" });
+    const url = URL.createObjectURL(new Blob([buf], { type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }));
+    const a = document.createElement("a"); a.href = url; a.download = fname; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 30000);
+    msg.className = "msg ok"; msg.textContent = "✓ 保存しました（ダウンロードしたファイルを、Googleドライブにのせるとスプレッドシートとして開けます）";
+  }catch(e){ msg.className = "msg err"; msg.textContent = "ファイルを作れませんでした。電波のよいところで、もう一度お試しください"; }
+}
+
 function draw(){ onChange(); }
 return { load, get, cardHtml, peopleHtml, score, pendCount, discard, save, saveReport,
-         openEd, closeEd, pickState, pickDate, saveEd, openPeople, closePeople, findPeople, pickPerson,
+         openEd, closeEd, pickState, pickDate, pickMethod, saveEd, openPeople, closePeople, findPeople, pickPerson,
+         renderTab, tabState, tabDate, tabMethod, tabSave, tabChanged, openReport, saveReportXlsx,
          status: ()=>status };
 })();
