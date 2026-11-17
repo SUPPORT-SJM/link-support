@@ -1078,13 +1078,25 @@
         <div id="mmDeptChips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:7px;"></div>
         <select id="mmDeptSel" onchange="addDept(this.value)"></select>
         <input type="hidden" id="mmDept">
-        <p class="hint">ご本人の意向と適材適所を見て、管理者・チーム代表・系列代表が決めます（ご本人は変えられません）。</p>
+        <p class="hint">ご本人の意向と適材適所を見て、管理者・チーム代表・系列代表・アドバンスが決めます（ご本人は変えられません）。部門統括の方は、一覧の部門のボタンから、自分の部門だけ足したり外したりできます。</p>
         <div id="mmDeptFlags" style="display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;font-size:13px;">
           <label style="display:flex;align-items:center;gap:6px;font-weight:500;margin:0;"><input type="checkbox" id="mmDeptLead" style="width:17px;height:17px;">部門統括</label>
           <label style="display:flex;align-items:center;gap:6px;font-weight:500;margin:0;"><input type="checkbox" id="mmSchedIn" style="width:17px;height:17px;">スケジュール入力担当</label>
         </div>
         <p class="hint">「カレンダー形式表示」は、メンバー全員が見られます。その中の予定のかぶりチェックは、部門に入っているクリエ・サポーターの方が使えます（アドバンス以上は部門がなくても使えます）。<br>
         チーム代表・系列代表・部門統括・スケジュール入力担当の方は、公式公認の予定を文章から追加できます。</p>
+      </div>
+
+      <!-- v1.2.097：集客のURL（SASAEAI・LINK-BASEのいちばん上の事業）。このボタンだけで保存します -->
+      <div class="mm-f mm-full" id="mmLinksWrap" style="display:none;">
+        <label>🔗 SASAEAIのプロフィールURL</label>
+        <input id="mmSasa" type="url" inputmode="url" autocapitalize="off" spellcheck="false" placeholder="https://…">
+        <label style="margin-top:8px;">🏰 LINK-BASE：いちばん上に出す事業</label>
+        <input id="mmLbTitle" type="text" placeholder="事業のタイトル（例：はじめてのヨガ教室）" style="margin-bottom:6px;">
+        <input id="mmLbUrl" type="url" inputmode="url" autocapitalize="off" spellcheck="false" placeholder="https://…">
+        <p class="hint" id="mmLbNote"></p>
+        <button type="button" id="mmLinksSave" onclick="saveMemLinks()" style="margin-top:6px;background:#6E5FB5;color:#fff;border-radius:999px;padding:8px 16px;font-weight:700;font-size:13px;font-family:inherit;">🔗 このURLを保存する</button>
+        <p class="hint" id="mmLinksMsg" style="font-weight:700;"></p>
       </div>
 
       <div class="mm-f" id="mmAutoWrap" style="display:none;">
@@ -2750,15 +2762,23 @@ function delDept(i){
   document.getElementById("mmDept").value = cur.join(","); drawDept();
 }
 /* ---------- 一覧から、ワンタッチで部門を決めます ----------
-   ・決められるのは、管理者・チーム代表・系列代表
+   ・決められるのは、管理者・チーム代表・系列代表・アドバンス（v1.2.097）
+   ・部門統括の方は、自分の部門だけ（v1.2.097）
    ・ほかの方には、依頼のご案内を出します */
-let dpTarget = null, dpBusy = false;
+let dpTarget = null, dpBusy = false, dpOnly = null;   /* dpOnly：部門統括の方が変えられる部門（null ならすべて） */
 function openDeptPick(id){
   const m = ((data && data.members) || []).find(x=>String(x.id) === String(id));
   if(!m) return;
-  if(!(data && (data.isFull || data.isKeiRep))){
-    alert("部門の設定は、系列代表かアップの方に依頼してください。\n（部門は、ご本人の意向と適材適所を見て、系列代表・チーム代表・管理者が決めます）");
-    return;
+  /* v1.2.097：管理者・チーム代表・系列代表・アドバンスは、どの部門でも。部門統括の方は、自分の部門だけ */
+  dpOnly = null;
+  if(!(data && (data.isFull || data.isKeiRep || data.isAdv))){
+    const me = ((data && data.members) || []).find(x=>String(x.id).replace(/^0+/, "") === String(admin && admin.id || "").replace(/^0+/, ""));
+    const mine = me && me.deptLead ? String(me.dept || "").split(/[,、，]/).map(x=>x.trim()).filter(x=>x) : [];
+    if(!mine.length){
+      alert("部門の設定は、系列代表かアップの方に依頼してください。\n（部門は、ご本人の意向と適材適所を見て、管理者・チーム代表・系列代表・アドバンスが決めます。部門統括の方は、自分の部門だけ決められます）");
+      return;
+    }
+    dpOnly = mine;
   }
   dpTarget = m;
   document.getElementById("dpTitle").textContent = (m.name || m.id) + "さんの部門";
@@ -2771,7 +2791,8 @@ function drawDeptPick(){
   const cur = String(dpTarget.dept || "").split(/[,、，]/).map(x=>x.trim()).filter(x=>x);
   const all = DEPT_LIST.concat(cur.filter(x=>DEPT_LIST.indexOf(x) < 0));
   document.getElementById("dpList").innerHTML = all.map(k=>
-    `<button type="button" class="${cur.indexOf(k) >= 0 ? "on" : ""}" ${dpBusy ? "disabled" : ""} onclick="toggleDeptPick(this.dataset.k)" data-k="${k}"><span>${k}</span><span>${cur.indexOf(k) >= 0 ? "✓ 入っています" : "＋"}</span></button>`).join("");
+    `<button type="button" class="${cur.indexOf(k) >= 0 ? "on" : ""}" ${dpBusy || (dpOnly && dpOnly.indexOf(k) < 0) ? "disabled" : ""} onclick="toggleDeptPick(this.dataset.k)" data-k="${k}"><span>${k}</span><span>${cur.indexOf(k) >= 0 ? "✓ 入っています" : "＋"}</span></button>`).join("")
+    + (dpOnly ? '<p style="font-size:12px;color:#77748A;margin-top:6px;">部門統括の方は、自分の部門（' + dpOnly.join("・") + '）だけ足したり外したりできます。</p>' : "");
 }
 async function toggleDeptPick(k){
   if(!dpTarget || dpBusy) return;
@@ -2781,19 +2802,56 @@ async function toggleDeptPick(k){
   dpBusy = true; drawDeptPick(); msg.textContent = "保存しています…";
   try{
     const res = await fetch(GAS_URL, {method:"POST", body:new URLSearchParams({
-      action:"adminUpsertMember", id:admin.id, pin:admin.pin, email:admin.email || "",
-      targetId:dpTarget.id, dept:next.join(",") })});
+      action:"deptSet", id:admin.id, pin:admin.pin, email:admin.email || "",
+      target:dpTarget.id, dept:next.join(",") })});   /* v1.2.097：部門だけを決める専用のしくみ */
     const j = await res.json();
     if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
     if(!j || j.ok === false){
-      msg.textContent = j && j.error === "outofscope" ? "この方の部門は決められません（担当の範囲の外です）" : "保存できませんでした";
+      msg.textContent = j && j.error === "noperm" ? "この方の部門は決められません" : j && j.error === "unknown_action" ? "GASがまだ新しい版になっていません（v1.2.097 以上が必要です）" : "保存できませんでした";
     }else{
-      dpTarget.dept = next.join(",");
+      dpTarget.dept = j.dept != null ? j.dept : next.join(",");
       msg.textContent = "✓ 保存しました";
       render();
     }
   }catch(e){ msg.textContent = "通信できませんでした"; }
   dpBusy = false; if(dpTarget) drawDeptPick();
+}
+
+/* ---------- v1.2.097：会員情報の編集の「集客のURL」 ---------- */
+let memLinksFor = "";
+async function loadMemLinks(m){
+  const wrap = document.getElementById("mmLinksWrap");
+  if(!m){ wrap.style.display = "none"; return; }
+  wrap.style.display = "block"; memLinksFor = String(m.id);
+  ["mmSasa","mmLbTitle","mmLbUrl"].forEach(k=>{ const el = document.getElementById(k); el.value = ""; el.disabled = true; });
+  document.getElementById("mmLinksSave").disabled = true;
+  document.getElementById("mmLbNote").textContent = "";
+  const msg = document.getElementById("mmLinksMsg"); msg.textContent = "読み込んでいます…"; msg.style.color = "#77748A";
+  try{
+    const j = await (await fetch(`${GAS_URL}?` + new URLSearchParams({ action:"adminLinks", id:admin.id, pin:admin.pin, email:admin.email || "", target:m.id }).toString())).json();
+    if(memLinksFor !== String(m.id)) return;
+    if(!j || !j.ok){ msg.textContent = j && j.error === "outofscope" ? "この方のURLは変えられません" : j && j.error === "unknown_action" ? "GASがまだ新しい版になっていません（v1.2.097 以上が必要です）" : "読み込めませんでした"; return; }
+    document.getElementById("mmSasa").value = j.sasaeai || "";
+    const top = (j.linkbase || [])[0];
+    if(top){ document.getElementById("mmLbTitle").value = top.title || ""; document.getElementById("mmLbUrl").value = top.url || ""; }
+    document.getElementById("mmLbNote").textContent = (j.linkbase || []).length > 1 ? `ほかに ${(j.linkbase.length - 1)} 件あります（並べかえ・削除は、ご本人の画面でできます）` : "";
+    ["mmSasa","mmLbTitle","mmLbUrl"].forEach(k=>document.getElementById(k).disabled = false);
+    document.getElementById("mmLinksSave").disabled = false;
+    msg.textContent = "";
+  }catch(e){ msg.textContent = "通信できませんでした"; }
+}
+async function saveMemLinks(){
+  const msg = document.getElementById("mmLinksMsg");
+  const sasa = document.getElementById("mmSasa").value.trim(), ttl = document.getElementById("mmLbTitle").value.trim(), url = document.getElementById("mmLbUrl").value.trim();
+  const ok = u => !u || /^https?:\/\/\S+$/i.test(u);
+  if(!ok(sasa) || !ok(url)){ msg.textContent = "⚠️ URLは https:// から始まる形で入れてください"; msg.style.color = "#C62828"; return; }
+  const b = document.getElementById("mmLinksSave"); b.disabled = true; msg.textContent = "保存しています…"; msg.style.color = "#77748A";
+  try{
+    const j = await (await fetch(GAS_URL, { method:"POST", body:new URLSearchParams({ action:"adminLinksSave", id:admin.id, pin:admin.pin, email:admin.email || "", target:memLinksFor, sasaeai:sasa, lbTitle:ttl, lbUrl:url }) })).json();
+    if(j && j.ok){ msg.textContent = "✓ 保存しました"; msg.style.color = "#2E7D32"; }
+    else{ msg.textContent = j && j.error === "badurl" ? "⚠️ URLの形がちがうようです" : j && j.error === "outofscope" ? "この方のURLは変えられません" : "保存できませんでした"; msg.style.color = "#C62828"; }
+  }catch(e){ msg.textContent = "通信できませんでした"; msg.style.color = "#C62828"; }
+  b.disabled = false;
 }
 
 function openSelfEdit(){
@@ -2819,7 +2877,8 @@ function applyEditLimits(m){
   document.getElementById("mmEmailReset").style.display = full ? "" : "none";      /* 連絡先のリセットも */
   /* 部門：管理者・チーム代表・系列代表（追加のときは、保存したあとに編集で入れます）
      部門統括・スケジュール入力担当の印：管理者だけ */
-  const canDept = !!m && !!(data && (data.isFull || data.isKeiRep));
+  const canDept = !!m && !!(data && (data.isFull || data.isKeiRep || data.isAdv));   /* v1.2.097：アドバンスも */
+  loadMemLinks(m);
   document.getElementById("mmDeptWrap").style.display = canDept ? "block" : "none";
   document.getElementById("mmDeptFlags").style.display = (data && data.isAdmin) ? "flex" : "none";
   document.getElementById("mmDept").value = m ? (m.dept || "") : "";
@@ -3922,8 +3981,8 @@ async function saveMember(){
     };
     if(pin) params.newPin = pin;
     if(memClearEmail) params.clearEmail = "1";
-    if(data && (data.isFull || data.isKeiRep) && memEditing){
-      params.dept = document.getElementById("mmDept").value;    /* 部門：管理者・チーム代表・系列代表 */
+    if(data && (data.isFull || data.isKeiRep || data.isAdv) && memEditing){
+      params.dept = document.getElementById("mmDept").value;    /* 部門：管理者・チーム代表・系列代表・アドバンス（v1.2.097） */
     }
     if(data && data.isAdmin && memEditing){
       params.deptLead = document.getElementById("mmDeptLead").checked ? "1" : "0";
