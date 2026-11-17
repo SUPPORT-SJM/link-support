@@ -1721,11 +1721,25 @@ function placeTut(t){
   const key = W + "|" + H + "|" + nodes.map(n=>Math.round(n.hx||0) + "," + Math.round(n.hy||0)).join(";");
   if(key !== tutKey){
     nodes.forEach(n=>{ if(n.lw == null){ const nm = n.el.querySelector(".nm"); n.lw = nm ? nm.offsetWidth : 0; } });
-    const h = tutHome(); if(h){ tutF.hx = h[0]; tutF.hy = h[1]; } tutKey = key;
+    const h = cornerXY("br"); tutF.hx = h[0]; tutF.hy = h[1]; tutKey = key;   /* v1.2.103：右下のすみ */
   }
   stepFloater(tutF, t, sch.s, sch.o, 40, 16);
 }
 
+/* v1.2.103：4つの小さな丸（会員情報・見やすさ・管理者モード・使い方）は、画面の四すみに置きます
+   ・上の2つ：上の名前の段（タイトル・ベル）のすぐ下　・下の2つ：丸の段のいちばん下
+   ・名前（2行）が画面のはしから出ないところまで、内がわに寄せます */
+function cornerXY(pos){
+  const t = document.querySelector(".top");
+  const headB = t ? t.getBoundingClientRect().bottom - stage.getBoundingClientRect().top : 80;
+  const x = pos[1] === "l" ? 46 : W - 46;
+  /* 下の2つは、いちばん下の「Presented by／版」の行の左右（画面の下のすみ） */
+  const ft = document.querySelector(".foot");
+  const sTop = stage.getBoundingClientRect().top;
+  const footY = ft && ft.offsetHeight ? ft.getBoundingClientRect().top - sTop + ft.offsetHeight / 2 - 14 : H - 46;
+  const y = pos[0] === "t" ? Math.max(headB + 26, 30) : Math.max(footY, H - 46);
+  return [x, y];
+}
 /* ---- ログイン中のトップ：「会員情報」を左上（はじめの一歩と初期サポートガイドの間の、輪の外）に置きます ---- */
 let memF = null, memKey = "";
 function memHome(){
@@ -1777,7 +1791,7 @@ function placeMem(t){
   const key = W + "|" + H + "|" + nodes.map(n=>Math.round(n.hx||0) + "," + Math.round(n.hy||0)).join(";") + "|" + (tutF ? Math.round(tutF.hx) : "");
   if(key !== memKey){
     nodes.forEach(n=>{ if(n.lw == null){ const nm = n.el.querySelector(".nm"); n.lw = nm ? nm.offsetWidth : 0; } });
-    const h = memHome(); if(h){ memF.hx = h[0]; memF.hy = h[1]; } memKey = key;
+    const h = cornerXY("tl"); memF.hx = h[0]; memF.hy = h[1]; memKey = key;   /* v1.2.103：左上のすみ */
   }
   stepFloater(memF, t, sch.s, sch.o, 40, 16);
 }
@@ -1875,7 +1889,7 @@ function placeDbg(t){
   const key = W + "|" + H + "|" + nodes.map(n=>Math.round(n.hx||0) + "," + Math.round(n.hy||0)).join(";") + "|" + (tutF ? Math.round(tutF.hx) : "") + "|" + (memF ? Math.round(memF.hx) : "");
   if(key !== dbgKey){
     nodes.forEach(n=>{ if(n.lw == null){ const nm = n.el.querySelector(".nm"); n.lw = nm ? nm.offsetWidth : 0; } });
-    const h = dbgHome(); if(h){ dbgF.hx = h[0]; dbgF.hy0 = h[1]; } dbgKey = key;
+    const h = cornerXY("bl"); dbgF.hx = h[0]; dbgF.hy0 = h[1]; dbgKey = key;   /* v1.2.103：左下のすみ */
   }
   dbgF.hy = dbgF.hy0;
   stepFloater(dbgF, t, sch.s, sch.o, 52, 16, .4);   /* となりの丸に近いので、ふわふわは小さめ */
@@ -1936,7 +1950,7 @@ function placeView(t){
   const key = W + "|" + H + "|" + nodes.map(n=>Math.round(n.hx||0) + "," + Math.round(n.hy||0)).join(";") + "|" + Math.round(memF.hx || 0) + "," + Math.round(memF.hy || 0);
   if(key !== viewKey){
     nodes.forEach(n=>{ if(n.lw == null){ const nm = n.el.querySelector(".nm"); n.lw = nm ? nm.offsetWidth : 0; } });
-    const h = viewHome(); if(h){ viewF.hx = h[0]; viewF.hy = h[1]; } viewKey = key;
+    const h = cornerXY("tr"); viewF.hx = h[0]; viewF.hy = h[1]; viewKey = key;   /* v1.2.103：右上のすみ */
   }
   stepFloater(viewF, t, sch.s, sch.o, 52, 16, .6);
 }
