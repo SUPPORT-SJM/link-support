@@ -1740,7 +1740,9 @@ function memHome(){
   if(tutF && tutF.hx) boxes.push([tutF.hx - 50, tutF.hy - 30, tutF.hx + 50, tutF.hy + 44]);
   const inOrbit = (x, y)=>{ const dx = (x - acc.hx)/(ORBIT.rx + 50), dy = (y - acc.hy)/(ORBIT.ry + 50); return dx*dx + dy*dy < 1; };
   /* 目じるし：2つの丸のまん中から、輪の外へ少し出たところ */
-  let tx = 44, ty = acc.hy - 120;
+  /* v1.2.102：目じるしの丸がないときは、画面の左上のすみ（上の名前の段のすぐ下）をめざします（見やすさは、その左右反対＝右上のすみ） */
+  const headB = (()=>{ const t = document.querySelector(".top"); return t ? t.getBoundingClientRect().bottom - stage.getBoundingClientRect().top : 90; })();
+  let tx = 44, ty = Math.max(headB + 40, 24);
   if(a && g){
     const mx = (a.hx + g.hx)/2, my = (a.hy + g.hy)/2;
     const dx = mx - acc.hx, dy = my - acc.hy, d = Math.hypot(dx, dy) || 1;
