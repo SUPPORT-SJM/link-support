@@ -1880,14 +1880,19 @@ function logout(){
   location.href = "../index.html";
 }
 
+var ssReady = false;   /* v1.2.100：一覧と初期サポートの両方がそろったか */
 async function load(isLogin){
   if(typeof skyLoading === "function") skyLoading(isLogin ? "ログインしています…" : "読み込んでいます…");
+  /* v1.2.100：初期サポート（タブ「サポート状況」）も同時に読みはじめ、両方そろってから一覧を出します
+     （前は、一覧を出したあとで読みはじめていたので、①〜④だけ1〜2秒おくれて出ていました） */
+  const ssP = window.SS ? SS.load(admin, { onChange: ()=>{ if(data && ssReady){ render(); drawPendBar(); } }, toast: toast }) : null;
+  ssReady = false;
   try{
     const url = `${GAS_URL}?action=adminList&id=${encodeURIComponent(admin.id)}&pin=${encodeURIComponent(admin.pin)}&email=${encodeURIComponent(admin.email)}`;
     const res = await fetch(url);
     const j = await res.json();
     if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
-    if(typeof skyLoadingDone === "function") skyLoadingDone();
+    if(j.ok === false && typeof skyLoadingDone === "function") skyLoadingDone();
 
     /* お使いいただける方かを確かめます
        （ご案内をお出しして移るので、ログイン画面は出しません） */
@@ -1955,10 +1960,12 @@ async function load(isLogin){
     }[j.viewMode] || `<span class="chip">${j.members.length}名</span>`;
     $("#scopeLine").innerHTML = where + needTxt;
     prunePending();   /* 保存していない変更は、読み直しても残します */
+    /* 初期サポートの読み込みが終わるのを待ってから、読み込みの表示を消して、一覧を出します */
+    if(ssP){ try{ await ssP; }catch(e){} }
+    ssReady = true;
+    if(typeof skyLoadingDone === "function") skyLoadingDone();
     render();
     drawPendBar();
-    /* 初期サポート（タブ「サポート状況」）も読みこんで、同じカードに出します */
-    if(window.SS) SS.load(admin, { onChange: ()=>{ render(); drawPendBar(); }, toast: toast });
     return true;
   }catch(e){
     if(typeof skyLoadingDone === "function") skyLoadingDone();
