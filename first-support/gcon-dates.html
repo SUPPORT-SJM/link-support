@@ -242,6 +242,7 @@ async function savePlan(date, box, copied){
     if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
     if(!j || !j.ok){ box.innerHTML = `<p class="msg err">${esc(ERR[j && j.error] || "保存できませんでした。少しおいてお試しください。")}</p>`; return; }
     data.mine = j.mine;
+    try{ sessionStorage.setItem("sky_gcondates_" + member.id, JSON.stringify({ t: Date.now(), j: data })); }catch(e){}   /* v1.2.098：控えも新しく */
     drawMine(); drawList();
     if(copied){
       const mb = $("#mine .mine");
@@ -269,12 +270,19 @@ async function load(){
     });
     return;
   }
-  if(typeof skyLoading === "function") skyLoading("グルコンの日程を読みこんでいます", "しばらくお待ちください");
+  /* v1.2.098：この端末で30分以内に読んだものがあれば、それをすぐ出して、うしろで新しいものを読みます（読み込みの待ちをなくします） */
+  const CK = "sky_gcondates_" + member.id;
+  let cached = null;
+  try{ const c = JSON.parse(sessionStorage.getItem(CK) || "null"); if(c && Date.now() - c.t < 30*60*1000) cached = c.j; }catch(e){}
+  if(cached){ data = cached; drawMine(); drawList(); drawPast(); skySelf.get().then(v=>{ if(v){ selfVals = v; drawPast(); } }); }
+  else if(typeof skyLoading === "function") skyLoading("グルコンの日程を読みこんでいます", "しばらくお待ちください");
   try{
     const r = await fetch(`${GAS_URL}?action=gconDates&id=${encodeURIComponent(member.id)}&pin=${encodeURIComponent(member.pin)}`);
     const j = await r.json();
     if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
     if(typeof skyLoadingDone === "function") skyLoadingDone();
+    if(j && j.ok){ try{ sessionStorage.setItem(CK, JSON.stringify({ t: Date.now(), j: j })); }catch(e){} }
+    if(cached && (!j || !j.ok)) return;   /* 新しいものが読めなくても、出ているものはそのまま */
     if(!j || !j.ok){ $("#list").innerHTML = `<p class="msg err">${esc(ERR[j && j.error] || "日程を読みこめませんでした。")}</p>`; return; }
     data = j;
     drawMine(); drawList(); drawPast();

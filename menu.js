@@ -9,7 +9,8 @@
   var here = location.pathname;
   var inIkusei = here.indexOf("/ikusei/") >= 0;
   var inFirst  = here.indexOf("/first-support/") >= 0;
-  var up = (inIkusei || inFirst) ? "../" : "./";
+  var inPortal = here.indexOf("/link-portal/") >= 0;   /* v1.2.098 */
+  var up = (inIkusei || inFirst || inPortal) ? "../" : "./";
 
   /* 出す項目（段階が足りない方には出しません） */
   var ITEMS = [
@@ -83,7 +84,7 @@
 
   function build() {
     /* 管理ページとクリエマップでは、上のナビがあるので出しません */
-    if (here.indexOf("creamap-x7k2m9") >= 0) return;   /* 管理ページにも出します（v1.185） */
+    /* v1.2.098：クリエマップにも出します（すべてのページに） */
 
     var css = document.createElement("style");
     css.textContent = ''
