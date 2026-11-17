@@ -1714,7 +1714,7 @@ function tutHome(){
 }
 function placeTut(t){
   const top = path.length === 0 && me;
-  const sch = top ? nodes.find(n=>n.it.g === "apply" && n.it.kids) : null;
+  const sch = top ? (nodes.find(n=>n.it.g === "apply" && n.it.kids) || nodes.find(n=>n.it === TREE[0])) : null;   /* v1.2.101：目じるしの丸がホームにないときは、アカウントの丸を目じるしに（四すみの丸が消えていたため） */
   if(!sch){ if(tutF) tutF.el.style.display = "none"; tutKey = ""; return; }
   if(!tutF){ tutF = makeFloater("tut", 2.1); stage.insertBefore(tutF.el, stage.firstChild); }
   tutF.el.style.display = "";
@@ -1765,7 +1765,7 @@ function memHome(){
 }
 function placeMem(t){
   const top = path.length === 0 && me;
-  const sch = top ? nodes.find(n=>n.it.g === "apply" && n.it.kids) : null;
+  const sch = top ? (nodes.find(n=>n.it.g === "apply" && n.it.kids) || nodes.find(n=>n.it === TREE[0])) : null;   /* v1.2.101：目じるしの丸がホームにないときは、アカウントの丸を目じるしに（四すみの丸が消えていたため） */
   if(!sch){ if(memF) memF.el.style.display = "none"; memKey = ""; return; }
   if(!memF){
     memF = makeFloater("tut mem", 3.4, { ic:"👤", nm:"会員情報\n／紹介コード", href:"#member", aria:"会員情報（会員番号・紹介コード）を見る", onTap: openMemInfo });
@@ -1860,7 +1860,7 @@ function dbgHome(){
 }
 function placeDbg(t){
   const top = path.length === 0 && me && window.skyDebug && window.skyDebug.realAdmin && window.skyDebug.realAdmin();
-  const sch = top ? nodes.find(n=>n.it.g === "apply" && n.it.kids) : null;
+  const sch = top ? (nodes.find(n=>n.it.g === "apply" && n.it.kids) || nodes.find(n=>n.it === TREE[0])) : null;   /* v1.2.101：目じるしの丸がホームにないときは、アカウントの丸を目じるしに（四すみの丸が消えていたため） */
   if(!sch){ if(dbgF) dbgF.el.style.display = "none"; dbgKey = ""; return; }
   if(!dbgF){
     const d = window.skyDebug.get();
@@ -1924,7 +1924,7 @@ function viewHome(){
 }
 function placeView(t){
   const top = path.length === 0 && me && window.skyView;
-  const sch = top ? nodes.find(n=>n.it.g === "apply" && n.it.kids) : null;
+  const sch = top ? (nodes.find(n=>n.it.g === "apply" && n.it.kids) || nodes.find(n=>n.it === TREE[0])) : null;   /* v1.2.101：目じるしの丸がホームにないときは、アカウントの丸を目じるしに（四すみの丸が消えていたため） */
   if(!sch || !memF || memF.el.style.display === "none"){ if(viewF) viewF.el.style.display = "none"; viewKey = ""; return; }
   if(!viewF){
     viewF = makeFloater("tut view", 5.3, { ic:"👓", nm:viewName(), href:"#view", aria:"見やすさ（文字の大きさ・字体）を変える", onTap: ()=>window.skyView.open() });
