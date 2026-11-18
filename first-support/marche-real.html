@@ -33,6 +33,9 @@ body{font-family:"Zen Kaku Gothic New",sans-serif;background:radial-gradient(ell
   font-family:inherit;color:#4E342E;-webkit-tap-highlight-color:transparent;will-change:transform;z-index:6}
 .trav .ball{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-size:19px;background:#fff;border:3px solid #7A6BC4;box-shadow:0 0 0 5px rgba(122,107,196,.14),0 5px 12px rgba(70,60,140,.22)}
 .trav .nm{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:10.5px;line-height:1.2;color:#5A4BA3;background:rgba(255,255,255,.92);border-radius:7px;padding:1px 6px;white-space:nowrap}
+.bub{touch-action:none}
+.bub.drag{cursor:grabbing;z-index:8}
+.bub.drag .ball{transform:scale(1.12);box-shadow:0 10px 22px rgba(140,70,30,.3)}
 .bub .tag{font-size:9.5px;font-weight:700;color:#2E7D5B;background:#E3F5EC;border-radius:6px;padding:0 5px;margin-top:-2px}
 .legend{position:fixed;left:12px;bottom:calc(env(safe-area-inset-bottom) + 44px);z-index:5;font-size:10.5px;color:#4E6B7A;background:rgba(255,255,255,.85);border-radius:9px;padding:5px 8px;line-height:1.7}
 .legend i{display:inline-block;width:11px;height:11px;border-radius:50%;border:2.5px solid #2E9D6E;vertical-align:-1px;margin-right:4px}
@@ -114,6 +117,7 @@ body{font-family:"Zen Kaku Gothic New",sans-serif;background:radial-gradient(ell
    ・関東（東京・西東京・埼玉・千葉・神奈川）などは、丸がかさならないように海のほうに出して、線でつないでいます
    ・中身は marche-data.js（毎月見直し）。緑の丸は「次回が決まって、スケジュールサイトに載っている」地域
    ・紫の小さい丸「申し込みの流れ」は、日本中を行ったり来たりしています（v1.2.054）。押すと申し込みの流れが出ます
+   ・地域の丸はドラッグで引っぱれます。線がのびて、はなすと元の場所にもどります（v1.2.125）
    ・日本地図の形は Natural Earth（パブリックドメイン）をもとにしています
 ================================================================ */
 const $ = s => document.querySelector(s);
@@ -140,9 +144,21 @@ const B = M.REG.map((r, i) => {
   const b = document.createElement("button");
   b.type = "button"; b.className = "bub" + (r.next ? " next" : "");
   b.innerHTML = '<span class="ball">' + (ICON[r.key] || "🛍️") + '</span><span class="nm">' + esc(r.short) + '</span>';   /* 次回が決まっている地域は、緑のふちどり（左下に説明） */
-  b.addEventListener("click", () => openReg(r));
   $("#stage").appendChild(b);
-  return { el:b, r:r, ph: i * 1.3 };
+  const o = { el:b, r:r, ph: i * 1.3, ln:ln, dx:0, dy:0, vx:0, vy:0, drag:false, moved:false };
+  b.addEventListener("click", e => { if(o.moved){ o.moved = false; e.preventDefault(); return; } openReg(r); });
+  /* v1.2.125：丸はドラッグで引っぱれます。線がのびて、はなすと、びよーんと元の場所にもどります */
+  let sx = 0, sy = 0, s0x = 0, s0y = 0, pid = null;
+  b.addEventListener("pointerdown", e => { pid = e.pointerId; sx = e.clientX; sy = e.clientY; s0x = o.dx; s0y = o.dy; o.moved = false; });
+  b.addEventListener("pointermove", e => {
+    if(pid !== e.pointerId) return;
+    const mx = e.clientX - sx, my = e.clientY - sy;
+    if(!o.drag && Math.hypot(mx, my) > 6){ o.drag = true; o.moved = true; b.classList.add("drag"); try{ b.setPointerCapture(pid); }catch(_){} }
+    if(o.drag){ o.dx = s0x + mx / S; o.dy = s0y + my / S; o.vx = 0; o.vy = 0; }
+  });
+  const end = e => { if(pid !== e.pointerId) return; pid = null; if(o.drag){ o.drag = false; b.classList.remove("drag"); } };
+  b.addEventListener("pointerup", end); b.addEventListener("pointercancel", end);
+  return o;
 });
 
 /* ---------- 画面の大きさに合わせる ---------- */
@@ -185,7 +201,13 @@ function frame(t){
   trav.style.transform = "translate(" + (OX + tp[0] * S - 48).toFixed(1) + "px," + (OY + tp[1] * S - 19 + (reduce || paused ? 0 : Math.sin(t / 400) * 3)).toFixed(1) + "px)";
   B.forEach(b => {
     const fy = reduce || paused ? 0 : Math.sin(t / 700 + b.ph) * 5, fx = reduce || paused ? 0 : Math.cos(t / 950 + b.ph) * 2.5;
-    const cx = OX + b.r.x * S, cy = OY + b.r.y * S, hb = 25;
+    if(!b.drag && (b.dx || b.dy || b.vx || b.vy)){   /* はなしたあとは、ばねのように元の場所へ */
+      b.vx = (b.vx - b.dx * 0.12) * 0.82; b.vy = (b.vy - b.dy * 0.12) * 0.82;
+      b.dx += b.vx; b.dy += b.vy;
+      if(Math.abs(b.dx) + Math.abs(b.dy) + Math.abs(b.vx) + Math.abs(b.vy) < 0.05){ b.dx = b.dy = b.vx = b.vy = 0; }
+    }
+    b.ln.setAttribute("x2", (b.r.x + b.dx).toFixed(1)); b.ln.setAttribute("y2", (b.r.y + b.dy).toFixed(1));
+    const cx = OX + (b.r.x + b.dx) * S, cy = OY + (b.r.y + b.dy) * S, hb = 25;
     b.el.style.transform = "translate(" + (cx - 46 + fx).toFixed(1) + "px," + (cy - hb + fy).toFixed(1) + "px)";
   });
   requestAnimationFrame(frame);
