@@ -217,7 +217,7 @@ function cardHtml(id){
   const m = get(id);
   if(!m) return '<div class="ss-note">初期サポートの記録はありません（あなたの担当の範囲外の方です）</div>';
   const sg = signals(m);
-  const chip = g=>`<button type="button" class="ss-chip ${g.items.some(k=>itemChanged(m, k)) ? "pend" : ""}" onclick="SS.openEd('${esc(m.id)}','${g.key}')">
+  const chip = g=>`<button type="button" class="ss-chip ${g.items.some(k=>itemChanged(m, k)) ? "pend" : ""} ${sg[g.key].c === "g" ? "done" : ""}" onclick="SS.openEd('${esc(m.id)}','${g.key}')">
       <span class="ss-dot ${sg[g.key].c}"></span>
       <span><span class="t">${esc(g.title)}</span><br><span class="v">${esc(sg[g.key].v)}</span>${selfLine(m, g.key) ? `<span class="me">${esc(selfLine(m, g.key))}</span>` : ""}</span></button>`;
   return `<div class="ss-chips">${GROUPS.map(chip).join("")}</div>`;
