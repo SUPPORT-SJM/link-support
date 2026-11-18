@@ -33,7 +33,9 @@ body{font-family:"Zen Kaku Gothic New",sans-serif;background:radial-gradient(ell
   font-family:inherit;color:#4E342E;-webkit-tap-highlight-color:transparent;will-change:transform;z-index:6}
 .trav .ball{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-size:19px;background:#fff;border:3px solid #7A6BC4;box-shadow:0 0 0 5px rgba(122,107,196,.14),0 5px 12px rgba(70,60,140,.22)}
 .trav .nm{font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:10.5px;line-height:1.2;color:#5A4BA3;background:rgba(255,255,255,.92);border-radius:7px;padding:1px 6px;white-space:nowrap}
-.bub{touch-action:none}
+.bub,.trav{touch-action:none}
+.trav.drag{cursor:grabbing;z-index:9}
+.trav.drag .ball{transform:scale(1.15)}
 .bub.drag{cursor:grabbing;z-index:8}
 .bub.drag .ball{transform:scale(1.12);box-shadow:0 10px 22px rgba(140,70,30,.3)}
 .bub .tag{font-size:9.5px;font-weight:700;color:#2E7D5B;background:#E3F5EC;border-radius:6px;padding:0 5px;margin-top:-2px}
@@ -180,7 +182,7 @@ const SEG = []; let LEN = 0;
 for(let i = 0; i < ROUTE.length - 1; i++){ const l = Math.hypot(ROUTE[i+1][0] - ROUTE[i][0], ROUTE[i+1][1] - ROUTE[i][1]); SEG.push(l); LEN += l; }
 let travD = 0, travDir = 1, lastT = null;
 function travPos(dt){
-  if(!reduce && !paused){
+  if(!reduce && !paused && !T.drag && !(T.dx || T.dy)){   /* 引っぱっている間と、もどっている間は、旅をお休み */
     travD += travDir * dt * 0.045;                       /* 地図の上で 1秒に45ほど（片道 約30秒） */
     if(travD >= LEN){ travD = LEN; travDir = -1; }
     if(travD <= 0){ travD = 0; travDir = 1; }
@@ -191,6 +193,20 @@ function travPos(dt){
   return [ROUTE[i][0] + (ROUTE[i+1][0] - ROUTE[i][0]) * e, ROUTE[i][1] + (ROUTE[i+1][1] - ROUTE[i][1]) * e];
 }
 const trav = $("#flowBtn");
+/* v1.2.126：申し込みの流れの丸も、ドラッグで引っぱれます。はなすと、いた場所にもどって、また旅を続けます */
+const T = { dx:0, dy:0, vx:0, vy:0, drag:false, moved:false };
+(function(){
+  let sx = 0, sy = 0, pid = null;
+  trav.addEventListener("pointerdown", e => { pid = e.pointerId; sx = e.clientX; sy = e.clientY; T.moved = false; });
+  trav.addEventListener("pointermove", e => {
+    if(pid !== e.pointerId) return;
+    const mx = e.clientX - sx, my = e.clientY - sy;
+    if(!T.drag && Math.hypot(mx, my) > 6){ T.drag = true; T.moved = true; trav.classList.add("drag"); try{ trav.setPointerCapture(pid); }catch(_){} }
+    if(T.drag){ T.dx = mx / S; T.dy = my / S; T.vx = 0; T.vy = 0; }
+  });
+  const end = e => { if(pid !== e.pointerId) return; pid = null; if(T.drag){ T.drag = false; trav.classList.remove("drag"); } };
+  trav.addEventListener("pointerup", end); trav.addEventListener("pointercancel", end);
+})();
 
 /* ---------- ふわふわ ---------- */
 const reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -198,6 +214,12 @@ let paused = false;
 function frame(t){
   const dt = lastT == null ? 0 : Math.min(64, t - lastT); lastT = t;
   const tp = travPos(dt);
+  if(!T.drag && (T.dx || T.dy || T.vx || T.vy)){
+    T.vx = (T.vx - T.dx * 0.12) * 0.82; T.vy = (T.vy - T.dy * 0.12) * 0.82;
+    T.dx += T.vx; T.dy += T.vy;
+    if(Math.abs(T.dx) + Math.abs(T.dy) + Math.abs(T.vx) + Math.abs(T.vy) < 0.05){ T.dx = T.dy = T.vx = T.vy = 0; }
+  }
+  tp[0] += T.dx; tp[1] += T.dy;
   trav.style.transform = "translate(" + (OX + tp[0] * S - 48).toFixed(1) + "px," + (OY + tp[1] * S - 19 + (reduce || paused ? 0 : Math.sin(t / 400) * 3)).toFixed(1) + "px)";
   B.forEach(b => {
     const fy = reduce || paused ? 0 : Math.sin(t / 700 + b.ph) * 5, fx = reduce || paused ? 0 : Math.cos(t / 950 + b.ph) * 2.5;
@@ -239,7 +261,7 @@ document.querySelectorAll(".sheet").forEach(s => {
   s.querySelector(".closeb").addEventListener("click", closePops);
 });
 document.addEventListener("keydown", e => { if(e.key === "Escape") closePops(); });
-$("#flowBtn").addEventListener("click", () => { $("#popFlow").hidden = false; paused = true; });
+$("#flowBtn").addEventListener("click", e => { if(T.moved){ T.moved = false; e.preventDefault(); return; } $("#popFlow").hidden = false; paused = true; });
 </script>
 </body>
 </html>
