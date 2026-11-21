@@ -783,9 +783,24 @@ async function syncFlow(){
     FLOW_MARKS = Array.from(new Set(FLOW_MARKS.concat(om)));
     try{ sessionStorage.setItem(inhKey, "1"); }catch(e){}
   }
+  homeAutoDone(d, localOnly);
   if(Object.keys(localOnly).length) saveFlow(localOnly); else saveFlowLocal();
   if(JSON.stringify([FLOW, FLOW_MARKS]) !== before){ flowPaintAll(); if(typeof reflowLevel === "function" && !drag) reflowLevel(); }
   refreshGrow();
+}
+/* v1.2.134：この端末で、もうホーム画面に置けているものは「できた」を押した状態にします
+     ・LINKサポート … アイコンから開いているとき（その印をこの端末に控えます）
+     ・LINKポータル … ポータルのアイコンから開いたことがあるとき（link-portal/open.html が控えます）
+     ご本人が「できた」をもどした項目（記録が false）は、そのままにします */
+function homeAutoDone(d, localOnly){
+  let sa = false;
+  try{ sa = (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone === true; }catch(e){}
+  if(sa){ try{ localStorage.setItem("sky_home_support", "1"); }catch(e){} }
+  const has = k=>{ try{ return localStorage.getItem(k) === "1"; }catch(e){ return false; } };
+  const put = k=>{ if(!FLOW[k] && d[k] !== false){ FLOW[k] = true; localOnly[k] = true; } };
+  if(has("sky_home_support")) put("h0_s");
+  if(has("sky_home_portal")) put("h0_p");
+  if(FLOW.h0_s && FLOW.h0_p) put("h0");
 }
 async function flowInherit(q){
   const [h, g, s1] = await Promise.all([q("hajime"), q("guide"), q("step1")]);

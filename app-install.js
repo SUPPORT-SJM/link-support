@@ -55,6 +55,14 @@
   let fromSite = false;
   try{ fromSite = !!document.referrer && new URL(document.referrer).origin === location.origin; }catch(e){}
   if(isStandalone && !fromSite){ location.replace(C.open); return; }
+  /* v1.2.134：「もうホーム画面に置けている」印（この端末に控えます）
+       ・LINKサポート … アイコンから開いたLINKサポートの中にいるとき（index.html でも控えます）
+       ・LINKポータル … ポータルのアイコンから開いたとき（link-portal/open.html で控えます）
+       ・どちらも、このページの「ホーム画面に追加する」で追加できたとき */
+  const HOME_KEY = { support:"sky_home_support", portal:"sky_home_portal" };
+  const homeSet = (k)=>{ try{ localStorage.setItem(HOME_KEY[k], "1"); }catch(e){} };
+  const homeHas = (k)=>{ try{ return localStorage.getItem(HOME_KEY[k]) === "1"; }catch(e){ return false; } };
+  if(isStandalone && C.tool === "support") homeSet("support");
 
   /* LINEの中で開いたときは、ふつうのブラウザで開き直します（LINEのしくみ：openExternalBrowser=1） */
   if(isLINE && !/[?&]openExternalBrowser=1/.test(location.search)){
@@ -69,7 +77,7 @@
   /* Android（とパソコンのChrome）：「インストールしますか？」を出せる状態を受け取ります */
   let deferred = null, installed = false, waited = false;
   window.addEventListener("beforeinstallprompt", (e)=>{ e.preventDefault(); deferred = e; draw(); });
-  window.addEventListener("appinstalled", ()=>{ installed = true; deferred = null; draw(); });
+  window.addEventListener("appinstalled", ()=>{ installed = true; deferred = null; homeSet(C.tool); draw(); });
   setTimeout(()=>{ waited = true; draw(); }, 3500);
 
   /* 2つのツール（どちらの画面からも、もう一方へ移れます） */
@@ -144,6 +152,9 @@
       + `<p class="ai-small">${dev === "ios" ? "Safari" : "Chrome"}などの、ふつうのブラウザで開きます。目の前にいない方には、このボタンを押してもらいます。</p>`;
   }
   const qrBlock = (lead)=>`<div class="ai-qr"><div id="aiQr"></div><p>${lead}</p></div>`;
+  /* v1.2.134：この端末のタブで、もう置けているときは「ブラウザで開く」のすぐ下にお知らせ */
+  const mineTab = isIOS ? "ios" : isAndroid ? "android" : "pc";
+  const haveNote = (dev)=> (dev === mineTab && homeHas(C.tool)) ? '<div class="ai-have" id="aiHave">✅ すでにホーム画面に追加されています</div>' : "";
   /* v1.2.131：どの端末のタブでも「ブラウザで開く」→「QRコード」→「その端末での置き方」の順に出します
      （目の前の人にはQRを読んでもらう／目の前にいない人には開くボタンを押してもらう） */
   const qrLead = "目の前の方には、このQRコードをスマホのカメラで読みとってもらうと、このページが開きます";
@@ -161,7 +172,7 @@
                     "右上の「<b>追加</b>」を押す"]);
 
   function panelAndroid(){
-    const top = openBtn("android") + qrBlock(qrLead);
+    const top = openBtn("android") + haveNote("android") + qrBlock(qrLead);
     if(!isAndroid) return top + stepsAndroid;
     if(installed){
       return top + `<div class="ai-done">✅ ホーム画面に「${esc(C.name)}」のアイコンができました</div>`
@@ -176,7 +187,7 @@
   }
 
   function panelIOS(){
-    const top = openBtn("ios") + qrBlock(qrLead);
+    const top = openBtn("ios") + haveNote("ios") + qrBlock(qrLead);
     if(!isIOS){
       /* iPhone以外で見ているとき：iOS 26 と iOS 18まで の両方を出します */
       return top + '<p class="ai-lead">iPhoneでのホーム画面への置き方（Safari）<br><b>iOS 26</b>の場合</p>' + stepsIOS26
@@ -207,7 +218,7 @@
 
   function panelPC(){
     const ext = /^https?:/i.test(C.pcUrl || "");
-    return `<a class="ai-big" href="${esc(C.pcUrl || C.open)}"${ext ? ' target="_blank" rel="noopener"' : ""}>🔗 ${esc(C.name)}を開く</a>`
+    return `<a class="ai-big" href="${esc(C.pcUrl || C.open)}"${ext ? ' target="_blank" rel="noopener"' : ""}>🔗 ${esc(C.name)}を開く</a>` + haveNote("pc")
       + (deferred && !isAndroid && !isIOS ? '<button class="ai-sub" id="aiInstall">💻 パソコンにもアプリとして置く</button>' : "")
       + qrBlock(qrLead);
   }
@@ -269,16 +280,6 @@
       b.addEventListener("click", ()=>{ tab = b.dataset.t; draw(); });
     });
     if(isLINE) { const n = $("aiLineNote"); if(n) n.hidden = false; }
-    /* v1.2.133：アイコンから開いたLINKサポートの中で見ているときは「もう置けています」をいちばん上に */
-    if(isStandalone && C.tool === "support"){
-      const d = document.createElement("div");
-      d.className = "ai-have"; d.id = "aiHave";
-      d.innerHTML = '<b>✅ LINKサポートは、もうホーム画面に置けています</b>'
-        + '<span>このままで大丈夫です。いまは、ホーム画面のアイコンから開いています。</span>'
-        + '<span>次は、「LINKポータル」もホーム画面に置きましょう。</span>';
-      /* 右上のメニュー・ホームのボタンと重ならないように、2つのツールの下に出します */
-      const t = document.querySelector(".ai-tools"); if(t) t.insertAdjacentElement("afterend", d);
-    }
     draw();
   }
   if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", start); else start();
