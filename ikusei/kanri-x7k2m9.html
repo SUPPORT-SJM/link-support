@@ -134,7 +134,7 @@
   #yariPop .ysum dt{color:#7A72A0;font-weight:700;font-size:12px;margin-top:6px;}
   #yariPop .ysum dd{margin:0;white-space:pre-wrap;word-break:break-word;}
   /* v1.2.092：スキルアッププロの開放（オン・オフ） */
-  .h1ver{font-family:monospace;font-size:11px;font-weight:400;opacity:.75;margin-left:8px;vertical-align:middle;}
+  .h1ver{font-family:monospace;font-size:11px;font-weight:400;opacity:.75;margin-top:2px;}   /* v1.2.145：名前の行の下に */
   /* v1.2.096：細かい項目（入れ子） */
   .dm-item.has-sub{cursor:default;}
   .dm-item.has-sub .nm2{cursor:pointer;}
@@ -190,7 +190,8 @@
     th{padding:8px 6px;}
     .head{padding:12px 0;}
     .head .wrap.row{padding-right:62px;}   /* 右上のメニューのボタンと重ならないように */
-    .head h1{font-size:15.5px;}
+    /* v1.2.145：題名は1行のまま、画面の幅に合わせて少し小さくし、右上のホーム・メニューのボタンに重ねません */
+    .head h1{font-size:clamp(11.5px, calc((100vw - 156px) / 14), 15.5px);white-space:nowrap;}
     /* 流れていく帯（ボタン類）：上に残る帯と同じ色で、すきまなくつなげます */
     .head.headFlow{position:static;padding:0 0 12px;margin-top:-1px;}
     .head.headFlow .wrap{padding-right:62px;}
@@ -712,8 +713,10 @@
   <div class="head">
     <div class="wrap row">
       <div>
-        <h1>🔐 メンバーマネジメントルーム<span class="h1ver" id="h1Ver"></span></h1>
+        <!-- v1.2.145：版の番号は、名前の行の下へ（題名をせまい画面でもホームのボタンに重ねないため） -->
+        <h1>🔐 メンバーマネジメントルーム</h1>
         <div class="me" id="meLine"></div>
+        <div class="h1ver" id="h1Ver"></div>
         <button type="button" id="btnSelfEdit" onclick="openSelfEdit()" style="display:none;margin-top:6px;background:rgba(255,255,255,.22);color:#fff;border:1.5px solid rgba(255,255,255,.55);border-radius:999px;padding:5px 13px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;">✏️ 自分の会員情報を編集する</button>
       </div>
       <div class="tools">
