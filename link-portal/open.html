@@ -29,15 +29,6 @@
 /* LINKポータルへ移ります。もどってきたとき（ポータルを閉じたとき）は、ボタンでもう一度開けます */
 (function(){
   var URL_PORTAL = "https://app.link-event-x.com";
-  /* v1.2.134：ポータルのアイコンから開いたことを控えます（案内ページの「すでに追加されています」・はじめの一歩の「できた」に使います）
-     v1.2.135：Androidは「ホーム画面に追加」で置いたアイコンだと、ふつうのChromeの画面で開くため、アプリの形かどうかでは見分けられません。
-               このページはアイコンからしか開かないので、Android・パソコンでは開いたら控えます。
-               iPhoneだけは、案内ページの住所がこのページになっているので、アイコン（アプリの形）から開いたときだけ控えます */
-  try{
-    var app = (window.matchMedia && (matchMedia("(display-mode: minimal-ui)").matches || matchMedia("(display-mode: standalone)").matches)) || navigator.standalone === true;
-    var ios = /iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-    if(app || !ios) localStorage.setItem("sky_home_portal", "1");
-  }catch(e){}
   var once = false;
   try{ once = sessionStorage.getItem("lp_opened") === "1"; }catch(e){}
   if(!once){

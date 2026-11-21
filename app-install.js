@@ -55,14 +55,6 @@
   let fromSite = false;
   try{ fromSite = !!document.referrer && new URL(document.referrer).origin === location.origin; }catch(e){}
   if(isStandalone && !fromSite){ location.replace(C.open); return; }
-  /* v1.2.134：「もうホーム画面に置けている」印（この端末に控えます）
-       ・LINKサポート … アイコンから開いたLINKサポートの中にいるとき（index.html でも控えます）
-       ・LINKポータル … ポータルのアイコンから開いたとき（link-portal/open.html で控えます）
-       ・どちらも、このページの「ホーム画面に追加する」で追加できたとき */
-  const HOME_KEY = { support:"sky_home_support", portal:"sky_home_portal" };
-  const homeSet = (k)=>{ try{ localStorage.setItem(HOME_KEY[k], "1"); }catch(e){} };
-  const homeHas = (k)=>{ try{ return localStorage.getItem(HOME_KEY[k]) === "1"; }catch(e){ return false; } };
-  if(isStandalone && C.tool === "support") homeSet("support");
 
   /* LINEの中で開いたときは、ふつうのブラウザで開き直します（LINEのしくみ：openExternalBrowser=1） */
   if(isLINE && !/[?&]openExternalBrowser=1/.test(location.search)){
@@ -77,7 +69,7 @@
   /* Android（とパソコンのChrome）：「インストールしますか？」を出せる状態を受け取ります */
   let deferred = null, installed = false, waited = false;
   window.addEventListener("beforeinstallprompt", (e)=>{ e.preventDefault(); deferred = e; draw(); });
-  window.addEventListener("appinstalled", ()=>{ installed = true; deferred = null; homeSet(C.tool); draw(); });
+  window.addEventListener("appinstalled", ()=>{ installed = true; deferred = null; draw(); });
   setTimeout(()=>{ waited = true; draw(); }, 3500);
 
   /* 2つのツール（どちらの画面からも、もう一方へ移れます） */
@@ -148,13 +140,10 @@
       else href = u.replace(/^https:\/\//, "x-safari-https://").replace(/^http:\/\//, "x-safari-http://");
       attr = "";
     }
-    return `<a class="ai-big" href="${esc(href)}"${attr}>🔗 ${esc(C.name)}をブラウザで開く</a>`
+    return `<a class="ai-big ai-open" href="${esc(href)}"${attr}>🔗 ${esc(C.name)}をブラウザで開く</a>`
       + `<p class="ai-small">${dev === "ios" ? "Safari" : "Chrome"}などの、ふつうのブラウザで開きます。目の前にいない方には、このボタンを押してもらいます。</p>`;
   }
   const qrBlock = (lead)=>`<div class="ai-qr"><div id="aiQr"></div><p>${lead}</p></div>`;
-  /* v1.2.134：この端末のタブで、もう置けているときは「ブラウザで開く」のすぐ下にお知らせ */
-  const mineTab = isIOS ? "ios" : isAndroid ? "android" : "pc";
-  const haveNote = (dev)=> (dev === mineTab && homeHas(C.tool)) ? '<div class="ai-have" id="aiHave">✅ すでにホーム画面に追加されています</div>' : "";
   /* v1.2.131：どの端末のタブでも「ブラウザで開く」→「QRコード」→「その端末での置き方」の順に出します
      （目の前の人にはQRを読んでもらう／目の前にいない人には開くボタンを押してもらう） */
   const qrLead = "目の前の方には、このQRコードをスマホのカメラで読みとってもらうと、このページが開きます";
@@ -172,7 +161,7 @@
                     "右上の「<b>追加</b>」を押す"]);
 
   function panelAndroid(){
-    const top = openBtn("android") + haveNote("android") + qrBlock(qrLead);
+    const top = openBtn("android") + qrBlock(qrLead);
     if(!isAndroid) return top + stepsAndroid;
     if(installed){
       return top + `<div class="ai-done">✅ ホーム画面に「${esc(C.name)}」のアイコンができました</div>`
@@ -187,7 +176,7 @@
   }
 
   function panelIOS(){
-    const top = openBtn("ios") + haveNote("ios") + qrBlock(qrLead);
+    const top = openBtn("ios") + qrBlock(qrLead);
     if(!isIOS){
       /* iPhone以外で見ているとき：iOS 26 と iOS 18まで の両方を出します */
       return top + '<p class="ai-lead">iPhoneでのホーム画面への置き方（Safari）<br><b>iOS 26</b>の場合</p>' + stepsIOS26
@@ -218,9 +207,27 @@
 
   function panelPC(){
     const ext = /^https?:/i.test(C.pcUrl || "");
-    return `<a class="ai-big" href="${esc(C.pcUrl || C.open)}"${ext ? ' target="_blank" rel="noopener"' : ""}>🔗 ${esc(C.name)}を開く</a>` + haveNote("pc")
+    return `<a class="ai-big" href="${esc(C.pcUrl || C.open)}"${ext ? ' target="_blank" rel="noopener"' : ""}>🔗 ${esc(C.name)}を開く</a>`
       + (deferred && !isAndroid && !isIOS ? '<button class="ai-sub" id="aiInstall">💻 パソコンにもアプリとして置く</button>' : "")
       + qrBlock(qrLead);
+  }
+
+  function askOpen(a){
+    const old = $("aiAsk"); if(old) old.remove();
+    const d = document.createElement("div");
+    d.className = "ai-ask"; d.id = "aiAsk";
+    const tg = a.getAttribute("target") ? ' target="_blank" rel="noopener"' : "";
+    d.innerHTML = '<div class="ai-ask-box" role="dialog" aria-modal="true">'
+      + `<p class="ai-ask-t">すでにホーム画面に<br>「${esc(C.name)}」のアイコンがある方へ</p>`
+      + '<p class="ai-ask-m">ここで開かなくて大丈夫です。<br>はじめの一歩にもどって、<b>「できた」</b>を押してください。</p>'
+      + '<a class="ai-ask-back" id="aiAskBack" href="' + esc(base + "index.html") + '">はじめの一歩にもどる</a>'
+      + `<a class="ai-ask-go" id="aiAskGo" href="${esc(a.getAttribute("href"))}"${tg}>まだ置いていないので、ブラウザで開く</a>`
+      + '<button type="button" class="ai-ask-x" id="aiAskX">とじる</button></div>';
+    document.body.appendChild(d);
+    const close = ()=>d.remove();
+    $("aiAskX").addEventListener("click", close);
+    $("aiAskGo").addEventListener("click", ()=>setTimeout(close, 300));
+    d.addEventListener("click", (e)=>{ if(e.target === d) close(); });
   }
 
   function draw(){
@@ -233,6 +240,9 @@
     p.innerHTML = tab === "android" ? panelAndroid() : tab === "ios" ? panelIOS() : panelPC();
     document.body.classList.toggle("ai-arrow-on", !!p.querySelector(".ai-arrow"));
     const ib = $("aiInstall"); if(ib) ib.addEventListener("click", install);
+    /* v1.2.136：「ブラウザで開く」を押したら、LINKサポートでもLINKポータルでも同じ確認を出します
+         （置けているかどうかは見分けません。すでにアイコンがある方は、はじめの一歩へもどって「できた」を押していただきます） */
+    const ob = p.querySelector("a.ai-open"); if(ob) ob.addEventListener("click", (e)=>{ e.preventDefault(); askOpen(ob); });
     const cb = $("aiCopy"); if(cb) cb.addEventListener("click", ()=>{
       const u = here.replace(/[?&]openExternalBrowser=1/, "");   /* この案内ページのアドレス */
       (navigator.clipboard ? navigator.clipboard.writeText(u) : Promise.reject()).then(()=>{ cb.textContent = "✅ コピーしました。Safariに貼りつけてください"; })
