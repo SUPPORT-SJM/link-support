@@ -172,7 +172,8 @@
 
     document.body.appendChild(btn);
     /* トップページ以外では、メニューの下に「ホーム」を出します
-       （上のナビに「ホーム」があるページは、そちらを使います） */
+       （上のナビに「ホーム」があるページは、そちらを使います）
+       v1.2.143：上の帯の「ホーム」はなくし、ホームはここ（メニューの下）にそろえました */
     var atTop = !inIkusei && !inFirst && /\/(index\.html)?$/.test(here);
     if (!atTop && !document.querySelector(".sky-home")) {
       var home = document.createElement("a");
@@ -180,6 +181,10 @@
       home.href = up + "index.html";
       home.setAttribute("aria-label", "トップページに戻る");
       home.textContent = "🏠";
+      /* v1.2.143：保存していない変更を確かめるページ（メンバーマネジメントルームなど）では、その確認を通してから移ります */
+      home.addEventListener("click", function (e) {
+        if (typeof window.goLeave === "function") { e.preventDefault(); window.goLeave(function () { location.href = home.href; }); }
+      });
       document.body.appendChild(home);
     }
     document.body.appendChild(bg);

@@ -740,7 +740,7 @@
         <label class="idlechk" title="最後のログインから30日以上たっている方だけを出します"><input type="checkbox" id="fIdle" onchange="render()">30日以上ログインなし</label>
         <button class="btn-add" id="btnReport" onclick="saveReport()" style="background:#3DAA6E;">📄 ファーストサポート管理表をつくる</button>
         <button id="btnStats" onclick="openStats()" style="display:none;">📊 アクセス</button>
-        <button id="btnHome" class="sky-home" onclick="goLeave(()=>location.href='../index.html')">🏠 ホーム</button>
+        <!-- v1.2.143：「ホーム」は右上のメニューの下の丸いボタンへ（保存していない変更があるときの確認は、そちらでも出ます） -->
         <button onclick="goLeave(()=>location.href='./creamap-x7k2m9.html')">🗺 クリエマップ</button>
         <button id="btnShowHid" onclick="toggleShowHidden()">🙈 表示フィルター：ON</button>
       </div>
