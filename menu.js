@@ -143,8 +143,9 @@
       + '.skym a.it.now .ar{display:none;}'
       + '.skym a.it .bd{background:#3FA98A;color:#fff;font-size:9.5px;font-weight:700;'
       + 'border-radius:99px;padding:1px 8px;flex-shrink:0;}'
-      /* どのページからでもトップページへ戻れるボタン（メニューのすぐ下） */
-      + '.skym-home{position:fixed;right:14px;top:calc(env(safe-area-inset-top) + 86px);'
+      /* どのページからでもトップページへ戻れるボタン
+         v1.2.144：メニューの下だと本文の文字に重なるので、メニューのすぐ左（同じ高さ）に置きます */
+      + '.skym-home{position:fixed;right:74px;top:calc(env(safe-area-inset-top) + 12px);'
       + 'width:50px;height:50px;border-radius:16px;background:#fff;border:2px solid #6E5FB5;'
       + 'box-shadow:0 4px 14px rgba(110,95,181,.25);z-index:7999;text-decoration:none;'
       + 'display:flex;align-items:center;justify-content:center;font-size:22px;line-height:1;}'
