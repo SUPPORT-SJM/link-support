@@ -175,6 +175,8 @@
     return top + stepsAndroid + '<p class="ai-small">すでに追加ずみのときは、ホーム画面のアイコンから開けます。</p>';
   }
 
+  /* v1.2.140：Safariのボタンを指す「⬇」は、ホーム画面のアイコンから開いているとき（Safariのボタンがない）は出しません */
+  const arrowIf = (h)=> isStandalone ? "" : h;
   function panelIOS(){
     const top = openBtn("ios") + qrBlock(qrLead);
     if(!isIOS){
@@ -198,11 +200,11 @@
     if(isIOS26){
       /* iOS 26 のSafari：右下の「・・・」→「共有」→「その他」→「ホーム画面に追加」→「追加」 */
       return top + '<p class="ai-lead">iPhoneは、画面の右下のボタンから追加します。</p>' + stepsIOS26
-        + '<div class="ai-arrow ai-arrow-r" aria-hidden="true">⬇︎</div>';
+        + arrowIf('<div class="ai-arrow ai-arrow-r" aria-hidden="true">⬇︎</div>');
     }
     /* iOS 18 までのSafari */
     return top + '<p class="ai-lead">iPhoneは、画面の下のボタンから追加します。</p>' + stepsIOS18
-      + '<div class="ai-arrow" aria-hidden="true">⬇︎</div>';
+      + arrowIf('<div class="ai-arrow" aria-hidden="true">⬇︎</div>');
   }
 
   function panelPC(){
