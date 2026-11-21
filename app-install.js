@@ -48,8 +48,13 @@
   const esc = (t)=>String(t == null ? "" : t).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const here = location.href.split("#")[0].replace(/([?&])openExternalBrowser=1&?/, "$1").replace(/[?&]$/, "");
 
-  /* アイコンから開いたときは、すぐ目的のページへ */
-  if(isStandalone){ location.replace(C.open); return; }
+  /* v1.2.133：ホーム画面のアイコン（アプリの形）で開いているとき
+       ・アイコンから直接このページが開いたとき（前のページがない）… 前と同じく、すぐ目的のページへ
+       ・サイトの中のボタンから来たとき … もどさずに、このページを出して「もう置けています」とお知らせします
+         （前は、ここでも目的のページへもどしていたので、はじめの一歩のボタンを押しても、はじめの一歩にもどっていました） */
+  let fromSite = false;
+  try{ fromSite = !!document.referrer && new URL(document.referrer).origin === location.origin; }catch(e){}
+  if(isStandalone && !fromSite){ location.replace(C.open); return; }
 
   /* LINEの中で開いたときは、ふつうのブラウザで開き直します（LINEのしくみ：openExternalBrowser=1） */
   if(isLINE && !/[?&]openExternalBrowser=1/.test(location.search)){
@@ -264,6 +269,16 @@
       b.addEventListener("click", ()=>{ tab = b.dataset.t; draw(); });
     });
     if(isLINE) { const n = $("aiLineNote"); if(n) n.hidden = false; }
+    /* v1.2.133：アイコンから開いたLINKサポートの中で見ているときは「もう置けています」をいちばん上に */
+    if(isStandalone && C.tool === "support"){
+      const d = document.createElement("div");
+      d.className = "ai-have"; d.id = "aiHave";
+      d.innerHTML = '<b>✅ LINKサポートは、もうホーム画面に置けています</b>'
+        + '<span>このままで大丈夫です。いまは、ホーム画面のアイコンから開いています。</span>'
+        + '<span>次は、「LINKポータル」もホーム画面に置きましょう。</span>';
+      /* 右上のメニュー・ホームのボタンと重ならないように、2つのツールの下に出します */
+      const t = document.querySelector(".ai-tools"); if(t) t.insertAdjacentElement("afterend", d);
+    }
     draw();
   }
   if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", start); else start();
