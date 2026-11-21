@@ -136,64 +136,67 @@
       attr = "";
     }
     return `<a class="ai-big" href="${esc(href)}"${attr}>🔗 ${esc(C.name)}をブラウザで開く</a>`
-      + `<p class="ai-small">${dev === "ios" ? "Safari" : "Chrome"}などの、ふつうのブラウザで開きます。開いたページを、下の手順でホーム画面に置けます。</p>`;
+      + `<p class="ai-small">${dev === "ios" ? "Safari" : "Chrome"}などの、ふつうのブラウザで開きます。目の前にいない方には、このボタンを押してもらいます。</p>`;
   }
   const qrBlock = (lead)=>`<div class="ai-qr"><div id="aiQr"></div><p>${lead}</p></div>`;
+  /* v1.2.131：どの端末のタブでも「ブラウザで開く」→「QRコード」→「その端末での置き方」の順に出します
+     （目の前の人にはQRを読んでもらう／目の前にいない人には開くボタンを押してもらう） */
+  const qrLead = "目の前の方には、このQRコードをスマホのカメラで読みとってもらうと、このページが開きます";
+  const stepsAndroid = '<p class="ai-lead">Androidでのホーム画面への置き方（Chrome）</p>'
+    + stepList(["右上の <b>︙</b>（点が3つ）を押す",
+                "「<b>ホーム画面に追加</b>」または「<b>アプリをインストール</b>」を押す",
+                "「<b>インストール</b>」（または「追加」）を押す"]);
+  const stepsIOS26 = stepList(["画面の右下の「<b>・・・</b>」を押す",
+                    `「<b>共有</b>」${shareIcon} を押す`,
+                    "「<b>その他</b>」を押す",
+                    `「<b>ホーム画面に追加</b>」${plusIcon} を押す<br><span class="ai-small">見つからないときは、上にずらしてください</span>`,
+                    "右上の「<b>追加</b>」を押す"]);
+  const stepsIOS18 = stepList([`画面の下の ${shareIcon}（共有）を押す<br><span class="ai-small">見当たらないときは「<b>…</b>」→「<b>共有</b>」</span>`,
+                    `下にずらして「<b>ホーム画面に追加</b>」${plusIcon} を押す`,
+                    "右上の「<b>追加</b>」を押す"]);
 
   function panelAndroid(){
-    if(!isAndroid){
-      return openBtn("android") + '<p class="ai-lead">Androidのスマホで、このページを開いてください。</p>' + qrBlock("スマホのカメラで読みとると、このページが開きます");
-    }
+    const top = openBtn("android") + qrBlock(qrLead);
+    if(!isAndroid) return top + stepsAndroid;
     if(installed){
-      return openBtn("android") + `<div class="ai-done">✅ ホーム画面に「${esc(C.name)}」のアイコンができました</div>`
+      return top + `<div class="ai-done">✅ ホーム画面に「${esc(C.name)}」のアイコンができました</div>`
         + '<p class="ai-lead">これからは、ホーム画面のアイコンを押すだけで開けます。</p>';
     }
     if(deferred){
-      return openBtn("android") + `<button class="ai-big" id="aiInstall">📲 ホーム画面に追加する</button>`
-        + '<p class="ai-lead">押すと「インストールしますか？」と出ます。<br>「<b>インストール</b>」を押すと、ホーム画面にアイコンができます。</p>';
+      return top + `<button class="ai-big" id="aiInstall">📲 ホーム画面に追加する</button>`
+        + '<p class="ai-lead">押すと「インストールしますか？」と出ます。<br>「<b>インストール</b>」を押すと、ホーム画面にアイコンができます。</p>'
+        + stepsAndroid;
     }
-    if(!waited){
-      return openBtn("android") + '<button class="ai-big" disabled>準備しています…</button><p class="ai-lead">少しだけお待ちください。</p>';
-    }
-    return openBtn("android") + '<p class="ai-lead">右上のメニューから追加できます。</p>'
-      + stepList(["右上の <b>︙</b>（点が3つ）を押す",
-                  "「<b>ホーム画面に追加</b>」または「<b>アプリをインストール</b>」を押す",
-                  "「<b>インストール</b>」（または「追加」）を押す"])
-      + '<p class="ai-small">すでに追加ずみのときは、ホーム画面のアイコンから開けます。</p>';
+    return top + stepsAndroid + '<p class="ai-small">すでに追加ずみのときは、ホーム画面のアイコンから開けます。</p>';
   }
 
   function panelIOS(){
+    const top = openBtn("ios") + qrBlock(qrLead);
     if(!isIOS){
-      return openBtn("ios") + '<p class="ai-lead">iPhoneのカメラで読みとって、Safariで開いてください。</p>' + qrBlock("iPhoneのカメラで読みとると、このページが開きます");
+      /* iPhone以外で見ているとき：iOS 26 と iOS 18まで の両方を出します */
+      return top + '<p class="ai-lead">iPhoneでのホーム画面への置き方（Safari）<br><b>iOS 26</b>の場合</p>' + stepsIOS26
+        + '<p class="ai-lead"><b>iOS 18まで</b>の場合</p>' + stepsIOS18;
     }
     iosPrepare();
     if(isInApp){
-      return openBtn("ios") + '<p class="ai-lead">いまはアプリの中のブラウザで開いています。<br><b>Safari</b>で開き直してください。</p>'
+      return top + '<p class="ai-lead">いまはアプリの中のブラウザで開いています。<br><b>Safari</b>で開き直してください。</p>'
         + stepList(["右上（または右下）の <b>…</b> や <b>⋯</b> を押す",
                     "「<b>Safariで開く</b>」（または「ブラウザで開く」）を押す"])
         + '<button class="ai-sub" id="aiCopy">このページのアドレスをコピーする</button>';
     }
     if(isIOSChrome){
-      return openBtn("ios") + '<p class="ai-lead">iPhoneは、画面のボタンから追加します。</p>'
+      return top + '<p class="ai-lead">iPhoneのChromeでのホーム画面への置き方</p>'
         + stepList([`アドレスの右の ${shareIcon}（共有）を押す`,
                     `下にずらして「<b>ホーム画面に追加</b>」${plusIcon} を押す`,
                     "右上の「<b>追加</b>」を押す"]);
     }
     if(isIOS26){
       /* iOS 26 のSafari：右下の「・・・」→「共有」→「その他」→「ホーム画面に追加」→「追加」 */
-      return openBtn("ios") + '<p class="ai-lead">iPhoneは、画面の右下のボタンから追加します。</p>'
-        + stepList(["画面の右下の「<b>・・・</b>」を押す",
-                    `「<b>共有</b>」${shareIcon} を押す`,
-                    "「<b>その他</b>」を押す",
-                    `「<b>ホーム画面に追加</b>」${plusIcon} を押す<br><span class="ai-small">見つからないときは、上にずらしてください</span>`,
-                    "右上の「<b>追加</b>」を押す"])
+      return top + '<p class="ai-lead">iPhoneは、画面の右下のボタンから追加します。</p>' + stepsIOS26
         + '<div class="ai-arrow ai-arrow-r" aria-hidden="true">⬇︎</div>';
     }
     /* iOS 18 までのSafari */
-    return openBtn("ios") + '<p class="ai-lead">iPhoneは、画面の下のボタンから追加します。</p>'
-      + stepList([`画面の下の ${shareIcon}（共有）を押す<br><span class="ai-small">見当たらないときは「<b>…</b>」→「<b>共有</b>」</span>`,
-                  `下にずらして「<b>ホーム画面に追加</b>」${plusIcon} を押す`,
-                  "右上の「<b>追加</b>」を押す"])
+    return top + '<p class="ai-lead">iPhoneは、画面の下のボタンから追加します。</p>' + stepsIOS18
       + '<div class="ai-arrow" aria-hidden="true">⬇︎</div>';
   }
 
@@ -201,7 +204,7 @@
     const ext = /^https?:/i.test(C.pcUrl || "");
     return `<a class="ai-big" href="${esc(C.pcUrl || C.open)}"${ext ? ' target="_blank" rel="noopener"' : ""}>🔗 ${esc(C.name)}を開く</a>`
       + (deferred && !isAndroid && !isIOS ? '<button class="ai-sub" id="aiInstall">💻 パソコンにもアプリとして置く</button>' : "")
-      + qrBlock("スマホのカメラで読みとると、このページが開きます");
+      + qrBlock(qrLead);
   }
 
   function draw(){

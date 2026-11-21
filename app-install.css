@@ -31,7 +31,8 @@ body{font-family:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",sans-serif;co
 .ai-me{position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:var(--c);color:#fff;font-size:10px;font-weight:700;
        padding:1px 8px;border-radius:99px;white-space:nowrap;}
 .ai-panel{flex:1;margin-top:10px;background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:14px 14px 12px;
-          display:flex;flex-direction:column;justify-content:center;position:relative;min-height:0;max-height:430px;}
+          display:flex;flex-direction:column;justify-content:flex-start;position:relative;min-height:0;}
+/* v1.2.131 どのタブも「開く」「QR」「置き方」を全部出すので、高さの上限をなくし、上から並べます */
 .ai-big{display:block;width:100%;text-align:center;text-decoration:none;border:none;border-radius:14px;padding:15px 10px;
         background:linear-gradient(135deg,var(--c2),var(--c));color:#fff;font-family:inherit;font-size:16px;font-weight:900;cursor:pointer;
         box-shadow:0 6px 16px rgba(60,42,110,.22);}
@@ -40,8 +41,6 @@ body{font-family:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",sans-serif;co
         font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;}
 .ai-lead{font-size:13px;line-height:1.75;color:#4A4560;margin:10px 2px 0;text-align:center;}
 .ai-panel > .ai-lead:first-child{margin-top:0;}
-/* v1.2.130 「ブラウザで開く」ボタンで始まるパネルは上寄せ（上の空きをなくす） */
-.ai-panel:has(> a.ai-big:first-child){justify-content:flex-start;}
 .ai-small{font-size:11.5px;color:var(--sub);line-height:1.6;margin-top:8px;text-align:center;}
 .ai-steps{list-style:none;margin-top:10px;display:flex;flex-direction:column;gap:8px;}
 .ai-steps li{display:flex;gap:9px;align-items:flex-start;font-size:13.5px;line-height:1.6;background:var(--paper);border-radius:11px;padding:8px 10px;}
