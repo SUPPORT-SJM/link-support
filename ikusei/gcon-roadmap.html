@@ -314,6 +314,10 @@
   .next-btn[aria-disabled="true"]{opacity:.4;}
   .learned{display:flex;align-items:center;justify-content:center;gap:10px;max-width:420px;margin:18px auto 0;background:#fff;border:2px solid #CFE8DA;border-radius:14px;padding:12px;font-weight:700;cursor:pointer;}
   .learned input{width:22px;height:22px;}
+  /* v1.2.142 上の帯を、ほかのページと同じ「もどる」「ホーム」だけに */
+  #skyNav .inner{max-width:600px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  #skyNav .inner a{background:rgba(255,255,255,.2);color:#fff;font-size:11.5px;font-weight:700;border-radius:999px;padding:6px 13px;text-decoration:none;white-space:nowrap;}
+  @media (max-width:700px){ #skyNav .inner{padding-right:74px;} }
 </style>
 <link rel="stylesheet" href="../beta.css">
 <script src="../login.js"></script>
@@ -321,11 +325,11 @@
 </head>
 <body>
 
-<div id="skyNav"><div class="sky-inner">
-  <a class="sky-back" id="navBack" href="../index.html">‹ もどる</a><a class="sky-back sky-home" href="../index.html">🏠 ホーム</a>
-  <span class="sky-badges" id="navBadges"></span><span class="sky-who" id="navWho"></span>
-  <a class="sky-admin" id="navAdmin" href="./kanri-x7k2m9.html" style="display:none;">🔐 管理</a>
-  <button class="sky-out" onclick="skyLogout()">ログアウト</button>
+<!-- v1.2.142：上の帯を「もどる」「ホーム」だけに（名前・設定・管理・ログアウトなどはメニューから） -->
+<div id="skyNav"><div class="inner">
+  <a href="../index.html" class="back-btn" id="navBack">↩️ もどる</a>
+  <a class="sky-home" href="../index.html">🏠 ホーム</a>
+  <span id="navWho" hidden></span>
 </div></div>
 <header class="hero">
   <div class="wrap">
