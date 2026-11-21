@@ -217,9 +217,9 @@
     const d = document.createElement("div");
     d.className = "ai-ask"; d.id = "aiAsk";
     const tg = a.getAttribute("target") ? ' target="_blank" rel="noopener"' : "";
-    /* v1.2.137：短く。すでに置いてある方は、開くとトップページにもどることがある、とだけお伝えします */
+    /* v1.2.138：文を「〜もどることなどがあります／ホーム画面に置いてあることを確認したうえで」に。v1.2.137：短く。すでに置いてある方は、開くとトップページにもどることがある、とだけお伝えします */
     d.innerHTML = '<div class="ai-ask-box" role="dialog" aria-modal="true">'
-      + `<p class="ai-ask-m">すでにホーム画面に置いてある方は、<br>トップページにもどることがあります。<br>そのときは<b>「できた」</b>を押してください。</p>`
+      + `<p class="ai-ask-m">すでにホーム画面に置いてある方は、<br>トップページにもどることなどがあります。<br>そのときは、ホーム画面に置いてあることを<br>確認したうえで、<b>「できた」</b>を押してください。</p>`
       + `<a class="ai-ask-back" id="aiAskGo" href="${esc(a.getAttribute("href"))}"${tg}>ブラウザで開く</a>`
       + '<button type="button" class="ai-ask-x" id="aiAskX">とじる</button></div>';
     document.body.appendChild(d);
