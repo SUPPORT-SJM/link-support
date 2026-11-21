@@ -78,7 +78,7 @@ body.ai-arrow-on .ai-next{margin-bottom:26px;}   /* 下の矢印と重ならな�
 .ai-ask{position:fixed;inset:0;z-index:2147483000;background:rgba(40,30,70,.45);display:flex;align-items:center;justify-content:center;padding:16px;}
 .ai-ask-box{background:#fff;border-radius:18px;max-width:360px;width:100%;padding:20px 16px 14px;text-align:center;box-shadow:0 12px 36px rgba(40,30,70,.3);}
 .ai-ask-t{font-size:16px;font-weight:900;line-height:1.55;color:var(--ink);}
-.ai-ask-m{font-size:14px;line-height:1.75;color:#4A4560;margin:10px 0 14px;}
-.ai-ask-back{display:block;text-decoration:none;border-radius:14px;padding:14px 10px;background:#2FA36B;color:#fff;font-size:16px;font-weight:900;box-shadow:0 4px 12px rgba(47,163,107,.3);}
+.ai-ask-m{font-size:15px;line-height:1.8;color:#4A4560;margin:4px 0 16px;}
+.ai-ask-back{display:block;text-decoration:none;border-radius:14px;padding:14px 10px;background:linear-gradient(135deg,var(--c2),var(--c));color:#fff;font-size:16px;font-weight:900;box-shadow:0 4px 12px rgba(60,42,110,.25);}
 .ai-ask-go{display:block;text-decoration:none;margin-top:10px;border-radius:14px;padding:12px 10px;background:var(--mist);color:var(--c);font-size:14px;font-weight:700;}
 .ai-ask-x{margin-top:10px;border:none;background:none;color:var(--sub);font-family:inherit;font-size:13px;padding:6px 12px;cursor:pointer;}

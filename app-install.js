@@ -217,11 +217,10 @@
     const d = document.createElement("div");
     d.className = "ai-ask"; d.id = "aiAsk";
     const tg = a.getAttribute("target") ? ' target="_blank" rel="noopener"' : "";
+    /* v1.2.137：短く。すでに置いてある方は、開くとトップページにもどることがある、とだけお伝えします */
     d.innerHTML = '<div class="ai-ask-box" role="dialog" aria-modal="true">'
-      + `<p class="ai-ask-t">すでにホーム画面に<br>「${esc(C.name)}」のアイコンがある方へ</p>`
-      + '<p class="ai-ask-m">ここで開かなくて大丈夫です。<br>はじめの一歩にもどって、<b>「できた」</b>を押してください。</p>'
-      + '<a class="ai-ask-back" id="aiAskBack" href="' + esc(base + "index.html") + '">はじめの一歩にもどる</a>'
-      + `<a class="ai-ask-go" id="aiAskGo" href="${esc(a.getAttribute("href"))}"${tg}>まだ置いていないので、ブラウザで開く</a>`
+      + `<p class="ai-ask-m">すでにホーム画面に置いてある方は、<br>トップページにもどることがあります。<br>そのときは<b>「できた」</b>を押してください。</p>`
+      + `<a class="ai-ask-back" id="aiAskGo" href="${esc(a.getAttribute("href"))}"${tg}>ブラウザで開く</a>`
       + '<button type="button" class="ai-ask-x" id="aiAskX">とじる</button></div>';
     document.body.appendChild(d);
     const close = ()=>d.remove();
