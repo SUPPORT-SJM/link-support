@@ -119,24 +119,43 @@
   const shareIcon = '<span class="ai-ico" aria-label="共有">'
     + '<svg viewBox="0 0 24 24" width="16" height="16"><path d="M12 3v12M7.5 7.5 12 3l4.5 4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 11H6v10h12V11h-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span>';
   const plusIcon = '<span class="ai-ico" aria-label="追加"><svg viewBox="0 0 24 24" width="16" height="16"><rect x="4" y="4" width="16" height="16" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 8v8M8 12h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>';
+  /* v1.2.130：iPhone・Androidの画面にも「開く」ボタン。アプリの中（LINEなど）から押しても、ふつうのブラウザで開くようにします
+       ・Android … Chromeで開く（intent:// のしくみ）
+       ・iPhone  … LINEの中なら openExternalBrowser=1、ほかのアプリやChromeの中なら Safari で開く（x-safari-https://） */
+  function openBtn(dev){
+    let u = C.pcUrl || C.open || "./index.html";
+    try{ u = new URL(u, location.href).href; }catch(e){}
+    let href = u, attr = ' target="_blank" rel="noopener"';
+    if(dev === "android" && isAndroid && isInApp){
+      const m = u.match(/^https?:\/\/(.*)$/);
+      if(m) { href = "intent://" + m[1] + "#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=" + encodeURIComponent(u) + ";end"; attr = ""; }
+    }
+    if(dev === "ios" && isIOS && !isIOSSafari){
+      if(isLINE) href = u + (u.indexOf("?") >= 0 ? "&" : "?") + "openExternalBrowser=1";
+      else href = u.replace(/^https:\/\//, "x-safari-https://").replace(/^http:\/\//, "x-safari-http://");
+      attr = "";
+    }
+    return `<a class="ai-big" href="${esc(href)}"${attr}>🔗 ${esc(C.name)}をブラウザで開く</a>`
+      + `<p class="ai-small">${dev === "ios" ? "Safari" : "Chrome"}などの、ふつうのブラウザで開きます。開いたページを、下の手順でホーム画面に置けます。</p>`;
+  }
   const qrBlock = (lead)=>`<div class="ai-qr"><div id="aiQr"></div><p>${lead}</p></div>`;
 
   function panelAndroid(){
     if(!isAndroid){
-      return '<p class="ai-lead">Androidのスマホで、このページを開いてください。</p>' + qrBlock("スマホのカメラで読みとると、このページが開きます");
+      return openBtn("android") + '<p class="ai-lead">Androidのスマホで、このページを開いてください。</p>' + qrBlock("スマホのカメラで読みとると、このページが開きます");
     }
     if(installed){
-      return `<div class="ai-done">✅ ホーム画面に「${esc(C.name)}」のアイコンができました</div>`
+      return openBtn("android") + `<div class="ai-done">✅ ホーム画面に「${esc(C.name)}」のアイコンができました</div>`
         + '<p class="ai-lead">これからは、ホーム画面のアイコンを押すだけで開けます。</p>';
     }
     if(deferred){
-      return `<button class="ai-big" id="aiInstall">📲 ホーム画面に追加する</button>`
+      return openBtn("android") + `<button class="ai-big" id="aiInstall">📲 ホーム画面に追加する</button>`
         + '<p class="ai-lead">押すと「インストールしますか？」と出ます。<br>「<b>インストール</b>」を押すと、ホーム画面にアイコンができます。</p>';
     }
     if(!waited){
-      return '<button class="ai-big" disabled>準備しています…</button><p class="ai-lead">少しだけお待ちください。</p>';
+      return openBtn("android") + '<button class="ai-big" disabled>準備しています…</button><p class="ai-lead">少しだけお待ちください。</p>';
     }
-    return '<p class="ai-lead">右上のメニューから追加できます。</p>'
+    return openBtn("android") + '<p class="ai-lead">右上のメニューから追加できます。</p>'
       + stepList(["右上の <b>︙</b>（点が3つ）を押す",
                   "「<b>ホーム画面に追加</b>」または「<b>アプリをインストール</b>」を押す",
                   "「<b>インストール</b>」（または「追加」）を押す"])
@@ -145,24 +164,24 @@
 
   function panelIOS(){
     if(!isIOS){
-      return '<p class="ai-lead">iPhoneのカメラで読みとって、Safariで開いてください。</p>' + qrBlock("iPhoneのカメラで読みとると、このページが開きます");
+      return openBtn("ios") + '<p class="ai-lead">iPhoneのカメラで読みとって、Safariで開いてください。</p>' + qrBlock("iPhoneのカメラで読みとると、このページが開きます");
     }
     iosPrepare();
     if(isInApp){
-      return '<p class="ai-lead">いまはアプリの中のブラウザで開いています。<br><b>Safari</b>で開き直してください。</p>'
+      return openBtn("ios") + '<p class="ai-lead">いまはアプリの中のブラウザで開いています。<br><b>Safari</b>で開き直してください。</p>'
         + stepList(["右上（または右下）の <b>…</b> や <b>⋯</b> を押す",
                     "「<b>Safariで開く</b>」（または「ブラウザで開く」）を押す"])
         + '<button class="ai-sub" id="aiCopy">このページのアドレスをコピーする</button>';
     }
     if(isIOSChrome){
-      return '<p class="ai-lead">iPhoneは、画面のボタンから追加します。</p>'
+      return openBtn("ios") + '<p class="ai-lead">iPhoneは、画面のボタンから追加します。</p>'
         + stepList([`アドレスの右の ${shareIcon}（共有）を押す`,
                     `下にずらして「<b>ホーム画面に追加</b>」${plusIcon} を押す`,
                     "右上の「<b>追加</b>」を押す"]);
     }
     if(isIOS26){
       /* iOS 26 のSafari：右下の「・・・」→「共有」→「その他」→「ホーム画面に追加」→「追加」 */
-      return '<p class="ai-lead">iPhoneは、画面の右下のボタンから追加します。</p>'
+      return openBtn("ios") + '<p class="ai-lead">iPhoneは、画面の右下のボタンから追加します。</p>'
         + stepList(["画面の右下の「<b>・・・</b>」を押す",
                     `「<b>共有</b>」${shareIcon} を押す`,
                     "「<b>その他</b>」を押す",
@@ -171,7 +190,7 @@
         + '<div class="ai-arrow ai-arrow-r" aria-hidden="true">⬇︎</div>';
     }
     /* iOS 18 までのSafari */
-    return '<p class="ai-lead">iPhoneは、画面の下のボタンから追加します。</p>'
+    return openBtn("ios") + '<p class="ai-lead">iPhoneは、画面の下のボタンから追加します。</p>'
       + stepList([`画面の下の ${shareIcon}（共有）を押す<br><span class="ai-small">見当たらないときは「<b>…</b>」→「<b>共有</b>」</span>`,
                   `下にずらして「<b>ホーム画面に追加</b>」${plusIcon} を押す`,
                   "右上の「<b>追加</b>」を押す"])

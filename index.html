@@ -119,6 +119,7 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body)
 #taskSheet .fdone.rb{border:3px solid transparent;background:linear-gradient(#29B6F6,#29B6F6) padding-box,conic-gradient(var(--rainbow)) border-box;
   box-shadow:0 0 0 3px rgba(255,255,255,.9),0 0 14px rgba(244,154,193,.55);}
 #taskSheet .fclose{display:block;width:100%;padding:11px;border-radius:12px;border:none;background:#ECEFF1;color:#546E7A;font-family:inherit;font-weight:700;font-size:14.5px;margin-top:10px;cursor:pointer;}
+#taskSheet .flink.big{padding:20px 12px;border-color:#F57C00;background:#FF9800;color:#fff;font-size:17px;line-height:1.5;box-shadow:0 4px 12px rgba(245,124,0,.3);}   /* v1.2.130：はじめの一歩の「ホーム画面に置く」は、大きくオレンジに */
 #taskSheet .flink{display:block;padding:12px;border-radius:12px;border:2px solid #90CAF9;background:#F2F8FF;color:#1565C0;font-weight:700;font-size:14.5px;text-align:center;text-decoration:none;margin-top:10px;}
 #taskSheet .fbtn{display:block;padding:12px;border-radius:12px;background:#FF7043;color:#fff;font-weight:700;font-size:14.5px;text-align:center;text-decoration:none;margin-top:8px;}
 #taskSheet .fbtn.green{background:#06C755;}
@@ -685,7 +686,7 @@ const TREE = [
   {ic:"👋", nm:"はじめの一歩", g:"member", flowPage:"hajime", kids:[
     {ic:"📲", nm:"便利な2つを\nホームに置く", g:"member", num:0, task:"h0", subs:[["h0_p","LINKポータルを置いた"],["h0_s","このサイト（Skyarc LINKサポート）を置いた"]],
      note2:"「LINKポータル」と「このサイト（LINKサポート）」の2つを、スマホのホーム画面に置きます。アプリみたいにワンタップで開けて、ずっと楽になります✨<br>下のボタンから、iPhone・Android・パソコンそれぞれの置き方が見られます。置けたら「もどる」でここに戻って、「できたら押してね」を押してください。",
-     link:{t:"📲 ホーム画面に置く案内をひらく", u:B+"app.html"}},
+     link:{t:"📲 LINKポータルとこのサイトを<br>ホーム画面に置く", u:B+"app.html", cls:"big"}},
     {ic:"💬", nm:"LINK information\nを追加", g:"member", num:1, task:"h1",
      note2:"LINKの公式LINE「LINK information」を友だち追加します。詳しい使い方（リッチメニューなど）は、あとでお伝えします。いまは<b>「友だち追加」だけ</b>でOKです😊",
      html:'<a class="fbtn green" href="https://s.lmes.jp/landing-qr/2008524921-7QZ2vX3X?uLand=iRyJ9G" target="_blank" rel="noopener">📲 LINK information を友だち追加する</a>'
@@ -1249,7 +1250,7 @@ function openTask(it){
     + '<div id="fPassRule" hidden><div class="frule"><span>オープンチャットに入るときは、ご自身のお名前を<br><b>「名前／チーム名／系列名」</b><br>にします。文字数が多くなりすぎるときは、チーム名を省いて<br><b>「名前／系列名」</b><br>だけでも大丈夫です。<br>チャットでは<b>マナーを守って</b>、楽しくご参加ください。</span><label class="frule-ok"><input type="checkbox" id="fPassAgree"><b>分かりました</b></label></div></div>'
     + '<div id="fPassBox"></div></div>';
   if(it.nameRule && !it.pass) h += '</div>';
-  if(it.link) h += `<a class="flink" id="taskLink" href="${it.link.u}"${/^https?:/.test(it.link.u) ? ' target="_blank" rel="noopener"' : ""}>${it.link.t}</a>`;
+  if(it.link) h += `<a class="flink${it.link.cls ? " " + it.link.cls : ""}" id="taskLink" href="${it.link.u}"${/^https?:/.test(it.link.u) ? ' target="_blank" rel="noopener"' : ""}>${it.link.t}</a>`;
   /* v1.2.096：細かい項目（できたボタン）。ぜんぶ「できた」にすると、この項目も「できた」になります */
   if(it.subs && h.indexOf('fsubs-here') < 0) h += '<h4>✅ ひとつずつ、できたら押してください</h4><div class="fsubs-here"></div>';
   h += '<button type="button" class="fdone" id="taskDone"></button><button type="button" class="fclose" id="taskClose2">とじる</button>';

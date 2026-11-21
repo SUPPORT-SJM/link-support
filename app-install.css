@@ -40,6 +40,8 @@ body{font-family:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",sans-serif;co
         font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;}
 .ai-lead{font-size:13px;line-height:1.75;color:#4A4560;margin:10px 2px 0;text-align:center;}
 .ai-panel > .ai-lead:first-child{margin-top:0;}
+/* v1.2.130 「ブラウザで開く」ボタンで始まるパネルは上寄せ（上の空きをなくす） */
+.ai-panel:has(> a.ai-big:first-child){justify-content:flex-start;}
 .ai-small{font-size:11.5px;color:var(--sub);line-height:1.6;margin-top:8px;text-align:center;}
 .ai-steps{list-style:none;margin-top:10px;display:flex;flex-direction:column;gap:8px;}
 .ai-steps li{display:flex;gap:9px;align-items:flex-start;font-size:13.5px;line-height:1.6;background:var(--paper);border-radius:11px;padding:8px 10px;}
