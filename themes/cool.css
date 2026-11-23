@@ -69,3 +69,54 @@
 .cool .cb-info{font-size:13.5px;line-height:1.8;color:var(--cb-sub);margin:0 0 10px;}
 .cool .cb-btn{display:block;width:100%;box-sizing:border-box;text-align:center;text-decoration:none;background:var(--cb-navy);color:#fff;border:none;border-radius:10px;padding:12px;font-family:inherit;font-size:14.5px;font-weight:700;cursor:pointer;margin:6px 0 4px;}
 .cool .cb-btn.sub{background:#fff;color:var(--cb-navy);border:1px solid var(--cb-line);}
+
+/* ================================================================
+   v1.2.157：トップページ以外のページも、手帳の形に
+   ・外側（背景）は紺の革、上の帯・見出しは紺、本文は手帳の紙の上に置きます
+   ・どのページにも共通の部品（上の帯 #skyNav・見出し .hero・本文のかたまり）にだけ効かせています
+================================================================ */
+:root[data-sky-theme="cool"] body{color:#1E2A3B;}
+/* 上の帯（もどる） */
+:root[data-sky-theme="cool"] #skyNav{background:rgba(16,32,60,.92) !important;backdrop-filter:blur(6px);box-shadow:0 2px 10px rgba(0,0,0,.25);}
+/* 見出し（ページのいちばん上の大きな帯）：革の上に、明るい文字で */
+:root[data-sky-theme="cool"] .hero,
+:root[data-sky-theme="cool"] header.hero{background:linear-gradient(180deg,rgba(14,28,54,.55),rgba(14,28,54,.25)) !important;color:#F4F1EA !important;box-shadow:none !important;}
+:root[data-sky-theme="cool"] .hero h1,:root[data-sky-theme="cool"] .hero h2,:root[data-sky-theme="cool"] .hero p,
+:root[data-sky-theme="cool"] .hero .sub,:root[data-sky-theme="cool"] .hero .em,:root[data-sky-theme="cool"] .hero small{color:#F4F1EA !important;text-shadow:0 1px 2px rgba(0,0,0,.35);}
+/* 本文のかたまり：手帳の紙 */
+:root[data-sky-theme="cool"] body > .wrap,
+:root[data-sky-theme="cool"] body > main,
+:root[data-sky-theme="cool"] body > section:not(.cool),
+:root[data-sky-theme="cool"] body > .card,
+:root[data-sky-theme="cool"] body > .box,
+:root[data-sky-theme="cool"] body > footer,
+:root[data-sky-theme="cool"] #quizView > .wrap,
+:root[data-sky-theme="cool"] body > .wrap.goal{
+  background:#F6F3EC !important;border:1px solid #D9D4C7;border-radius:14px;
+  box-shadow:0 1px 0 #fff inset,0 12px 30px rgba(0,0,0,.30);
+  margin-left:12px !important;margin-right:12px !important;margin-top:12px;
+  position:relative;
+}
+@media (min-width:640px){
+  :root[data-sky-theme="cool"] body > .wrap,:root[data-sky-theme="cool"] body > main,:root[data-sky-theme="cool"] body > section:not(.cool),
+  :root[data-sky-theme="cool"] body > .card,:root[data-sky-theme="cool"] body > .box,:root[data-sky-theme="cool"] body > footer{max-width:640px;margin-left:auto !important;margin-right:auto !important;}
+}
+/* 手帳のとじ穴の線 */
+:root[data-sky-theme="cool"] body > .wrap::before,:root[data-sky-theme="cool"] body > main::before{content:"";position:absolute;left:7px;top:14px;bottom:14px;border-left:2px dotted #C9C2B0;pointer-events:none;}
+/* 中のカード・見出しの色を、手帳の色にそろえます */
+:root[data-sky-theme="cool"] .card h2,:root[data-sky-theme="cool"] .wrap > h1,:root[data-sky-theme="cool"] .wrap h2{color:#24344D;}
+:root[data-sky-theme="cool"] .verTag,:root[data-sky-theme="cool"] .foot{color:#AFBBD0 !important;}
+
+/* 丸が並ぶページ（LINK活用法・マルシェ情報・便利な情報一覧）は、themes/cool.js がカードの一覧に並べかえます */
+:root[data-sky-theme="cool"] body.cb-list #stage{display:none !important;}
+:root[data-sky-theme="cool"] body.cb-list .ttl{display:none !important;}
+.cool.cool-page{margin-top:74px;}   /* 右上のホーム・メニューのボタンの下から */
+/* 紙の中にある見出しの帯は、紺の表紙のような色に（灰色に見えないように） */
+:root[data-sky-theme="cool"] .wrap .hero,:root[data-sky-theme="cool"] main .hero,:root[data-sky-theme="cool"] #quizView .hero{
+  background:linear-gradient(135deg,#1F3358,#2E4A7A) !important;border-radius:12px;}
+:root[data-sky-theme="cool"] .hero::before,:root[data-sky-theme="cool"] .hero::after{opacity:.15;}
+/* カードの一覧に並べかえたページでは、もとの左上の「ホームに戻る」は重なるので出しません */
+:root[data-sky-theme="cool"] body.cb-list > .back-btn{display:none !important;}
+/* リアルのマルシェ：地図の説明は出さず、「申し込みの流れ」は右下に止めておきます */
+:root[data-sky-theme="cool"] body.cb-list .legend,:root[data-sky-theme="cool"] body.cb-list > .top{display:none !important;}
+:root[data-sky-theme="cool"] body.cb-list .trav{position:fixed !important;left:auto !important;top:auto !important;right:14px !important;bottom:60px !important;transform:none !important;z-index:50;}

@@ -9,7 +9,7 @@
 ================================================================ */
 
 /* ---------------- ① バージョン ---------------- */
-window.SKY_VERSION = "v1.2.156";
+window.SKY_VERSION = "v1.2.157";
 window.SKY_VERSION_DATE = "2026/11/21";
 
 /* ---------------- ② GASのURL ----------------
@@ -559,7 +559,7 @@ window.skyView = (function () {
   /* v1.2.153：デザインを足すときは、ここに1行（css に themes/〇〇.css のファイル名）と、そのファイルを足すだけです */
   var THEMES = [
     { k: "magic", nm: "夢と魔法の\n虹色テーマ", sub: "いまのデザイン" },
-    { k: "cool",  nm: "クール\nビジネステーマ", sub: "手帳のような落ち着いたデザイン（試作中）", css: "cool.css" }
+    { k: "cool",  nm: "クール\nビジネステーマ", sub: "手帳のような落ち着いたデザイン（試作中）", css: "cool.css", js: "cool.js" }
   ];
   /* このファイル（config.js）のある場所から、themes フォルダの場所を決めます（ikusei・first-support の中のページからでも同じ） */
   var BASE = (function () {
@@ -575,6 +575,12 @@ window.skyView = (function () {
       if (!ln) { ln = document.createElement("link"); ln.id = "skyThemeCss"; ln.rel = "stylesheet"; (document.head || document.documentElement).appendChild(ln); }
       if (ln.getAttribute("href") !== href) ln.setAttribute("href", href);
     } else if (ln) ln.remove();
+    /* v1.2.157：動きのあるデザイン（丸をカードに並べかえるなど）は、themes/〇〇.js を読みこみます */
+    if (t && t.js && !document.getElementById("skyThemeJs")) {
+      var sc = document.createElement("script"); sc.id = "skyThemeJs";
+      sc.src = BASE + "themes/" + t.js + "?v=" + (window.SKY_VERSION || "");
+      (document.head || document.documentElement).appendChild(sc);
+    }
   }
   function get() {
     var v = null;
