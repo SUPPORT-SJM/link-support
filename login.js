@@ -16,150 +16,296 @@
     return window.SKY_GAS_URL || "";
   }
 
-  var ov = null, pending = null;
+  /* ================================================================
+     v1.2.156：ログインの画面を、トップページと同じ形にそろえました
+     ・「はじめての方」（お名前・Googleアカウントかメールアドレス・パスコード4桁・会員番号）
+     ・「登録ずみの方」（Google／会員番号／メール のどれか ＋ パスコード）
+     ・どのページの「ログインする」からでも、この同じ画面が出ます
+     ・登録・ログインが終わったら、そのページのまま続きを出します（トップには飛びません）
+  ================================================================ */
+  var ov = null, pending = null, mode = "new", tab = "google", gMail = "", gName = "", gFor = "";
+  var CLIENT_ID = "315827385958-ikdpkfhkr6nmrgql470aolt4pv27pak3.apps.googleusercontent.com";
+  var BASE = (function () {
+    try { var s = document.currentScript && document.currentScript.src; if (s) return s.replace(/login\.js(\?.*)?$/, ""); } catch (e) {}
+    return "";
+  })();
+  function $(id) { return document.getElementById(id); }
 
-  /* ---------- 画面の部品を用意します(最初に呼ばれたときだけ) ---------- */
   function build() {
     if (ov) return;
-  /* ---------- 見た目 ---------- */
-  var css = document.createElement("style");
-  css.textContent = ''
-    + '#skyLoginOv{display:none;position:fixed;inset:0;z-index:9999;background:rgba(40,28,70,.62);align-items:center;justify-content:center;padding:18px;}'
-    + '#skyLoginOv.show{display:flex;}'
-    + '#skyLoginOv *{box-sizing:border-box;font-family:inherit;}'
-    + '.sl-card{background:#fff;border-radius:20px;padding:26px 22px;width:100%;max-width:370px;box-shadow:0 14px 46px rgba(0,0,0,.32);max-height:88vh;overflow-y:auto;}'
-    + '.sl-card h3{font-size:17px;font-weight:900;color:#6E5FB5;text-align:center;margin:0 0 4px;}'
-    + '.sl-card .sl-lead{font-size:12.5px;color:#7A8A80;text-align:center;line-height:1.8;margin:0 0 16px;}'
-    + '.sl-f{margin-bottom:12px;}'
-    + '.sl-f label{display:block;font-size:12px;font-weight:700;color:#6E5FB5;margin-bottom:5px;}'
-    + '.sl-f input{width:100%;padding:12px 13px;font-size:16px;border:2px solid #EDEAF9;border-radius:10px;background:#FBF8FE;color:#22322A;}'
-    + '.sl-f input:focus{outline:none;border-color:#4FB08C;}'
-    + '.sl-btn{width:100%;padding:14px;border-radius:12px;background:#4FB08C;color:#fff;font-size:15px;font-weight:700;border:none;cursor:pointer;}'
-    + '.sl-btn:disabled{opacity:.6;}'
-    + '.sl-sub{display:block;text-align:center;font-size:11.5px;color:#8A9A90;margin-top:12px;text-decoration:none;}'
-    + '.sl-msg{display:none;border-radius:9px;padding:9px 12px;font-size:12px;margin-bottom:12px;line-height:1.7;}'
-    + '.sl-msg.err{display:block;background:#FDEBEB;color:#B33;}'
-    + '.sl-msg.ok{display:block;background:#EAF7F0;color:#2F7A5C;}';
-  document.head.appendChild(css);
+    var css = document.createElement("style");
+    css.textContent = ''
+      + '#skyLoginOv{display:none;position:fixed;inset:0;z-index:9999;background:rgba(30,22,52,.45);align-items:center;justify-content:center;padding:16px;}'
+      + '#skyLoginOv.show{display:flex;}'
+      + '#skyLoginOv *{box-sizing:border-box;font-family:inherit;}'
+      + '#skyLoginOv .sl-card{position:relative;background:#fff;border-radius:24px;padding:24px 20px 20px;width:100%;max-width:400px;box-shadow:0 20px 50px rgba(30,22,52,.3);max-height:calc(100vh - 32px);overflow-y:auto;color:#2A2438;}'
+      + '#skyLoginOv h3{margin:0 0 4px;font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:20px;text-align:center;color:#2A2438;}'
+      + '#skyLoginOv .sl-lead{margin:0 0 18px;text-align:center;font-size:13px;color:#7A7390;}'
+      + '#skyLoginOv .sl-x{position:absolute;top:10px;right:12px;width:36px;height:36px;border-radius:50%;border:none;background:#F0EDF9;color:#7A7390;font-size:18px;cursor:pointer;}'
+      + '#skyLoginOv .sl-seg{display:flex;gap:4px;background:#F0EDF9;border-radius:12px;padding:4px;margin:0 0 16px;}'
+      + '#skyLoginOv .sl-seg button{flex:1;border:none;background:none;border-radius:9px;padding:9px 6px;font-family:"Zen Maru Gothic",sans-serif;font-weight:700;font-size:13px;color:#7A7390;cursor:pointer;}'
+      + '#skyLoginOv .sl-seg button.on{background:#fff;color:#6E5FB5;box-shadow:0 2px 8px rgba(60,42,110,.10);}'
+      + '#skyLoginOv .sl-seg.small button{font-size:12px;padding:7px 4px;}'
+      + '#skyLoginOv .sl-f{margin-bottom:14px;}'
+      + '#skyLoginOv .sl-f label{display:block;font-size:12px;font-weight:700;color:#6E5FB5;margin-bottom:6px;}'
+      + '#skyLoginOv .sl-f label small{font-weight:500;color:#7A7390;margin-left:4px;}'
+      + '#skyLoginOv .sl-f input{width:100%;padding:13px 14px;font-size:16px;border:2px solid #E4E0F0;border-radius:12px;background:#FCFBFF;color:#2A2438;}'
+      + '#skyLoginOv .sl-f input:focus{outline:none;border-color:#5FB8E6;}'
+      + '#skyLoginOv .sl-f input.pin{text-align:center;font-size:26px;letter-spacing:.5em;padding-left:.5em;font-weight:700;}'
+      + '#skyLoginOv .sl-g{width:100%;padding:12px;border-radius:12px;border:2px solid #E4E0F0;background:#fff;color:#2A2438;font-weight:700;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;}'
+      + '#skyLoginOv .sl-g.done{border-color:#3FA98A;color:#3FA98A;}'
+      + '#skyLoginOv .sl-or{display:flex;align-items:center;gap:10px;margin:10px 0;font-size:11px;color:#7A7390;}'
+      + '#skyLoginOv .sl-or::before,#skyLoginOv .sl-or::after{content:"";flex:1;height:1px;background:#E4E0F0;}'
+      + '#skyLoginOv .sl-err{display:none;margin:4px 0 12px;padding:10px 12px;border-radius:12px;background:#FFF1F0;border:1.5px solid #F5B5AE;font-size:14px;font-weight:700;line-height:1.7;color:#C62828;text-align:center;}'
+      + '#skyLoginOv .sl-err a{color:#6E5FB5;}'
+      + '#skyLoginOv .sl-go{width:100%;padding:15px;border:none;border-radius:14px;color:#fff;cursor:pointer;background:linear-gradient(110deg,#F49AC1,#F5A97A,#F5D06A,#8FD9A8,#6FC7D9,#7BA3E8,#A88BE0,#F49AC1);text-shadow:0 1px 3px rgba(40,30,80,.35);font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:16px;}'
+      + '#skyLoginOv .sl-go:disabled{opacity:.6;}'
+      + '#skyLoginOv .sl-forgot{display:block;text-align:center;margin-top:12px;font-size:12px;color:#7A7390;}'
+      + '#skyLoginOv .sl-done{text-align:center;padding:10px 0 4px;}'
+      + '#skyLoginOv .sl-done .em{font-size:48px;line-height:1;}'
+      + '#skyLoginOv .sl-done p{margin:10px 0 0;font-family:"Zen Maru Gothic",sans-serif;font-weight:900;font-size:18px;}';
+    document.head.appendChild(css);
 
-  ov = document.createElement("div");
-  ov.id = "skyLoginOv";
-  ov.innerHTML = ''
-    + '<div class="sl-card">'
-    +   '<h3>🌱 ログイン</h3>'
-    +   '<p class="sl-lead">記録を残すために、会員番号とパスコードを入れてください。<br>'
-    +   'どの端末からでも、同じ内容が見られるようになります。</p>'
-    +   '<div class="sl-msg" id="slMsg"></div>'
-    +   '<div class="sl-f"><label>会員番号</label>'
-    +     '<input type="text" id="slId" name="member-id" autocomplete="username" inputmode="numeric" placeholder="00012345"></div>'
-    +   '<div class="sl-f"><label>パスコード(4桁)</label>'
-    +     '<input type="password" id="slPin" name="pin" autocomplete="current-password" inputmode="numeric" maxlength="4" placeholder="数字4桁"></div>'
-    +   '<button class="sl-btn" id="slBtn">ログイン</button>'
-    +   '<a class="sl-sub" href="#" id="slClose">あとにする</a>'
-    + '</div>';
-  document.body.appendChild(ov);
+    ov = document.createElement("div");
+    ov.id = "skyLoginOv";
+    ov.innerHTML = ''
+      + '<div class="sl-card" role="dialog" aria-labelledby="slTitle">'
+      + '<button type="button" class="sl-x" id="slClose" aria-label="とじる">×</button>'
+      + '<div id="slBody">'
+      +   '<h3 id="slTitle">登録</h3><p class="sl-lead" id="slLead">これだけで、はじめられます</p>'
+      +   '<div class="sl-seg" id="slSeg"><button type="button" data-m="new" class="on">はじめての方</button><button type="button" data-m="login">登録ずみの方</button></div>'
+      +   '<p class="sl-err" id="slErr"></p>'
+      +   '<form id="slJ" novalidate>'
+      +     '<div class="sl-f"><label for="slName">お名前</label><input id="slName" autocomplete="name"></div>'
+      +     '<div class="sl-f"><label>Googleアカウント か メールアドレス</label>'
+      +       '<button type="button" class="sl-g" id="slJG"><b style="color:#4285F4;">G</b> Googleアカウントでつなぐ</button>'
+      +       '<div class="sl-or">または</div><input id="slJMail" type="email" inputmode="email" autocomplete="email" placeholder="メールアドレス"></div>'
+      +     '<div class="sl-f"><label for="slJPin">パスコード<small>数字4桁</small></label><input id="slJPin" class="pin" type="password" inputmode="numeric" maxlength="4" autocomplete="new-password"></div>'
+      +     '<div class="sl-f"><label for="slJId">会員番号<small>分かれば</small></label><input id="slJId" inputmode="numeric" autocomplete="off"></div>'
+      +     '<button type="submit" class="sl-go" id="slJGo">はじめる</button>'
+      +   '</form>'
+      +   '<form id="slL" novalidate hidden>'
+      +     '<div class="sl-seg small" id="slTabs"><button type="button" data-t="google" class="on">Google</button><button type="button" data-t="id">会員番号</button><button type="button" data-t="mail">メール</button></div>'
+      +     '<div class="sl-f" id="slPaneG"><button type="button" class="sl-g" id="slLG"><b style="color:#4285F4;">G</b> Googleアカウントをえらぶ</button></div>'
+      +     '<div class="sl-f" id="slPaneId" hidden><label for="slId">会員番号</label><input id="slId" inputmode="numeric" autocomplete="username" placeholder="00012345"></div>'
+      +     '<div class="sl-f" id="slPaneMail" hidden><label for="slLMail">メールアドレス</label><input id="slLMail" type="email" inputmode="email" autocomplete="email"></div>'
+      +     '<div class="sl-f"><label for="slPin">パスコード<small>数字4桁</small></label><input id="slPin" class="pin" type="password" inputmode="numeric" maxlength="4" autocomplete="current-password"></div>'
+      +     '<button type="submit" class="sl-go" id="slLGo">ログイン</button>'
+      +     '<a href="#" class="sl-forgot" id="slForgot">パスコードをお忘れの方</a>'
+      +   '</form>'
+      + '</div>'
+      + '<div class="sl-done" id="slDone" hidden><div class="em">🌱</div><p id="slDoneMsg"></p></div>'
+      + '</div>';
+    document.body.appendChild(ov);
 
-  document.getElementById("slClose").addEventListener("click", function (e) {
-    e.preventDefault(); window.skyLoginClose();
-  });
-  ov.addEventListener("click", function (e) { if (e.target === ov) window.skyLoginClose(); });
-  document.getElementById("slBtn").addEventListener("click", doLogin);
-  ["slId", "slPin"].forEach(function (k) {
-    document.getElementById(k).addEventListener("keydown", function (e) {
-      if (e.key === "Enter") doLogin();
+    $("slClose").addEventListener("click", function () { window.skyLoginClose(); });
+    ov.addEventListener("click", function (e) { if (e.target === ov) window.skyLoginClose(); });
+    Array.prototype.forEach.call(ov.querySelectorAll("#slSeg button"), function (b) { b.addEventListener("click", function () { setMode(b.dataset.m); }); });
+    Array.prototype.forEach.call(ov.querySelectorAll("#slTabs button"), function (b) { b.addEventListener("click", function () { setTab(b.dataset.t); }); });
+    ["slJPin", "slPin"].forEach(function (k) { digits($(k), 4); });
+    ["slJId", "slId"].forEach(function (k) { digits($(k)); });
+    $("slJG").addEventListener("click", function () { startGoogle("new"); });
+    $("slLG").addEventListener("click", function () { startGoogle("login"); });
+    $("slJMail").addEventListener("input", function (e) {
+      if (e.target.value && gMail) { gMail = ""; $("slJG").classList.remove("done"); $("slJG").innerHTML = '<b style="color:#4285F4;">G</b> Googleアカウントでつなぐ'; }
     });
-  });
+    $("slJ").addEventListener("submit", doJoin);
+    $("slL").addEventListener("submit", doLogin);
+    $("slForgot").addEventListener("click", function (e) {
+      e.preventDefault();
+      msg("パスコードは、ご登録ページから決めなおしていただけます。<br><a href='" + BASE + "touroku.html' style='font-weight:700;'>ご登録ページをひらく ›</a>");
+    });
+  }
+  function digits(el, max) {
+    el.addEventListener("input", function () {
+      el.value = el.value.replace(/[０-９]/g, function (c) { return String.fromCharCode(c.charCodeAt(0) - 65248); }).replace(/\D/g, "").slice(0, max || 99);
+    });
+  }
+  function setMode(m) {
+    mode = m;
+    Array.prototype.forEach.call(ov.querySelectorAll("#slSeg button"), function (b) { b.classList.toggle("on", b.dataset.m === m); });
+    $("slJ").hidden = (m !== "new"); $("slL").hidden = (m !== "login");
+    $("slTitle").textContent = m === "new" ? "登録" : "ログイン";
+    $("slLead").textContent = m === "new" ? "これだけで、はじめられます" : "ご登録のときの内容で入れます";
+    msg("");
+  }
+  function setTab(t) {
+    tab = t;
+    Array.prototype.forEach.call(ov.querySelectorAll("#slTabs button"), function (b) { b.classList.toggle("on", b.dataset.t === t); });
+    $("slPaneG").hidden = (t !== "google"); $("slPaneId").hidden = (t !== "id"); $("slPaneMail").hidden = (t !== "mail");
+    msg("");
+  }
+  function msg(t) {
+    var e = $("slErr"); if (!e) return;
+    e.innerHTML = t || ""; e.style.display = t ? "block" : "none";
+    if (!t) return;
+    var btn = $("slL").hidden ? $("slJGo") : $("slLGo");
+    if (btn && e.nextElementSibling !== btn) btn.parentNode.insertBefore(e, btn);
+    try { e.scrollIntoView({ block: "center" }); } catch (x) {}
   }
 
-  function msg(t, cls) {
-    var el = document.getElementById("slMsg");
-    el.textContent = t; el.className = "sl-msg " + cls;
+  /* ---------- Google（はじめて押したときに読みこみます） ---------- */
+  var gReady = false, gLoading = false;
+  function loadGoogle(cb) {
+    if (gReady && window.google && google.accounts) return cb && cb();
+    if (gLoading) return;
+    gLoading = true;
+    var s = document.createElement("script");
+    s.src = "https://accounts.google.com/gsi/client"; s.async = true;
+    s.onload = function () {
+      try { google.accounts.id.initialize({ client_id: CLIENT_ID, callback: onGoogle }); gReady = true; } catch (e) {}
+      gLoading = false; if (cb) cb();
+    };
+    s.onerror = function () { gLoading = false; msg("Googleの読み込みができませんでした。メールアドレスか会員番号でお試しください。"); };
+    document.head.appendChild(s);
+  }
+  function startGoogle(forWhat) {
+    gFor = forWhat;
+    if (!gReady) { msg("Googleを読みこんでいます。少しお待ちください。"); loadGoogle(function () { msg(""); try { google.accounts.id.prompt(); } catch (e) {} }); return; }
+    google.accounts.id.prompt();
+  }
+  function onGoogle(res) {
+    try {
+      var p = JSON.parse(decodeURIComponent(escape(atob(res.credential.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")))));
+      gMail = String(p.email || "").toLowerCase(); gName = p.name || "";
+      var label = "✓ " + gMail;
+      $("slJG").classList.add("done"); $("slJG").textContent = label;
+      $("slLG").classList.add("done"); $("slLG").textContent = label;
+      $("slJMail").value = "";
+      if (gFor === "new" && !$("slName").value.trim() && gName) $("slName").value = gName;
+      msg("");
+    } catch (e) { msg("Googleの確認ができませんでした。"); }
   }
 
-  /* ---------- 呼び出し口 ---------- */
+  var ERR = {
+    busy: "いま混み合っています。少しおいてお試しください。",
+    emailtaken: "このメールアドレス（Googleアカウント）は、すでにご登録があります。<br>上の「登録ずみの方」から、ご自分で決めたパスコードで入ってください。",
+    exists: "この会員番号は、すでにご登録があります。<br>上の「登録ずみの方」から、ご自分で決めたパスコードで入ってください。",
+    proxy: "あなたは、すでにサポートのどなたかから登録をしてもらっています。<br>上の「登録ずみの方」から、会員番号とはじめのパスコード「1111」で入り、そのあと、ご自分で決めた新しいパスコードに変えてください。",
+    pin1111: "1111 は使えません。ご自分で決めた数字4桁を入れてください。<br>サポートの方に先に登録してもらった方は、上の「登録ずみの方」から、会員番号と「1111」で入ることもできます。",
+    badpin: "パスコードは数字4桁で入れてください。",
+    badid: "会員番号は数字だけで入れてください。",
+    bademail: "メールアドレスをご確認ください。",
+    noname: "お名前を入れてください。",
+    nomember: "ご登録が見つかりません。",
+    email: "ご登録のGoogleアカウントと異なります。",
+    nosave: "この端末では、ログインの記録を残せない設定になっています。<br>ブラウザの「プライベートモード」を解いてお試しください。"
+  };
+
+  /* ---------- 端末に残して、そのページの続きへ ---------- */
+  function saveMe(j, pin, fallbackId) {
+    var m = {
+      id: j.id || fallbackId, pin: pin, email: j.email || "",
+      name: j.name || "", realName: j.realName || "", area: j.area || "", keiretsu: j.keiretsu || "", role: j.role || "",
+      sup: j.sup === true, crie: j.crie === true,
+      nick: j.nick || "", keiChat: j.keiChat || "", refUrl: j.refUrl || "", linkJoin: j.linkJoin || "",
+      badges: j.badges || [], celebrate: j.celebrate || "", helper: j.helper || "",
+      dept: j.dept || "", deptLead: j.deptLead === true, schedIn: j.schedIn === true,
+      needPin: j.needPin === true
+    };
+    localStorage.setItem("skyarc_member", JSON.stringify(m));
+    if (!localStorage.getItem("skyarc_member")) throw new Error("nosave");
+    try { localStorage.setItem("lsapp_returning", "1"); } catch (e) {}
+    return m;
+  }
+  function finish(m, text) {
+    $("slBody").hidden = true; $("slDoneMsg").textContent = text; $("slDone").hidden = false;
+    var run = pending;
+    setTimeout(function () {
+      window.skyLoginClose();
+      if (typeof run === "function") { try { run(m); } catch (e) {} }
+      else location.reload();
+    }, 1100);
+  }
+
+  /* ---------- はじめての方：登録 ---------- */
+  async function doJoin(e) {
+    e.preventDefault();
+    var name = $("slName").value.trim();
+    var mail = gMail || $("slJMail").value.trim().toLowerCase();
+    var pin = $("slJPin").value.trim(), id = $("slJId").value.trim();
+    var bad = !name ? ERR.noname
+            : !mail ? "Googleアカウントをつなぐか、メールアドレスを入れてください。"
+            : !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(mail) ? ERR.bademail
+            : !/^\d{4}$/.test(pin) ? ERR.badpin
+            : pin === "1111" ? ERR.pin1111 : "";
+    if (bad) { msg(bad); return; }
+    msg("");
+    var btn = $("slJGo"); btn.disabled = true;
+    if (typeof skyLoading === "function") skyLoading("登録しています…");
+    try {
+      var r = await fetch(gasUrl(), { method: "POST", body: new URLSearchParams({ action: "join", name: name, email: mail, pin: pin, id: id, authType: gMail ? "Google" : "メール" }) });
+      var j = await r.json();
+      if (typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
+      if (typeof skyLoadingDone === "function") skyLoadingDone();
+      if (!j || j.ok !== true) { msg(ERR[j && j.error] || "登録できませんでした。少しおいてお試しください。"); return; }
+      var m = saveMe(j, pin, j.id);
+      finish(m, name + "さん、ようこそ");
+    } catch (err) {
+      if (typeof skyLoadingDone === "function") skyLoadingDone();
+      msg(err && err.message === "nosave" ? ERR.nosave : "通信できませんでした。電波のよい場所でお試しください。");
+    } finally { btn.disabled = false; }
+  }
+
+  /* ---------- 登録ずみの方：ログイン ---------- */
+  async function doLogin(e) {
+    e.preventDefault();
+    var pin = $("slPin").value.trim(), id = "", email = "";
+    if (tab === "google") { if (!gMail) { msg("先にGoogleアカウントをえらんでください。"); return; } email = gMail; }
+    else if (tab === "mail") { email = $("slLMail").value.trim().toLowerCase(); if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { msg(ERR.bademail); return; } }
+    else { id = $("slId").value.trim(); if (!id) { msg("会員番号を入れてください。"); return; } }
+    if (!/^\d{4}$/.test(pin)) { msg(ERR.badpin); return; }
+    msg("");
+    var btn = $("slLGo"); btn.disabled = true;
+    if (typeof skyLoading === "function") skyLoading("ログインしています…");
+    try {
+      if (!id) {
+        var r0 = await fetch(gasUrl() + "?action=byEmail&email=" + encodeURIComponent(email));
+        var j0 = await r0.json();
+        if (typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j0)) return;
+        var list = (j0 && j0.members) || [];
+        if (!j0.ok || !list.length) {
+          if (typeof skyLoadingDone === "function") skyLoadingDone();
+          msg("このメールアドレス（Googleアカウント）でのご登録が見つかりません。<br>会員番号でお試しいただくか、「はじめての方」から登録してください。");
+          return;
+        }
+        id = list[0].id;
+      }
+      var url = gasUrl() + "?action=loginFast&id=" + encodeURIComponent(id) + "&pin=" + encodeURIComponent(pin) + (tab === "google" ? "&email=" + encodeURIComponent(email) : "");
+      var r = await fetch(url);
+      var j = await r.json();
+      if (typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return;
+      if (typeof skyLoadingDone === "function") skyLoadingDone();
+      if (!j || j.ok !== true) {
+        if (j && j.error === "locked") msg("パスコードのお間違いが続いたため、<b>" + (j.wait || 60) + "秒ほど</b>おやすみいただきます。");
+        else if (j && j.error === "pin") msg("パスコードが違います。" + (j.rest > 0 ? "<br>あと" + j.rest + "回まちがえると、少しおやすみになります。" : ""));
+        else msg(ERR[j && j.error] || "ログインできませんでした。");
+        return;
+      }
+      var m = saveMe(j, pin, id);
+      finish(m, (m.name || "") + (m.name ? "さん、おかえりなさい" : "おかえりなさい"));
+      /* バッジは、あとから静かに取りに行きます（前と同じ） */
+      fetch(gasUrl() + "?action=extra&id=" + encodeURIComponent(m.id) + "&pin=" + encodeURIComponent(pin))
+        .then(function (r2) { return r2.json(); })
+        .then(function (e2) { if (e2 && e2.ok) { m.badges = e2.badges || []; m.celebrate = e2.celebrate || ""; localStorage.setItem("skyarc_member", JSON.stringify(m)); } })
+        .catch(function () {});
+    } catch (err) {
+      if (typeof skyLoadingDone === "function") skyLoadingDone();
+      msg(err && err.message === "nosave" ? ERR.nosave : "通信できませんでした。電波のよい場所でお試しください。");
+    } finally { btn.disabled = false; }
+  }
+
+  /* ---------- 呼び出し口（いままでどおり skyLoginRequired(あとで実行したい処理) で使えます） ---------- */
   window.skyLoginRequired = function (afterLogin) {
     build();
     pending = afterLogin || null;
-    document.getElementById("slMsg").className = "sl-msg";
+    $("slBody").hidden = false; $("slDone").hidden = true;
+    var back = false; try { back = localStorage.getItem("lsapp_returning") === "1"; } catch (e) {}
+    setMode(back ? "login" : "new");   /* 前にこの端末で入ったことがある方は「登録ずみの方」から */
     ov.classList.add("show");
-    setTimeout(function () { document.getElementById("slId").focus(); }, 100);
+    loadGoogle();
   };
   window.skyLoginClose = function () { if (ov) ov.classList.remove("show"); pending = null; };
-
-  /* ---------- ログイン処理 ---------- */
-  async function doLogin() {
-    var id = document.getElementById("slId").value.trim();
-    var pin = document.getElementById("slPin").value.trim();
-    var btn = document.getElementById("slBtn");
-    if (!id) { msg("会員番号を入れてください", "err"); return; }
-    if (!/^\d{4}$/.test(pin)) { msg("パスコードは4桁の数字で入れてください", "err"); return; }
-
-    btn.disabled = true; btn.textContent = "確認中…";
-    msg("確認しています…", "ok");
-    if (typeof skyLoading === "function") skyLoading("ログインしています…");
-    try {
-      /* 1回の通信でまとめて受け取ります（速くするためです） */
-      var url = gasUrl() + "?action=loginFast&id=" + encodeURIComponent(id) + "&pin=" + encodeURIComponent(pin);
-      var res = await fetch(url);
-      var j = await res.json();
-      if (typeof skyLoadingDone === "function") skyLoadingDone();
-      if (j.ok === false) {
-        msg({
-          busy: "いま混み合っています。少しおいてお試しください",
-          pin: "パスコードが違います",
-          nomember: "その会員番号は登録されていません",
-          emailtaken: "このメールは別の会員番号で登録されています",
-          email: "登録されている連絡先と異なります"
-        }[j.error] || "ログインできませんでした", "err");
-        return;
-      }
-      /* 保存して、この端末で使えるようにします */
-      var m = {
-        id: id, pin: pin,
-        name: j.name || "", realName: j.realName || "", area: j.area || "", keiretsu: j.keiretsu || "",
-        role: j.role || "", sup: j.sup === true, crie: j.crie === true,
-        nick: j.nick || "", keiChat: j.keiChat || "", refUrl: j.refUrl || "", linkJoin: j.linkJoin || "",
-        badges: j.badges || [], celebrate: j.celebrate || "",
-        email: j.email || "", helper: j.helper || "",
-        dept: j.dept || "", deptLead: j.deptLead === true, schedIn: j.schedIn === true,
-        needPin: j.needPin === true
-      };
-      /* 保存できたかを確かめます(ブラウザの設定で保存できない場合があります) */
-      try {
-        localStorage.setItem("skyarc_member", JSON.stringify(m));
-        var check = localStorage.getItem("skyarc_member");
-        if (!check) throw new Error("saved but empty");
-      } catch (se) {
-        msg("この端末では、ログインの記録を残せない設定になっています。\n" +
-            "ブラウザの「プライベートモード」を解いてお試しください。", "err");
-        return;
-      }
-      msg("✅ ログインしました", "ok");
-
-      /* バッジは、あとから静かに取りに行きます */
-      fetch(gasUrl() + "?action=extra&id=" + encodeURIComponent(id) + "&pin=" + encodeURIComponent(pin))
-        .then(function (r) { return r.json(); })
-        .then(function (e2) {
-          if (e2 && e2.ok) {
-            m.badges = e2.badges || []; m.celebrate = e2.celebrate || "";
-            localStorage.setItem("skyarc_member", JSON.stringify(m));
-          }
-        }).catch(function () {});
-
-      var run = pending;
-      setTimeout(function () {
-        window.skyLoginClose();
-        if (typeof run === "function") { try { run(m); } catch (e) {} }
-        else location.reload();
-      }, 700);
-    } catch (e) {
-      if (typeof skyLoadingDone === "function") skyLoadingDone();
-      msg("通信できませんでした。電波のよい場所でお試しください。", "err");
-    } finally {
-      btn.disabled = false; btn.textContent = "ログイン";
-    }
-  }
-
 
   /* ================================================================
      このページをお使いいただけない方へのご案内
