@@ -139,6 +139,13 @@
   .c-douga{background:#9575CD;} .c-event{background:#26A69A;} .c-crie{background:#7CB342;}
   .chip.plan.c-support{color:#E64A19;} .chip.plan.c-kouryu-on,.chip.plan.c-kouryu-re{color:#3A6FB0;}
   .chip.plan.c-douga{color:#6A4CAF;} .chip.plan.c-event{color:#1E8277;} .chip.plan.c-crie{color:#558B2F;}
+  /* v1.2.151：合同説明会と、表示する予定の切りかえ */
+  .c-godo{background:#E91E63;color:#fff;}
+  .item.k-godo{border-left-color:#E91E63;}
+  .vfil{display:flex;gap:8px;flex-wrap:wrap;margin:-4px 0 14px;}
+  .vfil .lb{width:100%;font-size:12px;font-weight:700;color:#8A6A57;}
+  .vfil button{flex:1;min-width:140px;background:#fff;border:2px solid #E0D6CC;color:#8A8F98;border-radius:12px;padding:9px 10px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;}
+  .vfil button.on{border-color:#F9A825;color:#B26A00;background:#FFF8E1;}
 
   .legend{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:11px;color:#8A6A57;margin:10px 2px 0;}
   .legend span{display:inline-flex;align-items:center;gap:4px;}
@@ -273,6 +280,13 @@
       <span id="loadedAt"></span>
     </div>
 
+    <!-- v1.2.151：表示する予定の切りかえ（公式公認サイトの予定／チーム独自の予定。合同説明会はチーム独自に入ります） -->
+    <div class="vfil" id="vfil" style="display:none;">
+      <span class="lb">表示する予定</span>
+      <button type="button" id="vfOff" onclick="toggleVf('off')"></button>
+      <button type="button" id="vfTeam" onclick="toggleVf('team')"></button>
+    </div>
+
     <div id="firstLoad" class="empty">読み込んでいます…</div>
 
     <div id="body" style="display:none;">
@@ -387,7 +401,7 @@ const GAS_URL = window.SKY_GAS_URL;
 const WD = ["日","月","火","水","木","金","土"];
 const CAT_NAME = {
   "support":"ユーザーサポート会", "kouryu-on":"交流会(オンライン)", "kouryu-re":"交流会(リアル)",
-  "douga":"動画視聴会", "event":"そのほかの催し", "crie":"クリエ以上の申込み"
+  "douga":"動画視聴会", "event":"そのほかの催し", "crie":"クリエ以上の申込み", "godo":"合同説明会"
 };
 const KIND_NAME = { official:"公式公認", shoko:"チーム代表", team:"チーム" };
 const ERR = {
@@ -460,6 +474,7 @@ function showLoadedAt(t){
   $("#reloadWrap").style.display = "flex";
 }
 async function load(fresh){
+  if(fresh){ godo = null; loadGodo(true); }
   if(!fresh){
     const k = keepLoad();
     if(k){ take(k.j, true); showLoadedAt(k.t); return; }
@@ -494,6 +509,8 @@ function take(j, first){
   const la = document.getElementById("lsAt"); if(la) la.textContent = siteAtText() + "。";
   $("#firstLoad").style.display = "none";
   $("#body").style.display = "block";
+  $("#vfil").style.display = "flex"; paintVf();
+  if(!godo && !godoBusy) loadGodo(false);
   /* 「＋ 予定を入れる」のボタンは、v1.2.058 でなくしました（予定は「文章から追加する」で入れます。必要になったら戻します） */
   $("#tools").style.display = canOfficial ? "block" : "none";
   draw();
@@ -578,6 +595,14 @@ function byDay(){
              title:e.title || e.label || "", label:e.label || "", url:e.url || "",
              place: cat === "kouryu-re" ? "real" : "online", bef:false, aft:false, marche:isMarche(e.title || e.label) });
   });
+  /* v1.2.151：合同説明会（合同説明会のページと同じスプレッドシートから）も、チーム独自の予定として入れます */
+  ((godo && godo.list) || []).forEach(x => {
+    const d = String(x.date || "");
+    if(!/^\d{4}\/\d{2}\/\d{2}$/.test(d)) return;
+    put(d, { src:"godo", kind:"team", cat:"godo", start:x.start || "", end:x.end || "", s:x.start ? toMin(x.start) : null, e:x.end ? toMin(x.end) : null, date:d,
+             title:"LINK合同説明会（" + (x.adv || "") + "さん）", label:"合同説明会", url:"godo.html", place:"online", bef:false, aft:false, marche:false,
+             memo: x.n != null ? "いま" + x.n + "名が同席予定" : "" });
+  });
   /* LINKスケジュールサイトの予定も、カレンダーに入れます（手で入れた同じ予定とは1つにまとめます） */
   const siteDays = {};
   ((data.link && data.link.items) || []).forEach(x => eachDay(x.date, x.endDate || x.date, d => { siteDays[d] = 1; }));
@@ -615,8 +640,41 @@ function clashesOf(list){
 function label(x){ return x.title || (x.kind === "shoko" ? "チーム代表の予定" : CAT_NAME[x.cat] || ""); }
 function tmText(x){ return x.start ? x.start + (x.end ? "〜" + x.end : "〜") : "時間の指定なし"; }
 
+/* v1.2.151：表示する予定の切りかえ（この端末に覚えます）。かぶりのチェックには使いません（いつも全部の予定で見ます） */
+let VF = { off:true, team:true };
+try{ const v = JSON.parse(localStorage.getItem("sky_cal_vf") || "null"); if(v) VF = { off: v.off !== false, team: v.team !== false }; }catch(e){}
+function vfMap(map){
+  const out = {};
+  Object.keys(map).forEach(d => {
+    const l = map[d].filter(x => x.kind === "official" ? VF.off : VF.team);   /* チーム独自：チームの予定・申込みシート・チーム代表・合同説明会 */
+    if(l.length) out[d] = l;
+  });
+  return out;
+}
+function paintVf(){
+  const a = $("#vfOff"), b = $("#vfTeam"); if(!a || !b) return;
+  a.className = VF.off ? "on" : ""; a.textContent = (VF.off ? "✓ " : "") + "公式公認サイト：" + (VF.off ? "オン" : "オフ");
+  b.className = VF.team ? "on" : ""; b.textContent = (VF.team ? "✓ " : "") + "チーム独自：" + (VF.team ? "オン" : "オフ");
+}
+function toggleVf(k){
+  VF[k] = !VF[k];
+  try{ localStorage.setItem("sky_cal_vf", JSON.stringify(VF)); }catch(e){}
+  paintVf(); if(data) draw();
+}
+/* 合同説明会の日程（合同説明会のページと同じ読み込み） */
+let godo = null, godoBusy = false;
+async function loadGodo(fresh){
+  if(!member || godoBusy) return;
+  godoBusy = true;
+  try{
+    const r = await fetch(GAS_URL + "?action=godoList&id=" + encodeURIComponent(member.id) + "&pin=" + encodeURIComponent(member.pin) + (fresh ? "&fresh=1" : ""));
+    const j = await r.json();
+    if(j && j.ok && Array.isArray(j.list)){ godo = j; if(data) draw(); }
+  }catch(e){}
+  godoBusy = false;
+}
 function draw(){
-  const map = byDay();
+  const map = vfMap(byDay());
   const today = ymd(new Date());
 
   /* 「かぶっている予定が◯件」の一覧はなくしました（v1.2.043）。かぶりは上の「この時間に入っている予定を見る」で見ます */
@@ -652,7 +710,7 @@ function draw(){
 
 function canTouch(it){ return canEdit || (canOfficial && it.kind === "official"); }
 function drawDay(map){
-  map = map || byDay();
+  map = map || vfMap(byDay());
   const list = map[selDate] || [];
   /* カレンダーと日ごとの一覧は、予定を並べるだけ（かぶりの印は出しません） */
   $("#dayTitle").textContent = mdw(selDate) + " の予定";
@@ -661,12 +719,14 @@ function drawDay(map){
   h += list.map(x => {
     const tag = x.kind === "official" ? (x.src === "site" ? (x.lk === "公式" ? "公式（会社主催）" : "公認公式（会員主催）") : "公式公認") + (x.okFlag === "ok" ? "｜かぶってOK" : x.okFlag === "marche" ? "｜マルシェだけOK" : "")
       : x.kind === "shoko" ? "チーム代表"
+      : x.src === "godo" ? "チーム独自｜合同説明会"
       : (x.src === "sheet" ? "申込みシート｜" + (CAT_NAME[x.cat] || x.label) : "これから入れたい｜" + (CAT_NAME[x.cat] || ""));
     const fl = [x.place === "real" ? "リアル" : x.place === "online" ? "オンライン" : "", (x.bef && x.aft ? "ビフォー・アフターあり" : x.bef ? "ビフォーあり" : x.aft ? "アフターあり" : ""),
                 x.multi ? "〜" + mdw(x.endDate) + "まで" : ""].filter(Boolean).join("・");
     let acts = "";
     if(x.src === "sheet" && x.url) acts += '<a href="' + esc(x.url) + '" target="_blank" rel="noopener">📋 申込みシートを開く</a>';
     if(x.src === "site" && x.url) acts += '<a href="' + esc(x.url) + '" target="_blank" rel="noopener">🗓 スケジュールサイトで見る</a>';
+    if(x.src === "godo") acts += '<a href="godo.html">🎤 合同説明会のページを開く</a>';
     if(x.src === "own" && canTouch(x.item)) acts += '<button onclick="openForm(\'' + esc(x.item.cid) + '\')">✏️ 変える</button><button class="del" onclick="delItem(\'' + esc(x.item.cid) + '\')">🗑 消す</button>';
     return '<div class="item k-' + esc(x.cat) + '"' + (x.col ? ' style="border-left-color:' + (x.col.bg === "#fff" ? x.col.fg : x.col.bg) + ';"' : "") + '><span class="tag">' + esc(tag) + '</span><span class="tm">' + esc(tmText(x)) + '</span>' +
       (fl ? '<span class="flags">' + esc(fl) + '</span>' : "") +
