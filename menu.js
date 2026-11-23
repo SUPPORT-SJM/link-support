@@ -254,7 +254,7 @@
       if (window.skyView) {
         html += '<div class="sec">設定</div>'
               + '<a class="it" href="#" id="skymView"><span class="ic">👓</span>'
-              + '<span class="tx">見やすさの設定<span class="sb">文字の大きさ・字体（いま：' + window.skyView.label() + '）</span></span>'
+              + '<span class="tx">見やすさとデザイン<span class="sb">文字の大きさ・字体・デザイン（いま：' + window.skyView.label() + '）</span></span>'
               + '<span class="ar">›</span></a>';
       }
 

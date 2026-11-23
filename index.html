@@ -212,6 +212,38 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body)
 .tut.mem .tb{border-color:var(--g-member);}
 .tut.mem .tt{color:#2E7D62;white-space:pre;text-align:center;line-height:1.25;}
 .tut.mem{width:96px;}
+/* ===== v1.2.149：クールビジネステーマ（試作：トップページだけ）。手帳のような落ち着いたデザイン ===== */
+:root[data-sky-theme="cool"]{ --cb-ink:#1E2A3B; --cb-sub:#5D6878; --cb-line:#D9D4C7; --cb-paper:#F6F3EC; --cb-gold:#A88A4D; --cb-navy:#24344D; }
+:root[data-sky-theme="cool"]{background-color:#EFEBE2 !important;}   /* ベータテストの模様は残して、下の色だけ落ち着いた色に */
+.cool{max-width:560px;margin:6px auto 0;padding:0 16px 12px;font-family:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",sans-serif;color:var(--cb-ink);}
+.cool[hidden]{display:none;}
+.cool .cb-book{background:var(--cb-paper);border:1px solid var(--cb-line);border-radius:14px;padding:16px 14px 14px 22px;position:relative;
+  box-shadow:0 1px 0 #fff inset,0 6px 18px rgba(30,42,59,.08);}
+.cool .cb-book::before{content:"";position:absolute;left:9px;top:14px;bottom:14px;border-left:2px dotted #C9C2B0;}   /* 手帳のとじ穴の線 */
+.cool .cb-sec{display:flex;align-items:baseline;gap:8px;margin:16px 0 8px;font-weight:700;font-size:13px;letter-spacing:.08em;color:var(--cb-gold);}
+.cool .cb-sec:first-child{margin-top:0;}
+.cool .cb-sec::after{content:"";flex:1;border-bottom:1px solid var(--cb-line);transform:translateY(-4px);}
+.cool .cb-card{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:#fff;border:1px solid var(--cb-line);border-left:4px solid var(--cb-navy);
+  border-radius:10px;padding:11px 12px;margin:0 0 8px;font-family:inherit;color:var(--cb-ink);cursor:pointer;text-decoration:none;}
+.cool .cb-card:active{transform:scale(.99);}
+.cool .cb-card .ball{flex:none;width:38px;height:38px;border-radius:9px;background:#F1EEE6;display:grid;place-items:center;font-size:19px;}
+.cool .cb-card .tx{flex:1;min-width:0;}
+.cool .cb-card .nm{display:block;font-weight:700;font-size:15px;line-height:1.4;}
+.cool .cb-card .sb{display:block;font-size:12px;color:var(--cb-sub);line-height:1.5;margin-top:1px;}
+.cool .cb-card .ar{flex:none;color:#9AA3AF;font-size:18px;}
+.cool .cb-card.step .no{flex:none;font-size:11px;font-weight:700;color:var(--cb-gold);letter-spacing:.06em;width:46px;}
+.cool .cb-card.done{border-left-color:#4E8C6A;}
+.cool .cb-card.now{border-left-color:var(--cb-gold);box-shadow:0 0 0 2px rgba(168,138,77,.25);}
+.cool .cb-card.lock{opacity:.55;border-left-color:#B9B4A8;}
+.cool .cb-bar{display:block;height:4px;border-radius:4px;background:#E9E4D8;margin-top:6px;overflow:hidden;}
+.cool .cb-bar i{display:block;height:100%;background:var(--cb-gold);}
+.cool .cb-card.done .cb-bar i{background:#4E8C6A;}
+.cool .cb-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.cool .cb-grid .cb-card{margin:0;padding:10px;border-left-width:1px;border-top:3px solid var(--cb-navy);flex-direction:column;align-items:flex-start;gap:6px;}
+.cool .cb-grid .cb-card .ar{display:none;}
+.cool .cb-mine{border-left-color:var(--cb-gold);}
+.cool .cb-small{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px;}
+.cool .cb-small button{background:#fff;border:1px solid var(--cb-line);border-radius:999px;padding:9px 6px;font-family:inherit;font-size:11.5px;font-weight:700;color:var(--cb-navy);cursor:pointer;white-space:nowrap;}
 /* v1.2.146：あなた専用ページ（アカウントのすぐ下の小さな丸と、えらぶ画面） */
 .tut.minef{width:110px;}
 /* v1.2.147：ほかの小さな丸より3割大きく */
@@ -395,6 +427,8 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body)
     <a id="infoBtn" class="info-btn" target="_blank" rel="noopener"></a>
   </div>
 
+  <!-- v1.2.149：クールビジネステーマ（試作）のトップページ。手帳のように、カードで並べます -->
+  <section class="cool" id="cool" hidden></section>
   <nav class="stage" id="stage" aria-live="polite"></nav>
 
   <div class="foot">Presented by Skyarc-team<br><span class="verTag"></span></div>
@@ -1059,6 +1093,7 @@ function makeNode(it, i, home, fromX, fromY){
    いま出ているアイコンはそのまま、新しい置き場所へすっと動きます */
 function reflow(){
   if(path.length !== 0) return;
+  if(coolOn() && me){ renderCool(); return; }   /* v1.2.149 */
   const items = TREE.filter(ok);
   const hs = homes(items.length, true, true);
   const keep = [];
@@ -1081,6 +1116,11 @@ function reflow(){
 /* ---------- アイコンを並べる ---------- */
 function build(fromX, fromY){
   const last = path[path.length-1];
+  /* v1.2.149：クールビジネステーマのときは、いちばん上の段だけカードで並べます（中の段は、今までどおり丸） */
+  const coolTop = coolOn() && !last && !!me;
+  $("#cool").hidden = !coolTop;
+  if(coolTop){ nodes = []; stage.hidden = true; $("#crumb").hidden = true; $("#info").hidden = true; renderCool(); return; }
+  stage.hidden = false;   /* 丸を並べる前に出しておきます（幅を正しく測るため） */
   let items = last ? (last.kids || []).filter(last.mine ? mineOk : ok) : TREE.filter(ok);
   if(!last && !me) items = [Object.assign({}, JOIN, { nm: isReturning() ? "ログイン" : "登録" })];  /* まだの方は、まん中のひとつだけ */
   if(last && last.mine && !items.length) items = [MINE_SETUP, BACK];   /* v1.2.146：まだ何もえらんでいないときは、まん中に「設定する」 */
@@ -1253,7 +1293,7 @@ function flowPaintNode(el, it){
   el.classList.toggle("flock", !!(it.lockAfter && !flowDone(it.lockAfter)));
   const m = el.querySelector(".fmark"); if(m) m.textContent = marked ? "🌈" : done ? "✅" : "";
 }
-function flowPaintAll(){ nodes.forEach(n=>flowPaintNode(n.el, n.it)); paintPoint(); customTick(); }
+function flowPaintAll(){ nodes.forEach(n=>flowPaintNode(n.el, n.it)); paintPoint(); customTick(); if(!$("#cool").hidden) renderCool(); }
 /* 中の段でも、出す丸が変わったら（次のステップへの丸など）、すっと足します */
 function reflowLevel(){
   if(path.length === 0){ reflow(); return; }
@@ -1979,7 +2019,7 @@ function placeDbg(t){
 
 /* ---- ログイン中のトップ：「見やすさ」の丸を、アカウントの丸のまん中から見て「会員情報」と左右反対の場所（同じ高さ）に置きます ---- */
 let viewF = null, viewKey = "";
-function viewName(){ return "見やすさ\n（" + (window.skyView ? window.skyView.label() : "ふつう") + "）"; }
+function viewName(){ return "見やすさ\nとデザイン"; }   /* v1.2.149 */
 function viewHome(){
   const acc = nodes.find(n=>n.it === TREE[0]) || { hx: W/2, hy: H/2 };
   let tx = W - 60, ty = memF && memF.hy ? memF.hy : acc.hy - 200;
@@ -2025,7 +2065,7 @@ function placeView(t){
   const sch = top ? (nodes.find(n=>n.it.g === "apply" && n.it.kids) || nodes.find(n=>n.it === TREE[0])) : null;   /* v1.2.101：目じるしの丸がホームにないときは、アカウントの丸を目じるしに（四すみの丸が消えていたため） */
   if(!sch || !memF || memF.el.style.display === "none"){ if(viewF) viewF.el.style.display = "none"; viewKey = ""; return; }
   if(!viewF){
-    viewF = makeFloater("tut view", 5.3, { ic:"👓", nm:viewName(), href:"#view", aria:"見やすさ（文字の大きさ・字体）を変える", onTap: ()=>window.skyView.open() });
+    viewF = makeFloater("tut view", 5.3, { ic:"👓", nm:viewName(), href:"#view", aria:"見やすさとデザイン（文字の大きさ・字体・デザイン）を変える", onTap: ()=>window.skyView.open() });
     stage.insertBefore(viewF.el, stage.firstChild);
   }
   viewF.el.style.display = "";
@@ -2776,8 +2816,68 @@ function placeMine(t){
   stepFloater(mineF, t, acc.s, acc.o, 55, 21, .6);
 }
 
+/* ================================================================
+   v1.2.149：クールビジネステーマ（試作）— トップページを手帳のようなカードで並べます
+   ・ファーストサポートの3つは「ステップ」として、進み具合のバー付きで上から順に
+   ・ほかの丸は、見られるものだけをカードに（開放された順に増えていきます）
+   ・押したときの動きは、丸を押したときと同じです（中の段は、いまは丸のまま）
+================================================================ */
+function coolOn(){ return document.documentElement.getAttribute("data-sky-theme") === "cool"; }
+function renderCool(){
+  const box = $("#cool"); if(!box) return;
+  const all = TREE.filter(ok);
+  const steps = FLOW_ORDER.map(k=>flowPageItem(k)).filter(Boolean);
+  const next = flowNext();
+  const cardList = [];
+  const card = (it, extra, cls, pre)=>`<button type="button" class="cb-card ${cls || ""}" data-i="${cardList.push(it) - 1}">`
+    + (pre || "") + `<span class="ball">${it.ic}</span><span class="tx"><span class="nm">${esc(String(it.nm).replace(/\n/g, ""))}</span>${extra || ""}</span><span class="ar">›</span></button>`;
+  let h = '<div class="cb-book">';
+  h += '<div class="cb-sec">ファーストサポート</div>';
+  steps.forEach((it, i)=>{
+    const tasks = flowTasks(it), done = tasks.filter(k=>FLOW[k]).length;
+    const locked = it.lockAfter && !flowDone(it.lockAfter);
+    const isDone = flowDone(it.flowPage), isNow = it.flowPage === next;
+    const st = locked ? "🔒 前のステップを終えると開きます" : isDone ? "完了しました" : `進行中　${done} / ${tasks.length}`;
+    h += card(it, `<span class="sb">${st}</span><span class="cb-bar"><i style="width:${Math.round(done / Math.max(tasks.length, 1) * 100)}%"></i></span>`,
+      "step " + (locked ? "lock" : isDone ? "done" : isNow ? "now" : ""), `<span class="no">STEP ${i + 1}</span>`);
+  });
+  if(customOn()){
+    const n = minePickItems().length;
+    h += '<div class="cb-sec">あなた専用</div>';
+    h += card(MINE, `<span class="sb">${n ? "よく使うものを集めたページ（" + n + "個）" : "よく使うものを選んで、自分専用のページを作れます"}</span>`, "cb-mine");
+  }
+  const rk = it=> it.moon ? 1 : it.pickKids ? 6 : it.g === "sup" ? 7 : it.g === "crie" ? 8 : 9;   /* サポーターの部屋 → クリエの部屋 の順 */
+  const rest = all.filter(it=>!it.flowPage && it !== TREE[0]).map((it, i)=>({ it, i })).sort((a, b)=>(rk(a.it) - rk(b.it)) || (a.i - b.i)).map(x=>x.it);
+  if(rest.length){
+    h += '<div class="cb-sec">メニュー</div><div class="cb-grid">';
+    rest.forEach(it=>{ h += card(it, ""); });
+    h += '</div>';
+  }
+  h += '<div class="cb-sec">アカウント・設定</div><div class="cb-small">'
+    + '<button type="button" data-act="acc">👤 アカウント</button>'
+    + '<button type="button" data-act="mem">🪪 会員情報／紹介コード</button>'
+    + '<button type="button" data-act="view">👓 見やすさとデザイン</button>'
+    + '<button type="button" data-act="howto">📖 使い方</button></div>';
+  h += '</div>';
+  box.innerHTML = h;
+  box.querySelectorAll(".cb-card").forEach(el=>el.addEventListener("click", e=>{
+    const it = cardList[+el.dataset.i];
+    if(it === MINE){ goTo(()=>{ path.length = 0; path.push(MINE); }); if(!minePickItems().length) setTimeout(mineIntro, 450); return; }
+    const r = el.getBoundingClientRect(), sr = stage.getBoundingClientRect();
+    tap({ el, it, x: r.left - sr.left + r.width/2, y: r.top - sr.top + r.height/2, s:1, ts:1, o:1, to:1 }, e);
+  }));
+  box.querySelectorAll(".cb-small button").forEach(b=>b.addEventListener("click", ()=>{
+    const a = b.dataset.act;
+    if(a === "acc"){ saveReturn(); location.href = B + "ikusei/account.html"; }
+    if(a === "mem") openMemInfo();
+    if(a === "view" && window.skyView) window.skyView.open();
+    if(a === "howto") location.href = B + "howto.html";
+  }));
+}
+
 /* ---------- 最初に並べます ---------- */
 window.addEventListener("resize", ()=>{
+  if(!nodes.length) return;   /* v1.2.149：カードの画面のときは、丸を並べなおしません */
   const hs = layoutFor(nodes.length);
   nodes.forEach((n,i)=>{ n.hx = hs[i][0]; n.hy = hs[i][1]; });
 });

@@ -9,7 +9,7 @@
 ================================================================ */
 
 /* ---------------- ① バージョン ---------------- */
-window.SKY_VERSION = "v1.2.148";
+window.SKY_VERSION = "v1.2.149";
 window.SKY_VERSION_DATE = "2026/11/21";
 
 /* ---------------- ② GASのURL ----------------
@@ -555,12 +555,18 @@ window.skyView = (function () {
     { k: "norm", nm: "いつもの字体" },
     { k: "ud",   nm: "UDゴシック", sub: "だれにでも読みやすい字体" }
   ];
+  /* v1.2.149：デザイン（テーマ）。クールビジネスは試作中で、いまはトップページだけが変わります */
+  var THEMES = [
+    { k: "magic", nm: "夢と魔法の\n虹色テーマ", sub: "いまのデザイン" },
+    { k: "cool",  nm: "クール\nビジネステーマ", sub: "手帳のような落ち着いたデザイン（試作・トップページのみ）" }
+  ];
   function get() {
     var v = null;
     try { v = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) {}
     v = v || {};
     if (!SIZES.some(function (s) { return s.k === v.size; })) v.size = "m";
     if (!FONTS.some(function (s) { return s.k === v.font; })) v.font = "norm";
+    if (!THEMES.some(function (s) { return s.k === v.theme; })) v.theme = "magic";
     return v;
   }
   function save(v) { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch (e) {} }
@@ -568,7 +574,7 @@ window.skyView = (function () {
   function label(v) {
     v = v || get();
     var s = SIZES.filter(function (x) { return x.k === v.size; })[0];
-    return s.short + (v.font === "ud" ? "・UD" : "");
+    return s.short + (v.font === "ud" ? "・UD" : "") + (v.theme === "cool" ? "・クール" : "");
   }
 
   /* --- 文字の大きさ：ページの中の「〇〇px」の文字の大きさを、決めた割合でかけ算します（元の大きさは覚えておきます） --- */
@@ -650,6 +656,7 @@ window.skyView = (function () {
     F = factor(v);
     document.documentElement.setAttribute("data-sky-size", v.size);
     document.documentElement.setAttribute("data-sky-font", v.font);
+    document.documentElement.setAttribute("data-sky-theme", v.theme);
     if (F !== 1 || anyScaled) { anyScaled = true; scaleAll(); watch(); }
     setFont(v);
     try { window.dispatchEvent(new CustomEvent("skyview", { detail: v })); } catch (e) {}
@@ -684,7 +691,7 @@ window.skyView = (function () {
     css();
     var old = document.getElementById("skyView"); if (old) old.remove();
     var ov = document.createElement("div"); ov.id = "skyView";
-    ov.setAttribute("role", "dialog"); ov.setAttribute("aria-label", "見やすさの設定");
+    ov.setAttribute("role", "dialog"); ov.setAttribute("aria-label", "見やすさとデザインの設定");
     document.body.appendChild(ov);
     /* UDゴシックのボタンは、UDゴシックの字体で見せます */
     var pre = document.getElementById("skyUdFontPre");
@@ -695,9 +702,9 @@ window.skyView = (function () {
     }
     /* 選んでいるあいだは、まだ反映しません（えらんだものに印がつくだけ）。
        「この設定を反映する」を押すと注意書きが出て、「OK」で反映して、とじます */
-    var cur = get(), sel = { size: cur.size, font: cur.font }, warn = false;
+    var cur = get(), sel = { size: cur.size, font: cur.font, theme: cur.theme }, warn = false;
     function draw() {
-      var h = '<div class="vc"><h3>👓 見やすさの設定</h3><p class="ld">この端末で見るときの、文字の大きさと字体を変えられます</p>'
+      var h = '<div class="vc"><h3>👓 見やすさとデザイン</h3><p class="ld">この端末で見るときの、文字の大きさ・字体・デザインを変えられます</p>'
         + '<div class="sec">文字の大きさ</div><div class="ops">';
       SIZES.forEach(function (s) {
         h += '<button type="button" class="op' + (sel.size === s.k ? " on" : "") + '" data-size="' + s.k + '">' + s.nm
@@ -707,6 +714,11 @@ window.skyView = (function () {
       FONTS.forEach(function (s) {
         h += '<button type="button" class="op' + (s.k === "ud" ? " ud" : "") + (sel.font === s.k ? " on" : "") + '" data-font="' + s.k + '">' + s.nm
           + (s.sub ? '<small>' + s.sub + '</small>' : "") + '</button>';
+      });
+      h += '</div><div class="sec">デザイン</div><div class="ops">';
+      THEMES.forEach(function (s) {
+        h += '<button type="button" class="op' + (sel.theme === s.k ? " on" : "") + '" data-theme="' + s.k + '" style="white-space:pre-line;">' + s.nm
+          + (s.sub ? '<small style="white-space:normal;">' + s.sub + '</small>' : "") + '</button>';
       });
       h += '</div><button type="button" class="cl go" data-act="apply">この設定を反映する</button></div>';
       if (warn) {
@@ -720,14 +732,17 @@ window.skyView = (function () {
       var b = e.target.closest ? e.target.closest("button") : null; if (!b) return;
       if (b.dataset.size) { sel.size = b.dataset.size; draw(); return; }
       if (b.dataset.font) { sel.font = b.dataset.font; draw(); return; }
+      if (b.dataset.theme) { sel.theme = b.dataset.theme; draw(); return; }
       if (b.dataset.act === "apply") {
         var v = get();
-        if (v.size === sel.size && v.font === sel.font) { ov.remove(); return; }   /* 何も変えていなければ、そのままとじます */
+        if (v.size === sel.size && v.font === sel.font && v.theme === sel.theme) { ov.remove(); return; }   /* 何も変えていなければ、そのままとじます */
         warn = true; draw(); return;
       }
       if (b.dataset.act === "ok") {
-        var nv = get(); nv.size = sel.size; nv.font = sel.font;
-        save(nv); apply(nv); ov.remove(); return;
+        var nv = get(), themeChanged = nv.theme !== sel.theme; nv.size = sel.size; nv.font = sel.font; nv.theme = sel.theme;
+        save(nv); apply(nv); ov.remove();
+        if (themeChanged) location.reload();   /* デザインを変えたときは、ページを開きなおして反映します */
+        return;
       }
     });
     draw();
@@ -736,6 +751,7 @@ window.skyView = (function () {
   /* ページを開いたときに、覚えている設定を反映します */
   (function boot() {
     var v = get();
+    document.documentElement.setAttribute("data-sky-theme", v.theme);   /* v1.2.149：デザインは、いちばん先に印をつけます */
     if (v.size === "m" && v.font === "norm") { watch(); return; }   /* ふつうのままなら、何もしません */
     setFont(v);
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { apply(v); });
