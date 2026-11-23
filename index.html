@@ -212,6 +212,21 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body)
 .tut.mem .tb{border-color:var(--g-member);}
 .tut.mem .tt{color:#2E7D62;white-space:pre;text-align:center;line-height:1.25;}
 .tut.mem{width:96px;}
+/* v1.2.146：あなた専用ページ（アカウントのすぐ下の小さな丸と、えらぶ画面） */
+.tut.minef{width:96px;}
+.tut.minef .tb{border-color:#F2B33D;background:#FFF8E1;}
+.tut.minef .tt{color:#B26A00;}
+#mineSheet .mhint{font-size:13px;line-height:1.7;color:#5B5670;margin:2px 0 10px;}
+#mineSheet .mlist{max-height:58vh;overflow:auto;border:1.5px solid #ECE8F6;border-radius:12px;padding:4px 6px;}
+#mineSheet .mrow{display:flex;align-items:center;gap:6px;padding:7px 2px;border-bottom:1px solid #F2EFF9;}
+#mineSheet .mx{flex:none;width:26px;height:26px;border-radius:8px;border:1.5px solid #CFC8E6;background:#fff;color:#6E5FB5;font-weight:900;font-size:16px;line-height:1;cursor:pointer;padding:0;}
+#mineSheet .mx.no{visibility:hidden;}
+#mineSheet .mi{flex:none;width:22px;text-align:center;}
+#mineSheet .mn{flex:1;font-size:14px;line-height:1.4;color:#2A2540;}
+#mineSheet .mt{flex:none;min-width:58px;padding:6px 8px;border-radius:999px;border:2px solid #CFC8E6;background:#fff;color:#8B86A3;font-family:inherit;font-weight:900;font-size:12.5px;cursor:pointer;}
+#mineSheet .mt.on{background:#F2B33D;border-color:#F2B33D;color:#fff;}
+#mineSheet .mkids[hidden]{display:none;}
+#mineSheet .mcount{font-size:12.5px;font-weight:700;color:#B26A00;margin:8px 2px 0;}
 /* 管理者モードの丸（管理者の方だけ）：オフ＝灰色／オン＝紺／試し中＝オレンジ */
 .tut.dbg .tb{border-color:#8A84A0;}
 .tut.dbg{width:104px;}
@@ -420,6 +435,17 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body)
   <p class="fca-txt">参加のときに、このお名前を貼り付けます。先に<b>「📋 タップしてコピー」</b>を押して、お名前をコピーしてください。</p>
   <button type="button" id="fcaOk">OK</button>
 </div></div>
+<!-- v1.2.146：あなた専用ページに置く丸をえらぶ -->
+<div class="sheet" id="mineSheet" style="z-index:8100;" hidden>
+  <div class="card note" role="dialog" aria-labelledby="mineTitle">
+    <button type="button" class="close" id="mineClose" aria-label="とじる">×</button>
+    <h3 id="mineTitle">⭐ あなた専用ページに置く丸</h3>
+    <p class="mhint">よく使う丸を「オン」にすると、あなた専用ページに並びます。<br>＋を押すと、その中の丸も見られます。</p>
+    <div class="mlist" id="mineList"></div>
+    <p class="mcount" id="mineCount"></p>
+    <button type="button" id="mineDone" style="display:block;width:100%;padding:12px;border-radius:12px;border:none;background:#6E5FB5;color:#fff;font-family:inherit;font-weight:900;font-size:15px;margin-top:10px;cursor:pointer;">できあがり</button>
+  </div>
+</div>
 <div class="sheet" id="taskSheet" style="z-index:8100;" hidden>
   <div class="card note" role="dialog" aria-labelledby="taskTitle">
     <button type="button" class="close" id="taskClose" aria-label="とじる">×</button>
@@ -979,8 +1005,9 @@ function homesPair(n){
   const ry = Math.max(Math.min(ryWant, ryFit), RY_MIN);
   /* 輪がたてに縮んだぶん、月の通り道も少しだけ小さくします */
   ORBIT.ry = Math.round(ORBIT_RY0 * Math.max(Math.min(ry / ryWant, 1), .8));
-  const pts = [[0, 0]];
-  for(let m=0; m<moonN; m++) pts.push([0, m % 2 ? -ORBIT.ry : ORBIT.ry]);
+  const up0 = customOn() ? -22 : 0;   /* v1.2.146：あなた専用ページの丸を下に置くので、アカウントを少し上に */
+  const pts = [[0, up0]];
+  for(let m=0; m<moonN; m++) pts.push([0, up0 + (m % 2 ? -ORBIT.ry : ORBIT.ry)]);
   for(let i=0;i<ring;i++){
     const a = -Math.PI/2 + i*2*Math.PI/ring;
     pts.push([Math.cos(a)*rx, Math.sin(a)*ry]);
@@ -1040,8 +1067,9 @@ function build(fromX, fromY){
   const last = path[path.length-1];
   let items = last ? (last.kids || []).filter(ok) : TREE.filter(ok);
   if(!last && !me) items = [Object.assign({}, JOIN, { nm: isReturning() ? "ログイン" : "登録" })];  /* まだの方は、まん中のひとつだけ */
-  if(last) items = [BACK].concat(items);                      /* 中の段は、まん中が「もどる」 */
-  const hs = homes(items.length, path.length === 0 ? true : items.length > 1, path.length === 0 && !!me);  /* いちばん上は、まん中に上下でアカウントと「新しい仲間へ」 */
+  if(last && last.mine && !items.length) items = [MINE_SETUP, BACK];   /* v1.2.146：まだ何もえらんでいないときは、まん中に「設定する」 */
+  else if(last) items = [BACK].concat(items);                 /* 中の段は、まん中が「もどる」 */
+  const hs = layoutFor(items.length);   /* いちばん上は、まん中に上下でアカウントと「新しい仲間へ」 */
   nodes = items.map((it,i)=> makeNode(it, i, hs[i], fromX, fromY));
   document.getElementById("crumb").hidden = path.length === 0 || !!(last && last.noCrumb);   /* 「メンバー向け」の段は、左上の名前を出しません */
   document.getElementById("crumbTitle").textContent = (last ? last.nm.replace(/\n/g,"") : "");
@@ -1053,6 +1081,7 @@ function build(fromX, fromY){
     ib.hidden = !last.info.btn;
     if(last.info.btn){
       ib.textContent = last.info.btn; ib.href = last.info.url;
+      ib.onclick = last.mine ? (e)=>{ e.preventDefault(); openMineEdit(); } : null;   /* v1.2.146 */
       /* このサイトの中のページは、同じタブで開きます */
       if(/^https?:\/\//.test(last.info.url)){ ib.target = "_blank"; ib.rel = "noopener"; }
       else{ ib.removeAttribute("target"); ib.removeAttribute("rel"); }
@@ -1135,6 +1164,8 @@ function tap(n, e){
   const it = n.flipped && n.it.flip ? n.it.flip : n.it;
   if(it.join){ openJoin(n); return; }
   if(it.back){ goBack(n); return; }
+  if(it.mineSetup){ openMineEdit(); return; }   /* v1.2.146 */
+  if(it.mine){ goTo(()=>{ path.length = 0; path.push(MINE); }, n.x, n.y, n); return; }
   /* ===== 仮組み：ファーストサポートの新しい流れ ===== */
   if(it.lockAfter && !flowDone(it.lockAfter)){ showToast("先に「" + flowPageItem(it.lockAfter).nm.replace(/\n/g,"") + "」を進めましょう"); return; }
   if(it.ph){ showToast("0番は、準備中です"); return; }
@@ -1206,7 +1237,7 @@ function flowPaintNode(el, it){
   el.classList.toggle("flock", !!(it.lockAfter && !flowDone(it.lockAfter)));
   const m = el.querySelector(".fmark"); if(m) m.textContent = marked ? "🌈" : done ? "✅" : "";
 }
-function flowPaintAll(){ nodes.forEach(n=>flowPaintNode(n.el, n.it)); paintPoint(); }
+function flowPaintAll(){ nodes.forEach(n=>flowPaintNode(n.el, n.it)); paintPoint(); customTick(); }
 /* 中の段でも、出す丸が変わったら（次のステップへの丸など）、すっと足します */
 function reflowLevel(){
   if(path.length === 0){ reflow(); return; }
@@ -1315,7 +1346,7 @@ function openTask(it){
     else if(grp && !wasGrp && flowItemDone(grp)) flowCelebrate("🎉 " + grp.nm.replace(/\n/g,"") + "、ぜんぶできました！");
   };
 }
-function closeTask(){ $("#taskSheet").hidden = true; }
+function closeTask(){ $("#taskSheet").hidden = true; setTimeout(customTick, 300); }
 /* ページをポップアップの中に出します（もどるで、ステップの中身にもどります） */
 function openPage(pg){
   const f = $("#pageFrame");
@@ -1463,6 +1494,7 @@ document.getElementById("noteBody").addEventListener("click", e=>{ if(e.target.c
    そのページの「ホームに戻る」などでトップに戻ってきたときに、同じ段を出します */
 const RET_KEY = "sky_return";
 function saveReturn(){
+  if(path[0] === MINE){ try{ sessionStorage.setItem(RET_KEY, JSON.stringify({ mine:true, idx:[], t: Date.now() })); }catch(e){} return; }   /* v1.2.146 */
   const idx = []; let list = TREE;
   for(const p of path){
     const i = list.indexOf(p);
@@ -1487,9 +1519,22 @@ function openFlowHash(fromMenuSamePage){
   path.length = 0; path.push(it);
   return true;
 }
-addEventListener("hashchange", ()=>{ if(flowHashPage()) openFlowHash(true); });
+addEventListener("hashchange", ()=>{
+  if(flowHashPage()) openFlowHash(true);
+  if(location.hash === "#mine"){   /* v1.2.146：このページでメニューから開いたとき */
+    try{ history.replaceState(null, "", location.pathname + location.search); }catch(e){}
+    if(customOn()) goTo(()=>{ path.length = 0; path.push(MINE); });
+  }
+});
 function restoreReturn(){
   if(openFlowHash(false)) return;
+  if(location.hash === "#mine" || location.hash === "#mineEdit"){   /* v1.2.146：メニューから「あなた専用ページ」 */
+    const ed = location.hash === "#mineEdit";
+    try{ history.replaceState(null, "", location.pathname + location.search); sessionStorage.removeItem(RET_KEY); }catch(e){}
+    if(customOn()){ path.length = 0; path.push(MINE); if(ed) setTimeout(openMineEdit, 600); }
+    else if(me) mineWant = ed ? "edit" : "open";   /* はじめての端末では、記録を読んでから開きます */
+    return;
+  }
   /* 「交流会・サポート会情報」から（チーム情報のページ・活用の1stステップ）：各種スケジュール情報（公式公認／チーム独自）の段を開きます */
   /* v1.2.086：#schedTeam は、便利な情報一覧の「チーム独自の交流会などの情報」から：各種スケジュール情報 › チーム独自 の段を開きます */
   if(location.hash === "#sched" || location.hash === "#schedTeam"){
@@ -1514,6 +1559,7 @@ function restoreReturn(){
   if(Date.now() - (r.t || 0) > 2*60*60*1000) return;      /* 2時間より前のものは使いません */
   let ref = ""; try{ ref = document.referrer ? new URL(document.referrer).origin : ""; }catch(e){}
   if(ref !== location.origin) return;                      /* このサイトのページから戻ってきたときだけ */
+  if(r.mine){ if(customOn()) path.push(MINE); return; }    /* v1.2.146：あなた専用ページへ */
   let list = TREE;
   for(const i of r.idx){
     const it = list[i];
@@ -1622,6 +1668,7 @@ function frame(t){
   placeMem(t);
   placeDbg(t);
   placeView(t);
+  placeMine(t);
   leaving = leaving.filter(n=>{
     if(t - n.dying > 420){ n.el.remove(); return false; }
     return true;
@@ -2168,7 +2215,7 @@ function saveMe(j, pin, fallbackId){
   };
   localStorage.setItem("skyarc_member", JSON.stringify(m));
   if(!localStorage.getItem("skyarc_member")) throw new Error("nosave");
-  me = m; loadFlow(); setTimeout(syncFlow, 300);   /* 仮組み：その方の進み具合を読みなおします */
+  me = m; loadFlow(); mineLoadLocal(); mineLoaded = false; setTimeout(syncFlow, 300);   /* 仮組み：その方の進み具合を読みなおします */
   markReturning();
   pointProg = null; loadPoint();
   return m;
@@ -2459,9 +2506,177 @@ window.addEventListener("pageshow", ev=>{
   }
 });
 
+/* ================================================================
+   v1.2.146：あなた専用ページ（トップページのカスタマイズ）
+   ・はじめの一歩・LINKを知ろう・LINKを使おう の3つが終わった方（役割のある方は最初から）に開きます
+   ・えらぶ画面には、その方が見られる丸だけが出ます（ok() と同じ決まり）
+   ・えらんだ丸は、スプレッドシートのタブ「custom進捗」に記録します（どの端末でも同じになります）
+   ・トップページの丸は、今までどおり全部出ます
+================================================================ */
+const MINE = { ic:"⭐", nm:"あなた専用ページ", g:"common", mine:true,
+  get kids(){ return minePickItems(); },
+  get info(){ return minePickItems().length
+    ? { text:"あなたがえらんだ丸です。", btn:"⚙️ 丸をえらびなおす", url:"#mineEdit" }
+    : { text:"よく使う丸だけを集めた、あなた専用のページを作れます。まん中の「設定する」を押してください。" }; } };
+const MINE_SETUP = { ic:"⚙️", nm:"設定する", g:"apply", mineSetup:true };
+const MINE_APP = "custom";
+let MINE_PICK = [];
+function customOn(){
+  if(!me) return false;
+  if(String(me.role || "") || me.sup === true || me.crie === true) return true;   /* 役割のある方は最初から */
+  return flowAllDone();
+}
+function mineKey(k){ return "sky_" + k + "_" + (me && me.id ? me.id : ""); }
+/* 丸の見分け方：上の段からの名前のつながり（例：「クリエの部屋›クリエマップ」） */
+function mineIndex(){
+  const map = {}, list = [];
+  const walk = (arr, pre, depth, parentOk)=>{
+    (arr || []).forEach(it=>{
+      if(!it || it.back || it.join || it.mine) return;
+      const nm = String(it.nm || "").replace(/\n/g, "");
+      const id = pre ? pre + "›" + nm : nm;
+      const see = parentOk && ok(it) && !it.ph && !it.wip;
+      if(!map[id]) map[id] = it;
+      if(see) list.push({ id, it, depth });
+      if(it.kids && see) walk(it.kids, id, depth + 1, true);
+    });
+  };
+  walk(TREE, "", 0, true);
+  return { map, list };
+}
+function minePickItems(){
+  if(!customOn()) return [];
+  const ix = mineIndex(), seen = new Set(ix.list.map(x=>x.id));
+  return MINE_PICK.filter(id=>seen.has(id)).map(id=>ix.map[id]).filter(Boolean);
+}
+function mineLoadLocal(){ try{ MINE_PICK = JSON.parse(localStorage.getItem(mineKey("mine")) || "[]") || []; }catch(e){ MINE_PICK = []; } }
+async function mineLoad(){
+  mineLoadLocal();
+  if(!me || !me.id || !me.pin || !GAS_URL || flowDbg()) return;
+  try{
+    const j = await fetch(`${GAS_URL}?action=load&app=${MINE_APP}&id=${encodeURIComponent(me.id)}&pin=${encodeURIComponent(me.pin)}`).then(r=>r.json());
+    if(!j || j.ok !== true || !j.data) return;
+    const d = JSON.parse(j.data || "{}") || {};
+    if(typeof d.pick !== "string") return;
+    const arr = JSON.parse(d.pick || "[]");
+    if(!Array.isArray(arr)) return;
+    const before = JSON.stringify(MINE_PICK);
+    MINE_PICK = arr; try{ localStorage.setItem(mineKey("mine"), JSON.stringify(arr)); }catch(e){}
+    if(before !== JSON.stringify(arr) && path[0] === MINE && path.length === 1) goTo(()=>{});
+  }catch(e){}
+}
+let mineSaveT = 0;
+function mineSave(){
+  try{ localStorage.setItem(mineKey("mine"), JSON.stringify(MINE_PICK)); }catch(e){}
+  if(!me || !me.id || !me.pin || !GAS_URL || flowDbg()) return;
+  clearTimeout(mineSaveT);
+  mineSaveT = setTimeout(()=>{
+    const body = new URLSearchParams({ action:"save", app:MINE_APP, id:me.id, pin:me.pin, data:JSON.stringify({ pick: JSON.stringify(MINE_PICK) }) });
+    fetch(GAS_URL, { method:"POST", body }).catch(()=>{});
+  }, 700);
+}
+/* えらぶ画面 */
+function openMineEdit(){
+  if(!customOn()) return;
+  const ix = mineIndex(), box = $("#mineList");
+  const kidsOf = (i)=>{ const out = []; for(let j = i + 1; j < ix.list.length && ix.list[j].depth > ix.list[i].depth; j++) out.push(j); return out; };
+  let h = "", stack = [];
+  ix.list.forEach((x, i)=>{
+    while(stack.length && stack[stack.length - 1] >= x.depth){ h += "</div>"; stack.pop(); }
+    const has = i + 1 < ix.list.length && ix.list[i + 1].depth > x.depth;
+    const on = MINE_PICK.indexOf(x.id) >= 0;
+    h += `<div class="mrow" style="padding-left:${x.depth * 18 + 2}px">`
+      + `<button type="button" class="mx${has ? "" : " no"}" data-i="${i}" aria-label="中の丸を見る">＋</button>`
+      + `<span class="mi">${x.it.ic || ""}</span><span class="mn">${esc(String(x.it.nm).replace(/\n/g, ""))}</span>`
+      + `<button type="button" class="mt${on ? " on" : ""}" data-id="${esc(x.id)}">${on ? "オン" : "オフ"}</button></div>`;
+    if(has){ h += `<div class="mkids" data-k="${i}" hidden>`; stack.push(x.depth); }
+  });
+  while(stack.length){ h += "</div>"; stack.pop(); }
+  box.innerHTML = h;
+  const count = ()=>{ $("#mineCount").textContent = "いま " + minePickItems().length + " こ えらんでいます"; };
+  box.querySelectorAll(".mx").forEach(b=>b.onclick = ()=>{
+    const k = box.querySelector(`.mkids[data-k="${b.dataset.i}"]`); if(!k) return;
+    k.hidden = !k.hidden; b.textContent = k.hidden ? "＋" : "－";
+  });
+  box.querySelectorAll(".mt").forEach(b=>b.onclick = ()=>{
+    const id = b.dataset.id, at = MINE_PICK.indexOf(id);
+    if(at >= 0) MINE_PICK.splice(at, 1); else MINE_PICK.push(id);
+    b.classList.toggle("on", at < 0); b.textContent = at < 0 ? "オン" : "オフ";
+    mineSave(); count();
+  });
+  count();
+  $("#mineSheet").hidden = false;
+}
+function closeMineEdit(){
+  $("#mineSheet").hidden = true;
+  if(path[0] === MINE && path.length === 1) goTo(()=>{});   /* えらんだ丸で並べなおします */
+  else if(customOn()) goTo(()=>{ path.length = 0; path.push(MINE); });
+}
+$("#mineClose").onclick = closeMineEdit;
+$("#mineDone").onclick = closeMineEdit;
+function esc(t){ return String(t).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+/* 丸の並べ方：あなた専用ページで多いとき（8こより多い）は、スマホのホーム画面のように縦横に */
+function layoutFor(n){
+  const last = path[path.length - 1];
+  if(last && last.mine && n - 1 > 8) return homesGrid(n);
+  return homes(n, path.length === 0 ? true : n > 1, path.length === 0 && !!me);
+}
+function homesGrid(n){
+  { const ft = document.querySelector(".foot"); if(ft) ft.classList.remove("inStage"); }
+  W = Math.min(stage.clientWidth || 360, 440);
+  const cols = W >= 400 ? 4 : 3, cw = W / cols, rowH = 122, top = 62;
+  const pts = [[W/2, top]];   /* いちばん上のまん中に「もどる」 */
+  for(let i = 1; i < n; i++){
+    const r = Math.floor((i - 1) / cols), c = (i - 1) % cols;
+    pts.push([cw * (c + .5), top + rowH * (r + 1)]);
+  }
+  H = top + rowH * (Math.ceil((n - 1) / cols)) + 90;
+  stage.style.height = H + "px";
+  return pts;
+}
+/* 解放のお知らせ（1回だけ）と、メニュー用の印 */
+let mineLoaded = false, mineWant = "";
+function customTick(){
+  if(!me) return;
+  const on = customOn();
+  try{ localStorage.setItem(mineKey("custom_on"), on ? "1" : "0"); }catch(e){}
+  if(!on) return;
+  if(!mineLoaded){ mineLoaded = true; mineLoad(); }
+  if(mineWant){   /* メニューから来たのに、まだ記録を読んでいなかったとき */
+    const w = mineWant; mineWant = "";
+    try{ localStorage.setItem(mineKey("custom_seen"), "1"); }catch(e){}
+    goTo(()=>{ path.length = 0; path.push(MINE); });
+    if(w === "edit") setTimeout(openMineEdit, 600);
+    return;
+  }
+  let seen = false; try{ seen = localStorage.getItem(mineKey("custom_seen")) === "1"; }catch(e){}
+  if(seen || !$("#taskSheet").hidden || !$("#mineSheet").hidden || flowDbg()) return;
+  try{ localStorage.setItem(mineKey("custom_seen"), "1"); }catch(e){}
+  openInfoSheet("🎉 カスタマイズ機能が解放されました", "",
+    '<p>このサイトを、あなたがより見やすいようにカスタマイズできます。<br>よく使う丸だけを集めた「<b>⭐ あなた専用ページ</b>」を作れます。</p>'
+    + '<p>くわしくは、メニューの「⭐ あなた専用ページ」から選んでください。</p>'
+    + '<a class="fbtn" href="#mine" id="mineGo" style="background:#F2B33D;">⭐ あなた専用ページを開く</a>'
+    + '<button type="button" class="fclose" onclick="closeTask()">とじる</button>');
+  const g = $("#mineGo"); if(g) g.onclick = (e)=>{ e.preventDefault(); $("#taskSheet").hidden = true; goTo(()=>{ path.length = 0; path.push(MINE); }); };
+}
+/* アカウントのすぐ下の小さな丸「あなた専用」 */
+let mineF = null;
+function placeMine(t){
+  const acc = path.length === 0 && me && customOn() ? nodes.find(n=>n.it === TREE[0]) : null;
+  if(!acc){ if(mineF) mineF.el.style.display = "none"; return; }
+  if(!mineF){
+    mineF = makeFloater("tut minef", 2.2, { ic:"⭐", nm:"あなた専用", href:"#mine", aria:"あなた専用ページを開く",
+      onTap: ()=>goTo(()=>{ path.length = 0; path.push(MINE); }) });
+    stage.appendChild(mineF.el);
+  }
+  mineF.el.style.display = "";
+  mineF.hx = acc.hx; mineF.hy = acc.hy + 60;
+  stepFloater(mineF, t, acc.s, acc.o, 48, 16, .6);
+}
+
 /* ---------- 最初に並べます ---------- */
 window.addEventListener("resize", ()=>{
-  const hs = homes(nodes.length, path.length === 0 ? true : nodes.length > 1, path.length === 0 && !!me);
+  const hs = layoutFor(nodes.length);
   nodes.forEach((n,i)=>{ n.hx = hs[i][0]; n.hy = hs[i][1]; });
 });
 /* 上の「〇〇さん、おかえりなさい」があとから2行になったときも、丸の並びを画面の高さに合わせなおします */
@@ -2474,9 +2689,11 @@ if(window.ResizeObserver){
     window.dispatchEvent(new Event("resize"));
   }).observe(topBox);
 }
+if(me) mineLoadLocal();   /* v1.2.146：あなた専用ページの丸（この端末の控え） */
 restoreReturn();
 build(null, null);
-setTimeout(syncFlow, 400);   /* 仮組み：スプレッドシートの記録を読みます */
+setTimeout(syncFlow, 400);
+setTimeout(customTick, 1500);   /* v1.2.146：カスタマイズ機能の解放のお知らせ・スプレッドシートから読みなおし */   /* 仮組み：スプレッドシートの記録を読みます */
 nodes.forEach(n=>{ n.s = .3; n.o = 0; });
 requestAnimationFrame(frame);
 

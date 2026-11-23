@@ -18,6 +18,10 @@
 
     { sec: "アカウント" },
     { ic:"👤", nm:"会員情報の確認・編集", url: up+"ikusei/account.html", need:"" },
+    /* v1.2.146：3つ（はじめの一歩・LINKを知ろう・LINKを使おう）が終わった方に開く、あなた専用ページ */
+    { ic:"⭐", nm:"あなた専用ページ",
+      sub:"よく使う丸だけを並べた、あなたのページ",
+      url: up+"index.html#mine", need:"custom" },
 
     { sec: "新規メンバーサポート" },
     { ic:"💌", nm:"新規の方への最初のメッセージ",
@@ -71,6 +75,9 @@
   function allowed(need, m) {
     if (!need) return true;
     if (!m) return false;
+    if (need === "custom") {   /* v1.2.146：トップページで解放されたかどうかを、この端末に控えています */
+      try { return localStorage.getItem("sky_custom_on_" + m.id) === "1"; } catch (e) { return false; }
+    }
     /* 🌈 になった方で、まだサポーターでない方だけ */
     if (need === "grow3") {
       var g = window.skyGrowth ? window.skyGrowth.mine() : null;
