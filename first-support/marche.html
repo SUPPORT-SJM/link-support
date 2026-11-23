@@ -136,6 +136,8 @@ let popOpen = false;
 /* ---------- ポップアップ（オンライン・比較表） ---------- */
 function closePops(){ document.querySelectorAll(".sheet").forEach(s=>s.hidden = true); popOpen = false; }
 document.querySelectorAll(".bub[data-pop]").forEach(b=>b.addEventListener("click", ()=>{ $("#" + b.dataset.pop).hidden = false; popOpen = true; }));
+/* v1.2.148：あなた専用ページから、ポップアップを直接開けるように（例：#popGodo） */
+(function(){ const h = location.hash.slice(1), el = h && document.getElementById(h); if(el && el.classList.contains("sheet")){ el.hidden = false; popOpen = true; } })();
 document.querySelectorAll(".sheet").forEach(s=>{
   s.addEventListener("click", e=>{ if(e.target === s) closePops(); });
   s.querySelector(".closeb").addEventListener("click", closePops);

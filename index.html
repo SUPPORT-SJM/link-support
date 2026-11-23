@@ -216,7 +216,8 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body)
 .tut.minef{width:110px;}
 /* v1.2.147：ほかの小さな丸より3割大きく */
 .tut.minef .tb{width:42px;height:42px;font-size:20px;border-color:#F2B33D;background:#FFF8E1;}
-.tut.minef .tt{color:#B26A00;font-size:13px;}
+.tut.minef .tt{color:#B26A00;font-size:13px;text-align:center;line-height:1.25;padding:1px 6px;}
+.tut.minef .tt2{display:block;font-size:10px;color:#8A6A2A;}   /* v1.2.148：「あなた専用」の下に「カスタマイズ」 */
 #mineSheet .mhint{font-size:13px;line-height:1.7;color:#5B5670;margin:2px 0 10px;}
 #mineSheet .mlist{max-height:58vh;overflow:auto;border:1.5px solid #ECE8F6;border-radius:12px;padding:4px 6px;}
 #mineSheet .mrow{display:flex;align-items:center;gap:6px;padding:7px 2px;border-bottom:1px solid #F2EFF9;}
@@ -441,10 +442,10 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body)
   <div class="card note" role="dialog" aria-labelledby="mineTitle">
     <button type="button" class="close" id="mineClose" aria-label="とじる">×</button>
     <h3 id="mineTitle">⭐ あなた専用ページに置く丸</h3>
-    <p class="mhint">よく使う丸を「オン」にすると、あなた専用ページに並びます。<br>＋を押すと、その中の丸も見られます。</p>
+    <p class="mhint">よく使う丸を「オン」にすると、あなた専用ページに並びます。<br>「＋」を押すと、中に入っている丸も表示されます。</p>
     <div class="mlist" id="mineList"></div>
     <p class="mcount" id="mineCount"></p>
-    <button type="button" id="mineDone" style="display:block;width:100%;padding:12px;border-radius:12px;border:none;background:#6E5FB5;color:#fff;font-family:inherit;font-weight:900;font-size:15px;margin-top:10px;cursor:pointer;">できあがり</button>
+    <button type="button" id="mineDone" style="display:block;width:100%;padding:12px;border-radius:12px;border:none;background:#6E5FB5;color:#fff;font-family:inherit;font-weight:900;font-size:15px;margin-top:10px;cursor:pointer;">設定する</button>
   </div>
 </div>
 <div class="sheet" id="taskSheet" style="z-index:8100;" hidden>
@@ -627,7 +628,21 @@ const TREE = [
      押すと、スカイアークチームのページへ（v1.216 で「チーム作り」からかわりました） */
   /* v1.2.052：「LINK活用法」（もとの「チーム情報」→「もっとLINKを活用しよう」）。はじめから出ています。
      中に「各種スケジュール情報」「SASAEAIにプロフィール掲載」「LINK-BASEに事業を掲載」なども入っています */
-  {ic:"🌈", nm:"LINK活用法", g:"team", url:B+"first-support/skyarc.html"},
+  {ic:"🌈", nm:"LINK活用法", g:"team", url:B+"first-support/skyarc.html", pickKids:[
+    /* v1.2.148：あなた専用ページに置けるように、「LINK活用法」のページの中の丸も、ここに書いておきます（ホームの丸には出ません） */
+    {ic:"🌱", nm:"やりたいことを\n見つける", g:"team", url:B+"first-support/yaritai.html"},
+    {ic:"🌈", nm:"Skyarc\n専用サイト", g:"team", url:B+"first-support/skyarc.html#popSkyarc"},
+    {ic:"🛍️", nm:"マルシェ情報", g:"team", url:B+"first-support/marche.html", pickKids:[
+      {ic:"🗾", nm:"リアルの\nマルシェ", g:"team", url:B+"first-support/marche-real.html"},
+      {ic:"💻", nm:"オンラインの\nマルシェ", g:"team", url:B+"first-support/marche.html#popOnline"},
+      {ic:"📊", nm:"各地域の条件など\n比較表", g:"team", wide:true, url:B+"first-support/marche.html#popCompare"}
+    ]},
+    {ic:"🚀", nm:"紹介・ビジネス\n活動サポート", g:"team", url:B+"first-support/skyarc-recruit.html"},
+    "SCHED",
+    {ic:"🎤", nm:"Skyarc LINK\n合同説明会情報", g:"team", wide:true, url:B+"first-support/skyarc.html#popGodo"},
+    {ic:"🤝", nm:"SASAEAIに\nプロフィール掲載", g:"team", url:B+"first-support/sasaeai.html"},
+    {ic:"🏰", nm:"LINK-BASEに\n事業を掲載", g:"team", url:B+"first-support/linkbase.html"}
+  ]},
   /* 各種スケジュール情報：v1.2.051 からホームの丸には出さず、「LINK活用法」のページから（#sched）開きます */
   {ic:"📋", nm:"各種スケジュール情報", g:"apply", wide:true, need:"hashOnly", kids:[
     {ic:"🗓", nm:"公式公認\nイベント", g:"apply", info:{
@@ -1066,7 +1081,7 @@ function reflow(){
 /* ---------- アイコンを並べる ---------- */
 function build(fromX, fromY){
   const last = path[path.length-1];
-  let items = last ? (last.kids || []).filter(ok) : TREE.filter(ok);
+  let items = last ? (last.kids || []).filter(last.mine ? mineOk : ok) : TREE.filter(ok);
   if(!last && !me) items = [Object.assign({}, JOIN, { nm: isReturning() ? "ログイン" : "登録" })];  /* まだの方は、まん中のひとつだけ */
   if(last && last.mine && !items.length) items = [MINE_SETUP, BACK];   /* v1.2.146：まだ何もえらんでいないときは、まん中に「設定する」 */
   else if(last) items = [BACK].concat(items);                 /* 中の段は、まん中が「もどる」 */
@@ -1524,7 +1539,7 @@ addEventListener("hashchange", ()=>{
   if(flowHashPage()) openFlowHash(true);
   if(location.hash === "#mine"){   /* v1.2.146：このページでメニューから開いたとき */
     try{ history.replaceState(null, "", location.pathname + location.search); }catch(e){}
-    if(customOn()) goTo(()=>{ path.length = 0; path.push(MINE); });
+    if(customOn()){ goTo(()=>{ path.length = 0; path.push(MINE); }); if(!minePickItems().length) setTimeout(mineIntro, 450); }
   }
 });
 function restoreReturn(){
@@ -1532,7 +1547,7 @@ function restoreReturn(){
   if(location.hash === "#mine" || location.hash === "#mineEdit"){   /* v1.2.146：メニューから「あなた専用ページ」 */
     const ed = location.hash === "#mineEdit";
     try{ history.replaceState(null, "", location.pathname + location.search); sessionStorage.removeItem(RET_KEY); }catch(e){}
-    if(customOn()){ path.length = 0; path.push(MINE); if(ed) setTimeout(openMineEdit, 600); }
+    if(customOn()){ path.length = 0; path.push(MINE); if(ed) setTimeout(openMineEdit, 600); else if(!MINE_PICK.length) setTimeout(()=>{ if(!minePickItems().length && path[0] === MINE) mineIntro(); }, 2500); }
     else if(me) mineWant = ed ? "edit" : "open";   /* はじめての端末では、記録を読んでから開きます */
     return;
   }
@@ -1592,10 +1607,14 @@ function frame(t){
     orb.style.opacity = earth.o;
   }else orb.style.opacity = 0;
   if(moon && earth && earth.hx != null){
-    const a0 = reduce ? Math.PI/2 : Math.PI/2 + t/1000 * 2*Math.PI/ORBIT.sec;
+    /* v1.2.148：まわるのをやめ、点線の上に三角形に置いて、その場でふわふわさせます
+       ・上（頂点）… LINKの話を聞きたい・入りたいと言われたら
+       ・右下 … 便利な情報一覧（下の丸と重ならないよう、少し高め）
+       ・左下 … 新しい仲間へこのサイトを教える */
     moons.forEach((mn, i)=>{
       if(mn === drag) return;
-      const a = a0 + i*2*Math.PI/moons.length;   /* 2つなら、ちょうど反対側 */
+      const a = mn.it.flowInfo ? -Math.PI/2 : /benri/.test(mn.it.url || "") ? Math.PI/9 : /first-message/.test(mn.it.url || "") ? Math.PI*8/9
+              : -Math.PI/2 + i*2*Math.PI/moons.length;
       mn.hx = earth.hx + Math.cos(a)*ORBIT.rx;
       mn.hy = earth.hy + Math.sin(a)*ORBIT.ry;
     });
@@ -1670,6 +1689,7 @@ function frame(t){
   placeDbg(t);
   placeView(t);
   placeMine(t);
+  placeMineC(t);
   leaving = leaving.filter(n=>{
     if(t - n.dying > 420){ n.el.remove(); return false; }
     return true;
@@ -2216,7 +2236,7 @@ function saveMe(j, pin, fallbackId){
   };
   localStorage.setItem("skyarc_member", JSON.stringify(m));
   if(!localStorage.getItem("skyarc_member")) throw new Error("nosave");
-  me = m; loadFlow(); mineLoadLocal(); mineLoaded = false; setTimeout(syncFlow, 300);   /* 仮組み：その方の進み具合を読みなおします */
+  me = m; loadFlow(); mineLoadLocal(); mineLoaded = false; mineAuto = true; setTimeout(syncFlow, 300);   /* ログインした直後も、あなた専用ページを先に */   /* 仮組み：その方の進み具合を読みなおします */
   markReturning();
   pointProg = null; loadPoint();
   return m;
@@ -2515,10 +2535,7 @@ window.addEventListener("pageshow", ev=>{
    ・トップページの丸は、今までどおり全部出ます
 ================================================================ */
 const MINE = { ic:"⭐", nm:"あなた専用ページ", g:"common", mine:true,
-  get kids(){ return minePickItems(); },
-  get info(){ return minePickItems().length
-    ? { text:"あなたがえらんだ丸です。", btn:"⚙️ 丸をえらびなおす", url:"#mineEdit" }
-    : { text:"よく使う丸だけを集めた、あなた専用のページを作れます。まん中の「設定する」を押してください。" }; } };
+  get kids(){ return minePickItems(); } };   /* v1.2.148：上の説明のカードはなくし、「もどる」の上に「カスタマイズ」の丸を浮かべます */
 const MINE_SETUP = { ic:"⚙️", nm:"設定する", g:"apply", mineSetup:true };
 const MINE_APP = "custom";
 let MINE_PICK = [];
@@ -2529,20 +2546,36 @@ function customOn(){
 }
 function mineKey(k){ return "sky_" + k + "_" + (me && me.id ? me.id : ""); }
 /* 丸の見分け方：上の段からの名前のつながり（例：「クリエの部屋›クリエマップ」） */
+function mineOk(it){ return it.need === "hashOnly" || ok(it); }   /* 「各種スケジュール情報」は、ホームには出さない丸ですが、ここでは置けます */
 function mineIndex(){
   const map = {}, list = [];
+  const sched = TREE.find(x=>x.need === "hashOnly");
   const walk = (arr, pre, depth, parentOk)=>{
     (arr || []).forEach(it=>{
+      if(it === "SCHED") it = sched;   /* LINK活用法の中の「交流会などの各種スケジュール情報」 */
       if(!it || it.back || it.join || it.mine) return;
+      if(depth === 0 && it.need === "hashOnly") return;   /* いちばん上には出さず、LINK活用法の中に出します */
       const nm = String(it.nm || "").replace(/\n/g, "");
       const id = pre ? pre + "›" + nm : nm;
-      const see = parentOk && ok(it) && !it.ph && !it.wip;
+      const see = parentOk && mineOk(it) && !it.ph && !it.wip;
       if(!map[id]) map[id] = it;
       if(see) list.push({ id, it, depth });
-      if(it.kids && see) walk(it.kids, id, depth + 1, true);
+      const kids = (it.kids || []).concat(it.pickKids || []);
+      if(kids.length && see) walk(kids, id, depth + 1, true);
     });
   };
-  walk(TREE, "", 0, true);
+  /* v1.2.148：えらぶ画面の上の段の順番：アカウント → 3つの小さな丸 → はじめの一歩 → LINKを知ろう → LINKを使おう → LINK活用法 → そのほか（サポーターの部屋・クリエの部屋など） */
+  const rank = it=>{
+    if(it === TREE[0]) return 0;
+    if(it.moon) return 1;
+    if(it.flowPage) return 2 + FLOW_ORDER.indexOf(it.flowPage);
+    if(it.pickKids) return 6;
+    if(it.g === "sup") return 7;    /* サポーターの部屋 */
+    if(it.g === "crie") return 8;   /* クリエの部屋 */
+    return 9;
+  };
+  const top = TREE.map((it, i)=>({ it, i })).sort((a, b)=>(rank(a.it) - rank(b.it)) || (a.i - b.i)).map(x=>x.it);
+  walk(top, "", 0, true);
   return { map, list };
 }
 function minePickItems(){
@@ -2564,6 +2597,8 @@ async function mineLoad(){
     const before = JSON.stringify(MINE_PICK);
     MINE_PICK = arr; try{ localStorage.setItem(mineKey("mine"), JSON.stringify(arr)); }catch(e){}
     if(before !== JSON.stringify(arr) && path[0] === MINE && path.length === 1) goTo(()=>{});
+    if(mineAuto && path.length === 0 && arr.length && !drag) goTo(()=>{ path.push(MINE); });
+    mineAuto = false;
   }catch(e){}
 }
 let mineSaveT = 0;
@@ -2576,7 +2611,15 @@ function mineSave(){
     fetch(GAS_URL, { method:"POST", body }).catch(()=>{});
   }, 700);
 }
-/* えらぶ画面 */
+/* v1.2.148：あなた専用ページの説明（まだ何も選んでいないとき、星の丸から来たら出します） */
+function mineIntro(){
+  openInfoSheet("⭐ あなた専用ページ", "",
+    '<p>現在このサイトで使えるサービスやコンテンツの中から、よく使うものを優先して並べた、<b>あなた専用のページ</b>を作ることができます。</p>'
+    + '<a class="fbtn" href="#mineEdit" id="mineIntroGo" style="background:#F2B33D;">⚙️ 設定する</a>'
+    + '<button type="button" class="fclose" onclick="closeTask()">閉じる</button>');
+  const g = $("#mineIntroGo"); if(g) g.onclick = (e)=>{ e.preventDefault(); $("#taskSheet").hidden = true; openMineEdit(); };
+}
+/* 選ぶ画面 */
 function openMineEdit(){
   if(!customOn()) return;
   const ix = mineIndex(), box = $("#mineList");
@@ -2594,7 +2637,7 @@ function openMineEdit(){
   });
   while(stack.length){ h += "</div>"; stack.pop(); }
   box.innerHTML = h;
-  const count = ()=>{ $("#mineCount").textContent = "いま " + minePickItems().length + " こ えらんでいます"; };
+  const count = ()=>{ $("#mineCount").textContent = "現在 " + minePickItems().length + "個 選択しています"; };
   box.querySelectorAll(".mx").forEach(b=>b.onclick = ()=>{
     const k = box.querySelector(`.mkids[data-k="${b.dataset.i}"]`); if(!k) return;
     k.hidden = !k.hidden; b.textContent = k.hidden ? "＋" : "－";
@@ -2620,12 +2663,13 @@ function esc(t){ return String(t).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;
 function layoutFor(n){
   const last = path[path.length - 1];
   if(last && last.mine && n - 1 > 8) return homesGrid(n);
+  if(last && last.mine && minePickItems().length) return homesMineRing(n);
   return homes(n, path.length === 0 ? true : n > 1, path.length === 0 && !!me);
 }
 function homesGrid(n){
   { const ft = document.querySelector(".foot"); if(ft) ft.classList.remove("inStage"); }
   W = Math.min(stage.clientWidth || 360, 440);
-  const cols = W >= 400 ? 4 : 3, cw = W / cols, rowH = 122, top = 62;
+  const cols = W >= 400 ? 4 : 3, cw = W / cols, rowH = 122, top = 148;   /* v1.2.148：「もどる」の上に「カスタマイズ」の丸の場所をあけます */
   const pts = [[W/2, top]];   /* いちばん上のまん中に「もどる」 */
   for(let i = 1; i < n; i++){
     const r = Math.floor((i - 1) / cols), c = (i - 1) % cols;
@@ -2634,6 +2678,42 @@ function homesGrid(n){
   H = top + rowH * (Math.ceil((n - 1) / cols)) + 90;
   stage.style.height = H + "px";
   return pts;
+}
+/* あなた専用ページ（8こまで）：まん中に「もどる」、まわりに輪。「もどる」の真上に「カスタマイズ」を置くので、輪のいちばん上はあけます */
+function homesMineRing(n){
+  /* まん中のたての列（上に「カスタマイズ」、下に「もどる」）はあけて、えらんだ丸は左右の弧に並べます */
+  { const ft = document.querySelector(".foot"); if(ft) ft.classList.remove("inStage"); }
+  W = Math.min(stage.clientWidth || 360, 440);
+  const k = n - 1, cx = W/2;
+  const right = Math.ceil(k / 2), left = k - right;
+  const rx = Math.max(W*.36, 124);
+  const ry = Math.max(rx * .94, Math.max(right, 1) * 70);
+  const g = Math.PI * 25/180;   /* いちばん上・いちばん下から少しあけます */
+  H = 2*ry + 150; stage.style.height = H + "px";
+  const cy = H/2;
+  const pts = [[cx, cy + 36]];   /* もどる */
+  const arc = (cnt, side)=>{
+    for(let i = 0; i < cnt; i++){
+      const span = Math.min(Math.PI - 2*g, (cnt - 1) * Math.PI * 48/180);   /* 少ないときは、横のまん中あたりに寄せます */
+      const a = cnt === 1 ? 0 : -span/2 + i * span / (cnt - 1);
+      pts.push([cx + side * Math.cos(a) * rx, cy + Math.sin(a) * ry]);
+    }
+  };
+  arc(right, 1); arc(left, -1);
+  return pts;
+}
+/* 「もどる」の真上に浮かぶ「カスタマイズ」の丸（押すと、えらぶ画面） */
+let mineC = null;
+function placeMineC(t){
+  const back = path.length === 1 && path[0] === MINE && minePickItems().length ? nodes.find(n=>n.it.back) : null;
+  if(!back){ if(mineC) mineC.el.style.display = "none"; return; }
+  if(!mineC){
+    mineC = makeFloater("tut minef", 4.1, { ic:"⚙️", nm:"カスタマイズ", href:"#mineEdit", aria:"あなた専用ページの丸を選び直す", onTap: openMineEdit });
+    stage.appendChild(mineC.el);
+  }
+  mineC.el.style.display = "";
+  mineC.hx = back.hx; mineC.hy = back.hy - (minePickItems().length > 8 ? 86 : 96);
+  stepFloater(mineC, t, back.s, back.o, 55, 21, .6);
 }
 /* 解放のお知らせ（1回だけ）と、メニュー用の印 */
 let mineLoaded = false, mineWant = "";
@@ -2648,6 +2728,7 @@ function customTick(){
     try{ localStorage.setItem(mineKey("custom_seen"), "1"); }catch(e){}
     goTo(()=>{ path.length = 0; path.push(MINE); });
     if(w === "edit") setTimeout(openMineEdit, 600);
+    else setTimeout(()=>{ if(!minePickItems().length && path[0] === MINE) mineIntro(); }, 1500);
     return;
   }
   let seen = false; try{ seen = localStorage.getItem(mineKey("custom_seen")) === "1"; }catch(e){}
@@ -2655,10 +2736,10 @@ function customTick(){
   try{ localStorage.setItem(mineKey("custom_seen"), "1"); }catch(e){}
   openInfoSheet("🎉 カスタマイズ機能が解放されました", "",
     '<p>このサイトを、あなたがより見やすいようにカスタマイズできます。<br>よく使う丸だけを集めた「<b>⭐ あなた専用ページ</b>」を作れます。</p>'
-    + '<p>くわしくは、メニューの「⭐ あなた専用ページ」から選んでください。</p>'
+    + '<p>詳しくは、メニューの「⭐ あなた専用ページ」から選んでください。</p>'
     + '<a class="fbtn" href="#mine" id="mineGo" style="background:#F2B33D;">⭐ あなた専用ページを開く</a>'
     + '<button type="button" class="fclose" onclick="closeTask()">とじる</button>');
-  const g = $("#mineGo"); if(g) g.onclick = (e)=>{ e.preventDefault(); $("#taskSheet").hidden = true; goTo(()=>{ path.length = 0; path.push(MINE); }); };
+  const g = $("#mineGo"); if(g) g.onclick = (e)=>{ e.preventDefault(); $("#taskSheet").hidden = true; goTo(()=>{ path.length = 0; path.push(MINE); }); if(!minePickItems().length) setTimeout(mineIntro, 450); };
 }
 /* アカウントのすぐ下の小さな丸「あなた専用」 */
 let mineF = null;
@@ -2666,8 +2747,8 @@ function placeMine(t){
   const acc = path.length === 0 && me && customOn() ? nodes.find(n=>n.it === TREE[0]) : null;
   if(!acc){ if(mineF) mineF.el.style.display = "none"; return; }
   if(!mineF){
-    mineF = makeFloater("tut minef", 2.2, { ic:"⭐", nm:"あなた専用", href:"#mine", aria:"あなた専用ページを開く",
-      onTap: ()=>goTo(()=>{ path.length = 0; path.push(MINE); }) });
+    mineF = makeFloater("tut minef", 2.2, { ic:"⭐", nm:'あなた専用<span class="tt2">カスタマイズ</span>', href:"#mine", aria:"あなた専用ページを開く（カスタマイズ）",
+      onTap: ()=>{ goTo(()=>{ path.length = 0; path.push(MINE); }); if(!minePickItems().length) setTimeout(mineIntro, 450); } });
     stage.appendChild(mineF.el);
   }
   mineF.el.style.display = "";
@@ -2679,14 +2760,9 @@ function placeMine(t){
   const side = below.filter(n=>center.indexOf(n) < 0);
   const orbitBottom = acc.hy + ORBIT.ry;
   let y = side.length ? Math.max(...side.map(n=>n.hy)) + 8 : orbitBottom + 60;
-  if(center.length) y = Math.min(y, Math.min(...center.map(n=>n.hy)) - 92);
+  if(center.length) y = Math.min(y, Math.min(...center.map(n=>n.hy)) - 106);   /* 「カスタマイズ」の2行目のぶんも見ます */
   y = Math.max(y, acc.hy + 75);   /* アカウントの名前には重ねません（月とは、下の「よける」で重ならないようにします） */
-  /* 月（まわっている小さな丸）が近くを通るときは、横へよけます */
-  let dx = 0;
-  nodes.filter(n=>n.it.moon).forEach(mn=>{
-    const ax = mn.x - acc.hx, ay = (mn.y + 18) - y;
-    if(Math.abs(ay) < 78 && Math.abs(ax) < 105) dx = (ax >= 0 ? -1 : 1) * (105 - Math.abs(ax));
-  });
+  const dx = 0;   /* v1.2.148：月はまわらなくなったので、よけるのはやめました */
   /* よけても、左右の丸（例：サポーターの部屋）には重ならない範囲で */
   let lo = 60, hi = W - 60;
   nodes.forEach(n=>{
@@ -2716,7 +2792,11 @@ if(window.ResizeObserver){
   }).observe(topBox);
 }
 if(me) mineLoadLocal();   /* v1.2.146：あなた専用ページの丸（この端末の控え） */
+/* v1.2.148：あなた専用ページを作った方は、サイトを開いたとき（ほかのページの「ホーム」から来たときではなく）に、まずあなた専用ページを出します */
+let mineAuto = false;
+try{ mineAuto = !location.hash && !(document.referrer && new URL(document.referrer).origin === location.origin); }catch(e){ mineAuto = !location.hash; }
 restoreReturn();
+if(mineAuto && path.length === 0 && me && customOn() && MINE_PICK.length){ path.push(MINE); mineAuto = false; }
 build(null, null);
 setTimeout(syncFlow, 400);
 setTimeout(customTick, 1500);   /* v1.2.146：カスタマイズ機能の解放のお知らせ・スプレッドシートから読みなおし */   /* 仮組み：スプレッドシートの記録を読みます */
