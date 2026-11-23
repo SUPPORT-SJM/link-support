@@ -279,7 +279,7 @@ document.querySelectorAll(".sheet").forEach(s=>{
 });
 document.addEventListener("keydown", e=>{ if(e.key === "Escape") closePops(); });
 
-/* ---------- 太陽系（ぐるぐる） ----------
+/* ---------- 太陽系（v1.2.150：まわるのをやめ、その場でふわふわ） ----------
    ・まんなかの「便利な情報一覧」は、ふわふわ浮いています
    ・青い輪（LINKのサイト5つ）：輪はたてにまっすぐで動かず、丸だけが輪の上をまわります
    ・オレンジの輪（ポップアップの3つ）：輪そのものがゆっくり回転しながら、奥・手前にゆらゆら（Z軸のゆらぎ）
@@ -303,8 +303,9 @@ document.addEventListener("keydown", e=>{ if(e.key === "Escape") closePops(); })
     const half = (yBot - yTop) / 2;
     RI = { x: Math.min(W * 0.34, 170), y: 0 };
     RI.y = Math.min(half, RI.x * 1.45);
-    RO = { x: Math.min(W / 2 - 40, RI.x * 1.34), y0: 0 };
-    RO.y0 = RO.x * 0.39;
+    /* v1.2.150：オレンジの輪は、前より小さく（まんなかの「もどる」に重ならない大きさ）して、回さずに置きます */
+    RO = { x: Math.min(W / 2 - 40, RI.x * 1.34) * 0.56, y0: 0 };
+    RO.y0 = RO.x * 1.25;   /* たてに少し長い楕円（まんなかの「もどる」と、下の大きな丸の両方に重ならないように） */
     orbIn.style.cssText = `width:${RI.x*2}px;height:${RI.y*2}px;transform:translate(${cx-RI.x}px,${cy-RI.y}px)`;
     N.forEach(n=>{ n.lw = null; });
   }
@@ -345,23 +346,23 @@ document.addEventListener("keydown", e=>{ if(e.key === "Escape") closePops(); })
   let last = null, sec = 0;
   function frame(t){
     const dt = last == null ? 0 : Math.min(64, t - last); last = t;
-    if(!reduce && !popOpen) sec += dt / 1000;   /* ポップアップを開いている間は、まわるのを止めます */
-    /* オレンジの輪：回転（45秒でひとまわり）と、Z軸のゆらぎ（7秒で1回） */
-    const tilt = (38 - sec * 360 / 45) * Math.PI / 180;
-    const ry = RO.y0 * (0.55 + 0.45 * Math.sin(sec * 2 * Math.PI / 7));
+    /* v1.2.150：観覧車のようにまわるのはやめて、どの丸もその場でふわふわ浮くだけにしました（つまんで動かすのは今までどおり） */
+    const tilt = 0;
+    const ry = RO.y0;
     orbOut.style.cssText = `width:${RO.x*2}px;height:${ry*2}px;transform:translate(${cx-RO.x}px,${cy-ry}px) rotate(${tilt*180/Math.PI}deg)`;
     N.forEach(n=>{
       let hx, hy, depth = 0;
       if(n.kind === "sun"){ hx = cx; hy = cy; }
       else if(n.kind === "in"){
-        const a = sec * 2 * Math.PI / 30 + n.k * 2 * Math.PI / inN - Math.PI / 2;   /* 30秒でひとまわり（v1.2.086：丸の数で等分） */
+        const a = n.k * 2 * Math.PI / inN - Math.PI / 2;   /* いちばん上（頂点）が LINKポータル、そこから時計まわりに等分 */
         hx = cx + RI.x * Math.cos(a); hy = cy + RI.y * Math.sin(a);
       }else{
-        const a = -sec * 2 * Math.PI / 22 + n.k * 2 * Math.PI / 3;              /* 反対まわりに22秒でひとまわり */
+        /* 上（もどるの真上）… 会員情報・紹介コード／右下 … オープンチャットの名前づくり／左下 … LINKセミナー・イベントZoom */
+        const a = [-Math.PI / 2, Math.PI * 0.36, Math.PI * 0.64][n.k] ?? (n.k * 2 * Math.PI / 3);
         const x0 = RO.x * Math.cos(a), y0 = ry * Math.sin(a);
         hx = cx + x0 * Math.cos(tilt) - y0 * Math.sin(tilt);
         hy = cy + x0 * Math.sin(tilt) + y0 * Math.cos(tilt);
-        depth = Math.sin(a);                                                     /* 手前（+）ほど少し大きく、青い丸の前を通ります */
+        depth = 0;   /* 回らないので、大きさは一定です */
       }
       n.depth = depth;
       if(n.x == null){ n.x = hx; n.y = hy; }

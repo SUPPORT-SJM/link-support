@@ -9,7 +9,7 @@
 ================================================================ */
 
 /* ---------------- ① バージョン ---------------- */
-window.SKY_VERSION = "v1.2.149";
+window.SKY_VERSION = "v1.2.150";
 window.SKY_VERSION_DATE = "2026/11/21";
 
 /* ---------------- ② GASのURL ----------------
@@ -555,7 +555,7 @@ window.skyView = (function () {
     { k: "norm", nm: "いつもの字体" },
     { k: "ud",   nm: "UDゴシック", sub: "だれにでも読みやすい字体" }
   ];
-  /* v1.2.149：デザイン（テーマ）。クールビジネスは試作中で、いまはトップページだけが変わります */
+  /* v1.2.150：デザイン（テーマ）。クールビジネスは試作中で、いまはトップページだけが変わります */
   var THEMES = [
     { k: "magic", nm: "夢と魔法の\n虹色テーマ", sub: "いまのデザイン" },
     { k: "cool",  nm: "クール\nビジネステーマ", sub: "手帳のような落ち着いたデザイン（試作・トップページのみ）" }
@@ -751,7 +751,7 @@ window.skyView = (function () {
   /* ページを開いたときに、覚えている設定を反映します */
   (function boot() {
     var v = get();
-    document.documentElement.setAttribute("data-sky-theme", v.theme);   /* v1.2.149：デザインは、いちばん先に印をつけます */
+    document.documentElement.setAttribute("data-sky-theme", v.theme);   /* v1.2.150：デザインは、いちばん先に印をつけます */
     if (v.size === "m" && v.font === "norm") { watch(); return; }   /* ふつうのままなら、何もしません */
     setFont(v);
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { apply(v); });
