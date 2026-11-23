@@ -213,9 +213,10 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body)
 .tut.mem .tt{color:#2E7D62;white-space:pre;text-align:center;line-height:1.25;}
 .tut.mem{width:96px;}
 /* v1.2.146：あなた専用ページ（アカウントのすぐ下の小さな丸と、えらぶ画面） */
-.tut.minef{width:96px;}
-.tut.minef .tb{border-color:#F2B33D;background:#FFF8E1;}
-.tut.minef .tt{color:#B26A00;}
+.tut.minef{width:110px;}
+/* v1.2.147：ほかの小さな丸より3割大きく */
+.tut.minef .tb{width:42px;height:42px;font-size:20px;border-color:#F2B33D;background:#FFF8E1;}
+.tut.minef .tt{color:#B26A00;font-size:13px;}
 #mineSheet .mhint{font-size:13px;line-height:1.7;color:#5B5670;margin:2px 0 10px;}
 #mineSheet .mlist{max-height:58vh;overflow:auto;border:1.5px solid #ECE8F6;border-radius:12px;padding:4px 6px;}
 #mineSheet .mrow{display:flex;align-items:center;gap:6px;padding:7px 2px;border-bottom:1px solid #F2EFF9;}
@@ -1005,7 +1006,7 @@ function homesPair(n){
   const ry = Math.max(Math.min(ryWant, ryFit), RY_MIN);
   /* 輪がたてに縮んだぶん、月の通り道も少しだけ小さくします */
   ORBIT.ry = Math.round(ORBIT_RY0 * Math.max(Math.min(ry / ryWant, 1), .8));
-  const up0 = customOn() ? -22 : 0;   /* v1.2.146：あなた専用ページの丸を下に置くので、アカウントを少し上に */
+  const up0 = 0;   /* v1.2.147：アカウントは元の場所にもどしました（あなた専用の丸は、月の通り道の外へ） */
   const pts = [[0, up0]];
   for(let m=0; m<moonN; m++) pts.push([0, up0 + (m % 2 ? -ORBIT.ry : ORBIT.ry)]);
   for(let i=0;i<ring;i++){
@@ -2670,8 +2671,33 @@ function placeMine(t){
     stage.appendChild(mineF.el);
   }
   mineF.el.style.display = "";
-  mineF.hx = acc.hx; mineF.hy = acc.hy + 60;
-  stepFloater(mineF, t, acc.s, acc.o, 48, 16, .6);
+  /* v1.2.147：場所は、アカウントのまわりの月の通り道より外の、まっすぐ下。
+     左右の下の丸（例：サポーターの部屋・LINK活用法）より少し下で、まっすぐ下の丸（例：クリエの部屋）には重ならない高さ。
+     まわりの丸の数（メンバー・サポーター・クリエ・アドバンス）で、置き場所が変わります */
+  const below = nodes.filter(n=>n !== acc && !n.it.moon && n.hx != null && n.hy > acc.hy);
+  const center = below.filter(n=>Math.abs(n.hx - acc.hx) < 60);
+  const side = below.filter(n=>center.indexOf(n) < 0);
+  const orbitBottom = acc.hy + ORBIT.ry;
+  let y = side.length ? Math.max(...side.map(n=>n.hy)) + 8 : orbitBottom + 60;
+  if(center.length) y = Math.min(y, Math.min(...center.map(n=>n.hy)) - 92);
+  y = Math.max(y, acc.hy + 75);   /* アカウントの名前には重ねません（月とは、下の「よける」で重ならないようにします） */
+  /* 月（まわっている小さな丸）が近くを通るときは、横へよけます */
+  let dx = 0;
+  nodes.filter(n=>n.it.moon).forEach(mn=>{
+    const ax = mn.x - acc.hx, ay = (mn.y + 18) - y;
+    if(Math.abs(ay) < 78 && Math.abs(ax) < 105) dx = (ax >= 0 ? -1 : 1) * (105 - Math.abs(ax));
+  });
+  /* よけても、左右の丸（例：サポーターの部屋）には重ならない範囲で */
+  let lo = 60, hi = W - 60;
+  nodes.forEach(n=>{
+    if(n === acc || n.it.moon || n.hx == null || Math.abs(n.hy - y) > 75) return;
+    if(n.lw == null){ const nm = n.el.querySelector(".nm"); n.lw = nm ? nm.offsetWidth : 0; }
+    const half = Math.max(40, n.lw / 2);
+    if(n.hx < acc.hx) lo = Math.max(lo, n.hx + half + 62);
+    else hi = Math.min(hi, n.hx - half - 62);
+  });
+  mineF.hx = Math.min(Math.max(acc.hx + dx, Math.min(lo, acc.hx)), Math.max(hi, acc.hx)); mineF.hy = y;
+  stepFloater(mineF, t, acc.s, acc.o, 55, 21, .6);
 }
 
 /* ---------- 最初に並べます ---------- */
