@@ -2250,10 +2250,19 @@ function saveMe(j, pin, fallbackId){
   pointProg = null; loadPoint();
   return m;
 }
+/* v1.2.154：ほかのページ（例：カレンダー形式表示）から登録・ログインに来た方は、終わったらそのページへもどします */
+(function(){
+  try{
+    const b = new URLSearchParams(location.search).get("back") || "";
+    if(/^[\w\-\/]+\.html$/.test(b) && b.indexOf("..") < 0) sessionStorage.setItem("sky_back", b);
+  }catch(e){}
+})();
 function welcome(text){
   $("#jBody").hidden = true;
   $("#jDoneMsg").textContent = text;
   $("#jDone").hidden = false;
+  let back = ""; try{ back = sessionStorage.getItem("sky_back") || ""; sessionStorage.removeItem("sky_back"); }catch(e){}
+  if(back){ setTimeout(()=>{ location.href = B + back; }, 1300); return; }
   setTimeout(()=>{
     $("#sheet").hidden = true;
     setHello(text);
