@@ -9,7 +9,7 @@
 ================================================================ */
 
 /* ---------------- ① バージョン ---------------- */
-window.SKY_VERSION = "v1.2.152";
+window.SKY_VERSION = "v1.2.153";
 window.SKY_VERSION_DATE = "2026/11/21";
 
 /* ---------------- ② GASのURL ----------------
@@ -555,11 +555,27 @@ window.skyView = (function () {
     { k: "norm", nm: "いつもの字体" },
     { k: "ud",   nm: "UDゴシック", sub: "だれにでも読みやすい字体" }
   ];
-  /* v1.2.152：デザイン（テーマ）。クールビジネスは試作中で、いまはトップページだけが変わります */
+  /* v1.2.149：デザイン（テーマ）。クールビジネスは試作中で、いまはトップページだけが変わります */
+  /* v1.2.153：デザインを足すときは、ここに1行（css に themes/〇〇.css のファイル名）と、そのファイルを足すだけです */
   var THEMES = [
     { k: "magic", nm: "夢と魔法の\n虹色テーマ", sub: "いまのデザイン" },
-    { k: "cool",  nm: "クール\nビジネステーマ", sub: "手帳のような落ち着いたデザイン（試作・トップページのみ）" }
+    { k: "cool",  nm: "クール\nビジネステーマ", sub: "手帳のような落ち着いたデザイン（試作中）", css: "cool.css" }
   ];
+  /* このファイル（config.js）のある場所から、themes フォルダの場所を決めます（ikusei・first-support の中のページからでも同じ） */
+  var BASE = (function () {
+    try { var s = document.currentScript && document.currentScript.src; if (s) return s.replace(/config\.js(\?.*)?$/, ""); } catch (e) {}
+    return "";
+  })();
+  function setTheme(v) {
+    document.documentElement.setAttribute("data-sky-theme", v.theme);
+    var t = THEMES.filter(function (x) { return x.k === v.theme; })[0];
+    var ln = document.getElementById("skyThemeCss");
+    if (t && t.css) {
+      var href = BASE + "themes/" + t.css + "?v=" + (window.SKY_VERSION || "");
+      if (!ln) { ln = document.createElement("link"); ln.id = "skyThemeCss"; ln.rel = "stylesheet"; (document.head || document.documentElement).appendChild(ln); }
+      if (ln.getAttribute("href") !== href) ln.setAttribute("href", href);
+    } else if (ln) ln.remove();
+  }
   function get() {
     var v = null;
     try { v = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) {}
@@ -656,7 +672,7 @@ window.skyView = (function () {
     F = factor(v);
     document.documentElement.setAttribute("data-sky-size", v.size);
     document.documentElement.setAttribute("data-sky-font", v.font);
-    document.documentElement.setAttribute("data-sky-theme", v.theme);
+    setTheme(v);
     if (F !== 1 || anyScaled) { anyScaled = true; scaleAll(); watch(); }
     setFont(v);
     try { window.dispatchEvent(new CustomEvent("skyview", { detail: v })); } catch (e) {}
@@ -751,7 +767,7 @@ window.skyView = (function () {
   /* ページを開いたときに、覚えている設定を反映します */
   (function boot() {
     var v = get();
-    document.documentElement.setAttribute("data-sky-theme", v.theme);   /* v1.2.152：デザインは、いちばん先に印をつけます */
+    setTheme(v);   /* v1.2.149：デザインは、いちばん先に印をつけます（v1.2.153：themes のファイルも読みこみます） */
     if (v.size === "m" && v.font === "norm") { watch(); return; }   /* ふつうのままなら、何もしません */
     setFont(v);
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { apply(v); });
