@@ -359,6 +359,9 @@
     <div id="fCatWrap">
       <label for="fCat">チームの予定の種類</label>
       <select id="fCat"></select>
+      <!-- v1.2.163：チームの予定を見られる方（クリエ以上向けかどうか） -->
+      <label for="fAud">見られる方</label>
+      <select id="fAud"><option value="">全員</option><option value="crie">クリエ以上</option></select>
     </div>
     <label for="fText" id="fTextLabel">内容</label>
     <input type="text" id="fText" maxlength="200">
@@ -885,6 +888,7 @@ function openForm(cid){
   $("#fText").value = it ? it.title : "";
   $("#fMemo").value = it ? it.memo : "";
   $("#fCat").value = it && it.cat ? it.cat : "support";
+  $("#fAud").value = it && it.aud === "crie" ? "crie" : "";   /* v1.2.163 */
   $("#fPlace").value = it ? (it.place || "") : "online";
   $("#fBef").checked = it ? (it.bef !== undefined ? !!it.bef : !!it.ba) : false;
   $("#fAft").checked = it ? (it.aft !== undefined ? !!it.aft : !!it.ba) : false;
@@ -953,6 +957,7 @@ async function saveForm(){
   const p = { action:"calSave", kind:fKind, date:date.replace(/-/g, "/"), endDate:endDate.replace(/-/g, "/"),
               start:$("#fStart").value, end:$("#fEnd").value,
               title:$("#fText").value.trim(), memo:$("#fMemo").value, cat:fKind === "team" ? $("#fCat").value : "",
+              aud: fKind === "team" ? $("#fAud").value : "",   /* v1.2.163：クリエ以上向けかどうか */
               place:$("#fPlace").value, bef:$("#fBef").checked ? "1" : "0", aft:$("#fAft").checked ? "1" : "0", okFlag: fKind === "official" ? $("#fOk").value : "" };
   if(editing) p.cid = editing.cid;
   $("#fGo").disabled = true; $("#fMsg").textContent = "保存しています…";
