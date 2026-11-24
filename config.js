@@ -9,7 +9,7 @@
 ================================================================ */
 
 /* ---------------- ① バージョン ---------------- */
-window.SKY_VERSION = "v1.2.159";
+window.SKY_VERSION = "v1.2.160";
 window.SKY_VERSION_DATE = "2026/11/24";
 
 /* ---------------- ② GASのURL ----------------
@@ -782,4 +782,50 @@ window.skyView = (function () {
   })();
 
   return { get: get, open: open, label: label, apply: apply };
+})();
+
+/* ---------------- ⑪ 退会した方へのお知らせ（v1.2.160） ----------------
+   ・GASから error:"taikai" が返ってきたら、ログインを消して、お知らせを出します
+   ・どのページでも同じように出るよう、ここ（config.js）でまとめて見ます
+------------------------------------------------------------------ */
+(function () {
+  if (!window.fetch || window.__skyTaikaiHook) return;
+  window.__skyTaikaiHook = true;
+  var orig = window.fetch;
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]; }); }
+  function show(name) {
+    try { localStorage.removeItem("skyarc_member"); } catch (e) {}
+    if (document.getElementById("skyTaikai")) return;
+    var put = function () {
+      if (document.getElementById("skyTaikai")) return;
+      var who = name ? esc(name) + " さん" : "この会員番号の方";
+      var top = (function () { try { var s = document.querySelector('script[src*="config.js"]'); if (s) return s.src.replace(/config\.js(\?.*)?$/, "") + "index.html"; } catch (e) {} return "/link-support/"; })();
+      var d = document.createElement("div");
+      d.id = "skyTaikai";
+      d.setAttribute("style", "position:fixed;inset:0;z-index:2147483000;background:rgba(30,26,46,.72);display:flex;align-items:center;justify-content:center;padding:16px;font-family:'Hiragino Sans','Noto Sans JP','Yu Gothic',Meiryo,sans-serif;");
+      d.innerHTML =
+        '<div style="background:#fff;border-radius:16px;max-width:400px;width:100%;padding:22px 20px 18px;box-shadow:0 10px 40px rgba(0,0,0,.3);color:#3E3A50;line-height:1.75;font-size:14.5px;">' +
+          '<div style="font-weight:700;font-size:16.5px;margin-bottom:10px;">ご利用いただけません</div>' +
+          '<p style="margin:0 0 10px;">' + who + 'は、退会の手続きがされているため、この会員番号ではログインできません。</p>' +
+          '<p style="margin:0 0 10px;">このアカウントは退会の処理がされているため、このサイトもご利用いただけません。</p>' +
+          '<p style="margin:0 0 16px;">再開をご希望の場合は、紹介を受けた方などにご連絡のうえ、適切な再開の方法をご相談ください。</p>' +
+          '<a href="' + top + '" style="display:block;text-align:center;background:#6B5BB8;color:#fff;text-decoration:none;border-radius:999px;padding:11px 0;font-weight:700;">閉じる</a>' +
+        '</div>';
+      document.body.appendChild(d);
+    };
+    if (document.body) put(); else document.addEventListener("DOMContentLoaded", put);
+  }
+  window.skyTaikaiShow = show;
+  window.fetch = function (input, init) {
+    var p = orig.apply(this, arguments);
+    var url = "";
+    try { url = typeof input === "string" ? input : (input && input.url) || ""; } catch (e) {}
+    if (url.indexOf("script.google") < 0) return p;
+    return p.then(function (res) {
+      try {
+        res.clone().json().then(function (j) { if (j && j.error === "taikai") show(j.name || ""); }).catch(function () {});
+      } catch (e) {}
+      return res;
+    });
+  };
 })();
