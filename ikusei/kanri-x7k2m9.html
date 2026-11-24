@@ -223,6 +223,10 @@
     border:1.5px solid #E1DCF2;border-radius:999px;padding:2px 9px 2px 6px;background:#fff;}
   .hidchk input{width:14px;height:14px;margin:0;}
   .hidchk.pend{outline:2.5px dashed #E5A823;outline-offset:1px;}
+  /* v1.2.158：退会（みなさんの画面で共通。チェックが入ると自動で非表示になります） */
+  .hidchk.taikai{margin-left:4px;}
+  .hidchk.taikai.on{border-color:#C98A8A;color:#A04848;background:#FFF4F4;}
+  .tag.taikai{background:#F3DADA;color:#A04848;}
   #tbody tr.row-hid > td{opacity:.45;}
   #tbody tr.row-hid > td:first-child{opacity:1;}
   #btnSaveTop{background:#F5C452 !important;color:#3B2A00 !important;}
@@ -1922,6 +1926,7 @@ async function load(isLogin){
     }
     data = j;
     hiddenOrig = {}; (j.hidden || []).forEach(k=>{ hiddenOrig[hk(k)] = true; });
+    setTaikaiOrig(j.taikai);   /* v1.2.158：退会 */
 
     const bs = document.getElementById("btnStats");
     if(bs) bs.style.display = j.isAdmin ? "inline-block" : "none";
@@ -2086,6 +2091,8 @@ function render(){
     if(kf && (m.keiretsu || "") !== kf) return false;     /* えらんだ系列だけ */
     /* 非表示にしてある方は出しません（表示フィルター：OFF のとき・保存前に変えた方は出します） */
     if(!showHidden && hiddenOrig[hk(m.id)] && !(hk(m.id) in pendingHide)) return false;
+    /* v1.2.158：退会した方も、自動で出しません（表示フィルター：OFF のとき・保存前に変えた方は出します） */
+    if(!showHidden && taikaiOrig[hk(m.id)] && !(hk(m.id) in pendingTaikai)) return false;
     if($("#fIdle") && $("#fIdle").checked && !idle30(m)) return false;
     if(relF === "intro" && !relOf(m).intro) return false;
     if(relF === "helper" && !relOf(m).helper) return false;
@@ -2191,6 +2198,7 @@ function rowsHtml(list){
       : "";
 
     const hidOn = effHidden(m), hidPend = hidOn !== !!hiddenOrig[hk(m.id)];
+    const taiOn = effTaikai(m), taiPend = taiOn !== !!taikaiOrig[hk(m.id)];
     const growMark = m.grow && window.skyGrowth ? `<span title="${window.skyGrowth.label(window.skyGrowth.stage(m.grow))}" style="text-decoration:none;display:inline-block;margin-right:3px;">${window.skyGrowth.mark(window.skyGrowth.stage(m.grow))}</span>` : "";
     const editRow = (() => {
       /* 要確認・確認待ちのマークは、名前ではなく「編集」の左に置きます
@@ -2209,12 +2217,13 @@ function rowsHtml(list){
     const ssPeople = window.SS ? SS.peopleHtml(m.id) : "";
     const rel = relOf(m);
     const rank = roleLabel(m);
-    return `<div class="mc ${rel.intro ? "is-intro" : (rel.helper ? "is-helper" : "")} ${m.needCheck ? "row-check" : (m.autoFill ? "row-auto" : "")} ${hidOn ? "row-hid" : ""}">
+    return `<div class="mc ${rel.intro ? "is-intro" : (rel.helper ? "is-helper" : "")} ${m.needCheck ? "row-check" : (m.autoFill ? "row-auto" : "")} ${(hidOn || taiOn) ? "row-hid" : ""}">
       <div class="mc-top">
         <a href="#" class="nm nm-link" onclick="openDetail('${m.id}');return false;">${growMark}${m.name || "(名前未登録)"}</a><button type="button" class="pen-btn" onclick="openDetail('${m.id}')" title="進捗の編集" aria-label="進捗の編集">✏️</button>${m.realName && m.realName !== m.name ? `<span class="rn">(${m.realName})</span>` : ""}
         <span class="id">${m.id}</span>
         <span class="tags">
           <span class="tag rank">${rank}</span>
+          ${taiOn ? '<span class="tag taikai">退会</span>' : ""}
           ${rel.intro ? '<span class="tag intro">紹介</span>' : ""}
           ${rel.helper ? '<span class="tag helper">🤝 サポート</span>' : ""}
         </span>
@@ -2228,7 +2237,7 @@ function rowsHtml(list){
         ${canYari(m) ? `<button type="button" class="yari-btn" onclick="openYaritai('${m.id}')">🌱 やりたいこと</button>` : ""}
         ${canYari(m) ? `<button type="button" class="pro-btn" onclick="openPro('${m.id}')" title="スキルアッププロの許可">🚀 プロ</button>` : ""}
         <button type="button" class="dept-chip ${m.dept ? "has" : ""}" onclick="openDeptPick('${m.id}')" title="部門">🏷 ${m.dept ? String(m.dept).split(",").join("・") : "部門：未所属"}</button>
-        <label class="hidchk ${hidPend ? "pend" : ""}" title="あなたの画面だけで非表示にします"><input type="checkbox" ${hidOn ? "checked" : ""} onchange="toggleHide('${m.id}', this.checked)">非表示</label>
+        <label class="hidchk ${hidPend ? "pend" : ""}" title="あなたの画面だけで非表示にします"><input type="checkbox" ${hidOn ? "checked" : ""} onchange="toggleHide('${m.id}', this.checked)">非表示</label><label class="hidchk taikai ${taiOn ? "on" : ""} ${taiPend ? "pend" : ""}" title="退会した方にチェックします（みなさんの画面で共通です。チェックが入ると自動で非表示になります）"><input type="checkbox" ${taiOn ? "checked" : ""} onchange="toggleTaikai('${m.id}', this.checked)">退会</label>
         ${editRow}
       </div>
     </div>`;
@@ -2333,6 +2342,7 @@ function effFlag(m, flag){
 function pendCount(){
   return Object.keys(pendingRoles).reduce((n, id)=>n + Object.keys(pendingRoles[id]).length, 0)
        + Object.keys(pendingHide).length
+       + Object.keys(pendingTaikai).length   /* v1.2.158：退会 */
        + (window.SS ? SS.pendCount() : 0);   /* 初期サポートの変更も */
 }
 
@@ -2345,11 +2355,40 @@ function toggleHide(id, on){
   if(!!hiddenOrig[k] === !!on) delete pendingHide[k]; else pendingHide[k] = !!on;
   render(); drawPendBar();
 }
+/* ---------- v1.2.158：退会（みなさんの画面で共通。タブ「退会」に記録します） ---------- */
+let taikaiOrig = {}, pendingTaikai = {};
+function effTaikai(m){ const k = hk(m.id); return (k in pendingTaikai) ? pendingTaikai[k] : !!taikaiOrig[k]; }
+function toggleTaikai(id, on){
+  const k = hk(id);
+  if(!!taikaiOrig[k] === !!on) delete pendingTaikai[k]; else pendingTaikai[k] = !!on;
+  render(); drawPendBar();
+}
+function setTaikaiOrig(list){ taikaiOrig = {}; (list || []).forEach(k=>{ taikaiOrig[hk(k)] = true; }); }
+async function saveTaikaiPart(){
+  const onIds = Object.keys(pendingTaikai).filter(k=>pendingTaikai[k]);
+  const offIds = Object.keys(pendingTaikai).filter(k=>!pendingTaikai[k]);
+  if(!onIds.length && !offIds.length) return true;
+  try{
+    const body = new URLSearchParams({ action:"taikaiSet", id:admin.id, pin:admin.pin, email:admin.email,
+      onIds: JSON.stringify(onIds), offIds: JSON.stringify(offIds) });
+    const res = await fetch(GAS_URL, { method:"POST", body });
+    const j = await res.json();
+    if(typeof skyCheckMaintenance === "function" && skyCheckMaintenance(j)) return false;
+    if(!j || j.ok !== true){ toast(({ busy:"いま混み合っています。少しおいてお試しください" })[j && j.error] || "退会の保存ができませんでした"); return false; }
+    setTaikaiOrig(j.taikai);
+    pendingTaikai = {};
+    render(); drawPendBar();
+    toast("✅ 退会の設定を保存しました");
+    return true;
+  }catch(e){ toast("通信できませんでした"); return false; }
+}
 function toggleShowHidden(){ showHidden = !showHidden; render(); }
 function drawHidBtn(){
   const n = data ? data.members.filter(m=>hiddenOrig[hk(m.id)]).length : 0;
-  /* ON＝非表示にした方をかくしている／OFF＝非表示にした方も（うすく）出している */
-  $("#btnShowHid").textContent = "🙈 表示フィルター：" + (showHidden ? "OFF" : "ON") + (n ? "（非表示 " + n + "名）" : "");
+  const nt = data ? data.members.filter(m=>taikaiOrig[hk(m.id)]).length : 0;   /* v1.2.158：退会した方の人数 */
+  const cnt = [n ? "非表示 " + n + "名" : "", nt ? "退会 " + nt + "名" : ""].filter(Boolean).join("・");
+  /* ON＝非表示・退会の方をかくしている／OFF＝非表示・退会の方も（うすく）出している */
+  $("#btnShowHid").textContent = "🙈 表示フィルター：" + (showHidden ? "OFF" : "ON") + (cnt ? "（" + cnt + "）" : "");
   $("#btnShowHid").title = showHidden ? "押すと、非表示にした方をかくします" : "押すと、非表示にした方もうすく出します（チェックを外すと表示に戻せます）";
 }
 /* 読み直したあとに、もう同じになっているものは外します */
@@ -2361,6 +2400,7 @@ function prunePending(){
     if(!Object.keys(p).length) delete pendingRoles[id];
   });
   Object.keys(pendingHide).forEach(k=>{ if(!!hiddenOrig[k] === pendingHide[k]) delete pendingHide[k]; });
+  Object.keys(pendingTaikai).forEach(k=>{ if(!!taikaiOrig[k] === pendingTaikai[k]) delete pendingTaikai[k]; });
 }
 function drawPendBar(){
   const n = pendCount();
@@ -2386,7 +2426,7 @@ function setFlag(target, flag, on){
 function undoPending(){
   if(!pendCount()) return;
   if(!confirm("保存していない変更（" + pendCount() + "件）を元にもどします。よろしいですか？")) return;
-  pendingRoles = {}; pendingHide = {};
+  pendingRoles = {}; pendingHide = {}; pendingTaikai = {};
   if(window.SS) SS.discard();
   render(); drawPendBar();
 }
@@ -2394,8 +2434,9 @@ function undoPending(){
 async function savePending(){
   const okRoles = await saveRolesPart();
   const okHide = await saveHidePart();
+  const okTai = await saveTaikaiPart();   /* v1.2.158 */
   const okSs = await saveSsPart();
-  return okRoles && okHide && okSs;
+  return okRoles && okHide && okTai && okSs;
 }
 /* 初期サポート（状態・アップクリエ・サポート担当）の保存 */
 async function saveSsPart(){
@@ -2499,7 +2540,7 @@ async function leaveChoose(c){
   const next = leaveNext; leaveNext = null;
   if(c === "stay" || !next) return;
   if(c === "save"){ const ok = await savePending(); if(!ok) return; }
-  if(c === "discard"){ pendingRoles = {}; pendingHide = {}; if(window.SS) SS.discard(); render(); drawPendBar(); }
+  if(c === "discard"){ pendingRoles = {}; pendingHide = {}; pendingTaikai = {}; if(window.SS) SS.discard(); render(); drawPendBar(); }
   next();
 }
 /* メニューなどのリンクで移るとき */
