@@ -634,7 +634,8 @@ function byDay(){
     const st = e.allDay ? "" : w.slice(11, 16);
     const en = e.allDay ? "" : String(e.end || "");   /* シートに書いてある終わりの時間（読めないときは、はじまりから1時間として見ます） */
     const cat = e.cat || e.book || "event";
-    put(d, { src:"sheet", kind:"team", cat:cat, start:st, end:en, s:st ? toMin(st) : null, e:en ? toMin(en) : null, date:d,
+    const em = en ? toMin(en) : null, sm = st ? toMin(st) : null;   /* v1.2.166：日をまたぐ会（23:35〜00:05 など）は、その日の24時までとして見ます */
+    put(d, { src:"sheet", book:e.book || "", kind:"team", cat:cat, start:st, end:en, s:sm, e:(em != null && sm != null && em <= sm) ? 24 * 60 : em, date:d,
              title:e.title || e.label || "", label:e.label || "", url:e.url || "",
              place: cat === "kouryu-re" ? "real" : "online", bef:false, aft:false, marche:isMarche(e.title || e.label) });
   });
@@ -886,7 +887,7 @@ function drawDay(map){
     const tag = x.kind === "official" ? (x.src === "site" ? (x.lk === "公式" ? "公式（会社主催）" : "公認公式（会員主催）") : "公式公認") + (x.okFlag === "ok" ? "｜かぶってOK" : x.okFlag === "marche" ? "｜マルシェだけOK" : "")
       : x.kind === "shoko" ? "チーム代表"
       : x.src === "godo" ? "チーム独自｜合同説明会"
-      : (x.src === "sheet" ? "申込みシート｜" + (CAT_NAME[x.cat] || x.label) : "これから入れたい｜" + (CAT_NAME[x.cat] || ""));
+      : (x.src === "sheet" ? (x.book === "rule" ? "チーム独自｜定例・アフター" : "申込みシート｜" + (CAT_NAME[x.cat] || x.label)) : "これから入れたい｜" + (CAT_NAME[x.cat] || ""));
     const fl = [x.place === "real" ? "リアル" : x.place === "online" ? "オンライン" : "", (x.bef && x.aft ? "ビフォー・アフターあり" : x.bef ? "ビフォーあり" : x.aft ? "アフターあり" : ""),
                 x.multi ? "〜" + mdw(x.endDate) + "まで" : ""].filter(Boolean).join("・");
     let acts = "";
