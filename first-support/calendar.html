@@ -146,6 +146,19 @@
   .vfil .lb{width:100%;font-size:12px;font-weight:700;color:#8A6A57;}
   .vfil button{flex:1;min-width:140px;background:#fff;border:2px solid #E0D6CC;color:#8A8F98;border-radius:12px;padding:9px 10px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;}
   .vfil button.on{border-color:#F9A825;color:#B26A00;background:#FFF8E1;}
+  /* v1.2.165：自分のカレンダーに取り込む */
+  .vfil button.imp{flex-basis:100%;background:var(--main);border-color:var(--main);color:#fff;}
+  #imp .cats{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px;}
+  #imp .cats label{margin:0;display:flex;align-items:center;gap:6px;font-weight:500;font-size:12.5px;color:var(--ink);background:#FFF8F2;border:1.5px solid var(--line);border-radius:10px;padding:8px 8px;}
+  #imp .sec{font-size:13px;font-weight:700;color:var(--deep);margin:14px 0 4px;}
+  #imp .note{font-size:11.5px;color:#8A6A57;line-height:1.7;margin-top:4px;}
+  #imp .list{max-height:240px;overflow:auto;border:1.5px solid var(--line);border-radius:10px;padding:6px 10px;margin-top:6px;background:#fff;}
+  #imp .list div{font-size:12px;line-height:1.6;padding:4px 0;border-bottom:1px dashed #EFE6DC;}
+  #imp .list div:last-child{border-bottom:none;}
+  #imp .list b{font-weight:700;color:var(--deep);margin-right:4px;}
+  #imp .list i{font-style:normal;font-size:10.5px;color:#fff;background:#B9A190;border-radius:6px;padding:0 5px;margin-right:4px;}
+  #imp .list i.t{background:#7CB342;}
+  #imp .how{font-size:12px;line-height:1.8;color:var(--ink);background:#FFF8E1;border-radius:10px;padding:9px 11px;margin-top:10px;display:none;}
 
   .legend{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:11px;color:#8A6A57;margin:10px 2px 0;}
   .legend span{display:inline-flex;align-items:center;gap:4px;}
@@ -285,6 +298,7 @@
       <span class="lb">表示する予定</span>
       <button type="button" id="vfOff" onclick="toggleVf('off')"></button>
       <button type="button" id="vfTeam" onclick="toggleVf('team')"></button>
+      <button type="button" class="imp on" onclick="openImp()">📥 自分のカレンダーに取り込む</button>   <!-- v1.2.165 -->
     </div>
 
     <div id="firstLoad" class="empty">読み込んでいます…</div>
@@ -381,6 +395,31 @@
     <div class="msg" id="fMsg"></div>
     <button class="go" id="fGo" onclick="saveForm()">この内容で入れる</button>
     <button class="cancel" onclick="closeForm()">とじる</button>
+  </div>
+</div>
+
+<!-- v1.2.165：自分のカレンダー（Google・iPhone）に取り込む -->
+<div class="ov" id="imp">
+  <div class="card">
+    <h3>📥 自分のカレンダーに取り込む</h3>
+    <p class="note">表示している予定から、今日から先の予定を、GoogleカレンダーやiPhoneのカレンダーに入れるファイルを作ります。</p>
+    <div id="impOff">
+      <div class="sec">公式公認サイトの予定（カテゴリー）</div>
+      <div class="cats" id="impCats"></div>
+      <p class="note">いくつかのカテゴリーに入っている予定は、どれか1つでもオンなら入ります。</p>
+    </div>
+    <div id="impTeam">
+      <div class="sec">チーム独自の予定</div>
+      <p class="note" id="impTeamNote"></p>
+    </div>
+    <div class="sec" id="impCount"></div>
+    <div class="list" id="impList"></div>
+    <button class="go" id="impGo" onclick="makeIcs()">📅 カレンダー用のファイルを作る</button>
+    <div class="how" id="impHow">ファイルができました。<br>
+      ・iPhone：ダウンロードしたファイルを開き、「すべてを追加」を押します。<br>
+      ・Android：ダウンロードしたファイルを開き、Googleカレンダーを選びます。<br>
+      ・パソコン：Googleカレンダーの「設定」→「インポート」で、このファイルを選びます。</div>
+    <button class="cancel" onclick="closeImp()">とじる</button>
   </div>
 </div>
 
@@ -676,6 +715,129 @@ async function loadGodo(fresh){
     if(j && j.ok && Array.isArray(j.list)){ godo = j; if(data) draw(); }
   }catch(e){}
   godoBusy = false;
+}
+/* ================================================================
+   v1.2.165：自分のカレンダーに取り込む（.ics のファイルを作ります）
+   ・公式公認サイトの予定 … カテゴリーごとにオン・オフ（いくつかに入っている予定は、どれか1つでもオンなら入ります）
+   ・チーム独自の予定 … その方が見られるものは、すべて入れます（GASが見られる方だけ返しています）
+   ・表示する予定の切りかえ（公式公認サイト／チーム独自）で、オフのほうは入れません
+   ・今日から先の予定だけ。同じ予定をもう一度入れても、同じ番号（UID）にしてあります
+================================================================ */
+const IMP_CATS = ["LINKを理解する", "LINKセミナー", "リアル交流会", "オンライン交流会", "つなぐマルシェ", "成長と学び", "紹介者作り", "チームビルディングを学ぶ", "LINKサポート無料講座"];
+const IMP_DEF = { "LINKセミナー":1, "つなぐマルシェ":1, "成長と学び":1, "紹介者作り":1, "チームビルディングを学ぶ":1 };
+let impSel = Object.assign({}, IMP_DEF);
+try{ const v = JSON.parse(localStorage.getItem("sky_cal_impcat") || "null"); if(v && typeof v === "object") impSel = v; }catch(e){}
+function impToday(){ return ymd(new Date()); }
+function impHash(t){ let h = 5381; for(const ch of String(t || "")) h = ((h * 33) ^ ch.codePointAt(0)) >>> 0; return h.toString(36); }   /* 予定ごとの番号（UID）用 */
+function siteCats(x){
+  const c = String(x.cat || "").split(/[・,、\s]+/).filter(Boolean);
+  if(String(x.src || "").indexOf("LINKサポート無料講座") >= 0) c.push("LINKサポート無料講座");
+  return c;
+}
+/* 入れる予定の一覧（{ uid, date, endDate, start, end, title, tag, memo, url }） */
+function impItems(){
+  const t = impToday(), out = [];
+  if(VF.off){
+    ((data && data.link && data.link.items) || []).forEach(x => {
+      if((x.endDate || x.date) < t) return;
+      if(!siteCats(x).some(c => impSel[c])) return;
+      out.push({ uid:"link-" + (x.n || x.url || x.date + x.title), date:x.date, endDate:x.endDate || "", start:x.start || "", end:x.end || "",
+                 title:x.title || "", tag:"公式公認", url:x.url || "",
+                 memo:[x.kind ? x.kind : "", x.org ? "主催：" + x.org : "", x.cat ? "カテゴリー：" + x.cat : ""].filter(Boolean).join("\n") });
+    });
+  }
+  if(VF.team){
+    ((data && data.items) || []).filter(it => it.kind === "team" || it.kind === "shoko").forEach(it => {
+      if((it.endDate || it.date) < t) return;
+      out.push({ uid:"cal-" + it.cid, date:it.date, endDate:it.endDate || "", start:it.start || "", end:it.end || "",
+                 title:it.title || (it.kind === "shoko" ? "チーム代表の予定" : CAT_NAME[it.cat] || "チームの予定"), tag:"チーム", url:"", memo:it.memo || "" });
+    });
+    ((data && data.events) || []).forEach(e => {
+      const w = String(e.when || ""), d = w.slice(0, 10);
+      if(!/^\d{4}\/\d{2}\/\d{2}$/.test(d) || d < t) return;
+      const st = e.allDay ? "" : w.slice(11, 16);
+      out.push({ uid:"ev-" + (e.book || "") + "-" + w.replace(/\D/g, "") + "-" + impHash(e.title || e.label), date:d, endDate:"", start:st, end:e.allDay ? "" : String(e.end || ""),
+                 title:e.title || e.label || "", tag:"チーム", url:/^https?:/.test(e.url || "") ? e.url : "", memo:e.label && e.label !== e.title ? e.label : "" });
+    });
+    ((godo && godo.list) || []).forEach(x => {
+      const d = String(x.date || "");
+      if(!/^\d{4}\/\d{2}\/\d{2}$/.test(d) || d < t) return;
+      out.push({ uid:"godo-" + d.replace(/\D/g, "") + "-" + String(x.start || "").replace(/\D/g, "") + "-" + impHash(x.adv || ""), date:d, endDate:"", start:x.start || "", end:x.end || "",
+                 title:"LINK合同説明会（" + (x.adv || "") + "さん）", tag:"チーム", url:"", memo:"" });
+    });
+  }
+  out.sort((a, b) => (a.date + (a.start || "00:00")).localeCompare(b.date + (b.start || "00:00")));
+  return out;
+}
+function openImp(){
+  if(!data) return;
+  $("#impOff").style.display = VF.off ? "block" : "none";
+  $("#impTeam").style.display = VF.team ? "block" : "none";
+  $("#impCats").innerHTML = IMP_CATS.map(c => '<label><input type="checkbox" data-c="' + esc(c) + '"' + (impSel[c] ? " checked" : "") + '>' + esc(c) + '</label>').join("");
+  $("#impCats").querySelectorAll("input").forEach(el => el.addEventListener("change", () => {
+    if(el.checked) impSel[el.dataset.c] = 1; else delete impSel[el.dataset.c];
+    try{ localStorage.setItem("sky_cal_impcat", JSON.stringify(impSel)); }catch(e){}
+    impPaint();
+  }));
+  $("#impHow").style.display = "none";
+  impPaint();
+  $("#imp").classList.add("show");
+}
+function closeImp(){ $("#imp").classList.remove("show"); }
+function impPaint(){
+  const list = impItems();
+  const nTeam = list.filter(x => x.tag === "チーム").length;
+  $("#impTeamNote").textContent = "あなたが見られるチーム独自の予定は、すべて入ります（" + nTeam + "件）。";
+  $("#impCount").textContent = (!VF.off && !VF.team) ? "「表示する予定」を、どちらかオンにしてください。" : "これらが入ります（" + list.length + "件）";
+  $("#impList").innerHTML = list.length ? list.map(x => '<div><b>' + esc(mdw(x.date)) + (x.endDate && x.endDate !== x.date ? "〜" + esc(mdw(x.endDate)) : "") + " " + esc(x.start ? x.start + (x.end ? "〜" + x.end : "") : "終日") + '</b>'
+    + '<i class="' + (x.tag === "チーム" ? "t" : "") + '">' + esc(x.tag) + '</i>' + esc(x.title) + '</div>').join("") : '<div>入る予定はありません。</div>';
+  $("#impList").style.display = (!VF.off && !VF.team) ? "none" : "block";
+  $("#impGo").disabled = !list.length;
+}
+/* ---- .ics を作ります（時刻は日本時間 → 世界時に直して書きます） ---- */
+function icsEsc(t){ return String(t || "").replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n"); }
+function icsFold(line){
+  const enc = new TextEncoder(); const out = []; let cur = "", n = 0;
+  for(const ch of line){ const b = enc.encode(ch).length; if(n + b > (out.length ? 74 : 75)){ out.push(cur); cur = ""; n = 0; } cur += ch; n += b; }
+  out.push(cur); return out.join("\r\n ");
+}
+function icsUtc(date, hhmm, addMin){
+  const p = date.split("/").map(Number), t = String(hhmm).split(":").map(Number);
+  const d = new Date(Date.UTC(p[0], p[1] - 1, p[2], t[0] - 9, t[1] + (addMin || 0)));
+  return d.getUTCFullYear() + pad(d.getUTCMonth() + 1) + pad(d.getUTCDate()) + "T" + pad(d.getUTCHours()) + pad(d.getUTCMinutes()) + "00Z";
+}
+function icsDay(date, add){ const d = dOf(date); d.setDate(d.getDate() + (add || 0)); return d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()); }
+function makeIcs(){
+  const list = impItems(); if(!list.length) return;
+  const now = icsUtc(impToday(), "09:00").replace(/T.*/, "") + "T000000Z";
+  const L = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Skyarc LINK Support//Calendar//JA", "CALSCALE:GREGORIAN", "METHOD:PUBLISH", "X-WR-CALNAME:LINKの予定", "X-WR-TIMEZONE:Asia/Tokyo"];
+  list.forEach(x => {
+    L.push("BEGIN:VEVENT", "UID:" + String(x.uid).replace(/[^\w\-.]/g, "") + "@skyarc-link-support", "DTSTAMP:" + now);
+    if(x.start){
+      const last = x.endDate || x.date;
+      const sm = toMin(x.start), em = toMin(x.end);
+      let endStr;
+      if(em != null){ endStr = icsUtc(last, x.end, (!x.endDate && em <= sm) ? 24 * 60 : 0); }   /* 日をまたぐ会は、次の日のおわりの時刻 */
+      else endStr = icsUtc(last, x.start, 60);   /* おわりが分からないときは1時間 */
+      L.push("DTSTART:" + icsUtc(x.date, x.start), "DTEND:" + endStr);
+    }else{
+      L.push("DTSTART;VALUE=DATE:" + icsDay(x.date), "DTEND;VALUE=DATE:" + icsDay(x.endDate || x.date, 1));
+    }
+    L.push("SUMMARY:" + icsEsc(x.title));
+    const desc = [x.memo, x.url].filter(Boolean).join("\n");
+    if(desc) L.push("DESCRIPTION:" + icsEsc(desc));
+    if(x.url) L.push("URL:" + x.url);
+    L.push("END:VEVENT");
+  });
+  L.push("END:VCALENDAR");
+  const text = L.map(icsFold).join("\r\n") + "\r\n";
+  const blob = new Blob([text], { type:"text/calendar;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "LINKの予定_" + impToday().replace(/\//g, "") + ".ics";
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
+  $("#impHow").style.display = "block";
 }
 function draw(){
   const map = vfMap(byDay());
