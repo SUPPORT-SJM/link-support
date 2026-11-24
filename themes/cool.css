@@ -1,5 +1,5 @@
 /* ================================================================
-   デザイン：クールビジネステーマ（v1.2.153）
+   デザイン：クールビジネステーマ（v1.2.153・v1.2.164：紙の余白と完了の印）
    ----------------------------------------------------------------
    ・「見やすさとデザイン」でクールビジネスを選ぶと、config.js がこのファイルを読みこみます
    ・html に data-sky-theme="cool" の印がつくので、ここの決まりはその印があるときだけ効きます
@@ -96,13 +96,20 @@
   box-shadow:0 1px 0 #fff inset,0 12px 30px rgba(0,0,0,.30);
   margin-left:12px !important;margin-right:12px !important;margin-top:12px;
   position:relative;
+  /* v1.2.164：紙の内側に上下左右の余白をとります（ページによって0のところがあり、文字が紙のふちや左の点線に重なっていたため） */
+  box-sizing:border-box;padding:var(--cb-pad-t) var(--cb-pad-r) var(--cb-pad-b) var(--cb-pad-l) !important;
 }
+/* v1.2.164：外側の余白は、どのページも同じに（ページごとの body の余白に左右されないように） */
+:root[data-sky-theme="cool"]{ --cb-pad-t:18px; --cb-pad-r:16px; --cb-pad-b:20px; --cb-pad-l:28px; --cb-line-x:11px; }
+:root[data-sky-theme="cool"] body{padding-left:0 !important;padding-right:0 !important;background:transparent !important;}   /* v1.2.164：ページごとの地の色を消して、どのページも外側は革に */
+/* v1.2.164：上の帯（もどる）がないページは、右上のホーム・メニューのボタンの下から紙をはじめます（ボタンが紙の文字に重ならないように） */
+:root[data-sky-theme="cool"] body:not(:has(#skyNav)) > :is(.wrap, main, .card, .box):first-of-type{margin-top:72px !important;}
 @media (min-width:640px){
   :root[data-sky-theme="cool"] body > .wrap,:root[data-sky-theme="cool"] body > main,:root[data-sky-theme="cool"] body > section:not(.cool),
   :root[data-sky-theme="cool"] body > .card,:root[data-sky-theme="cool"] body > .box,:root[data-sky-theme="cool"] body > footer{max-width:640px;margin-left:auto !important;margin-right:auto !important;}
 }
 /* 手帳のとじ穴の線 */
-:root[data-sky-theme="cool"] body > .wrap::before,:root[data-sky-theme="cool"] body > main::before{content:"";position:absolute;left:7px;top:14px;bottom:14px;border-left:2px dotted #C9C2B0;pointer-events:none;}
+:root[data-sky-theme="cool"] body > .wrap::before,:root[data-sky-theme="cool"] body > main::before,:root[data-sky-theme="cool"] #quizView > .wrap::before{content:"";position:absolute;left:var(--cb-line-x);top:14px;bottom:14px;border-left:2px dotted #CFC8B6;pointer-events:none;}
 /* 中のカード・見出しの色を、手帳の色にそろえます */
 :root[data-sky-theme="cool"] .card h2,:root[data-sky-theme="cool"] .wrap > h1,:root[data-sky-theme="cool"] .wrap h2{color:#24344D;}
 :root[data-sky-theme="cool"] .verTag,:root[data-sky-theme="cool"] .foot{color:#AFBBD0 !important;}
@@ -120,3 +127,17 @@
 /* リアルのマルシェ：地図の説明は出さず、「申し込みの流れ」は右下に止めておきます */
 :root[data-sky-theme="cool"] body.cb-list .legend,:root[data-sky-theme="cool"] body.cb-list > .top{display:none !important;}
 :root[data-sky-theme="cool"] body.cb-list .trav{position:fixed !important;left:auto !important;top:auto !important;right:14px !important;bottom:60px !important;transform:none !important;z-index:50;}
+
+/* ================================================================
+   v1.2.164：完了と、次にやるところの印（トップページ・中の段のカード）
+   ・完了したカード … 右の空いているところに、緑の大きなチェックと「完了」
+   ・次にやるカード … 題名に、明るい赤の下線
+================================================================ */
+.cool .cb-card .cb-ok{flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:44px;color:#2E9E5B;line-height:1;}
+.cool .cb-card .cb-ok b{font-size:30px;font-weight:900;line-height:1;}
+.cool .cb-card .cb-ok small{font-size:11px;font-weight:700;margin-top:2px;letter-spacing:.08em;}
+.cool .cb-card.now .nm{text-decoration:underline;text-decoration-color:#E5484D;text-decoration-thickness:3px;text-underline-offset:5px;}
+
+/* v1.2.164：トップページは、中の手帳（#cool）だけを紙にします（外側まで紙にすると、紙が二重になるため） */
+:root[data-sky-theme="cool"] body > .wrap:has(#cool){background:transparent !important;border:none !important;box-shadow:none !important;padding:0 10px !important;margin-left:0 !important;margin-right:0 !important;margin-top:0 !important;}
+:root[data-sky-theme="cool"] body > .wrap:has(#cool)::before{content:none !important;}

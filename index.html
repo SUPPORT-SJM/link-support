@@ -2808,10 +2808,15 @@ function coolStatus(it){
 function renderCoolLevel(box, last){
   const list = [];
   const esc2 = t=>esc(String(t || "").replace(/\n/g, ""));
+  /* v1.2.164：完了したカードは、右に緑の大きなチェックと「完了」。まだのものの最初の1つ（次にやるところ）は、題名に赤い下線 */
+  let nowSet = false;
   const card = (it)=>{
     const st = coolStatus(it), done = /^✓/.test(st), lock = /^🔒/.test(st);
-    return `<button type="button" class="cb-card${done ? " done" : ""}${lock ? " lock" : ""}" data-i="${list.push(it) - 1}">`
-      + `<span class="ball">${it.ic || ""}</span><span class="tx"><span class="nm">${esc2(it.nm)}</span>${st ? `<span class="sb">${esc(st)}</span>` : ""}</span><span class="ar">›</span></button>`;
+    const todo = !done && !lock && (it.task || it.flowPage || (it.kids && it.kids.some(k=>k.task)));
+    const now = todo && !nowSet && !last.mine; if(now) nowSet = true;
+    return `<button type="button" class="cb-card${done ? " done" : ""}${lock ? " lock" : ""}${now ? " now" : ""}" data-i="${list.push(it) - 1}">`
+      + `<span class="ball">${it.ic || ""}</span><span class="tx"><span class="nm">${esc2(it.nm)}</span>${st && !done ? `<span class="sb">${esc(st)}</span>` : ""}</span>`
+      + (done ? '<span class="cb-ok"><b>✓</b><small>完了</small></span>' : '<span class="ar">›</span>') + `</button>`;
   };
   let h = '<div class="cb-book">';
   h += `<div class="cb-head"><button type="button" class="cb-back" id="cbBack">↩️ もどる</button><h2 class="cb-title">${esc2(last.nm)}</h2></div>`;
@@ -2846,15 +2851,16 @@ function renderCool(){
   const next = flowNext();
   const cardList = [];
   const card = (it, extra, cls, pre)=>`<button type="button" class="cb-card ${cls || ""}" data-i="${cardList.push(it) - 1}">`
-    + (pre || "") + `<span class="ball">${it.ic}</span><span class="tx"><span class="nm">${esc(String(it.nm).replace(/\n/g, ""))}</span>${extra || ""}</span><span class="ar">›</span></button>`;
+    + (pre || "") + `<span class="ball">${it.ic}</span><span class="tx"><span class="nm">${esc(String(it.nm).replace(/\n/g, ""))}</span>${extra || ""}</span>`
+    + (/(^| )done( |$)/.test(cls || "") ? '<span class="cb-ok"><b>✓</b><small>完了</small></span>' : '<span class="ar">›</span>') + `</button>`;   /* v1.2.164：完了は緑の大きなチェック */
   let h = '<div class="cb-book">';
   h += '<div class="cb-sec">ファーストサポート</div>';
   steps.forEach((it, i)=>{
     const tasks = flowTasks(it), done = tasks.filter(k=>FLOW[k]).length;
     const locked = it.lockAfter && !flowDone(it.lockAfter);
     const isDone = flowDone(it.flowPage), isNow = it.flowPage === next;
-    const st = locked ? "🔒 前のステップを終えると開きます" : isDone ? "完了しました" : `進行中　${done} / ${tasks.length}`;
-    h += card(it, `<span class="sb">${st}</span><span class="cb-bar"><i style="width:${Math.round(done / Math.max(tasks.length, 1) * 100)}%"></i></span>`,
+    const st = locked ? "🔒 前のステップを終えると開きます" : isDone ? "" : `進行中　${done} / ${tasks.length}`;   /* v1.2.164：完了は右のチェックで分かるので、小さな文字は出しません */
+    h += card(it, `${st ? `<span class="sb">${st}</span>` : ""}<span class="cb-bar"><i style="width:${Math.round(done / Math.max(tasks.length, 1) * 100)}%"></i></span>`,
       "step " + (locked ? "lock" : isDone ? "done" : isNow ? "now" : ""), `<span class="no">STEP ${i + 1}</span>`);
   });
   if(customOn()){
