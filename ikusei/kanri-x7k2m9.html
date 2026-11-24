@@ -224,9 +224,9 @@
   .hidchk input{width:14px;height:14px;margin:0;}
   .hidchk.pend{outline:2.5px dashed #E5A823;outline-offset:1px;}
   /* v1.2.158：退会（みなさんの画面で共通。チェックが入ると自動で非表示になります） */
-  .hidchk.taikai{margin-left:4px;}
-  .hidchk.taikai.on{border-color:#C98A8A;color:#A04848;background:#FFF4F4;}
-  .tag.taikai{background:#F3DADA;color:#A04848;}
+  .mc-foot .hidchk.taikai{margin-left:auto;}   /* v1.2.159：右下に置きます */
+  .mc-foot .edit-row + .hidchk.taikai{margin-left:0;}
+  /* v1.2.159：目立たせず、右下に小さく出るだけにします */
   #tbody tr.row-hid > td{opacity:.45;}
   #tbody tr.row-hid > td:first-child{opacity:1;}
   #btnSaveTop{background:#F5C452 !important;color:#3B2A00 !important;}
@@ -2223,7 +2223,6 @@ function rowsHtml(list){
         <span class="id">${m.id}</span>
         <span class="tags">
           <span class="tag rank">${rank}</span>
-          ${taiOn ? '<span class="tag taikai">退会</span>' : ""}
           ${rel.intro ? '<span class="tag intro">紹介</span>' : ""}
           ${rel.helper ? '<span class="tag helper">🤝 サポート</span>' : ""}
         </span>
@@ -2237,8 +2236,8 @@ function rowsHtml(list){
         ${canYari(m) ? `<button type="button" class="yari-btn" onclick="openYaritai('${m.id}')">🌱 やりたいこと</button>` : ""}
         ${canYari(m) ? `<button type="button" class="pro-btn" onclick="openPro('${m.id}')" title="スキルアッププロの許可">🚀 プロ</button>` : ""}
         <button type="button" class="dept-chip ${m.dept ? "has" : ""}" onclick="openDeptPick('${m.id}')" title="部門">🏷 ${m.dept ? String(m.dept).split(",").join("・") : "部門：未所属"}</button>
-        <label class="hidchk ${hidPend ? "pend" : ""}" title="あなたの画面だけで非表示にします"><input type="checkbox" ${hidOn ? "checked" : ""} onchange="toggleHide('${m.id}', this.checked)">非表示</label><label class="hidchk taikai ${taiOn ? "on" : ""} ${taiPend ? "pend" : ""}" title="退会した方にチェックします（みなさんの画面で共通です。チェックが入ると自動で非表示になります）"><input type="checkbox" ${taiOn ? "checked" : ""} onchange="toggleTaikai('${m.id}', this.checked)">退会</label>
-        ${editRow}
+        <label class="hidchk ${hidPend ? "pend" : ""}" title="あなたの画面だけで非表示にします"><input type="checkbox" ${hidOn ? "checked" : ""} onchange="toggleHide('${m.id}', this.checked)">非表示</label>
+        ${editRow}${`<label class="hidchk taikai ${taiOn ? "on" : ""} ${taiPend ? "pend" : ""}" title="退会した方にチェックします（みなさんの画面で共通です。チェックが入ると自動で非表示になります）"><input type="checkbox" ${taiOn ? "checked" : ""} onchange="toggleTaikai('${m.id}', this.checked)">退会</label>`}
       </div>
     </div>`;
   }).join("");
@@ -2385,10 +2384,9 @@ async function saveTaikaiPart(){
 function toggleShowHidden(){ showHidden = !showHidden; render(); }
 function drawHidBtn(){
   const n = data ? data.members.filter(m=>hiddenOrig[hk(m.id)]).length : 0;
-  const nt = data ? data.members.filter(m=>taikaiOrig[hk(m.id)]).length : 0;   /* v1.2.158：退会した方の人数 */
-  const cnt = [n ? "非表示 " + n + "名" : "", nt ? "退会 " + nt + "名" : ""].filter(Boolean).join("・");
+  /* v1.2.159：退会した方の人数は、ここには出しません（表示フィルターをOFFにして、その方のカードの右下で分かるだけにします） */
   /* ON＝非表示・退会の方をかくしている／OFF＝非表示・退会の方も（うすく）出している */
-  $("#btnShowHid").textContent = "🙈 表示フィルター：" + (showHidden ? "OFF" : "ON") + (cnt ? "（" + cnt + "）" : "");
+  $("#btnShowHid").textContent = "🙈 表示フィルター：" + (showHidden ? "OFF" : "ON") + (n ? "（非表示 " + n + "名）" : "");
   $("#btnShowHid").title = showHidden ? "押すと、非表示にした方をかくします" : "押すと、非表示にした方もうすく出します（チェックを外すと表示に戻せます）";
 }
 /* 読み直したあとに、もう同じになっているものは外します */
