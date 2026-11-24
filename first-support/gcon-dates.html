@@ -156,7 +156,7 @@ function drawList(){
       ${times(x)}
       ${on || stop ? "" : `<button class="btn plan" data-date="${esc(x.date)}">この日に出席予定にする</button><div class="askbox"></div>`}
     </div>`;
-  }).join("") + '<p class="small">※ 出席予定にすると、初期サポートマネジメント（サポートの方の画面）に出ます。</p>'
+  }).join("") + /* v1.2.162：名前をメンバーマネジメントルームに */ '<p class="small">※ 出席予定にすると、メンバーマネジメントルーム（サポートの方の画面）に出ます。</p>'
     : '<p class="msg">いまのところ、予定されているグルコンはありません。</p>';
   document.querySelectorAll("#list .btn.plan").forEach(b=>b.addEventListener("click", ()=>askPlan(b)));
 }
