@@ -618,7 +618,8 @@ function eachDay(from, to, fn){
 function byDay(){
   const map = {};
   const put = (d, x) => { (map[d] = map[d] || []).push(x); };
-  (data.items || []).forEach(it => {
+  /* v1.2.167：手入力の「公式公認」の予定は使いません（公式公認スケジュールサイトの予定と同じものだったため。サイトのほうを出します） */
+  (data.items || []).filter(it => it.kind !== "official").forEach(it => {
     const base = {
       src:"own", kind:it.kind, cat:it.kind === "team" ? (it.cat || "event") : it.kind,
       start:it.start || "", end:it.end || "", s:toMin(it.start), e:toMin(it.end),
