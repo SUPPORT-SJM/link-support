@@ -30,23 +30,12 @@ body{font-family:"Zen Kaku Gothic New",sans-serif;background:radial-gradient(ell
 .bub.in{--c:#4E86D6}
 .bub.out{--c:#E8873A}
 .bub.out{width:80px;transform-origin:50% 22px}
-/* v1.2.169：外がわの3つ（会員情報・紹介コード／オープンチャットの名前づくり／LINKセミナーZoom）は、前の1.5倍にして、
-   虹色に光りながら点滅させます（小さいけれど大事なところなので、すぐ目に入るように） */
-.bub.out .ball{width:44px;height:44px;font-size:21px;border-width:3px;animation:benriGlow 3s linear infinite}
+/* v1.2.169：外がわの3つ（会員情報・紹介コード／オープンチャットの名前づくり／LINKセミナーZoom）は、前の1.5倍の大きさ
+   v1.2.170：光り方は、黄色一色で、2秒に1回ゆっくり明るくなる形に（虹色の速い点滅は、うるさいのでやめました） */
+.bub.out .ball{width:44px;height:44px;font-size:21px;border-width:3px;border-color:#F5C400;animation:benriGlow 2s ease-in-out infinite}
 @keyframes benriGlow{
-  0%  {border-color:#FF4D6D;box-shadow:0 0 10px 3px rgba(255,77,109,.85),0 0 22px 7px rgba(255,77,109,.45)}
-  8%  {box-shadow:0 0 3px 1px rgba(255,77,109,.35),0 0 8px 2px rgba(255,77,109,.15)}
-  17% {border-color:#FF9F1C;box-shadow:0 0 10px 3px rgba(255,159,28,.85),0 0 22px 7px rgba(255,159,28,.45)}
-  25% {box-shadow:0 0 3px 1px rgba(255,159,28,.35),0 0 8px 2px rgba(255,159,28,.15)}
-  33% {border-color:#FFD60A;box-shadow:0 0 10px 3px rgba(255,214,10,.9),0 0 22px 7px rgba(255,214,10,.5)}
-  42% {box-shadow:0 0 3px 1px rgba(255,214,10,.35),0 0 8px 2px rgba(255,214,10,.15)}
-  50% {border-color:#2EC4B6;box-shadow:0 0 10px 3px rgba(46,196,182,.85),0 0 22px 7px rgba(46,196,182,.45)}
-  58% {box-shadow:0 0 3px 1px rgba(46,196,182,.35),0 0 8px 2px rgba(46,196,182,.15)}
-  67% {border-color:#3A86FF;box-shadow:0 0 10px 3px rgba(58,134,255,.85),0 0 22px 7px rgba(58,134,255,.45)}
-  75% {box-shadow:0 0 3px 1px rgba(58,134,255,.35),0 0 8px 2px rgba(58,134,255,.15)}
-  83% {border-color:#9B5DE5;box-shadow:0 0 10px 3px rgba(155,93,229,.85),0 0 22px 7px rgba(155,93,229,.45)}
-  92% {box-shadow:0 0 3px 1px rgba(155,93,229,.35),0 0 8px 2px rgba(155,93,229,.15)}
-  100%{border-color:#FF4D6D;box-shadow:0 0 10px 3px rgba(255,77,109,.85),0 0 22px 7px rgba(255,77,109,.45)}
+  0%,100%{box-shadow:0 0 2px 1px rgba(255,200,0,.25)}
+  50%    {box-shadow:0 0 10px 3px rgba(255,200,0,.8),0 0 20px 6px rgba(255,200,0,.35)}
 }
 .bub.out .nm{font-size:9.5px;padding:1px 4px;border-radius:6px}
 .sun{position:absolute;left:0;top:0;width:120px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;
