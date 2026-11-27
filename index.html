@@ -2722,7 +2722,7 @@ function homesMineRing(n){
 /* v1.2.173：あなた専用ページの左右の重さをそろえます
    ・丸の重さ＝見た目の大きさ（ふつうの丸は直径68、小さな丸（moon）は48、もっと小さな丸は38）の2乗
    ・重いものから順に、いまの合計が軽いほうへ入れます（同じなら数の少ないほう）
-   ・左右それぞれの中では、えらんだ順のまま上から並べます */
+   ・左右それぞれの中では、小さい丸を上に、大きい丸を下に置きます（同じ大きさなら、えらんだ順）。v1.2.174：下が重いほうが落ち着いて見えるため */
 let mineRightN = null;
 function mineBalance(list){
   const wOf = it => { const d = it.moon ? (it.tiny ? 38 : 48) : 68; return d * d; };
@@ -2732,7 +2732,7 @@ function mineBalance(list){
     const toR = wr < wl || (wr === wl && R.length <= L.length);
     if(toR){ R.push(x); wr += x.w; } else { L.push(x); wl += x.w; }
   });
-  const byI = (a, b)=>a.i - b.i;
+  const byI = (a, b)=>(a.w - b.w) || (a.i - b.i);   /* 軽い（小さい）丸が上、重い（大きい）丸が下 */
   return { right: R.sort(byI).map(x=>x.it), left: L.sort(byI).map(x=>x.it) };
 }
 /* 「もどる」の真上に浮かぶ「カスタマイズ」の丸（押すと、えらぶ画面） */
