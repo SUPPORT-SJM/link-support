@@ -1095,11 +1095,16 @@ function build(fromX, fromY){
   if(last && last.mine && !items.length) items = [MINE_SETUP, BACK];   /* v1.2.146：まだ何もえらんでいないときは、まん中に「設定する」 */
   else if(last) items = [BACK].concat(items);                 /* 中の段は、まん中が「もどる」 */
   /* v1.2.173：あなた専用ページ（輪の形）は、丸の大きさを見て、左右の重さがそろうように分けます */
-  mineRightN = null;
+  mineRightN = null; mineGrid = null;
   if(last && last.mine && minePickItems().length && items.length - 1 <= 8){
     const b = mineBalance(items.slice(1));
     items = [items[0]].concat(b.right, b.left);
     mineRightN = b.right.length;
+  }else if(last && last.mine && minePickItems().length){
+    /* v1.2.175：9こ以上のときも、「もどる」をまん中にして、小さい丸を上・大きい丸を下、左右の重さをそろえて並べます */
+    const g = mineGridPlan(items.slice(1));
+    items = [items[0]].concat(g.items);
+    mineGrid = g;
   }
   const hs = layoutFor(items.length);   /* いちばん上は、まん中に上下でアカウントと「新しい仲間へ」 */
   nodes = items.map((it,i)=> makeNode(it, i, hs[i], fromX, fromY));
@@ -2685,6 +2690,13 @@ function layoutFor(n){
 }
 function homesGrid(n){
   { const ft = document.querySelector(".foot"); if(ft) ft.classList.remove("inStage"); }
+  if(mineGrid && mineGrid.cells.length === n){   /* v1.2.175：あなた専用ページ（9こ以上）は mineGridPlan で決めた場所に */
+    W = Math.min(stage.clientWidth || 360, 440);
+    const cw = W / 3, rowH = 122, y0 = 110;
+    H = y0 + rowH * (mineGrid.rows - 1) + 110;
+    stage.style.height = H + "px";
+    return mineGrid.cells.map(([c, r])=>[cw * (c + .5), y0 + rowH * r]);
+  }
   W = Math.min(stage.clientWidth || 360, 440);
   const cols = W >= 400 ? 4 : 3, cw = W / cols, rowH = 122, top = 148;   /* v1.2.148：「もどる」の上に「カスタマイズ」の丸の場所をあけます */
   const pts = [[W/2, top]];   /* いちばん上のまん中に「もどる」 */
@@ -2723,7 +2735,34 @@ function homesMineRing(n){
    ・丸の重さ＝見た目の大きさ（ふつうの丸は直径68、小さな丸（moon）は48、もっと小さな丸は38）の2乗
    ・重いものから順に、いまの合計が軽いほうへ入れます（同じなら数の少ないほう）
    ・左右それぞれの中では、小さい丸を上に、大きい丸を下に置きます（同じ大きさなら、えらんだ順）。v1.2.174：下が重いほうが落ち着いて見えるため */
-let mineRightN = null;
+let mineRightN = null, mineGrid = null;
+/* v1.2.175：9こ以上のときの並べ方（3列）
+   ・まん中の列のまん中あたりに「カスタマイズ」（上）と「もどる」（下）の場所をあけます
+   ・小さい丸から順に、上の段から入れます（大きい丸ほど下の段へ）
+   ・1つの段の中では、重いものを、いまの合計が軽いほうの列（左・右）へ。まん中が空いている段は、まん中も使います */
+function mineGridPlan(list){
+  const wOf = it => { const d = it.moon ? (it.tiny ? 38 : 48) : 68; return d * d; };
+  const k = list.length, cols = 3;
+  const rows = Math.ceil((k + 2) / cols);
+  const rB = Math.max(1, Math.floor(rows / 2));          /* 「もどる」の段（その上の段に「カスタマイズ」） */
+  const sorted = list.map((it, i)=>({ it, i, w: wOf(it) })).sort((a, b)=>(a.w - b.w) || (a.i - b.i));
+  const out = [], cells = [[1, rB]];
+  let wl = 0, wr = 0, p = 0;
+  for(let r = 0; r < rows && p < sorted.length; r++){
+    const midFree = !(r === rB || r === rB - 1);
+    const slots = midFree ? 3 : 2;
+    const take = sorted.slice(p, p + slots); p += take.length;
+    const row = take.slice().sort((a, b)=>(b.w - a.w) || (a.i - b.i));
+    let useMid = midFree && (row.length % 2 === 1), usedL = false, usedR = false;
+    row.forEach(x=>{
+      if(useMid){ useMid = false; out.push(x.it); cells.push([1, r]); return; }
+      const toR = usedL ? true : usedR ? false : wr < wl;   /* 1つの段で、左右は1つずつ */
+      if(toR){ usedR = true; wr += x.w; out.push(x.it); cells.push([2, r]); }
+      else{ usedL = true; wl += x.w; out.push(x.it); cells.push([0, r]); }
+    });
+  }
+  return { items: out, cells, rows };
+}
 function mineBalance(list){
   const wOf = it => { const d = it.moon ? (it.tiny ? 38 : 48) : 68; return d * d; };
   const idx = list.map((it, i)=>({ it, i, w: wOf(it) })).sort((a, b)=>(b.w - a.w) || (a.i - b.i));
