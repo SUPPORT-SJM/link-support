@@ -2739,7 +2739,7 @@ let mineRightN = null, mineGrid = null;
 /* v1.2.175：9こ以上のときの並べ方（3列）
    ・まん中の列のまん中あたりに「カスタマイズ」（上）と「もどる」（下）の場所をあけます
    ・小さい丸から順に、上の段から入れます（大きい丸ほど下の段へ）
-   ・1つの段の中では、重いものを、いまの合計が軽いほうの列（左・右）へ。まん中が空いている段は、まん中も使います */
+   ・1つの段の中では、重いものを、いまの合計が軽いほうの列（左・右）へ。まん中が空いている段で数が奇数なら、いちばん小さい丸をまん中に */
 function mineGridPlan(list){
   const wOf = it => { const d = it.moon ? (it.tiny ? 38 : 48) : 68; return d * d; };
   const k = list.length, cols = 3;
@@ -2753,10 +2753,11 @@ function mineGridPlan(list){
     const slots = midFree ? 3 : 2;
     const take = sorted.slice(p, p + slots); p += take.length;
     const row = take.slice().sort((a, b)=>(b.w - a.w) || (a.i - b.i));
-    let useMid = midFree && (row.length % 2 === 1), usedL = false, usedR = false;
+    let usedL = false, usedR = false;
+    /* v1.2.176：数が奇数の段は、いちばん小さい丸をまん中に。大きいほうは左右へ */
+    if(midFree && row.length % 2 === 1){ const x = row.pop(); out.push(x.it); cells.push([1, r]); }
     row.forEach(x=>{
-      if(useMid){ useMid = false; out.push(x.it); cells.push([1, r]); return; }
-      const toR = usedL ? true : usedR ? false : wr < wl;   /* 1つの段で、左右は1つずつ */
+      const toR = usedL ? true : usedR ? false : wr <= wl;   /* 1つの段で、左右は1つずつ。同じ重さなら右から */
       if(toR){ usedR = true; wr += x.w; out.push(x.it); cells.push([2, r]); }
       else{ usedL = true; wl += x.w; out.push(x.it); cells.push([0, r]); }
     });
@@ -2784,7 +2785,7 @@ function placeMineC(t){
     stage.appendChild(mineC.el);
   }
   mineC.el.style.display = "";
-  mineC.hx = back.hx; mineC.hy = back.hy - (minePickItems().length > 8 ? 86 : 96);
+  mineC.hx = back.hx; mineC.hy = back.hy - (mineGrid ? 122 : 96);   /* v1.2.176：3列の並びのときは、「もどる」の1つ上のマス（段の高さ122）にそろえます */
   stepFloater(mineC, t, back.s, back.o, 55, 21, .6);
 }
 /* 解放のお知らせ（1回だけ）と、メニュー用の印 */
