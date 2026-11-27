@@ -44,6 +44,7 @@ body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body)
 
 /* 上の見出し */
 .top{display:flex;align-items:center;gap:12px;padding-right:58px;}
+body.on-mine .top{padding-right:120px;}   /* v1.2.177：あなた専用ページでは「ホーム」のボタンが増えるので、名前の行をそのぶん左で折り返します */
 .appicon{width:52px;height:52px;border-radius:14px;flex:none;overflow:hidden;box-shadow:var(--shadow);
   background:#6E5FB5 url("./img/app-icon-180.png") center/cover no-repeat;}   /* ホーム画面のアイコンと同じ絵 */
 .top h1{font-family:var(--f-head);font-weight:900;font-size:18px;line-height:1.35;margin:0;color:var(--deep);text-wrap:balance;}
@@ -1085,6 +1086,7 @@ function reflow(){
 /* ---------- アイコンを並べる ---------- */
 function build(fromX, fromY){
   const last = path[path.length-1];
+  mineUrlSync();   /* v1.2.177：あなた専用ページのアドレスと「ホーム」ボタン */
   /* v1.2.149：クールビジネステーマのときは、カードで並べます（v1.2.153：中の段・あなた専用ページも） */
   const coolTop = coolOn() && !!me;
   $("#cool").hidden = !coolTop;
@@ -2730,6 +2732,28 @@ function homesMineRing(n){
   };
   arc(right, 1); arc(left, -1);
   return pts;
+}
+/* v1.2.177：あなた専用ページを開いているあいだは
+   ・アドレスを custom-index.html にします（ブックマークすると、次からあなた専用ページが直接開きます）
+   ・メニューの左に「ホーム」のボタンを出します（押すと、このページのいちばん上の段へ） */
+function mineUrlSync(){
+  const onMine = !!me && path.length === 1 && path[0] === MINE;
+  const file = location.pathname.split("/").pop();
+  try{
+    if(onMine && file !== "custom-index.html") history.replaceState(null, "", location.pathname.replace(/[^\/]*$/, "custom-index.html"));
+    else if(!onMine && file === "custom-index.html") history.replaceState(null, "", location.pathname.replace(/[^\/]*$/, "index.html"));
+  }catch(e){}
+  document.querySelectorAll(".skym-home:not(#mineHome)").forEach(x=>x.remove());   /* 古い menu.js が出したホームのボタンとは重ねません */
+  let h = document.getElementById("mineHome");
+  if(onMine && !h){
+    h = document.createElement("a");
+    h.id = "mineHome"; h.className = "skym-home"; h.href = B + "index.html";
+    h.setAttribute("aria-label", "トップページに戻る"); h.textContent = "🏠";
+    h.addEventListener("click", e=>{ e.preventDefault(); goTo(()=>{ path.length = 0; }); });
+    document.body.appendChild(h);
+  }
+  if(h) h.style.display = onMine ? "" : "none";
+  document.body.classList.toggle("on-mine", onMine);
 }
 /* v1.2.173：あなた専用ページの左右の重さをそろえます
    ・丸の重さ＝見た目の大きさ（ふつうの丸は直径68、小さな丸（moon）は48、もっと小さな丸は38）の2乗

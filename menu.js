@@ -182,7 +182,7 @@
     /* トップページ以外では、メニューの下に「ホーム」を出します
        （上のナビに「ホーム」があるページは、そちらを使います）
        v1.2.143：上の帯の「ホーム」はなくし、ホームはここ（メニューの下）にそろえました */
-    var atTop = !inIkusei && !inFirst && /\/(index\.html)?$/.test(here);
+    var atTop = !inIkusei && !inFirst && /\/((custom-)?index\.html)?$/.test(here);   /* v1.2.177：あなた専用ページ（custom-index.html）は、トップページの中なので、ホームのボタンはトップページの側で出します */
     if (!atTop && !document.querySelector(".sky-home")) {
       var home = document.createElement("a");
       home.className = "skym-home";
