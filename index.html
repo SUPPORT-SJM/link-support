@@ -1094,6 +1094,13 @@ function build(fromX, fromY){
   if(!last && !me) items = [Object.assign({}, JOIN, { nm: isReturning() ? "ログイン" : "登録" })];  /* まだの方は、まん中のひとつだけ */
   if(last && last.mine && !items.length) items = [MINE_SETUP, BACK];   /* v1.2.146：まだ何もえらんでいないときは、まん中に「設定する」 */
   else if(last) items = [BACK].concat(items);                 /* 中の段は、まん中が「もどる」 */
+  /* v1.2.173：あなた専用ページ（輪の形）は、丸の大きさを見て、左右の重さがそろうように分けます */
+  mineRightN = null;
+  if(last && last.mine && minePickItems().length && items.length - 1 <= 8){
+    const b = mineBalance(items.slice(1));
+    items = [items[0]].concat(b.right, b.left);
+    mineRightN = b.right.length;
+  }
   const hs = layoutFor(items.length);   /* いちばん上は、まん中に上下でアカウントと「新しい仲間へ」 */
   nodes = items.map((it,i)=> makeNode(it, i, hs[i], fromX, fromY));
   document.getElementById("crumb").hidden = path.length === 0 || !!(last && last.noCrumb);   /* 「メンバー向け」の段は、左上の名前を出しません */
@@ -2695,9 +2702,9 @@ function homesMineRing(n){
   { const ft = document.querySelector(".foot"); if(ft) ft.classList.remove("inStage"); }
   W = Math.min(stage.clientWidth || 360, 440);
   const k = n - 1, cx = W/2;
-  const right = Math.ceil(k / 2), left = k - right;
+  const right = mineRightN != null && mineRightN <= k ? mineRightN : Math.ceil(k / 2), left = k - right;   /* v1.2.173：左右の数は mineBalance で決めます */
   const rx = Math.max(W*.36, 124);
-  const ry = Math.max(rx * .94, Math.max(right, 1) * 70);
+  const ry = Math.max(rx * .94, Math.max(right, left, 1) * 70);
   const g = Math.PI * 25/180;   /* いちばん上・いちばん下から少しあけます */
   H = 2*ry + 150; stage.style.height = H + "px";
   const cy = H/2;
@@ -2711,6 +2718,22 @@ function homesMineRing(n){
   };
   arc(right, 1); arc(left, -1);
   return pts;
+}
+/* v1.2.173：あなた専用ページの左右の重さをそろえます
+   ・丸の重さ＝見た目の大きさ（ふつうの丸は直径68、小さな丸（moon）は48、もっと小さな丸は38）の2乗
+   ・重いものから順に、いまの合計が軽いほうへ入れます（同じなら数の少ないほう）
+   ・左右それぞれの中では、えらんだ順のまま上から並べます */
+let mineRightN = null;
+function mineBalance(list){
+  const wOf = it => { const d = it.moon ? (it.tiny ? 38 : 48) : 68; return d * d; };
+  const idx = list.map((it, i)=>({ it, i, w: wOf(it) })).sort((a, b)=>(b.w - a.w) || (a.i - b.i));
+  const R = [], L = []; let wr = 0, wl = 0;
+  idx.forEach(x=>{
+    const toR = wr < wl || (wr === wl && R.length <= L.length);
+    if(toR){ R.push(x); wr += x.w; } else { L.push(x); wl += x.w; }
+  });
+  const byI = (a, b)=>a.i - b.i;
+  return { right: R.sort(byI).map(x=>x.it), left: L.sort(byI).map(x=>x.it) };
 }
 /* 「もどる」の真上に浮かぶ「カスタマイズ」の丸（押すと、えらぶ画面） */
 let mineC = null;
